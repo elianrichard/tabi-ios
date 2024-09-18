@@ -2,8 +2,10 @@ name: Tabi
 settings:
   MARKETING_VERSION: "1.0"
   CURRENT_PROJECT_VERSION: 1
+  base:
+    GENERATE_INFOPLIST_FILE: YES
 options:
-  bundleIdPrefix: com.example
+  bundleIdPrefix: com.sora
 packages:
   Lottie:
     url: https://github.com/airbnb/lottie-spm.git
@@ -17,6 +19,14 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.sora.Tabi
       INFOPLIST_FILE: Tabi/Info.plist
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: 1
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.travel"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_CFBundleDisplayName: Tabi
     dependencies:
       - package: Lottie
   TabiTests:
