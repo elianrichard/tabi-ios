@@ -1,0 +1,41 @@
+name: Tabi
+settings:
+  MARKETING_VERSION: "1.0"
+  CURRENT_PROJECT_VERSION: 1
+options:
+  bundleIdPrefix: com.example
+packages:
+  Lottie:
+    url: https://github.com/airbnb/lottie-spm.git
+    minorVersion: 4.5.0
+targets:
+  Tabi:
+    type: application
+    platform: iOS
+    sources: [Tabi]
+    resources: [Resources]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.sora.Tabi
+      INFOPLIST_FILE: Tabi/Info.plist
+    dependencies:
+      - package: Lottie
+  TabiTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [TabiTests]
+    dependencies:
+      - target: Tabi
+    settings:
+      base:
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Tabi.app/Tabi"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  Tabi:
+    build:
+      targets:
+        Tabi: all
+        TabiTests: all
+    test:
+      targets:
+        - name: TabiTests
+      gatherCoverageData: true

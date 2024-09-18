@@ -3,310 +3,251 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		670A838F2C9B4D16008688C7 /* TabiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670A838E2C9B4D16008688C7 /* TabiApp.swift */; };
-		670A83912C9B4D16008688C7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670A83902C9B4D16008688C7 /* ContentView.swift */; };
-		670A83932C9B4D16008688C7 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670A83922C9B4D16008688C7 /* Item.swift */; };
-		670A83952C9B4D17008688C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 670A83942C9B4D17008688C7 /* Assets.xcassets */; };
-		670A83982C9B4D17008688C7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 670A83972C9B4D17008688C7 /* Preview Assets.xcassets */; };
-		670A83A22C9B4D17008688C7 /* TabiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670A83A12C9B4D17008688C7 /* TabiTests.swift */; };
-		670A83AC2C9B4D17008688C7 /* TabiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670A83AB2C9B4D17008688C7 /* TabiUITests.swift */; };
-		670A83AE2C9B4D17008688C7 /* TabiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670A83AD2C9B4D17008688C7 /* TabiUITestsLaunchTests.swift */; };
+		01DF1EAE222FA09B438AA5D5 /* TabiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BEE1B031C8F5D5E17C5A7E /* TabiTests.swift */; };
+		0A3DBEC4C5A08BF31145EC77 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = EDC904A88B2A1412D8579DB8 /* Lottie */; };
+		193EF5393580521E81C1EDFC /* TabiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801D07EF98473F5F23897B16 /* TabiApp.swift */; };
+		1AC49BDA79D55B808C92260A /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E8AD1D678A45D43805145D6 /* Item.swift */; };
+		2D9FE406346C389C7271B646 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E4CD9D7EE8A79D4F38A68F6 /* Assets.xcassets */; };
+		3A6A1023FF48F7DFA5A00845 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 709814A93EEA6A7C13BE91B0 /* ContentView.swift */; };
+		7783C57744B2EF7B9A86C41B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B18A5BBD5C20E7222311F7A /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		670A839E2C9B4D17008688C7 /* PBXContainerItemProxy */ = {
+		640F20A5168BC0F99EC05A57 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 670A83832C9B4D16008688C7 /* Project object */;
+			containerPortal = 52D028A8C506DEC02ABD9944 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 670A838A2C9B4D16008688C7;
-			remoteInfo = Tabi;
-		};
-		670A83A82C9B4D17008688C7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 670A83832C9B4D16008688C7 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 670A838A2C9B4D16008688C7;
+			remoteGlobalIDString = 5A67DCF3DFD1D11ED7C2B34A;
 			remoteInfo = Tabi;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		670A838B2C9B4D16008688C7 /* Tabi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tabi.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		670A838E2C9B4D16008688C7 /* TabiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabiApp.swift; sourceTree = "<group>"; };
-		670A83902C9B4D16008688C7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		670A83922C9B4D16008688C7 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
-		670A83942C9B4D17008688C7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		670A83972C9B4D17008688C7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		670A839D2C9B4D17008688C7 /* TabiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TabiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		670A83A12C9B4D17008688C7 /* TabiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabiTests.swift; sourceTree = "<group>"; };
-		670A83A72C9B4D17008688C7 /* TabiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TabiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		670A83AB2C9B4D17008688C7 /* TabiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabiUITests.swift; sourceTree = "<group>"; };
-		670A83AD2C9B4D17008688C7 /* TabiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabiUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		4E8AD1D678A45D43805145D6 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
+		4FE33B5E892F71915A68BF96 /* Tabi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Tabi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5E4CD9D7EE8A79D4F38A68F6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6B18A5BBD5C20E7222311F7A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		709814A93EEA6A7C13BE91B0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		801D07EF98473F5F23897B16 /* TabiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabiApp.swift; sourceTree = "<group>"; };
+		B5BEE1B031C8F5D5E17C5A7E /* TabiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabiTests.swift; sourceTree = "<group>"; };
+		BC09FFC9FBDA1E226A0F5A18 /* TabiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TabiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		670A83882C9B4D16008688C7 /* Frameworks */ = {
+		1F9C179D80D2FF54D0E771FF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		670A839A2C9B4D17008688C7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		670A83A42C9B4D17008688C7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				0A3DBEC4C5A08BF31145EC77 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		670A83822C9B4D16008688C7 = {
+		5424B800A2A07AE6A15719E2 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				670A838D2C9B4D16008688C7 /* Tabi */,
-				670A83A02C9B4D17008688C7 /* TabiTests */,
-				670A83AA2C9B4D17008688C7 /* TabiUITests */,
-				670A838C2C9B4D16008688C7 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		670A838C2C9B4D16008688C7 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				670A838B2C9B4D16008688C7 /* Tabi.app */,
-				670A839D2C9B4D17008688C7 /* TabiTests.xctest */,
-				670A83A72C9B4D17008688C7 /* TabiUITests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		670A838D2C9B4D16008688C7 /* Tabi */ = {
-			isa = PBXGroup;
-			children = (
-				670A838E2C9B4D16008688C7 /* TabiApp.swift */,
-				670A83902C9B4D16008688C7 /* ContentView.swift */,
-				670A83922C9B4D16008688C7 /* Item.swift */,
-				670A83942C9B4D17008688C7 /* Assets.xcassets */,
-				670A83962C9B4D17008688C7 /* Preview Content */,
-			);
-			path = Tabi;
-			sourceTree = "<group>";
-		};
-		670A83962C9B4D17008688C7 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				670A83972C9B4D17008688C7 /* Preview Assets.xcassets */,
+				6B18A5BBD5C20E7222311F7A /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		670A83A02C9B4D17008688C7 /* TabiTests */ = {
+		818040B7E932E8BD5D516532 /* TabiTests */ = {
 			isa = PBXGroup;
 			children = (
-				670A83A12C9B4D17008688C7 /* TabiTests.swift */,
+				B5BEE1B031C8F5D5E17C5A7E /* TabiTests.swift */,
 			);
 			path = TabiTests;
 			sourceTree = "<group>";
 		};
-		670A83AA2C9B4D17008688C7 /* TabiUITests */ = {
+		944D05FE8C3D4B109137931A /* Tabi */ = {
 			isa = PBXGroup;
 			children = (
-				670A83AB2C9B4D17008688C7 /* TabiUITests.swift */,
-				670A83AD2C9B4D17008688C7 /* TabiUITestsLaunchTests.swift */,
+				5E4CD9D7EE8A79D4F38A68F6 /* Assets.xcassets */,
+				709814A93EEA6A7C13BE91B0 /* ContentView.swift */,
+				4E8AD1D678A45D43805145D6 /* Item.swift */,
+				801D07EF98473F5F23897B16 /* TabiApp.swift */,
+				5424B800A2A07AE6A15719E2 /* Preview Content */,
 			);
-			path = TabiUITests;
+			path = Tabi;
+			sourceTree = "<group>";
+		};
+		9D4C4541308E8004E8E6CEE9 = {
+			isa = PBXGroup;
+			children = (
+				944D05FE8C3D4B109137931A /* Tabi */,
+				818040B7E932E8BD5D516532 /* TabiTests */,
+				D972AE8B5ABAE8042C9E2B62 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D972AE8B5ABAE8042C9E2B62 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4FE33B5E892F71915A68BF96 /* Tabi.app */,
+				BC09FFC9FBDA1E226A0F5A18 /* TabiTests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		670A838A2C9B4D16008688C7 /* Tabi */ = {
+		5A67DCF3DFD1D11ED7C2B34A /* Tabi */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 670A83B12C9B4D17008688C7 /* Build configuration list for PBXNativeTarget "Tabi" */;
+			buildConfigurationList = 1E0623C6C6C35A1790F2ECE3 /* Build configuration list for PBXNativeTarget "Tabi" */;
 			buildPhases = (
-				670A83872C9B4D16008688C7 /* Sources */,
-				670A83882C9B4D16008688C7 /* Frameworks */,
-				670A83892C9B4D16008688C7 /* Resources */,
+				0379EBB8B91D77E212EDD430 /* Sources */,
+				5952B21ECEB082EFDEEDEAA0 /* Resources */,
+				1F9C179D80D2FF54D0E771FF /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = Tabi;
+			packageProductDependencies = (
+				EDC904A88B2A1412D8579DB8 /* Lottie */,
+			);
 			productName = Tabi;
-			productReference = 670A838B2C9B4D16008688C7 /* Tabi.app */;
+			productReference = 4FE33B5E892F71915A68BF96 /* Tabi.app */;
 			productType = "com.apple.product-type.application";
 		};
-		670A839C2C9B4D17008688C7 /* TabiTests */ = {
+		E5183593BC9BD3D77CCAA337 /* TabiTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 670A83B42C9B4D17008688C7 /* Build configuration list for PBXNativeTarget "TabiTests" */;
+			buildConfigurationList = 4602C73F808BE99E5F3C63B4 /* Build configuration list for PBXNativeTarget "TabiTests" */;
 			buildPhases = (
-				670A83992C9B4D17008688C7 /* Sources */,
-				670A839A2C9B4D17008688C7 /* Frameworks */,
-				670A839B2C9B4D17008688C7 /* Resources */,
+				7B5CEF6ACBBF68D21EB140D1 /* Sources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				670A839F2C9B4D17008688C7 /* PBXTargetDependency */,
+				E5A9A1FB433DE1BB39DB350D /* PBXTargetDependency */,
 			);
 			name = TabiTests;
 			productName = TabiTests;
-			productReference = 670A839D2C9B4D17008688C7 /* TabiTests.xctest */;
+			productReference = BC09FFC9FBDA1E226A0F5A18 /* TabiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		670A83A62C9B4D17008688C7 /* TabiUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 670A83B72C9B4D17008688C7 /* Build configuration list for PBXNativeTarget "TabiUITests" */;
-			buildPhases = (
-				670A83A32C9B4D17008688C7 /* Sources */,
-				670A83A42C9B4D17008688C7 /* Frameworks */,
-				670A83A52C9B4D17008688C7 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				670A83A92C9B4D17008688C7 /* PBXTargetDependency */,
-			);
-			name = TabiUITests;
-			productName = TabiUITests;
-			productReference = 670A83A72C9B4D17008688C7 /* TabiUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		670A83832C9B4D16008688C7 /* Project object */ = {
+		52D028A8C506DEC02ABD9944 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
-					670A838A2C9B4D16008688C7 = {
-						CreatedOnToolsVersion = 15.4;
-					};
-					670A839C2C9B4D17008688C7 = {
-						CreatedOnToolsVersion = 15.4;
-						TestTargetID = 670A838A2C9B4D16008688C7;
-					};
-					670A83A62C9B4D17008688C7 = {
-						CreatedOnToolsVersion = 15.4;
-						TestTargetID = 670A838A2C9B4D16008688C7;
-					};
 				};
 			};
-			buildConfigurationList = 670A83862C9B4D16008688C7 /* Build configuration list for PBXProject "Tabi" */;
+			buildConfigurationList = A9A1B625C62636936B559B9D /* Build configuration list for PBXProject "Tabi" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
-			mainGroup = 670A83822C9B4D16008688C7;
-			productRefGroup = 670A838C2C9B4D16008688C7 /* Products */;
+			mainGroup = 9D4C4541308E8004E8E6CEE9;
+			packageReferences = (
+				66E4A142E32CB623043F99B6 /* XCRemoteSwiftPackageReference "lottie-spm" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				670A838A2C9B4D16008688C7 /* Tabi */,
-				670A839C2C9B4D17008688C7 /* TabiTests */,
-				670A83A62C9B4D17008688C7 /* TabiUITests */,
+				5A67DCF3DFD1D11ED7C2B34A /* Tabi */,
+				E5183593BC9BD3D77CCAA337 /* TabiTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		670A83892C9B4D16008688C7 /* Resources */ = {
+		5952B21ECEB082EFDEEDEAA0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				670A83982C9B4D17008688C7 /* Preview Assets.xcassets in Resources */,
-				670A83952C9B4D17008688C7 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		670A839B2C9B4D17008688C7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		670A83A52C9B4D17008688C7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				2D9FE406346C389C7271B646 /* Assets.xcassets in Resources */,
+				7783C57744B2EF7B9A86C41B /* Preview Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		670A83872C9B4D16008688C7 /* Sources */ = {
+		0379EBB8B91D77E212EDD430 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				670A83912C9B4D16008688C7 /* ContentView.swift in Sources */,
-				670A83932C9B4D16008688C7 /* Item.swift in Sources */,
-				670A838F2C9B4D16008688C7 /* TabiApp.swift in Sources */,
+				3A6A1023FF48F7DFA5A00845 /* ContentView.swift in Sources */,
+				1AC49BDA79D55B808C92260A /* Item.swift in Sources */,
+				193EF5393580521E81C1EDFC /* TabiApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		670A83992C9B4D17008688C7 /* Sources */ = {
+		7B5CEF6ACBBF68D21EB140D1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				670A83A22C9B4D17008688C7 /* TabiTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		670A83A32C9B4D17008688C7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				670A83AE2C9B4D17008688C7 /* TabiUITestsLaunchTests.swift in Sources */,
-				670A83AC2C9B4D17008688C7 /* TabiUITests.swift in Sources */,
+				01DF1EAE222FA09B438AA5D5 /* TabiTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		670A839F2C9B4D17008688C7 /* PBXTargetDependency */ = {
+		E5A9A1FB433DE1BB39DB350D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 670A838A2C9B4D16008688C7 /* Tabi */;
-			targetProxy = 670A839E2C9B4D17008688C7 /* PBXContainerItemProxy */;
-		};
-		670A83A92C9B4D17008688C7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 670A838A2C9B4D16008688C7 /* Tabi */;
-			targetProxy = 670A83A82C9B4D17008688C7 /* PBXContainerItemProxy */;
+			target = 5A67DCF3DFD1D11ED7C2B34A /* Tabi */;
+			targetProxy = 640F20A5168BC0F99EC05A57 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		670A83AF2C9B4D17008688C7 /* Debug */ = {
+		5026C23FB35B1CEA64ECC8FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.TabiTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tabi.app/Tabi";
+			};
+			name = Debug;
+		};
+		623DACA43E50435AB5D52761 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.TabiTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tabi.app/Tabi";
+			};
+			name = Release;
+		};
+		90085BB6F6B31AC7478384E6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -333,17 +274,74 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		98E058A4934B885B37BE1733 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
 					"$(inherited)",
+					"DEBUG=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -351,247 +349,100 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		670A83B02C9B4D17008688C7 /* Release */ = {
+		BB6BD295DA625EE6EE640C04 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Tabi/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sora.Tabi;
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				VALIDATE_PRODUCT = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = Release;
+			name = Debug;
 		};
-		670A83B22C9B4D17008688C7 /* Debug */ = {
+		FC15013AEC2C0BEA74BD3103 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Tabi/Preview Content\"";
-				DEVELOPMENT_TEAM = 5E27WSDAU2;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Tabi/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sora.app.Tabi;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sora.Tabi;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		670A83B32C9B4D17008688C7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Tabi/Preview Content\"";
-				DEVELOPMENT_TEAM = 5E27WSDAU2;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sora.app.Tabi;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		670A83B52C9B4D17008688C7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 5E27WSDAU2;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sora.app.TabiTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tabi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tabi";
-			};
-			name = Debug;
-		};
-		670A83B62C9B4D17008688C7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 5E27WSDAU2;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sora.app.TabiTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tabi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tabi";
-			};
-			name = Release;
-		};
-		670A83B82C9B4D17008688C7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 5E27WSDAU2;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sora.app.TabiUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Tabi;
-			};
-			name = Debug;
-		};
-		670A83B92C9B4D17008688C7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 5E27WSDAU2;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sora.app.TabiUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Tabi;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		670A83862C9B4D16008688C7 /* Build configuration list for PBXProject "Tabi" */ = {
+		1E0623C6C6C35A1790F2ECE3 /* Build configuration list for PBXNativeTarget "Tabi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				670A83AF2C9B4D17008688C7 /* Debug */,
-				670A83B02C9B4D17008688C7 /* Release */,
+				BB6BD295DA625EE6EE640C04 /* Debug */,
+				FC15013AEC2C0BEA74BD3103 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		670A83B12C9B4D17008688C7 /* Build configuration list for PBXNativeTarget "Tabi" */ = {
+		4602C73F808BE99E5F3C63B4 /* Build configuration list for PBXNativeTarget "TabiTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				670A83B22C9B4D17008688C7 /* Debug */,
-				670A83B32C9B4D17008688C7 /* Release */,
+				5026C23FB35B1CEA64ECC8FF /* Debug */,
+				623DACA43E50435AB5D52761 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		670A83B42C9B4D17008688C7 /* Build configuration list for PBXNativeTarget "TabiTests" */ = {
+		A9A1B625C62636936B559B9D /* Build configuration list for PBXProject "Tabi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				670A83B52C9B4D17008688C7 /* Debug */,
-				670A83B62C9B4D17008688C7 /* Release */,
+				98E058A4934B885B37BE1733 /* Debug */,
+				90085BB6F6B31AC7478384E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		670A83B72C9B4D17008688C7 /* Build configuration list for PBXNativeTarget "TabiUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				670A83B82C9B4D17008688C7 /* Debug */,
-				670A83B92C9B4D17008688C7 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		66E4A142E32CB623043F99B6 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 4.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EDC904A88B2A1412D8579DB8 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 66E4A142E32CB623043F99B6 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 670A83832C9B4D16008688C7 /* Project object */;
+	rootObject = 52D028A8C506DEC02ABD9944 /* Project object */;
 }
