@@ -1,23 +1,83 @@
 //
 //  APIService.swift
-//  MVVM-Combine-SwiftUI
+//  Tabi
 //
-//  Created by Gilang Sinawang on 25/07/24.
+//  Created by Elian Richard on 03/10/24.
 //
 
 import Foundation
 
-struct APIService {
+class APIService {
     
-    let baseURL: String = NetworkConfig.baseURL
+    // Shared instance
+    static let shared = APIService()
+    
+    // Private initializer to prevent multiple instances
+    private init() {}
 
-    var method: NetworkManager.HTTPMethod = .GET
+    // Generic function to perform GET request
+    func getRequest<T: Decodable>(urlString: String, completion: @escaping (Result<T, Error>) -> Void) {
+        guard let url = URL(string: urlString) else {
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                return
+            }
+            
+            do {
+                let decodedData = try JSONDecoder().decode(T.self, from: data)
+                completion(.success(decodedData))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        
+        task.resume()
+    }
     
-    var path: String = ""
-    
-    var headers: [String: Any]? = [:]
-    
-    var params: [String: Any]? = [:]
-    
-    var parameterEncoding: NetworkManager.EncodingType = .json
+    // Generic function to perform POST request
+    func postRequest<T: Decodable, U: Encodable>(urlString: String, body: U, completion: @escaping (Result<T, Error>) -> Void) {
+        guard let url = URL(string: urlString) else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(body)
+            request.httpBody = jsonData
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                return
+            }
+            
+            do {
+                let decodedData = try JSONDecoder().decode(T.self, from: data)
+                completion(.success(decodedData))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        
+        task.resume()
+    }
 }
