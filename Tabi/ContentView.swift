@@ -9,11 +9,39 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @StateObject var routes = Routes()
+    @State private var isShowSplash = true
+    
     var body: some View {
-//        VStack {
-//            Text("ContentView")
-//        }
-        SwiftDataTestingView()
+        NavigationStack (path: $routes.navPath) {
+            VStack {
+//                if isShowSplash {
+//                    SplashView()
+//                        .onAppear {
+//                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+//                                withAnimation {
+//                                    isShowSplash = false
+//                                }
+//                            }
+//                        }
+//                } else {
+                HomeView()
+//                }
+            }
+            .navigationDestination(for: Routes.Destination.self) { destination in
+                switch destination {
+                case .HomeView:
+                    HomeView()
+                case .SwiftDataTestingView:
+                    SwiftDataTestingView()
+//                        .navigationBarBackButtonHidden(true)
+//                        .toolbar(.hidden)
+                }
+                
+            }
+        }
+        .ignoresSafeArea(.keyboard)
+        .environmentObject(routes)
     }
 }
 

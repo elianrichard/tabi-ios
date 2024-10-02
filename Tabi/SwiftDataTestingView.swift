@@ -9,10 +9,10 @@ import SwiftUI
 import SwiftData
 
 struct SwiftDataTestingView: View {
+    @EnvironmentObject var routes: Routes
     @StateObject var swiftDataTestingViewModel = SwiftDataTestingViewModel()
     
     var body: some View {
-        NavigationSplitView {
             List {
                 ForEach(swiftDataTestingViewModel.events) { event in
                     NavigationLink {
@@ -52,31 +52,31 @@ struct SwiftDataTestingView: View {
             }
             
             .toolbar {
-                ToolbarItem {
+                ToolbarItemGroup (placement: .bottomBar) {
+                    Button(action: {
+                        routes.navigateToRoot()
+                    }) {
+                        Label("Home", systemImage: "house.fill")
+                    }
+                    Spacer()
+                    Button(action: {
+                        swiftDataTestingViewModel.fetchPosts()
+                    }) {
+                        Text("Fetch")
+                    }
+                    Button(action: {
+                        swiftDataTestingViewModel.createPost()
+                    }) {
+                        Text("Post")
+                    }
+                    Spacer()
                     Button(action: {
                         swiftDataTestingViewModel.addEvent()
                     }) {
                         Label("Add Item", systemImage: "plus")
                     }
                 }
-                ToolbarItem {
-                    Button(action: {
-                        swiftDataTestingViewModel.fetchPosts()
-                    }) {
-                        Text("Fetch")
-                    }
-                }
-                ToolbarItem {
-                    Button(action: {
-                        swiftDataTestingViewModel.createPost()
-                    }) {
-                        Text("Post")
-                    }
-                }
             }
-        } detail: {
-            Text("Select an item")
-        }
     }
 }
 
@@ -135,7 +135,7 @@ struct SwiftDataTestingView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let data):
-                        self.posts.append(data)
+                    self.posts.append(data)
                 case .failure(let error):
                     fatalError(error.localizedDescription)
                 }
