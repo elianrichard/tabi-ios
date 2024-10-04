@@ -10,11 +10,13 @@ import SwiftData
 
 @Model
 class EventData {
-    var name: String
+    var eventName: String
+    var isCompleted: Bool
+    var userEventBalance: Float
     
-    init(name: String) {
-        self.name = name
+    init(eventName: String, isCompleted: Bool, userEventBalance: Float) {
+        self.eventName = eventName
+        self.isCompleted = isCompleted
+        self.userEventBalance = userEventBalance
     }
 }
-
-var defaultEventData = EventData(name: "Travel")

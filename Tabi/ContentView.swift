@@ -34,8 +34,6 @@ struct ContentView: View {
                     HomeView()
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
-//                        .navigationBarBackButtonHidden(true)
-//                        .toolbar(.hidden)
                 }
                 
             }
@@ -47,5 +45,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: EventData.self, inMemory: true)
 }

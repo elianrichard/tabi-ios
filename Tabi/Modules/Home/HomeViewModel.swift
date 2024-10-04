@@ -8,9 +8,9 @@
 import Foundation
 
 @Observable class HomeViewModel: ObservableObject {
-    var text = "Hello from view model"
+    var selectedFilter: HomeFilterItems = .all
     
-    func editText() {
-        text = "Edited from view model"
-    }
+//    func editText() {
+//        text = "Edited from view model"
+//    }
 }
