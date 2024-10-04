@@ -6,6 +6,8 @@ settings:
     GENERATE_INFOPLIST_FILE: YES
 options:
   bundleIdPrefix: com.sora
+  attributes:
+    LastUpgradeCheck: 1600
 packages:
   Lottie:
     url: https://github.com/airbnb/lottie-spm.git
@@ -16,6 +18,10 @@ targets:
     platform: iOS
     sources: [Tabi]
     resources: [Resources]
+    files:
+      - path: "Tabi.app"
+        type: wrapper.application
+        buildPhase: none
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.sora.Tabi
       INFOPLIST_FILE: Tabi/Info.plist
@@ -36,6 +42,7 @@ targets:
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.travel"
         INFOPLIST_KEY_CFBundleDisplayName: Tabi
+        ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     dependencies:
       - package: Lottie
   TabiTests:
