@@ -11,12 +11,14 @@ import SwiftData
 @Model
 class EventData {
     var eventName: String
-    var isCompleted: Bool
+    var completionDate: Date?
     var userEventBalance: Float
+    var transactions: [Int]
     
-    init(eventName: String, isCompleted: Bool, userEventBalance: Float) {
+    init(eventName: String, completionDate: Date? = nil, userEventBalance: Float, transactions: [Int] = []) {
         self.eventName = eventName
-        self.isCompleted = isCompleted
+        self.completionDate = completionDate
         self.userEventBalance = userEventBalance
+        self.transactions = transactions
     }
 }

@@ -13,4 +13,15 @@ extension Date {
         formatter.dateFormat = format
         return formatter
     }
+    
+    init(dateString:String) {
+          let dateStringFormatter = DateFormatter()
+          dateStringFormatter.dateFormat = "yyyy-MM-dd"
+          let date = dateStringFormatter.date(from: dateString)
+          if let date = date {
+              self.self = date
+          } else {
+              self.self = Date()
+          }
+    }
 }

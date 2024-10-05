@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+var temporaryEvents: [EventData] = [
+    EventData(eventName: "Korea Trip", completionDate: nil, userEventBalance: 0, transactions: []),
+    EventData(eventName: "London Trip", completionDate: Date(), userEventBalance: 300_000, transactions: [10]),
+    EventData(eventName: "Paris Trip", completionDate: Date(), userEventBalance: -300_000, transactions: [10]),
+    EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, transactions: [10])
+]
+
 struct HomeView: View {
     @EnvironmentObject var routes: Routes
     @StateObject var homeViewModel = HomeViewModel()
@@ -50,10 +57,9 @@ struct HomeView: View {
                 Spacer(minLength: 30)
                 ScrollView {
                     VStack (spacing: 11) {
-                        EventCardView()
-                        EventCardView()
-                        EventCardView()
-                        EventCardView()
+                        ForEach(temporaryEvents) { event in
+                            EventCardView(event: event)
+                        }
                     }
                 }
                 Spacer(minLength: 50)

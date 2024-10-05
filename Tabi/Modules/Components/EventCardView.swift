@@ -8,22 +8,26 @@
 import SwiftUI
 
 struct EventCardView : View {
+    var event: EventData
+    
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
             HStack (spacing: 12) {
                 Circle()
                     .fill(Color(UIColor(hex: "#D9D9D9")))
                     .frame(width: 40)
-                VStack (alignment: .leading, spacing: 8) {
-                    Text("Text")
+                VStack (alignment: .leading, spacing: 4) {
+                    Text("\(event.eventName)")
                         .font(.body)
-                    HStack (spacing: 4) {
-                        Circle()
-                            .fill(.green)
-                            .frame(width: 10)
-                        Text("Ongoing Event")
-                            .font(.caption)
-                    }
+                        HStack (spacing: 8) {
+                            Circle()
+                                .fill(event.completionDate != nil ? .gray : .green)
+                                .frame(width: 10)
+                            Text(event.completionDate != nil
+                                 ? "Completed on \(Date().customDateFormat("dd MMMM yyyy").string(from: event.completionDate ?? Date()))"
+                                 : "Ongoing Event"
+                            ).font(.caption)
+                        }
                 }
             }
             Rectangle()
@@ -57,5 +61,7 @@ struct EventCardView : View {
 }
 
 #Preview {
-    EventCardView()
+    EventCardView(
+        event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, transactions: [10])
+    )
 }
