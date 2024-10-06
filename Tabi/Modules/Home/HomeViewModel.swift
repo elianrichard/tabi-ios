@@ -7,7 +7,8 @@
 
 import Foundation
 
-@Observable class HomeViewModel: ObservableObject {
+@Observable
+final class HomeViewModel: ObservableObject {
     var selectedFilter: HomeFilterItems {
         didSet {
             filterEvents(by: selectedFilter)
@@ -18,11 +19,17 @@ import Foundation
     
     init() {
         self.selectedFilter = .all
-        self.events = mockEventData
-        self.filteredEvents = mockEventData
+        self.events = []
+        self.filteredEvents = []
     }
     
-    private func filterEvents(by filter: HomeFilterItems) {
+    func populateEvents (data: [EventData]) {
+        events = data
+        filteredEvents = data
+        selectedFilter = .all
+    }
+    
+    func filterEvents(by filter: HomeFilterItems) {
         switch filter {
         case .all:
             filteredEvents = events
