@@ -7,13 +7,6 @@
 
 import SwiftUI
 
-var temporaryEvents: [EventData] = [
-    EventData(eventName: "Korea Trip", completionDate: nil, userEventBalance: 0, transactions: []),
-    EventData(eventName: "London Trip", completionDate: Date(), userEventBalance: 300_000, transactions: [10]),
-    EventData(eventName: "Paris Trip", completionDate: Date(), userEventBalance: -300_000, transactions: [10]),
-    EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, transactions: [10])
-]
-
 struct HomeView: View {
     @EnvironmentObject var routes: Routes
     @StateObject var homeViewModel = HomeViewModel()
@@ -55,12 +48,25 @@ struct HomeView: View {
                     }
                 }
                 Spacer(minLength: 30)
-                ScrollView {
-                    VStack (spacing: 11) {
-                        ForEach(temporaryEvents) { event in
-                            EventCardView(event: event)
+                if (!homeViewModel.filteredEvents.isEmpty) {
+                    ScrollView {
+                        VStack (spacing: 11) {
+                            ForEach(homeViewModel.filteredEvents) { event in
+                                EventCardView(event: event)
+                            }
                         }
                     }
+                } else {
+                    VStack (alignment: .center, spacing: 16) {
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                            .frame(width: 300, height: 180)
+                        Text("You don't have any\nevents yet.")
+                            .multilineTextAlignment(.center)
+                            .font(.title3)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    Spacer()
                 }
                 Spacer(minLength: 50)
                 

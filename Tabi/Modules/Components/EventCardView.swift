@@ -9,6 +9,22 @@ import SwiftUI
 
 struct EventCardView : View {
     var event: EventData
+    var status: EventCardStatus = .settled
+    var isNew: Bool = false
+    
+    init(event: EventData) {
+        self.event = event
+        if (event.userEventBalance > 0) {
+            self.status = .credit
+        } else if (event.userEventBalance < 0) {
+            self.status = .debt
+        } else {
+            self.status = .settled
+        }
+        if (event.transactions.count == 0) {
+            isNew = true
+        }
+    }
     
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
@@ -46,10 +62,10 @@ struct EventCardView : View {
                         .frame(width: 40)
                     
                 }
-                Text("New Event")
+                Text(isNew ? "New Event" : status == .settled ? "\(status.statusDisplay)" : "\(status.statusDisplay) \(String(format: "%.0f", event.userEventBalance).formatPrice())")
                     .font(.subheadline)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.white)
+                    .background(isNew ? .white : status.statusColor)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
         }

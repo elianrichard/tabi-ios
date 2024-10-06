@@ -37,11 +37,11 @@ enum EventCardStatus {
     var statusColor: Color {
         switch self {
         case .credit:
-            .green
+            Color(UIColor(hex: "#CBFFCC"))
         case .debt:
-            .red
+            Color(UIColor(hex: "#FFCBCC"))
         case .settled:
-            .gray
+            Color(UIColor(hex: "#B8B5B5"))
         }
     }
 }
