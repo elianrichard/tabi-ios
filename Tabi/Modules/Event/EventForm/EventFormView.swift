@@ -9,12 +9,12 @@ import SwiftUI
 
 struct EventFormView: View {
     @EnvironmentObject var routes: Routes
-    @StateObject var eventFormViewModel = EventFormViewModel()
+    @EnvironmentObject var eventFormViewModel: EventViewModel
     
     var body : some View {
         VStack (spacing: 40) {
             ZStack {
-                Text("Create Event")
+                Text(eventFormViewModel.selectedEvent != nil ? "Edit Event" : "Create Event")
                     .font(.title2)
                 HStack {
                     Button {
@@ -77,10 +77,10 @@ struct EventFormView: View {
             }
             Spacer()
             Button {
-                eventFormViewModel.handleCreateEvent()
+                eventFormViewModel.handleCreateEditEvent()
                 routes.navigateBack()
             } label: {
-                Text("Create")
+                Text(eventFormViewModel.selectedEvent != nil ? "Edit" : "Create")
                     .frame(maxWidth: .infinity)
                     .font(.callout)
                     .foregroundStyle(.black)

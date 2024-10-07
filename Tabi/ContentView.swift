@@ -34,10 +34,11 @@ struct ContentView: View {
                     HomeView()
                 case .EventFormView:
                     EventFormView()
+                case .EventDetailView:
+                    EventDetailView()
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
                 }
-                
             }
         }
         .ignoresSafeArea(.keyboard)
@@ -47,4 +48,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(EventViewModel())
+        .environmentObject(HomeViewModel())
 }

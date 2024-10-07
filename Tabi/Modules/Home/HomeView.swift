@@ -9,7 +9,8 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var routes: Routes
-    @StateObject var homeViewModel = HomeViewModel()
+    @EnvironmentObject var homeViewModel: HomeViewModel
+    @EnvironmentObject var eventViewModel: EventViewModel
     
     var body: some View {
         ZStack {
@@ -53,6 +54,10 @@ struct HomeView: View {
                         VStack (spacing: 11) {
                             ForEach(homeViewModel.filteredEvents) { event in
                                 EventCardView(event: event)
+                                    .onTapGesture {
+                                        eventViewModel.selectedEvent = event
+                                        routes.navigate(to: .EventDetailView)
+                                    }
                             }
                         }
                     }
@@ -75,6 +80,7 @@ struct HomeView: View {
             VStack {
                 HStack {
                     Button {
+                        eventViewModel.selectedEvent = nil
                         routes.navigate(to: .EventFormView)
                     } label: {
                         Image(systemName: "plus")

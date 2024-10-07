@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EventDetailView: View {
     @EnvironmentObject var routes: Routes
+    @EnvironmentObject var eventViewModel: EventViewModel
     
     let rect = CGRect(x: 0, y: 0, width: 500, height: 100)
     var body: some View {
@@ -34,7 +35,7 @@ struct EventDetailView: View {
             
             VStack {
                 ZStack {
-                    Text("Trip Name")
+                    Text("\(eventViewModel.selectedEvent?.eventName ?? "undefined")")
                         .font(.title2)
                     HStack {
                         Button {
@@ -46,17 +47,19 @@ struct EventDetailView: View {
                         Spacer()
                         Menu {
                             Button("Edit Event") {
-                                print("Edit Event")
+                                routes.navigate(to: .EventFormView)
                             }
                             Button("Complete Event") {
                                 print("Complete Event")
                             }
                             Button("Delete Event") {
-                                print("Delete Event")
+                                eventViewModel.handleDeleteEvent()
+                                routes.navigateBack()
                             }
                         } label: {
                             Image(systemName: "ellipsis")
                                 .foregroundStyle(.black)
+                                .frame(width: 40, height: 40)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -84,6 +87,7 @@ struct EventDetailView: View {
             .padding(20)
             .ignoresSafeArea()
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
