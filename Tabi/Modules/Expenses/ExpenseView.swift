@@ -10,11 +10,11 @@ import SwiftUI
 
 struct ExpenseView: View {
     @State var eventName: String = "Japan Trip"
-    @State var peoples: [people] = [
-        people(name: "Dharma"),
-        people(name: "Mario"),
-        people(name: "Renaldi"),
-        people(name: "Leo"),
+    @State var peoples: [People] = [
+        People(name: "Dharma"),
+        People(name: "Mario"),
+        People(name: "Renaldi"),
+        People(name: "Leo"),
     ]
     @State var selectedScreen = "Expenses"
     @State var screens = ["Expenses", "Totals", "Group Info"]

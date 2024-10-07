@@ -41,7 +41,10 @@ struct ContentView: View {
                     ExpenseView()
                 case .AddExpenseView:
                     AddExpenseView(eventName: eventName)
+                case .ExpenseSplitView:
+                    ExpenseSplitView()
                 }
+                
                 
             }
         }
