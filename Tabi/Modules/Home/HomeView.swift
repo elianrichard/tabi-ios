@@ -21,7 +21,7 @@ struct HomeView: View {
                 Text("Go To SwiftDataTestView")
             }
             Button {
-                homeViewModel.editText()
+                routes.navigate(to: .ExpensesView)
             } label: {
                 Text("Edit view model text")
             }

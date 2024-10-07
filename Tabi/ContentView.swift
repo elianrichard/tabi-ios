@@ -11,6 +11,7 @@ import SwiftData
 struct ContentView: View {
     @StateObject var routes = Routes()
     @State private var isShowSplash = true
+    @State var eventName: String = "Japan Trip"
     
     var body: some View {
         NavigationStack (path: $routes.navPath) {
@@ -36,6 +37,10 @@ struct ContentView: View {
                     SwiftDataTestingView()
 //                        .navigationBarBackButtonHidden(true)
 //                        .toolbar(.hidden)
+                case .ExpensesView:
+                    ExpenseView()
+                case .AddExpenseView:
+                    AddExpenseView(eventName: eventName)
                 }
                 
             }
