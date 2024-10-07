@@ -13,8 +13,10 @@ final class EventViewModel: ObservableObject {
     var selectedEvent: EventData? {
         didSet {
             eventName = self.selectedEvent?.eventName ?? ""
+            selectedSection = .expenses
         }
     }
+    var selectedSection: EventSectionEnum = .expenses
 
     @MainActor
     func handleCreateEditEvent () {

@@ -9,7 +9,7 @@ import Foundation
 
 @Observable
 final class HomeViewModel: ObservableObject {
-    var selectedFilter: HomeFilterItems {
+    var selectedFilter: HomeFilterEnum {
         didSet {
             filterEvents(by: selectedFilter)
         }
@@ -29,7 +29,7 @@ final class HomeViewModel: ObservableObject {
         selectedFilter = .all
     }
     
-    func filterEvents(by filter: HomeFilterItems) {
+    func filterEvents(by filter: HomeFilterEnum) {
         switch filter {
         case .all:
             filteredEvents = events

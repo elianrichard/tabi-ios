@@ -38,7 +38,7 @@ struct HomeView: View {
                         .font(.title)
                     ScrollView (.horizontal, showsIndicators: false) {
                         HStack (spacing: 10) {
-                            ForEach(HomeFilterItems.allCases) { item in
+                            ForEach(HomeFilterEnum.allCases) { item in
                                 Button {
                                     homeViewModel.selectedFilter = item
                                 } label: {

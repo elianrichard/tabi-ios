@@ -5,7 +5,7 @@
 //  Created by Elian Richard on 04/10/24.
 //
 
-enum HomeFilterItems: Identifiable, CaseIterable {
+enum HomeFilterEnum: Identifiable, CaseIterable {
     case all
     case youOwe
     case owsYou
@@ -37,7 +37,7 @@ enum HomeFilterItems: Identifiable, CaseIterable {
         }
     }
     
-    static var allCases: [HomeFilterItems] {
+    static var allCases: [HomeFilterEnum] {
         [.all, .youOwe, .owsYou, .settled]
     }
 }

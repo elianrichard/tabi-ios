@@ -17,11 +17,22 @@ struct EventDetailView: View {
             VStack (spacing: 0) {
                 Rectangle()
                     .fill(Color(UIColor(hex: "#F1F1F1")))
-                    .frame(maxWidth: .infinity, maxHeight: 250)
-                Circle()
-                    .fill(Color(UIColor(hex: "#D9D9D9")))
-                    .frame(width: 40)
-                    .padding(.top, -20)
+                    .frame(maxWidth: .infinity, maxHeight: 200)
+                HStack {
+                    Circle()
+                        .fill(Color(UIColor(hex: "#D9D9D9")))
+                        .frame(width: 40)
+                    Circle()
+                        .fill(Color(UIColor(hex: "#D9D9D9")))
+                        .frame(width: 40)
+                    Circle()
+                        .fill(Color(UIColor(hex: "#D9D9D9")))
+                        .frame(width: 40)
+                    Circle()
+                        .fill(Color(UIColor(hex: "#D9D9D9")))
+                        .frame(width: 40)
+                }
+                .padding(.top, -20)
                 VStack {
                     if false {
                         VStack (alignment: .center, spacing: 10) {
@@ -44,25 +55,42 @@ struct EventDetailView: View {
                             .background(Color(UIColor(hex: "#EBEBEB")))
                             .clipShape(RoundedRectangle(cornerRadius: 18))
                             
-                            VStack (spacing: 16){
-                                HStack {
-                                    Text("Expenses")
-                                    Text("Totals")
-                                }
-                                
-                                ScrollView {
-                                    VStack {
-                                        HStack {
-                                            Text("Card")
-                                        }
+                            VStack (spacing: 16) {
+                                HStack (spacing: 0) {
+                                    ForEach(EventSectionEnum.allCases) { section in
+                                        Text("\(section.displayName)")
+                                            .padding(.vertical, 10)
+                                            .frame(width: 150)
+                                            .background(eventViewModel.selectedSection == section ? .white : .clear)
+                                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                                            .onTapGesture {
+                                                withAnimation {
+                                                    eventViewModel.selectedSection = section
+                                                }
+                                            }
                                     }
+                                }
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 8)
+                                .background(Color(UIColor(hex: "#EBEBEB")))
+                                .clipShape(RoundedRectangle(cornerRadius: 40))
+                                
+                                VStack{
+                                    if eventViewModel.selectedSection == .expenses {
+                                        EventExpenseView()
+                                    } else {
+                                        EventTotalsView()
+                                    }
+                                }
+                                .transaction { transaction in
+                                    transaction.animation = nil
                                 }
                             }
                         }
                     }
                 }
                 .padding()
-                Spacer(minLength: 50)
+                Spacer(minLength: 80)
             }
             .ignoresSafeArea()
             
@@ -126,4 +154,5 @@ struct EventDetailView: View {
 
 #Preview {
     EventDetailView()
+        .environmentObject(EventViewModel())
 }
