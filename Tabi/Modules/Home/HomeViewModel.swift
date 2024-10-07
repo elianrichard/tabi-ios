@@ -7,10 +7,38 @@
 
 import Foundation
 
-@Observable class HomeViewModel: ObservableObject {
-    var text = "Hello from view model"
+@Observable
+final class HomeViewModel: ObservableObject {
+    var selectedFilter: HomeFilterItems {
+        didSet {
+            filterEvents(by: selectedFilter)
+        }
+    }
+    var events: [EventData]
+    var filteredEvents: [EventData]
     
-    func editText() {
-        text = "Edited from view model"
+    init() {
+        self.selectedFilter = .all
+        self.events = []
+        self.filteredEvents = []
+    }
+    
+    func populateEvents (data: [EventData]) {
+        events = data
+        filteredEvents = data
+        selectedFilter = .all
+    }
+    
+    func filterEvents(by filter: HomeFilterItems) {
+        switch filter {
+        case .all:
+            filteredEvents = events
+        case .youOwe:
+            filteredEvents = events.filter { $0.userEventBalance < 0 }
+        case .owsYou:
+            filteredEvents = events.filter { $0.userEventBalance > 0 }
+        case .settled:
+            filteredEvents = events.filter { $0.userEventBalance == 0 }
+        }
     }
 }
