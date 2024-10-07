@@ -14,12 +14,14 @@ class EventData {
     var completionDate: Date?
     var userEventBalance: Double
     var transactions: [Int]
+    var participants: [String]
     
-    init(eventName: String, completionDate: Date? = nil, userEventBalance: Double, transactions: [Int] = []) {
+    init(eventName: String, completionDate: Date? = nil, userEventBalance: Double = 0, transactions: [Int] = [], participants: [String] = ["You"]) {
         self.eventName = eventName
         self.completionDate = completionDate
         self.userEventBalance = userEventBalance
         self.transactions = transactions
+        self.participants = participants
     }
 }
 

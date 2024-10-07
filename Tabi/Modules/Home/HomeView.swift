@@ -75,7 +75,7 @@ struct HomeView: View {
             VStack {
                 HStack {
                     Button {
-                        print("Navigate to Create Event")
+                        routes.navigate(to: .EventFormView)
                     } label: {
                         Image(systemName: "plus")
                             .foregroundStyle(.black)
@@ -90,6 +90,10 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(20)
             .ignoresSafeArea()
+        }
+        .onAppear {
+            let data = SwiftDataService.shared.fetchAllEvents()
+            homeViewModel.populateEvents(data: data ?? [])
         }
     }
 }
