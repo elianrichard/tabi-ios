@@ -32,10 +32,11 @@ struct ContentView: View {
                 switch destination {
                 case .HomeView:
                     HomeView()
+                case .EventFormView:
+                    EventFormView()
+                        .navigationBarBackButtonHidden(true)
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
-//                        .navigationBarBackButtonHidden(true)
-//                        .toolbar(.hidden)
                 }
                 
             }
@@ -47,5 +48,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: EventData.self, inMemory: true)
 }

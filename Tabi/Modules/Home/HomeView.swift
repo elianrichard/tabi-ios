@@ -12,19 +12,88 @@ struct HomeView: View {
     @StateObject var homeViewModel = HomeViewModel()
     
     var body: some View {
-        VStack (spacing: 20) {
-            Text("HomeView")
-            Text("\(homeViewModel.text)")
-            Button {
-                routes.navigate(to: .SwiftDataTestingView)
-            } label: {
-                Text("Go To SwiftDataTestView")
+        ZStack {
+            VStack (alignment: .leading, spacing: 0) {
+                HStack (spacing: 10){
+                    HStack (spacing: 10 ){
+                        Circle()
+                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                            .frame(width: 40)
+                        Text("Hi, You!")
+                            .font(.body)
+                    }
+                    Spacer()
+                    Button {
+                        print("Notifications")
+                    } label: {
+                        Image(systemName: "bell.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(.black)
+                    }
+                }
+                Spacer(minLength: 52)
+                VStack (alignment: .leading, spacing: 15) {
+                    Text("Events")
+                        .font(.title)
+                    ScrollView (.horizontal, showsIndicators: false) {
+                        HStack (spacing: 10) {
+                            ForEach(HomeFilterItems.allCases) { item in
+                                Button {
+                                    homeViewModel.selectedFilter = item
+                                } label: {
+                                    NuggetView(text: item.displayName, isSelected: item == homeViewModel.selectedFilter)
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(minLength: 30)
+                if (!homeViewModel.filteredEvents.isEmpty) {
+                    ScrollView {
+                        VStack (spacing: 11) {
+                            ForEach(homeViewModel.filteredEvents) { event in
+                                EventCardView(event: event)
+                            }
+                        }
+                    }
+                } else {
+                    VStack (alignment: .center, spacing: 16) {
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                            .frame(width: 300, height: 180)
+                        Text("You don't have any\nevents yet.")
+                            .multilineTextAlignment(.center)
+                            .font(.title3)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    Spacer()
+                }
+                Spacer(minLength: 50)
+                
             }
-            Button {
-                homeViewModel.editText()
-            } label: {
-                Text("Edit view model text")
+            .padding()
+            VStack {
+                HStack {
+                    Button {
+                        routes.navigate(to: .EventFormView)
+                    } label: {
+                        Image(systemName: "plus")
+                            .foregroundStyle(.black)
+                            .font(.title)
+                            .frame(width: 70, height: 70)
+                            .background(Color(UIColor(hex: "#EBEBEB")))
+                            .clipShape(RoundedRectangle(cornerRadius: 50))
+                    }
+                }
+                .frame(maxHeight: .infinity, alignment: .bottom)
             }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(20)
+            .ignoresSafeArea()
+        }
+        .onAppear {
+            let data = SwiftDataService.shared.fetchAllEvents()
+            homeViewModel.populateEvents(data: data ?? [])
         }
     }
 }

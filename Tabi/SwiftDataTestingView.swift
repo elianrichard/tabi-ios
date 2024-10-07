@@ -8,35 +8,54 @@
 import SwiftUI
 import SwiftData
 
+
+// MODEL
+struct PostListModel: Encodable ,Decodable, Identifiable {
+    let id: Int
+    let userId: Int
+    let title: String
+    let body: String
+}
+
+@Model
+class NoteData {
+    var name: String
+    
+    init(name: String) {
+        self.name = name
+    }
+}
+
+// VIEW
 struct SwiftDataTestingView: View {
     @EnvironmentObject var routes: Routes
     @StateObject var swiftDataTestingViewModel = SwiftDataTestingViewModel()
     
     var body: some View {
             List {
-                ForEach(swiftDataTestingViewModel.events) { event in
+                ForEach(swiftDataTestingViewModel.notes) { note in
                     NavigationLink {
                         VStack {
-                            Text("Event:")
-                            TextField("Event Name", text: $swiftDataTestingViewModel.textField )
+                            Text("Note:")
+                            TextField("Note Name", text: $swiftDataTestingViewModel.textField )
                                 .border(.black)
                                 .multilineTextAlignment(.center)
                             Button (action: {
-                                swiftDataTestingViewModel.updateEventName(event)
+                                swiftDataTestingViewModel.updateNoteName(note)
                             }) {
-                                Text("Rename Event")
+                                Text("Rename Note")
                             }
                         }
                         .padding()
                         .onAppear {
-                            swiftDataTestingViewModel.textField = event.name
+                            swiftDataTestingViewModel.textField = note.name
                         }
                     } label: {
-                        Text("\(event.name)")
+                        Text("\(note.name)")
                     }
                 }
                 .onDelete(perform: { offsetIndex in
-                    swiftDataTestingViewModel.deleteEvent(offsetIndex)
+                    swiftDataTestingViewModel.deleteNote(offsetIndex)
                 })
                 ForEach(swiftDataTestingViewModel.posts) { post in
                     NavigationLink {
@@ -54,7 +73,7 @@ struct SwiftDataTestingView: View {
             .toolbar {
                 ToolbarItemGroup (placement: .bottomBar) {
                     Button(action: {
-                        routes.navigateToRoot()
+                        routes.navigate(to: .HomeView)
                     }) {
                         Label("Home", systemImage: "house.fill")
                     }
@@ -71,7 +90,7 @@ struct SwiftDataTestingView: View {
                     }
                     Spacer()
                     Button(action: {
-                        swiftDataTestingViewModel.addEvent()
+                        swiftDataTestingViewModel.addNote()
                     }) {
                         Label("Add Item", systemImage: "plus")
                     }
@@ -84,36 +103,37 @@ struct SwiftDataTestingView: View {
     SwiftDataTestingView()
 }
 
+// VIEW MODEL
 @Observable class SwiftDataTestingViewModel: ObservableObject {
-    var events: [EventData] = []
+    var notes: [NoteData] = []
     var textField: String = ""
     var posts: [PostListModel] = []
     
     @MainActor
     init() {
-        self.events = SwiftDataService.shared.fetchAllEvents() ?? []
+        self.notes = SwiftDataService.shared.fetchAllNotes() ?? []
         self.textField = ""
         self.posts = []
     }
     
     @MainActor
-    func addEvent() {
-        let new = EventData(name: "New Event")
-        SwiftDataService.shared.addEvent(new)
-        events.append(new)
+    func addNote() {
+        let new = NoteData(name: "New Note")
+        SwiftDataService.shared.addNote(new)
+        notes.append(new)
     }
     
     @MainActor
-    func deleteEvent(_ indexSet: IndexSet) {
+    func deleteNote(_ indexSet: IndexSet) {
         for index in indexSet {
-            SwiftDataService.shared.deleteEvent(at: index)
-            events.remove(at: index)
+            SwiftDataService.shared.deleteNote(at: index)
+            notes.remove(at: index)
         }
     }
     
     @MainActor
-    func updateEventName(_ event: EventData) {
-        event.name = textField
+    func updateNoteName(_ note: NoteData) {
+        note.name = textField
         SwiftDataService.shared.saveModelContext()
     }
     
@@ -145,9 +165,44 @@ struct SwiftDataTestingView: View {
     }
 }
 
-struct PostListModel: Encodable ,Decodable, Identifiable {
-    let id: Int
-    let userId: Int
-    let title: String
-    let body: String
+extension SwiftDataService {
+    func addNote (_ note: NoteData) {
+        modelContext.insert(note)
+        saveModelContext()
+    }
+    
+    func fetchAllNotes () -> [NoteData]? {
+        let fetchDescriptor = FetchDescriptor<NoteData>()
+        do {
+            return try modelContext.fetch(fetchDescriptor)
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
+    
+    func updateNote (_ note: NoteData, index: Int) {
+        if var allNotes = fetchAllNotes() {
+            allNotes[index] = note
+            saveModelContext()
+        }
+    }
+    
+    func deleteNote (at index: Int) {
+        if let allNotes = fetchAllNotes() {
+            let note = allNotes[index]
+            modelContext.delete(note)
+            saveModelContext()
+        }
+    }
+    func deleteNote (_ note: NoteData) {
+        modelContext.delete(note)
+    }
+    
+    func deleteAllNotes () {
+        do {
+            try modelContext.delete(model: NoteData.self)
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
 }
