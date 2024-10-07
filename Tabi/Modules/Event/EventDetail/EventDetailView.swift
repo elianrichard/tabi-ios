@@ -22,13 +22,46 @@ struct EventDetailView: View {
                     .fill(Color(UIColor(hex: "#D9D9D9")))
                     .frame(width: 40)
                     .padding(.top, -20)
-                VStack (alignment: .center, spacing: 10) {
-                    Text("You are the only member in this group")
-                        .padding(.top, 200)
-                    Text("Invite Friend")
-                        .underline(true)
+                VStack {
+                    if false {
+                        VStack (alignment: .center, spacing: 10) {
+                            Text("You are the only member in this group")
+                                .padding(.top, 200)
+                            Text("Invite Friend")
+                                .underline(true)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    } else {
+                        VStack (spacing: 40) {
+                            VStack (spacing: 4) {
+                                Text("You owe")
+                                    .font(.subheadline)
+                                Text("Rp 200.000")
+                                    .font(.title)
+                            }
+                            .padding(.horizontal, 72)
+                            .padding(.vertical, 18)
+                            .background(Color(UIColor(hex: "#EBEBEB")))
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            
+                            VStack (spacing: 16){
+                                HStack {
+                                    Text("Expenses")
+                                    Text("Totals")
+                                }
+                                
+                                ScrollView {
+                                    VStack {
+                                        HStack {
+                                            Text("Card")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding()
                 Spacer(minLength: 50)
             }
             .ignoresSafeArea()
