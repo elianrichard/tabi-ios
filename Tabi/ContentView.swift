@@ -34,7 +34,6 @@ struct ContentView: View {
                     HomeView()
                 case .EventFormView:
                     EventFormView()
-                        .navigationBarBackButtonHidden(true)
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
                 }

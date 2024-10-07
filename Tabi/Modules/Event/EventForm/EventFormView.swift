@@ -90,6 +90,7 @@ struct EventFormView: View {
             }
         }
         .padding()
+        .navigationBarBackButtonHidden(true)
     }
 }
 
