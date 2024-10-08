@@ -13,7 +13,7 @@ struct Item: Identifiable, Codable, Equatable{
     var itemName: String
     var itemPrice: Float?
     var itemQuantity: Int
-    var people: [People] = []
+    var asignees: [People] = []
 }
 
 struct People: Identifiable, Codable, Equatable{
