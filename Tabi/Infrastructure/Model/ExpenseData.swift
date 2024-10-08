@@ -39,13 +39,14 @@ struct AdditionalCharge: Identifiable, Equatable{
 enum SplitMethod: Identifiable {
     case equally
     case custom
-
+    
     var id: String{
         switch self{
         case .equally:
             "equally"
         case .custom:
             "custom"
+        }
     }
     
     var splitDescription: String {
