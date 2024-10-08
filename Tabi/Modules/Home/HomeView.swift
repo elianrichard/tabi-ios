@@ -25,6 +25,11 @@ struct HomeView: View {
             } label: {
                 Text("Edit view model text")
             }
+            Button {
+                routes.navigate(to: .LoginView)
+            } label: {
+                Text("Go To LoginView")
+            }
         }
     }
 }

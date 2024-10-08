@@ -9,16 +9,28 @@ import SwiftUI
 
 struct Input: View {
     var placeholder: String = ""
-    @State var text = ""
+    var isSecure: Bool = false
+    @Binding var text: String
+    
     var body: some View {
-        TextField(placeholder, text: $text)
-            .padding()
-            .background(Color.gray.opacity(0.5))
-            .clipShape(RoundedRectangle(cornerRadius: 4))
-            .padding(.horizontal)
+        Group {
+            if isSecure {
+                SecureField(placeholder, text: $text)
+                    .padding()
+                    .background(Color.gray.opacity(0.5))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .padding(.horizontal)
+            } else {
+                TextField(placeholder, text: $text)
+                    .padding()
+                    .background(Color.gray.opacity(0.5))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .padding(.horizontal)
+            }
+        }
     }
 }
 
 #Preview {
-    Input()
+    Input(text: .constant(""))
 }
