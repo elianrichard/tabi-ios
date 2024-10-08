@@ -77,8 +77,6 @@ struct AssignCustomSplitView: View {
                                     }
                                 }
                             }
-                            .frame(width: 50, alignment: .leading)
-                            .background(Color.gray)
                         }
                     }
                     Spacer()
