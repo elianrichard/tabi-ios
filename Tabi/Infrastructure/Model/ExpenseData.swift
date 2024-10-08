@@ -36,9 +36,17 @@ struct AdditionalCharge: Identifiable, Equatable{
     var amount: Float?
 }
 
-enum SplitMethod {
+enum SplitMethod: Identifiable {
     case equally
     case custom
+
+    var id: String{
+        switch self{
+        case .equally:
+            "equally"
+        case .custom:
+            "custom"
+    }
     
     var splitDescription: String {
         switch self {
