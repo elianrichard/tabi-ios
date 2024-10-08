@@ -30,12 +30,7 @@ struct ExpenseListView: View {
                                 VStack(alignment: .leading){
                                     Text(expense.name)
                                         .font(.title2)
-                                    if expense.coverer == loggedUser {
-                                        Text("You Paid this bill")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                    }else{
-                                        Text(expense.coverer  + " Paid this bill")
+                                        Text((expense.coverer == loggedUser ? "You" : expense.coverer)  + " Paid this bill")
                                             .font(.subheadline)
                                             .foregroundColor(.secondary)
                                     }
