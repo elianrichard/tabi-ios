@@ -14,16 +14,19 @@ final class EventViewModel: ObservableObject {
         didSet {
             eventName = self.selectedEvent?.eventName ?? ""
             selectedSection = .expenses
+            selectedContacts = self.selectedEvent?.participants ?? []
         }
     }
     var selectedSection: EventSectionEnum = .expenses
+    var selectedContacts: [UserData] = []
 
     @MainActor
     func handleCreateEditEvent () {
         if (selectedEvent != nil) {
             selectedEvent?.eventName = eventName
+            selectedEvent?.participants = selectedContacts
         } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: eventName))
+            SwiftDataService.shared.addEvent(EventData(eventName: eventName, participants: selectedContacts))
         }
     }
     

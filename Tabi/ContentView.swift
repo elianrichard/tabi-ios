@@ -36,6 +36,8 @@ struct ContentView: View {
                     EventFormView()
                 case .EventDetailView:
                     EventDetailView()
+                case .EventInviteView:
+                    EventInviteView()
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
                 }

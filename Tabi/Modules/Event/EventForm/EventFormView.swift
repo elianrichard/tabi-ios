@@ -50,15 +50,28 @@ struct EventFormView: View {
                     Text("Participants")
                         .font(.title3)
                     HStack (alignment: .top, spacing: 10) {
-                        VStack {
-                            Circle()
-                                .fill(Color(UIColor(hex: "#D9D9D9")))
-                                .frame(width: 40)
-                            Text("You")
-                                .font(.caption)
+                        ScrollView (showsIndicators: false) {
+                            HStack (alignment: .top, spacing: 10) {
+                                VStack {
+                                    Circle()
+                                        .fill(Color(UIColor(hex: "#D9D9D9")))
+                                        .frame(width: 40)
+                                    Text("You")
+                                        .font(.caption)
+                                }
+                                ForEach (eventFormViewModel.selectedContacts) { user in
+                                    VStack {
+                                        Circle()
+                                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                                            .frame(width: 40)
+                                        Text("\(user.name.split(separator: " ").first ?? "error")")
+                                            .font(.caption)
+                                    }
+                                }
+                            }
                         }
                         Button {
-                            print("add participant")
+                            routes.navigate(to: .EventInviteView)
                         } label: {
                             ZStack {
                                 Circle()
