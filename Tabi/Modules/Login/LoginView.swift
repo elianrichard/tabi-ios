@@ -13,22 +13,16 @@ struct LoginView: View {
     
     var body: some View {
         VStack {
-            Spacer()
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 20) {
                 Text("Login")
                     .font(.system(size: 22, weight: .medium))
                     .padding()
                 
-                Spacer()
-                    .frame(height: 20)
                 
                 InputWithLabel(label: "Phone Number",
                                placeholder: "+62",
                                text: $vm.phoneNumber)
-                
-                Spacer()
-                    .frame(height: 20)
                 
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
@@ -72,8 +66,6 @@ struct LoginView: View {
                 .padding(.top, 20)
                 .underline()
             
-            Spacer()
-            Spacer()
             
         }
     }
