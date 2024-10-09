@@ -12,7 +12,7 @@ struct Item: Identifiable, Codable, Equatable{
     var id: UUID = UUID.init()
     var itemName: String
     var itemPrice: Float?
-    var itemQuantity: Int
+    var itemQuantity: Float
     var asignees: [People] = []
 }
 
@@ -20,7 +20,6 @@ struct People: Identifiable, Codable, Equatable{
     var id: UUID = UUID.init()
     var name: String
     var share: Float = 0
-    var totalSpending: Float = 0
 }
 
 struct Expense: Identifiable{
@@ -35,6 +34,13 @@ struct AdditionalCharge: Identifiable, Equatable{
     var id: UUID = UUID.init()
     var additionalChargeType: AdditionalChargeType
     var amount: Float?
+}
+
+struct PeopleItem: Identifiable, Equatable{
+    var id: UUID = UUID.init()
+    var name: String
+    var totalSpending: Float
+    var items: [Item]
 }
 
 enum SplitMethod: Identifiable {

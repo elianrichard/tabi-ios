@@ -16,7 +16,7 @@ class ExpenseResultViewModel{
         People(name: "Renaldi", share: 0.25),
         People(name: "Leo", share: 0.25),
     ]
-    var totalSpending: Float? = 100000
+    var totalSpentAll: Float = 0
     var splitMethod: SplitMethod = .custom
     var expenseTitle: String = "Lunch at Yoshinoya"
     
@@ -37,9 +37,34 @@ class ExpenseResultViewModel{
         AdditionalCharge(additionalChargeType: .other, amount: 100000)
     ]
     
+    var peopleItems: [PeopleItem] = []
+    var isExpanded: Bool = false
+    
     init(){
         for index in items.indices{
             items[index].asignees.append(peoples.randomElement()!)
+        }
+        
+        for people in peoples {
+            let name = people.name
+            peopleItems.append(PeopleItem(name: name, totalSpending: 0, items: []))
+            for item in items {
+                if item.asignees.contains(people){
+                    let itemName = item.itemName
+                    let itemPrice = item.itemPrice
+                    let itemQuantity = people.share
+                    peopleItems[peopleItems.count-1].totalSpending += (itemPrice ?? 0) * itemQuantity
+                    totalSpentAll += (itemPrice ?? 0) * itemQuantity
+                    peopleItems[peopleItems.count-1].items.append(Item(itemName: itemName, itemPrice: itemPrice, itemQuantity: itemQuantity))
+                }
+            }
+        }
+        
+        for people in peopleItems {
+            let peopleIndex = peopleItems.firstIndex(of: people)
+            for additionalCharge in additionalCharges {
+                peopleItems[peopleIndex!].totalSpending += (additionalCharge.amount ?? 0) * people.totalSpending / totalSpentAll
+            }
         }
     }
 }

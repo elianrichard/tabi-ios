@@ -31,7 +31,7 @@ struct ExpenseResultView: View {
                             Spacer()
                             Text("Rp")
                                 .font(.title2)
-                            Text(String(Float(people.share * viewModel.totalSpending!).formatted(.number)))
+                            Text(String(Float(people.share * viewModel.totalSpentAll).formatted(.number)))
                                 .font(.title2)
                         }
                         .padding()
@@ -39,7 +39,7 @@ struct ExpenseResultView: View {
                         .cornerRadius(20)
                     }
                 }else if viewModel.splitMethod == .custom {
-                    ForEach(viewModel.peoples){ people in
+                    ForEach(viewModel.peopleItems){ people in
                         VStack{
                             HStack{
                                 Circle()
@@ -47,36 +47,40 @@ struct ExpenseResultView: View {
                                 Text(people.name)
                                     .font(.title3)
                                 Spacer()
-                                Text("Rp " + String(people.totalSpending.formatted(.number)))
+                                Text("Rp " + String(round(people.totalSpending).formatted(.number)))
                                     .font(.title3)
                                     .fontWeight(.semibold)
                             }
                             Divider()
-                            ForEach(viewModel.items){ item in
-                                if item.asignees.contains(people){
-                                    HStack{
-                                        Text(item.itemName)
-                                            .font(.subheadline)
+                            ForEach(people.items){ item in
+                                HStack{
+                                    Text(item.itemName)
+                                        .font(.subheadline)
+                                    Spacer()
+                                    Text("x" + String(item.itemQuantity))
+                                        .font(.subheadline)
+                                    Text("Rp " + String(Float(item.itemPrice ?? 0).formatted(.number)))
+                                        .frame(width: 100, alignment: .trailing)
+                                        .lineLimit(1)
+                                        .font(.subheadline)
+                                }
+                            }
+                            DisclosureGroup() {
+                                ForEach(viewModel.additionalCharges) { additionalCharge in
+                                    HStack {
+                                        Text(additionalCharge.additionalChargeType.name)
                                         Spacer()
-                                        let asigneeIndex = item.asignees.firstIndex(of: people)
-                                        Text("x" + String(item.asignees[asigneeIndex!].share))
-                                            .font(.subheadline)
-                                        Text("Rp " + String(Float(item.itemPrice ?? 0).formatted(.number)))
-                                            .frame(width: 100, alignment: .trailing)
-                                            .lineLimit(1)
-                                            .font(.subheadline)
+                                        Text("Rp " + String(Float(additionalCharge.amount ?? 0).formatted(.number)))
                                     }
+                                    .font(.subheadline)
+                                }
+                            } label: {
+                                HStack {
+                                    Text("Bill Details")
+                                        .font(.headline)
+                                        .padding(.vertical, 5)
                                 }
                             }
-                            List{
-                                Section("Bill Details"){
-                                    ForEach(viewModel.additionalCharges){additionalCharge in
-                                        Text("Test")
-//                                        Text(additionalCharge.additionalChargeType.name)
-                                    }
-                                }
-                            }
-                            .backgroundStyle(Color(.gray))
                         }
                         .padding()
                         .background(Color(.midLightGray))
