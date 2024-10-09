@@ -53,7 +53,7 @@ struct ExpenseResultView: View {
                             }
                             Divider()
                             ForEach(people.items){ item in
-                                HStack{
+                                HStack(alignment: .top){
                                     Text(item.itemName)
                                         .font(.subheadline)
                                     Spacer()

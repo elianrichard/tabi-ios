@@ -26,7 +26,7 @@ class ExpenseResultViewModel{
         Item(itemName: "Es krim spesial sosis", itemPrice: 20000, itemQuantity: 3),
         Item(itemName: "Bakmi Kuah", itemPrice: 20000, itemQuantity: 5),
         Item(itemName: "Bakso", itemPrice: 30000, itemQuantity: 5),
-        Item(itemName: "Sephaghetti agilio ogolio", itemPrice: 25000, itemQuantity: 2),
+        Item(itemName: "Sephaghetti agilio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio ogolio", itemPrice: 25000, itemQuantity: 2),
         Item(itemName: "Es krim cah kangkung", itemPrice: 50000, itemQuantity: 4),
     ]
     
