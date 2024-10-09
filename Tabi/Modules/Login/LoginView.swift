@@ -11,8 +11,6 @@ struct LoginView: View {
     
     @State private var vm = LoginViewModel()
     
-    @State private var score = 0
-    
     var body: some View {
         VStack {
             Spacer()
