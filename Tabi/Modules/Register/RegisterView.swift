@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RegisterView: View {
     @EnvironmentObject var routes: Routes
-    @State private var vm = RegisterViewModel()
+    @State private var registerViewModel = RegisterViewModel()
     
     
     var body: some View {
@@ -23,9 +23,9 @@ struct RegisterView: View {
                 
                 InputWithLabel(label: "Name",
                                placeholder: "Name",
-                               text: $vm.name)
-                .onSubmit(vm.validateName)
-                if vm.hasAttemptedValidation, let error = vm.nameError {
+                               text: $registerViewModel.name)
+                .onSubmit(registerViewModel.validateName)
+                if registerViewModel.hasAttemptedValidation, let error = registerViewModel.nameError {
                     Text(error)
                         .font(.caption)
                         .foregroundColor(.red)
@@ -34,9 +34,9 @@ struct RegisterView: View {
                 
                 InputWithLabel(label: "Phone Number",
                                placeholder: "(+62)",
-                               text: $vm.phoneNumber)
-                .onSubmit(vm.validatePhoneNumber)
-                if vm.hasAttemptedValidation, let error = vm.phoneNumberError {
+                               text: $registerViewModel.phoneNumber)
+                .onSubmit(registerViewModel.validatePhoneNumber)
+                if registerViewModel.hasAttemptedValidation, let error = registerViewModel.phoneNumberError {
                     Text(error)
                         .font(.caption)
                         .foregroundColor(.red)
@@ -46,9 +46,9 @@ struct RegisterView: View {
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
                                isSecure: true,
-                               text: $vm.password)
-                .onSubmit(vm.validatePassword)
-                if vm.hasAttemptedValidation, let error = vm.passwordError {
+                               text: $registerViewModel.password)
+                .onSubmit(registerViewModel.validatePassword)
+                if registerViewModel.hasAttemptedValidation, let error = registerViewModel.passwordError {
                     Text(error)
                         .font(.caption)
                         .foregroundColor(.red)
@@ -58,8 +58,8 @@ struct RegisterView: View {
                 InputWithLabel(label: "Confirm Password",
                                placeholder: "Confirm Password",
                                isSecure: true,
-                               text: $vm.confirmPassword)
-                if !vm.confirmPassword.isEmpty, let error = vm.confirmPasswordError {
+                               text: $registerViewModel.confirmPassword)
+                if !registerViewModel.confirmPassword.isEmpty, let error = registerViewModel.confirmPasswordError {
                     HStack {
                         Image(systemName: "x.circle.fill")
                             .foregroundColor(.red)
@@ -76,15 +76,15 @@ struct RegisterView: View {
                 .frame(height: 60)
             
             Button(action: {
-                vm.validateAllFields()
-                if vm.isFormValid() {
-                    vm.register()
+                registerViewModel.validateAllFields()
+                if registerViewModel.isFormValid() {
+                    registerViewModel.register()
                 }
             }) {
                 Text("Register")
                     .frame(maxWidth: .infinity)
                     .frame(height: 58)
-                    .background(vm.hasAttemptedValidation && vm.isFormValid() ? Color.blue : Color.gray)
+                    .background(registerViewModel.hasAttemptedValidation && registerViewModel.isFormValid() ? Color.blue : Color.gray)
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             }
