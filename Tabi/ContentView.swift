@@ -38,6 +38,8 @@ struct ContentView: View {
 //                        .toolbar(.hidden)
                 case .LoginView:
                     LoginView()
+                case .RegisterView:
+                    RegisterView()
                 }
                 
             }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LoginView: View {
-    
+    @EnvironmentObject var routes: Routes
     @State private var vm = LoginViewModel()
     
     @State private var score = 0
@@ -69,10 +69,16 @@ struct LoginView: View {
             }
             .padding(.horizontal)
             
-            Text("Don't have an account? Register")
-                .font(.system(size: 12))
-                .padding(.top, 20)
-                .underline()
+            Button(action: {
+                routes.navigate(to: .RegisterView)
+            }) {
+                Text("Don't have an account? Register")
+                    .font(.system(size: 12))
+                    .padding(.top, 20)
+                    .foregroundStyle(.black)
+                    .underline()
+            }
+            
             
             Spacer()
             Spacer()
