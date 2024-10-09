@@ -10,11 +10,24 @@ import SwiftData
 
 @Model
 class EventData {
-    var name: String
+    var eventName: String
+    var completionDate: Date?
+    var userEventBalance: Double
+    var transactions: [Int]
+    var participants: [String]
     
-    init(name: String) {
-        self.name = name
+    init(eventName: String, completionDate: Date? = nil, userEventBalance: Double = 0, transactions: [Int] = [], participants: [String] = ["You"]) {
+        self.eventName = eventName
+        self.completionDate = completionDate
+        self.userEventBalance = userEventBalance
+        self.transactions = transactions
+        self.participants = participants
     }
 }
 
-var defaultEventData = EventData(name: "Travel")
+var mockEventData: [EventData] = [
+    EventData(eventName: "Korea Trip", completionDate: nil, userEventBalance: 0, transactions: []),
+    EventData(eventName: "London Trip", completionDate: Date(), userEventBalance: 300_000, transactions: [10]),
+    EventData(eventName: "Paris Trip", completionDate: Date(), userEventBalance: -300_000, transactions: [10]),
+    EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, transactions: [10])
+]
