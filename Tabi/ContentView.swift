@@ -39,8 +39,11 @@ struct ContentView: View {
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
 //                        .navigationBarBackButtonHidden(true)
-//                        .toolbar(.hidden)                case .LoginView:
+//                        .toolbar(.hidden)
+                case .LoginView:
                     LoginView()
+                case .RegisterView:
+                    RegisterView()
                 case .ExpensesView:
                     ExpenseView()
                 case .AddExpenseView:
