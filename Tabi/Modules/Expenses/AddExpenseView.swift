@@ -14,7 +14,6 @@ struct AddExpenseView: View {
     @EnvironmentObject var routes: Routes
     
     var body: some View {
-        //        NavigationView {
         VStack{
             ScrollView(){
                 VStack(alignment: .leading){
@@ -160,7 +159,6 @@ struct AddExpenseView: View {
                     routes.navigate(to: .ExpenseSplitView)
                 }
         }
-        //        }
     }
 }
 

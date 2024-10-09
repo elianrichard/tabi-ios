@@ -39,8 +39,6 @@ struct AssignCustomSplitView: View {
                     .onTapGesture {
                         if viewModel.selectedAsignee != people{
                             viewModel.selectedAsignee = people
-                        }else{
-                            viewModel.selectedAsignee = nil
                         }
                     }
                 }
@@ -52,6 +50,7 @@ struct AssignCustomSplitView: View {
             .cornerRadius(5)
             .onAppear{
                 viewModel.gridItem = Array(repeating: .init(.flexible()), count: 5)
+                viewModel.selectedAsignee = viewModel.peoples.first!
             }
             Text("All Items")
                 .font(.title3)
@@ -61,9 +60,50 @@ struct AssignCustomSplitView: View {
                     VStack(alignment: .leading){
                         Text(item.itemName)
                         Text("Rp " + String((item.itemPrice?.formatted(.number))!))
+                            .fontWeight(.semibold)
+                        if !item.asignees.isEmpty{
+                            HStack{
+                                ZStack{
+                                    ForEach(Array(item.asignees.enumerated()), id: \.offset){ index, asignee in
+                                        Circle()
+                                            .frame(width: 20, height: 20)
+                                            .offset(CGSize(width: index*10, height: 0))
+                                        if asignee == item.asignees.last{
+                                            Image(systemName: "chevron.right")
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 20, height: 20)
+                                                .offset(CGSize(width: index*10+20, height: 0))
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+                    Spacer()
                     Text(String(item.itemQuantity) + "x")
+                        .fontWeight(.bold)
+                    VStack{
+                        if !item.asignees.contains(viewModel.selectedAsignee){
+                            Image(systemName: "circle")
+                                .padding([.leading], 50)
+                        }else{
+                            Image(systemName: "checkmark.circle.fill")
+                                .padding([.leading], 50)
+                        }
+                    }
+                    .onTapGesture {
+                        let itemIndex = viewModel.items.firstIndex(of: item)!
+                        if !item.asignees.contains(viewModel.selectedAsignee){
+                            viewModel.items[itemIndex].asignees.append(viewModel.selectedAsignee)
+                        }else{
+                            let removeIndex = item.asignees.firstIndex(of: viewModel.selectedAsignee)!
+                            viewModel.items[itemIndex].asignees.remove(at: removeIndex)
+                        }
+                    }
                 }
+                .padding(10)
+                .background(Color(.midLightGray))
+                .cornerRadius(10)
             }
         }
         .navigationTitle("Assign the items")

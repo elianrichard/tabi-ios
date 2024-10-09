@@ -23,7 +23,16 @@ class AssignCustomSplitViewModel{
         People(name: "Mario", share: 0.25),
         People(name: "Renaldi", share: 0.25),
         People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
     ]
-    var selectedAsignee: People? = nil
+    var selectedAsignee: People = People(name: "")
     var expenseTitle: String = "Lunch at Yoshinoya"
 }
