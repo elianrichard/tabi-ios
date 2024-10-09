@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     
-    @State private var vm = LoginViewModel()
+    @State private var loginViewModel = LoginViewModel()
     
     var body: some View {
         VStack {
@@ -22,12 +22,12 @@ struct LoginView: View {
                 
                 InputWithLabel(label: "Phone Number",
                                placeholder: "+62",
-                               text: $vm.phoneNumber)
+                               text: $loginViewModel.phoneNumber)
                 
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
                                isSecure: true,
-                               text: $vm.password)
+                               text: $loginViewModel.password)
                 
                 Text("Forgot Password?")
                     .font(.system(size: 10))
@@ -38,7 +38,7 @@ struct LoginView: View {
             Spacer()
                 .frame(height: 60)
             
-            Button(action: vm.login) {
+            Button(action: loginViewModel.login) {
                 Text("Login")
                     .frame(maxWidth: .infinity)
                     .frame(height: 58)
