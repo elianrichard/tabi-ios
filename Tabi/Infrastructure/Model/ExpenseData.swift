@@ -20,6 +20,7 @@ struct People: Identifiable, Codable, Equatable{
     var id: UUID = UUID.init()
     var name: String
     var share: Float = 0
+    var totalSpending: Float = 0
 }
 
 struct Expense: Identifiable{

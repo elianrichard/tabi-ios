@@ -10,7 +10,6 @@ import Foundation
 @Observable
 class ExpenseSplitViewModel{
     var expenseTitle: String = "Lunch at Yoshinoya"
-    var splitMethod: SplitMethod = .custom
     var peoples: [People] = [
         People(name: "Dharma", share: 0.25),
         People(name: "Mario", share: 0.25),
