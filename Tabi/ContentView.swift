@@ -40,6 +40,10 @@ struct ContentView: View {
                     SwiftDataTestingView()
 //                        .navigationBarBackButtonHidden(true)
 //                        .toolbar(.hidden)
+                case .LoginView:
+                    LoginView()
+                case .RegisterView:
+                    RegisterView()
                 case .ExpensesView:
                     ExpenseView()
                 case .AddExpenseView:
@@ -47,8 +51,6 @@ struct ContentView: View {
                 case .ExpenseSplitView:
                     ExpenseSplitView()
                 }
-                
-                
             }
         }
         .ignoresSafeArea(.keyboard)
