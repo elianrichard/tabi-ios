@@ -8,32 +8,26 @@
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject var routes: Routes
-    @State private var vm = LoginViewModel()
+    
+    @State private var loginViewModel = LoginViewModel()
     
     var body: some View {
         VStack {
-            Spacer()
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 20) {
                 Text("Login")
                     .font(.system(size: 22, weight: .medium))
                     .padding()
                 
-                Spacer()
-                    .frame(height: 20)
                 
                 InputWithLabel(label: "Phone Number",
                                placeholder: "+62",
-                               text: $vm.phoneNumber)
-                
-                Spacer()
-                    .frame(height: 20)
+                               text: $loginViewModel.phoneNumber)
                 
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
                                isSecure: true,
-                               text: $vm.password)
+                               text: $loginViewModel.password)
                 
                 Text("Forgot Password?")
                     .font(.system(size: 10))
@@ -44,7 +38,7 @@ struct LoginView: View {
             Spacer()
                 .frame(height: 60)
             
-            Button(action: vm.login) {
+            Button(action: loginViewModel.login) {
                 Text("Login")
                     .frame(maxWidth: .infinity)
                     .frame(height: 58)
@@ -67,19 +61,11 @@ struct LoginView: View {
             }
             .padding(.horizontal)
             
-            Button(action: {
-                routes.navigate(to: .RegisterView)
-            }) {
-                Text("Don't have an account? Register")
-                    .font(.system(size: 12))
-                    .padding(.top, 20)
-                    .foregroundStyle(.black)
-                    .underline()
-            }
+            Text("Don't have an account? Register")
+                .font(.system(size: 12))
+                .padding(.top, 20)
+                .underline()
             
-            
-            Spacer()
-            Spacer()
             
         }
     }
