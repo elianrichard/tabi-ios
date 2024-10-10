@@ -5,7 +5,7 @@
 //  Created by Dharmawan Ruslan on 03/10/24.
 //
 
-import Foundation
+import SwiftData
 import SwiftUI
 
 struct Item: Identifiable, Codable, Equatable{
@@ -22,12 +22,19 @@ struct People: Identifiable, Codable, Equatable{
     var share: Float = 0
 }
 
-struct Expense: Identifiable{
-    var id: UUID = UUID.init()
+@Model
+class Expense {
     var name: String
     var coverer: String
     var dateOfCreation: Date
     var price: Double
+    
+    init(name: String, coverer: String, dateOfCreation: Date, price: Double) {
+        self.name = name
+        self.coverer = coverer
+        self.dateOfCreation = dateOfCreation
+        self.price = price
+    }
 }
 
 struct AdditionalCharge: Identifiable, Equatable{

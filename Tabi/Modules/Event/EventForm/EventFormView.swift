@@ -9,12 +9,16 @@ import SwiftUI
 
 struct EventFormView: View {
     @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventFormViewModel: EventViewModel
+    @EnvironmentObject var eventViewModel: EventViewModel
+    @EnvironmentObject var eventInviteViewModel: EventInviteViewModel
+    
+    @State var name: String = ""
+    @State var isEdit: Bool = false
     
     var body : some View {
         VStack (spacing: 40) {
             ZStack {
-                Text(eventFormViewModel.selectedEvent != nil ? "Edit Event" : "Create Event")
+                Text(isEdit ? "Edit Event" : "Create Event")
                     .font(.title2)
                 HStack {
                     Button {
@@ -39,7 +43,7 @@ struct EventFormView: View {
                 VStack (alignment: .leading, spacing: 12) {
                     Text("Event name")
                         .font(.title3)
-                    TextField("Event name", text: $eventFormViewModel.eventName)
+                    TextField("Event name", text: $name)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
                         .font(.body)
@@ -59,7 +63,7 @@ struct EventFormView: View {
                                     Text("You")
                                         .font(.caption)
                                 }
-                                ForEach (eventFormViewModel.selectedContacts) { user in
+                                ForEach ( isEdit ? (eventViewModel.selectedEvent?.participants ?? []) : eventInviteViewModel.selectedContacts) { user in
                                     VStack {
                                         Circle()
                                             .fill(Color(UIColor(hex: "#D9D9D9")))
@@ -90,16 +94,23 @@ struct EventFormView: View {
             }
             Spacer()
             Button {
-                eventFormViewModel.handleCreateEditEvent()
+                eventViewModel.handleCreateEditEvent(name: name, selectedContacts: [])
+//                eventViewModel.handleCreateEditEvent(name: name, selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()
             } label: {
-                Text(eventFormViewModel.selectedEvent != nil ? "Edit" : "Create")
+                Text(eventViewModel.selectedEvent != nil ? "Edit" : "Create")
                     .frame(maxWidth: .infinity)
                     .font(.callout)
                     .foregroundStyle(.black)
                     .padding(.vertical, 16)
                     .background(Color(UIColor(hex: "#D9D9D9")))
                     .clipShape(RoundedRectangle(cornerRadius: 32))
+            }
+        }
+        .onAppear {
+            if let event = eventViewModel.selectedEvent {
+                isEdit = true
+                name = event.eventName
             }
         }
         .padding()
@@ -109,4 +120,6 @@ struct EventFormView: View {
 
 #Preview {
     EventFormView()
+        .environmentObject(EventViewModel())
+        .environmentObject(EventInviteViewModel())
 }

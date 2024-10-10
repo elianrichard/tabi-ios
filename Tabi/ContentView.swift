@@ -49,4 +49,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(EventViewModel())
+        .environmentObject(EventInviteViewModel())
 }

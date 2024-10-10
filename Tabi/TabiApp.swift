@@ -28,6 +28,7 @@ struct TabiApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(EventViewModel())
+                .environmentObject(EventInviteViewModel())
         }
         .modelContainer(sharedModelContainer)
     }

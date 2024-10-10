@@ -12,7 +12,7 @@ struct EventExpenseView: View {
     var body: some View {
         ScrollView (showsIndicators: false) {
             VStack {
-                ForEach(eventViewModel.expenses) { expense in
+                ForEach(eventViewModel.selectedEvent?.expenses ?? []) { expense in
                     EventDetailCardView(expense: expense)
                 }
             }

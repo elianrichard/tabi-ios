@@ -21,7 +21,7 @@ struct EventCardView : View {
         } else {
             self.status = .settled
         }
-        if (event.transactions.count == 0) {
+        if (event.expenses.count == 0) {
             isNew = true
         }
     }
@@ -78,6 +78,6 @@ struct EventCardView : View {
 
 #Preview {
     EventCardView(
-        event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, transactions: [10])
+        event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0)
     )
 }

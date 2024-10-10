@@ -12,7 +12,7 @@ import Contacts
 struct EventInviteView: View {
     @EnvironmentObject var routes: Routes
     @EnvironmentObject var eventViewModel: EventViewModel
-    @StateObject var eventInviteViewModel = EventInviteViewModel()
+    @EnvironmentObject var eventInviteViewModel: EventInviteViewModel
     
     var body: some View {
         VStack (spacing: 40) {
@@ -57,7 +57,7 @@ struct EventInviteView: View {
             }
             
             Button {
-                eventViewModel.selectedContacts = eventInviteViewModel.selectedContacts
+                eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
                 routes.navigateBack()
             } label: {
                 Text("Done")
@@ -71,55 +71,22 @@ struct EventInviteView: View {
         }
         .padding()
         .onAppear {
-            fetchContacts()
-            eventInviteViewModel.selectedContacts = eventViewModel.selectedContacts
-        }
-        .navigationBarBackButtonHidden(true)
-        .environmentObject(eventInviteViewModel)
-    }
-    
-    private func fetchContacts () -> Void {
-        let CNStore = CNContactStore()
-        
-        switch CNContactStore.authorizationStatus(for: .contacts) {
-        case .authorized, .limited:
-            do {
-                let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
-                let request = CNContactFetchRequest(keysToFetch: keys)
-                try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
-                    eventInviteViewModel.allContacts.append(contact)
-                })
-            } catch {
-                print("Error on contact fetching \(error)")
-            }
-//        case .restricted:
-//            print("restricted")
-//        case .denied:
-//            print("denied")
-        case .notDetermined, .denied, .restricted:
-            CNStore.requestAccess(for: .contacts) { granted, error in
-                if (granted) {
-                    print("contact granted")
-                    fetchContacts()
-                } else if let error = error {
-                    print("Error requesting contact acces: \(error)")
+            if (eventInviteViewModel.allContacts.count == 0) {
+                DispatchQueue.global(qos: .background).async {
+                    eventInviteViewModel.fetchContacts()
                 }
             }
-        default:
-            do {
-                let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
-                let request = CNContactFetchRequest(keysToFetch: keys)
-                try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
-                    eventInviteViewModel.allContacts.append(contact)
-                })
-            } catch {
-                print("Error on contact fetching \(error)")
+            if let selectedEvent = eventViewModel.selectedEvent {
+                eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
+    
 }
 
 #Preview {
     EventInviteView()
         .environmentObject(EventViewModel())
+        .environmentObject(EventInviteViewModel())
 }
