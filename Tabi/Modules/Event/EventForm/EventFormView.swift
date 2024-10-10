@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct EventFormView: View {
-    @EnvironmentObject var routes: Routes
-    @StateObject var eventFormViewModel = EventFormViewModel()
+    @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
     
     var body : some View {
         VStack (spacing: 40) {
             ZStack {
-                Text("Create Event")
+                Text(eventViewModel.selectedEvent != nil ? "Edit Event" : "Create Event")
                     .font(.title2)
                 HStack {
                     Button {
@@ -39,7 +39,7 @@ struct EventFormView: View {
                 VStack (alignment: .leading, spacing: 12) {
                     Text("Event name")
                         .font(.title3)
-                    TextField("Event name", text: $eventFormViewModel.eventName)
+                    TextField("Event name", text: Bindable(eventViewModel).eventName)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
                         .font(.body)
@@ -77,10 +77,10 @@ struct EventFormView: View {
             }
             Spacer()
             Button {
-                eventFormViewModel.handleCreateEvent()
+                eventViewModel.handleCreateEditEvent()
                 routes.navigateBack()
             } label: {
-                Text("Create")
+                Text(eventViewModel.selectedEvent != nil ? "Edit" : "Create")
                     .frame(maxWidth: .infinity)
                     .font(.callout)
                     .foregroundStyle(.black)
@@ -89,10 +89,18 @@ struct EventFormView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 32))
             }
         }
+        .onAppear {
+            if let selectedEvent = eventViewModel.selectedEvent {
+                eventViewModel.eventName = selectedEvent.eventName
+            }
+        }
         .padding()
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
     EventFormView()
+        .environment(EventViewModel())
+        .environment(Routes())
 }

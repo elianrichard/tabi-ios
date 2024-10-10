@@ -11,19 +11,24 @@ import PhotosUI
 
 struct AddExpenseView: View {
     @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
-    @EnvironmentObject var routes: Routes
+    @Environment(Routes.self) private var routes
     
     var body: some View {
-        VStack{
-            ScrollView(){
-                VStack(alignment: .leading){
-                    Text("Title")
-                        .padding([.top, .bottom], 5)
-                    TextField("Title", text: $viewModel.expenseName)
-                        .padding(10)
-                        .background(Color(.midLightGray))
-                        .cornerRadius(5)
-                } // Title
+        VStack {
+            ZStack {
+                Text("Add Expense")
+                    .font(.title2)
+                HStack {
+                    Button {
+                        routes.navigateBack()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .foregroundStyle(.black)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            ScrollView() {
                 VStack(alignment: .leading){
                     Text("Paid by")
                         .padding([.top, .bottom], 5)
@@ -38,7 +43,7 @@ struct AddExpenseView: View {
                         HStack{
                             if viewModel.selectedCoverer != nil{
                                 Text(viewModel.selectedCoverer!.name)
-                            }else{
+                            } else{
                                 Text("Paid by")
                             }
                             Spacer()
@@ -149,16 +154,16 @@ struct AddExpenseView: View {
                     .foregroundColor(.gray)
                     .background(Color(.midLightGray))
                     .cornerRadius(5)
-                } // Title
-            }
-            .padding([.top, .leading, .trailing], 30)
-            .navigationTitle("Add New Expense")
-            .navigationBarTitleDisplayMode(.inline)
-            BottomButton(text: "Next")
-                .onTapGesture {
-                    routes.navigate(to: .ExpenseSplitView)
                 }
+            }
+            Button {
+                routes.navigate(to: .ExpenseSplitView)
+            } label: {
+                BottomButton(text: "Next")
+            }
         }
+        .padding()
+        .navigationBarBackButtonHidden(true)
     }
 }
 

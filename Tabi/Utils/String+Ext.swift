@@ -27,8 +27,12 @@ extension String {
         }
         return final
     }
-
+    
     func removeDots() -> String {
         return self.replacingOccurrences(of: ".", with: "")
+    }
+    
+    func getFirstName() -> String {
+        return String(self.split(separator: " ").first ?? "")
     }
 }

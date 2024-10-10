@@ -27,7 +27,7 @@ struct Expense: Identifiable{
     var name: String
     var coverer: String
     var dateOfCreation: Date
-    var price: Int
+    var price: Double
 }
 
 struct AdditionalCharge: Identifiable, Equatable{

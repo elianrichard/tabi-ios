@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EventCardView : View {
     var event: EventData
-    var status: EventCardStatus = .settled
+    var status: EventCardStatusEnum = .settled
     var isNew: Bool = false
     
     init(event: EventData) {
