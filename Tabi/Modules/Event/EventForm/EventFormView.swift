@@ -7,11 +7,7 @@
 
 import SwiftUI
 
-struct EventFormView: View {
-    // @EnvironmentObject var routes: Routes
-    // @EnvironmentObject var eventViewModel: EventViewModel
-    // @EnvironmentObject var eventInviteViewModel: EventInviteViewModel
-    
+struct EventFormView: View {    
     @State var isEdit: Bool = false
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
