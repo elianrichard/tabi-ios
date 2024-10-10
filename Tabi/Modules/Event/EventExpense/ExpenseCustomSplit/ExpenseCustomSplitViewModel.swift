@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 @Observable
-class AssignCustomSplitViewModel{
+class ExpenseCustomSplitViewModel: ObservableObject{
     var gridItem: [GridItem] = []
     var items: [Item] = [
         Item(itemName: "Salad", itemPrice: 30500, itemQuantity: 3),

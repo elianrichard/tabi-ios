@@ -12,26 +12,18 @@ class EventViewModel {
     var eventName: String = ""
     var selectedEvent: EventData? {
         didSet {
-            eventName = self.selectedEvent?.eventName ?? ""
             selectedSection = .expenses
         }
     }
     var selectedSection: EventSectionEnum = .expenses
-    
-    var expenses: [Expense] = [
-        Expense(name: "Sate", coverer: "Naufal", dateOfCreation: .now, price: 100000),
-        Expense(name: "Bakso", coverer: "Elian", dateOfCreation: .distantPast, price: 50000),
-        Expense(name: "Micin", coverer: "Rafael Mario Omar Zhang", dateOfCreation: Date.now.addingTimeInterval(-86400), price: 200000),
-        Expense(name: "Hotel", coverer: "Dharmawan Ruslan", dateOfCreation: Date.now.addingTimeInterval(-86400*2), price: 300000),
-        Expense(name: "Tayo", coverer: "Elvina Vincensia", dateOfCreation: Date.now.addingTimeInterval(-86400*3), price: 75000),
-    ]
 
     @MainActor
-    func handleCreateEditEvent () {
-        if (selectedEvent != nil) {
-            selectedEvent?.eventName = eventName
+    func handleCreateEditEvent (selectedContacts: [UserData]) {
+        if let selectedEvent = selectedEvent {
+            selectedEvent.eventName = eventName
+            selectedEvent.participants = selectedContacts
         } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: eventName))
+            SwiftDataService.shared.addEvent(EventData(eventName: eventName, participants: [UserData(name: "You", phone: "08123456789")] + selectedContacts))
         }
     }
     

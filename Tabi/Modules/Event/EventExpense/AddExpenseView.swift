@@ -8,9 +8,11 @@
 import Foundation
 import SwiftUI
 import PhotosUI
+import Combine
 
 struct AddExpenseView: View {
-    @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
+    @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(Routes.self) private var routes
     
     var body: some View {
@@ -33,16 +35,16 @@ struct AddExpenseView: View {
                     Text("Paid by")
                         .padding([.top, .bottom], 5)
                     Menu {
-                        ForEach(viewModel.peoples, id: \.id) { people in
-                            Button(people.name, action: {
-                                viewModel.selectedCoverer = people
+                        ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
+                            Button(person.name, action: {
+                                eventExpenseViewModel.selectedCoverer = person
                             })
                             .frame(maxWidth: .infinity)
                         }
                     } label: {
                         HStack{
-                            if viewModel.selectedCoverer != nil{
-                                Text(viewModel.selectedCoverer!.name)
+                            if eventExpenseViewModel.selectedCoverer != nil{
+                                Text(eventExpenseViewModel.selectedCoverer!.name)
                             } else{
                                 Text("Paid by")
                             }
@@ -59,8 +61,8 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Participants")
                         .padding([.top, .bottom], 5)
-                    LazyVGrid(columns: viewModel.gridItem, spacing: 16){
-                        ForEach(viewModel.peoples, id: \.id) { people in
+                    LazyVGrid(columns: eventExpenseViewModel.gridItem, spacing: 16){
+                        ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
                             VStack{
                                 Circle()
                                     .frame(width: 40, height: 40)
@@ -68,18 +70,18 @@ struct AddExpenseView: View {
                                         Circle()
                                             .frame(width: 50, height: 50)
                                             .foregroundColor(.gray)
-                                            .opacity(!viewModel.selectedParticipants.contains(people) ? 0 : 0.5)
+                                            .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 0.5)
                                     }
-                                Text(people.name)
+                                Text(person.name.getFirstName())
                                     .font(.subheadline)
                                     .lineLimit(1)
                             }
                             .onTapGesture {
-                                if !viewModel.selectedParticipants.contains(people){
-                                    viewModel.selectedParticipants.append(people)
-                                }else{
-                                    let removeIndex = viewModel.selectedParticipants.firstIndex(of: people)
-                                    viewModel.selectedParticipants.remove(at: removeIndex!)
+                                if !eventExpenseViewModel.selectedParticipants.contains(person){
+                                    eventExpenseViewModel.selectedParticipants.append(person)
+                                } else {
+                                    let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person)
+                                    eventExpenseViewModel.selectedParticipants.remove(at: removeIndex!)
                                 }
                             }
                         }
@@ -90,25 +92,25 @@ struct AddExpenseView: View {
                     )
                     .cornerRadius(5)
                     .onAppear{
-                        viewModel.gridItem = Array(repeating: .init(.flexible()), count: 5)
+                        eventExpenseViewModel.gridItem = Array(repeating: .init(.flexible()), count: 5)
                     }
                 } // Participants
                 VStack(alignment: .leading){
                     Text("Split Method")
                         .padding([.top, .bottom], 5)
                     Menu {
-                        ForEach(viewModel.methods, id: \.self) { method in
-                            Button(method, action: {
-                                viewModel.selectedMethod = method
+                        ForEach(SplitMethod.allCases) { method in
+                            Button(method.splitDescription, action: {
+                                eventExpenseViewModel.selectedMethod = method
                             })
                             .frame(maxWidth: .infinity)
                         }
                     } label: {
                         HStack{
-                            if viewModel.selectedMethod != ""{
-                                Text(viewModel.selectedMethod)
-                            }else{
-                                Text("Split Method")
+                            if let method = eventExpenseViewModel.selectedMethod {
+                                Text(method.splitDescription)
+                            } else{
+                                Text("Select Split Method")
                             }
                             Spacer()
                             Image(systemName: "chevron.down")
@@ -120,15 +122,17 @@ struct AddExpenseView: View {
                         .cornerRadius(5)
                     }
                 } // Split Method
-                if viewModel.selectedMethod == "Split Equally"{
+                if eventExpenseViewModel.selectedMethod ==  .equally {
                     VStack(alignment: .leading){
-                        Text("Total Bill (RP)")
+                        Text("Total Bill (Rp)")
                             .padding([.top, .bottom], 5)
                         HStack{
                             Text("Rp")
-                            TextField("0", value: $viewModel.expenseTotal, format: .number .grouping(.automatic)
-                            )
+                            TextField("", text: Bindable(eventExpenseViewModel).expenseTotal)
                             .keyboardType(.numberPad)
+                            .onReceive(Just(eventExpenseViewModel.expenseTotal)) { _ in
+                                eventExpenseViewModel.expenseTotal = eventExpenseViewModel.expenseTotal.formatPrice()
+                            }
                         }
                         .padding(10)
                         .background(Color(.midLightGray))
@@ -138,7 +142,7 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Payment Receipt")
                         .padding([.top, .bottom], 5)
-                    PhotosPicker(selection: $viewModel.receiptImage, matching: .images, photoLibrary: .shared()){
+                    PhotosPicker(selection: Bindable(eventExpenseViewModel).receiptImage, matching: .images, photoLibrary: .shared()){
                         VStack(spacing: 10){
                             Image(systemName: "photo")
                                 .resizable()
@@ -157,7 +161,11 @@ struct AddExpenseView: View {
                 }
             }
             Button {
-                routes.navigate(to: .ExpenseSplitView)
+                if (eventExpenseViewModel.selectedMethod == .custom) {
+                    routes.navigate(to: .ExpenseCustomSplitView)
+                } else {
+                    routes.navigate(to: .ExpenseEqualSplitView)
+                }
             } label: {
                 BottomButton(text: "Next")
             }
@@ -169,4 +177,7 @@ struct AddExpenseView: View {
 
 #Preview {
     AddExpenseView()
+        .environment(Routes())
+        .environment(EventViewModel())
+        .environment(EventExpenseViewModel())
 }

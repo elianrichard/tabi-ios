@@ -8,8 +8,8 @@
 import Foundation
 import SwiftUI
 
-struct AssignCustomSplitView: View {
-    @State var viewModel: AssignCustomSplitViewModel = AssignCustomSplitViewModel()
+struct ExpenseCustomSplitView: View {
+    @State var viewModel: ExpenseCustomSplitViewModel = ExpenseCustomSplitViewModel()
     
     var body: some View {
         VStack(alignment: .leading){
@@ -114,5 +114,5 @@ struct AssignCustomSplitView: View {
 }
 
 #Preview {
-    AssignCustomSplitView()
+    ExpenseCustomSplitView()
 }

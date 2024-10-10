@@ -11,6 +11,8 @@ import SwiftData
 struct ContentView: View {
     @State private var routes = Routes()
     @State private var eventViewModel = EventViewModel()
+    @State private var eventInviteViewModel = EventInviteViewModel()
+    @State private var eventExpenseViewModel = EventExpenseViewModel()
     
     var body: some View {
         NavigationStack (path: $routes.navPath) {
@@ -25,6 +27,8 @@ struct ContentView: View {
                     EventFormView()
                 case .EventDetailView:
                     EventDetailView()
+                case .EventInviteView:
+                    EventInviteView()
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
                 case .LoginView:
@@ -33,14 +37,18 @@ struct ContentView: View {
                     RegisterView()
                 case .AddExpenseView:
                     AddExpenseView()
-                case .ExpenseSplitView:
-                    ExpenseSplitView()
+                case .ExpenseEqualSplitView:
+                    ExpenseEqualSplitView()
+                case .ExpenseCustomSplitView:
+                    ExpenseCustomSplitView()
                 }
             }
         }
         .ignoresSafeArea(.keyboard)
         .environment(routes)
         .environment(eventViewModel)
+        .environment(eventInviteViewModel)
+        .environment(eventExpenseViewModel)
     }
 }
 
