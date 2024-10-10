@@ -11,7 +11,7 @@ import SwiftUI
     var navPath = NavigationPath()
     
     public enum Destination {
-        case HomeView, SwiftDataTestingView, ExpensesView, AddExpenseView, ExpenseSplitView, EventFormView, LoginView, RegisterView, EventDetailView
+        case HomeView, SwiftDataTestingView, AddExpenseView, ExpenseSplitView, EventFormView, LoginView, RegisterView, EventDetailView
     }
     
     func navigate(to destination: Destination) {

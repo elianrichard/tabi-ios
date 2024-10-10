@@ -17,6 +17,14 @@ final class EventViewModel: ObservableObject {
         }
     }
     var selectedSection: EventSectionEnum = .expenses
+    
+    var expenses: [Expense] = [
+        Expense(name: "Sate", coverer: "Naufal", dateOfCreation: .now, price: 100000),
+        Expense(name: "Bakso", coverer: "Elian", dateOfCreation: .distantPast, price: 50000),
+        Expense(name: "Micin", coverer: "Rafael Mario Omar Zhang", dateOfCreation: Date.now.addingTimeInterval(-86400), price: 200000),
+        Expense(name: "Hotel", coverer: "Dharmawan Ruslan", dateOfCreation: Date.now.addingTimeInterval(-86400*2), price: 300000),
+        Expense(name: "Tayo", coverer: "Elvina Vincensia", dateOfCreation: Date.now.addingTimeInterval(-86400*3), price: 75000),
+    ]
 
     @MainActor
     func handleCreateEditEvent () {

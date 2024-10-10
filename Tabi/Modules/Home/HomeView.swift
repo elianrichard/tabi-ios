@@ -9,14 +9,14 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var routes: Routes
-    @EnvironmentObject var homeViewModel: HomeViewModel
+    @StateObject var homeViewModel = HomeViewModel()
     @EnvironmentObject var eventViewModel: EventViewModel
     
     var body: some View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
                 HStack (spacing: 10){
-                    HStack (spacing: 10 ){
+                    HStack (spacing: 10){
                         Circle()
                             .fill(Color(UIColor(hex: "#D9D9D9")))
                             .frame(width: 40)

@@ -16,18 +16,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
-//                if isShowSplash {
-//                    SplashView()
-//                        .onAppear {
-//                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-//                                withAnimation {
-//                                    isShowSplash = false
-//                                }
-//                            }
-//                        }
-//                } else {
                 HomeView()
-//                }
             }
             .navigationDestination(for: Routes.Destination.self) { destination in
                 switch destination {
@@ -39,14 +28,10 @@ struct ContentView: View {
                     EventDetailView()
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
-//                        .navigationBarBackButtonHidden(true)
-//                        .toolbar(.hidden)
                 case .LoginView:
                     LoginView()
                 case .RegisterView:
                     RegisterView()
-                case .ExpensesView:
-                    ExpenseView()
                 case .AddExpenseView:
                     AddExpenseView()
                 case .ExpenseSplitView:
@@ -62,5 +47,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(EventViewModel())
-        .environmentObject(HomeViewModel())
 }
