@@ -102,4 +102,5 @@ struct EventFormView: View {
 #Preview {
     EventFormView()
         .environment(EventViewModel())
+        .environment(Routes())
 }

@@ -106,4 +106,6 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environment(EventViewModel())
+        .environment(Routes())
 }

@@ -155,4 +155,5 @@ struct EventDetailView: View {
 #Preview {
     EventDetailView()
         .environment(EventViewModel())
+        .environment(Routes())
 }
