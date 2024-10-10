@@ -8,24 +8,26 @@
 import SwiftUI
 
 struct EventDetailCardView : View {
+    var expense: Expense
+    
     var body : some View {
-        HStack {
-            HStack (spacing: 16) {
+        HStack (alignment: .top) {
+            HStack (alignment: .top, spacing: 16) {
                 Circle()
                     .fill(Color(UIColor(hex: "#D9D9D9")))
                     .frame(width: 40)
                 VStack (alignment: .leading, spacing: 4) {
-                    Text("Breakfast")
+                    Text("\(expense.name.capitalized)")
                         .font(.body)
-                    Text("Naufal Paid this bill")
+                    Text("\(expense.coverer.getFirstName().capitalized) paid this bill")
                         .foregroundStyle(.black.opacity(0.5))
                         .font(.subheadline)
                 }
             }
             Spacer()
             VStack (alignment: .trailing) {
-                Text("Rp 100.000")
-                Text("Today")
+                Text("Rp \(String(format: "%.0f", expense.price).formatPrice())")
+                Text("\(expense.dateOfCreation.toProperText())")
                     .font(.subheadline)
                     .foregroundStyle(.black.opacity(0.5))
             }
@@ -38,5 +40,6 @@ struct EventDetailCardView : View {
 }
 
 #Preview {
-    EventDetailCardView()
+    EventDetailCardView(expense:
+        Expense(name: "Sate", coverer: "Naufal", dateOfCreation: Date(), price: 100000))
 }

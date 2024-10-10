@@ -132,7 +132,7 @@ struct EventDetailView: View {
             VStack {
                 HStack {
                     Button {
-                        routes.navigate(to: .EventFormView)
+                        routes.navigate(to: .AddExpenseView)
                     } label: {
                         Label("Add Expenses", systemImage: "plus")
                             .padding(.vertical, 20)
