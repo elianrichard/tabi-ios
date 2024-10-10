@@ -36,8 +36,10 @@ struct ContentView: View {
                     RegisterView()
                 case .AddExpenseView:
                     AddExpenseView()
-                case .ExpenseSplitView:
-                    ExpenseSplitView()
+                case .ExpenseEqualSplitView:
+                    ExpenseEqualSplitView()
+                case .ExpenseCustomSplitView:
+                    ExpenseCustomSplitView()
                 }
             }
         }
@@ -50,4 +52,5 @@ struct ContentView: View {
     ContentView()
         .environmentObject(EventViewModel())
         .environmentObject(EventInviteViewModel())
+        .environmentObject(EventExpenseViewModel())
 }

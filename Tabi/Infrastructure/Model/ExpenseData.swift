@@ -8,7 +8,7 @@
 import SwiftData
 import SwiftUI
 
-struct Item: Identifiable, Codable, Equatable{
+struct Item: Identifiable, Codable, Equatable {
     var id: UUID = UUID.init()
     var itemName: String
     var itemPrice: Float?
@@ -16,7 +16,7 @@ struct Item: Identifiable, Codable, Equatable{
     var asignees: [People] = []
 }
 
-struct People: Identifiable, Codable, Equatable{
+struct People: Identifiable, Codable, Equatable {
     var id: UUID = UUID.init()
     var name: String
     var share: Float = 0
@@ -37,7 +37,7 @@ class Expense {
     }
 }
 
-struct AdditionalCharge: Identifiable, Equatable{
+struct AdditionalCharge: Identifiable, Equatable {
     var id: UUID = UUID.init()
     var additionalChargeType: AdditionalChargeType
     var amount: Float?
@@ -55,7 +55,7 @@ enum SplitMethod: Identifiable {
             "custom"
         }
     }
-    
+
     var splitDescription: String {
         switch self {
         case .equally:
@@ -70,7 +70,7 @@ enum SplitMethod: Identifiable {
     }
 }
 
-enum AdditionalChargeType: Identifiable, Equatable{
+enum AdditionalChargeType: Identifiable, Equatable {
     case tax
     case serviceCharge
     case discount

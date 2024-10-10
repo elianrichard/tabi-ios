@@ -8,8 +8,8 @@
 import Foundation
 import SwiftUI
 
-struct ExpenseSplitView:View {
-    @State var viewModel = ExpenseSplitViewModel()
+struct ExpenseEqualSplitView: View {
+    @State var viewModel = ExpenseEqualSplitViewModel()
     
     var body: some View {
         VStack(alignment: .leading){
@@ -130,5 +130,5 @@ struct ExpenseSplitView:View {
 }
 
 #Preview {
-    ExpenseSplitView()
+    ExpenseEqualSplitView()
 }

@@ -18,10 +18,11 @@ final class EventViewModel: ObservableObject {
 
     @MainActor
     func handleCreateEditEvent (name: String, selectedContacts: [UserData]) {
-        if (selectedEvent != nil) {
-            selectedEvent?.eventName = name
+        if let selectedEvent = selectedEvent {
+            selectedEvent.eventName = name
+            selectedEvent.participants = selectedContacts
         } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: name, participants: selectedContacts))
+            SwiftDataService.shared.addEvent(EventData(eventName: name, participants: [UserData(name: "You", phone: "08123456789")] + selectedContacts))
         }
     }
     

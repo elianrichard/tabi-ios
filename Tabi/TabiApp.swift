@@ -29,6 +29,7 @@ struct TabiApp: App {
             ContentView()
                 .environmentObject(EventViewModel())
                 .environmentObject(EventInviteViewModel())
+                .environmentObject(EventExpenseViewModel())
         }
         .modelContainer(sharedModelContainer)
     }

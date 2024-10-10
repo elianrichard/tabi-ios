@@ -56,12 +56,14 @@ struct EventFormView: View {
                     HStack (alignment: .top, spacing: 10) {
                         ScrollView (showsIndicators: false) {
                             HStack (alignment: .top, spacing: 10) {
-                                VStack {
-                                    Circle()
-                                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                                        .frame(width: 40)
-                                    Text("You")
-                                        .font(.caption)
+                                if !isEdit {
+                                    VStack {
+                                        Circle()
+                                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                                            .frame(width: 40)
+                                        Text("You")
+                                            .font(.caption)
+                                    }
                                 }
                                 ForEach ( isEdit ? (eventViewModel.selectedEvent?.participants ?? []) : eventInviteViewModel.selectedContacts) { user in
                                     VStack {
@@ -94,8 +96,7 @@ struct EventFormView: View {
             }
             Spacer()
             Button {
-                eventViewModel.handleCreateEditEvent(name: name, selectedContacts: [])
-//                eventViewModel.handleCreateEditEvent(name: name, selectedContacts: eventInviteViewModel.selectedContacts)
+                eventViewModel.handleCreateEditEvent(name: name, selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()
             } label: {
                 Text(eventViewModel.selectedEvent != nil ? "Edit" : "Create")

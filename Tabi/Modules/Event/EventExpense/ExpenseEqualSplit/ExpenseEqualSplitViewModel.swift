@@ -8,7 +8,7 @@
 import Foundation
 
 @Observable
-class ExpenseSplitViewModel{
+class ExpenseEqualSplitViewModel : ObservableObject{
     var expenseTitle: String = "Lunch at Yoshinoya"
     var splitMethod: SplitMethod = .custom
     var peoples: [People] = [
