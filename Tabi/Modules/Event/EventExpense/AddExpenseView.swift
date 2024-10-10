@@ -11,12 +11,8 @@ import PhotosUI
 import Combine
 
 struct AddExpenseView: View {
-<<<<<<<< HEAD:Tabi/Modules/Event/EventExpense/AddExpenseView.swift
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-========
-    @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
->>>>>>>> sprint-1:Tabi/Modules/Event/Expenses/AddExpense/AddExpenseView.swift
     @Environment(Routes.self) private var routes
     
     var body: some View {
@@ -47,13 +43,8 @@ struct AddExpenseView: View {
                         }
                     } label: {
                         HStack{
-<<<<<<<< HEAD:Tabi/Modules/Event/EventExpense/AddExpenseView.swift
                             if eventExpenseViewModel.selectedCoverer != nil{
                                 Text(eventExpenseViewModel.selectedCoverer!.name)
-========
-                            if viewModel.selectedCoverer != nil{
-                                Text(viewModel.selectedCoverer!.name)
->>>>>>>> sprint-1:Tabi/Modules/Event/Expenses/AddExpense/AddExpenseView.swift
                             } else{
                                 Text("Paid by")
                             }
@@ -170,15 +161,11 @@ struct AddExpenseView: View {
                 }
             }
             Button {
-<<<<<<<< HEAD:Tabi/Modules/Event/EventExpense/AddExpenseView.swift
                 if (eventExpenseViewModel.selectedMethod == .custom) {
                     routes.navigate(to: .ExpenseCustomSplitView)
                 } else {
                     routes.navigate(to: .ExpenseEqualSplitView)
                 }
-========
-                routes.navigate(to: .ExpenseSplitView)
->>>>>>>> sprint-1:Tabi/Modules/Event/Expenses/AddExpense/AddExpenseView.swift
             } label: {
                 BottomButton(text: "Next")
             }
