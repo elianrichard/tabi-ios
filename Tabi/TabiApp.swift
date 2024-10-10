@@ -27,9 +27,6 @@ struct TabiApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(EventViewModel())
-                .environmentObject(EventInviteViewModel())
-                .environmentObject(EventExpenseViewModel())
         }
         .modelContainer(sharedModelContainer)
     }

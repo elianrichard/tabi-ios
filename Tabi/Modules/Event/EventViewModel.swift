@@ -8,7 +8,8 @@
 import SwiftUI
 
 @Observable
-final class EventViewModel: ObservableObject {
+class EventViewModel {
+    var eventName: String = ""
     var selectedEvent: EventData? {
         didSet {
             selectedSection = .expenses
@@ -17,12 +18,12 @@ final class EventViewModel: ObservableObject {
     var selectedSection: EventSectionEnum = .expenses
 
     @MainActor
-    func handleCreateEditEvent (name: String, selectedContacts: [UserData]) {
+    func handleCreateEditEvent (selectedContacts: [UserData]) {
         if let selectedEvent = selectedEvent {
-            selectedEvent.eventName = name
+            selectedEvent.eventName = eventName
             selectedEvent.participants = selectedContacts
         } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: name, participants: [UserData(name: "You", phone: "08123456789")] + selectedContacts))
+            SwiftDataService.shared.addEvent(EventData(eventName: eventName, participants: [UserData(name: "You", phone: "08123456789")] + selectedContacts))
         }
     }
     

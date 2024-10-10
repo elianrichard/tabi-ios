@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@Observable final class Routes: ObservableObject {
+@Observable class Routes {
     var navPath = NavigationPath()
     
     public enum Destination {

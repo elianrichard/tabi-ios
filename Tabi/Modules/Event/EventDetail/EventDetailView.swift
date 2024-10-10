@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct EventDetailView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventViewModel: EventViewModel
+    @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
     
     let rect = CGRect(x: 0, y: 0, width: 500, height: 100)
     var body: some View {
@@ -154,5 +154,6 @@ struct EventDetailView: View {
 
 #Preview {
     EventDetailView()
-        .environmentObject(EventViewModel())
+        .environment(EventViewModel())
+        .environment(Routes())
 }

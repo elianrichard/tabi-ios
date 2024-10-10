@@ -9,9 +9,10 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @StateObject var routes = Routes()
-    @State private var isShowSplash = true
-    @State var eventName: String = "Japan Trip"
+    @State private var routes = Routes()
+    @State private var eventViewModel = EventViewModel()
+    @State private var eventInviteViewModel = EventInviteViewModel()
+    @State private var eventExpenseViewModel = EventExpenseViewModel()
     
     var body: some View {
         NavigationStack (path: $routes.navPath) {
@@ -44,13 +45,13 @@ struct ContentView: View {
             }
         }
         .ignoresSafeArea(.keyboard)
-        .environmentObject(routes)
+        .environment(routes)
+        .environment(eventViewModel)
+        .environment(eventInviteViewModel)
+        .environment(eventExpenseViewModel)
     }
 }
 
 #Preview {
     ContentView()
-        .environmentObject(EventViewModel())
-        .environmentObject(EventInviteViewModel())
-        .environmentObject(EventExpenseViewModel())
 }

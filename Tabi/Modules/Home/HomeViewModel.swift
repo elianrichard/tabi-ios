@@ -8,7 +8,7 @@
 import Foundation
 
 @Observable
-final class HomeViewModel: ObservableObject {
+final class HomeViewModel {
     var selectedFilter: HomeFilterEnum {
         didSet {
             filterEvents(by: selectedFilter)

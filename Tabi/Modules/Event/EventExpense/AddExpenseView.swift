@@ -11,9 +11,9 @@ import PhotosUI
 import Combine
 
 struct AddExpenseView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventViewModel: EventViewModel
-    @EnvironmentObject var eventExpenseViewModel: EventExpenseViewModel
+    @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(Routes.self) private var routes
     
     var body: some View {
         VStack {
@@ -128,7 +128,7 @@ struct AddExpenseView: View {
                             .padding([.top, .bottom], 5)
                         HStack{
                             Text("Rp")
-                            TextField("", text: $eventExpenseViewModel.expenseTotal)
+                            TextField("", text: Bindable(eventExpenseViewModel).expenseTotal)
                             .keyboardType(.numberPad)
                             .onReceive(Just(eventExpenseViewModel.expenseTotal)) { _ in
                                 eventExpenseViewModel.expenseTotal = eventExpenseViewModel.expenseTotal.formatPrice()
@@ -142,7 +142,7 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Payment Receipt")
                         .padding([.top, .bottom], 5)
-                    PhotosPicker(selection: $eventExpenseViewModel.receiptImage, matching: .images, photoLibrary: .shared()){
+                    PhotosPicker(selection: Bindable(eventExpenseViewModel).receiptImage, matching: .images, photoLibrary: .shared()){
                         VStack(spacing: 10){
                             Image(systemName: "photo")
                                 .resizable()
@@ -177,6 +177,7 @@ struct AddExpenseView: View {
 
 #Preview {
     AddExpenseView()
-        .environmentObject(EventViewModel())
-        .environmentObject(EventExpenseViewModel())
+        .environment(Routes())
+        .environment(EventViewModel())
+        .environment(EventExpenseViewModel())
 }

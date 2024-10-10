@@ -8,12 +8,14 @@
 import SwiftUI
 
 struct EventFormView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventViewModel: EventViewModel
-    @EnvironmentObject var eventInviteViewModel: EventInviteViewModel
+    // @EnvironmentObject var routes: Routes
+    // @EnvironmentObject var eventViewModel: EventViewModel
+    // @EnvironmentObject var eventInviteViewModel: EventInviteViewModel
     
-    @State var name: String = ""
     @State var isEdit: Bool = false
+    @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     
     var body : some View {
         VStack (spacing: 40) {
@@ -43,7 +45,7 @@ struct EventFormView: View {
                 VStack (alignment: .leading, spacing: 12) {
                     Text("Event name")
                         .font(.title3)
-                    TextField("Event name", text: $name)
+                    TextField("Event name", text: Bindable(eventViewModel).eventName)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
                         .font(.body)
@@ -96,7 +98,7 @@ struct EventFormView: View {
             }
             Spacer()
             Button {
-                eventViewModel.handleCreateEditEvent(name: name, selectedContacts: eventInviteViewModel.selectedContacts)
+                eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()
             } label: {
                 Text(eventViewModel.selectedEvent != nil ? "Edit" : "Create")
@@ -109,9 +111,8 @@ struct EventFormView: View {
             }
         }
         .onAppear {
-            if let event = eventViewModel.selectedEvent {
+            if eventViewModel.selectedEvent != nil {
                 isEdit = true
-                name = event.eventName
             }
         }
         .padding()
@@ -121,6 +122,7 @@ struct EventFormView: View {
 
 #Preview {
     EventFormView()
-        .environmentObject(EventViewModel())
-        .environmentObject(EventInviteViewModel())
+        .environment(EventViewModel())
+        .environment(EventInviteViewModel())
+        .environment(Routes())
 }

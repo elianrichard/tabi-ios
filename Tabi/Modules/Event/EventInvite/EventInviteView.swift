@@ -10,9 +10,9 @@ import Contacts
 
 
 struct EventInviteView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventViewModel: EventViewModel
-    @EnvironmentObject var eventInviteViewModel: EventInviteViewModel
+    @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     
     var body: some View {
         VStack (spacing: 40) {
@@ -37,7 +37,7 @@ struct EventInviteView: View {
             VStack (spacing: 12) {
                 HStack {
                     Image(systemName: "magnifyingglass")
-                    TextField("Search", text: $eventInviteViewModel.searchUserText)
+                    TextField("Search", text: Bindable(eventInviteViewModel).searchUserText)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 12)
@@ -87,6 +87,7 @@ struct EventInviteView: View {
 
 #Preview {
     EventInviteView()
-        .environmentObject(EventViewModel())
-        .environmentObject(EventInviteViewModel())
+        .environment(Routes())
+        .environment(EventViewModel())
+        .environment(EventInviteViewModel())
 }

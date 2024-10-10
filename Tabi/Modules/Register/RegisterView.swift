@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RegisterView: View {
-    @EnvironmentObject var routes: Routes
+    @Environment(Routes.self) private var routes
     @State private var registerViewModel = RegisterViewModel()
     
     
