@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject var routes: Routes
-    @StateObject var homeViewModel = HomeViewModel()
-    @EnvironmentObject var eventViewModel: EventViewModel
+    @Environment(Routes.self) private var routes
+    @State var homeViewModel = HomeViewModel()
+    @Environment(EventViewModel.self) var eventViewModel: EventViewModel
     
     var body: some View {
         ZStack {

@@ -8,7 +8,7 @@
 import SwiftUI
 
 @Observable
-final class EventViewModel: ObservableObject {
+class EventViewModel {
     var eventName: String = ""
     var selectedEvent: EventData? {
         didSet {

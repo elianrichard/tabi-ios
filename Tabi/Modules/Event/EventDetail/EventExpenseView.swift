@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EventExpenseView: View {
-    @EnvironmentObject var eventViewModel: EventViewModel
+    @Environment(EventViewModel.self) private var eventViewModel
     var body: some View {
         ScrollView (showsIndicators: false) {
             VStack {

@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct EventFormView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventFormViewModel: EventViewModel
+    @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
     
     var body : some View {
         VStack (spacing: 40) {
             ZStack {
-                Text(eventFormViewModel.selectedEvent != nil ? "Edit Event" : "Create Event")
+                Text(eventViewModel.selectedEvent != nil ? "Edit Event" : "Create Event")
                     .font(.title2)
                 HStack {
                     Button {
@@ -39,7 +39,7 @@ struct EventFormView: View {
                 VStack (alignment: .leading, spacing: 12) {
                     Text("Event name")
                         .font(.title3)
-                    TextField("Event name", text: $eventFormViewModel.eventName)
+                    TextField("Event name", text: Bindable(eventViewModel).eventName)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
                         .font(.body)
@@ -77,16 +77,21 @@ struct EventFormView: View {
             }
             Spacer()
             Button {
-                eventFormViewModel.handleCreateEditEvent()
+                eventViewModel.handleCreateEditEvent()
                 routes.navigateBack()
             } label: {
-                Text(eventFormViewModel.selectedEvent != nil ? "Edit" : "Create")
+                Text(eventViewModel.selectedEvent != nil ? "Edit" : "Create")
                     .frame(maxWidth: .infinity)
                     .font(.callout)
                     .foregroundStyle(.black)
                     .padding(.vertical, 16)
                     .background(Color(UIColor(hex: "#D9D9D9")))
                     .clipShape(RoundedRectangle(cornerRadius: 32))
+            }
+        }
+        .onAppear {
+            if let selectedEvent = eventViewModel.selectedEvent {
+                eventViewModel.eventName = selectedEvent.eventName
             }
         }
         .padding()
@@ -96,4 +101,5 @@ struct EventFormView: View {
 
 #Preview {
     EventFormView()
+        .environment(EventViewModel())
 }

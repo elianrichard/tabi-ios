@@ -11,7 +11,7 @@ import PhotosUI
 
 struct AddExpenseView: View {
     @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
-    @EnvironmentObject var routes: Routes
+    @Environment(Routes.self) private var routes
     
     var body: some View {
         VStack {
