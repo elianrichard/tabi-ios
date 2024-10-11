@@ -3,6 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>NSContactsUsageDescription</key>
-	<string>The contacts will be used to gather all of user that has registered to Tabi app</string>
+	<string>We would like to access your contacts to see all available users for you to add in a event</string>
 </dict>
 </plist>
