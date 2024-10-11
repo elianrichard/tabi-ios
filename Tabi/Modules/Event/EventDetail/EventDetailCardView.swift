@@ -1,0 +1,45 @@
+//
+//  EventDetailCard.swift
+//  Tabi
+//
+//  Created by Elian Richard on 07/10/24.
+//
+
+import SwiftUI
+
+struct EventDetailCardView : View {
+    var expense: Expense
+    
+    var body : some View {
+        HStack (alignment: .top) {
+            HStack (alignment: .top, spacing: 16) {
+                Circle()
+                    .fill(Color(UIColor(hex: "#D9D9D9")))
+                    .frame(width: 40)
+                VStack (alignment: .leading, spacing: 4) {
+                    Text("\(expense.name.capitalized)")
+                        .font(.body)
+                    Text("\(expense.coverer.getFirstName().capitalized) paid this bill")
+                        .foregroundStyle(.black.opacity(0.5))
+                        .font(.subheadline)
+                }
+            }
+            Spacer()
+            VStack (alignment: .trailing) {
+                Text("Rp \(String(format: "%.0f", expense.price).formatPrice())")
+                Text("\(expense.dateOfCreation.toProperText())")
+                    .font(.subheadline)
+                    .foregroundStyle(.black.opacity(0.5))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(16)
+        .background(Color(UIColor(hex: "#EBEBEB")))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+#Preview {
+    EventDetailCardView(expense:
+        Expense(name: "Sate", coverer: "Naufal", dateOfCreation: Date(), price: 100000))
+}

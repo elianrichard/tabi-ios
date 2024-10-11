@@ -20,7 +20,5 @@ struct BottomButton: View {
         .frame(maxWidth: .infinity, alignment: .center)
         .background(Color(.lightGray))
         .cornerRadius(20)
-        .padding([.leading, .trailing], 30)
-        .padding([.top, .bottom], 10)
     }
 }

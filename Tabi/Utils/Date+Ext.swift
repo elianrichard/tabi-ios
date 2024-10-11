@@ -24,4 +24,15 @@ extension Date {
               self.self = Date()
           }
     }
+    
+    func toProperText() -> String {
+        let calendar = Calendar.current
+        if (calendar.isDateInToday(self)) {
+            return "Today"
+        } else if (calendar.isDateInYesterday(self)) {
+            return "Yesterday"
+        } else {
+            return customDateFormat("dd MMM YY").string(from: self)
+        }
+    }
 }

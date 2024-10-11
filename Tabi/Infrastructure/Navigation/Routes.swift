@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-@Observable final class Routes: ObservableObject {
+@Observable class Routes {
     var navPath = NavigationPath()
     
     public enum Destination {
-        case HomeView, SwiftDataTestingView, ExpensesView, AddExpenseView, ExpenseSplitView, EventFormView, LoginView, RegisterView
+        case HomeView, SwiftDataTestingView, AddExpenseView, ExpenseEqualSplitView, ExpenseCustomSplitView, EventFormView, LoginView, RegisterView, EventDetailView, EventInviteView
     }
     
     func navigate(to destination: Destination) {
