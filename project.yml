@@ -1,4 +1,4 @@
-name: Tabi
+name: Tabi Split
 settings:
   MARKETING_VERSION: "1.0"
   CURRENT_PROJECT_VERSION: 1
@@ -11,23 +11,23 @@ packages:
     url: https://github.com/airbnb/lottie-spm.git
     minorVersion: 4.5.0
 targets:
-  Tabi:
+  Tabi Split:
     type: application
     platform: iOS
-    sources: [Tabi]
+    sources: ["Tabi Split"]
     resources: [Resources]
     files:
-      - path: "Tabi.app"
+      - path: "Tabi Split.app"
         type: wrapper.application
         buildPhase: none
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.sora.Tabi
-      INFOPLIST_FILE: Tabi/Info.plist
+      INFOPLIST_FILE: Tabi Split/Info.plist
       base:
         GENERATE_INFOPLIST_FILE: YES
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: 1
-        DEVELOPMENT_ASSET_PATHS: '"Tabi/Resources/Preview Content"'
+        DEVELOPMENT_ASSET_PATHS: '"Tabi Split/Resources/Preview Content"'
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -39,7 +39,8 @@ targets:
           ]
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.travel"
-        INFOPLIST_KEY_CFBundleDisplayName: Tabi
+        INFOPLIST_KEY_CFBundleDisplayName: "Tabi Split"
+        ENABLE_TESTABILITY: YES
       configs:
         Debug:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
@@ -47,23 +48,23 @@ targets:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     dependencies:
       - package: Lottie
-  TabiTests:
+  Tabi Split Tests:
     type: bundle.unit-test
     platform: iOS
-    sources: [TabiTests]
+    sources: ["Tabi Split Tests"]
     dependencies:
-      - target: Tabi
+      - target: "Tabi Split"
     settings:
       base:
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Tabi.app/Tabi"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Tabi Split.app/Tabi Split"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
-  Tabi:
+  Tabi Split:
     build:
       targets:
-        Tabi: all
-        TabiTests: all
+        Tabi Split: all
+        Tabi Split Tests: all
     test:
       targets:
-        - name: TabiTests
+        - name: "Tabi Split Tests"
       gatherCoverageData: true
