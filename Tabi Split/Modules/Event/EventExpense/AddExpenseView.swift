@@ -32,6 +32,14 @@ struct AddExpenseView: View {
             }
             ScrollView() {
                 VStack(alignment: .leading){
+                    Text("Title")
+                        .padding([.top, .bottom], 5)
+                    TextField("Title", text: Bindable(eventExpenseViewModel).expenseName)
+                        .padding(10)
+                        .background(Color(.midLightGray))
+                        .cornerRadius(5)
+                } // Title
+                VStack(alignment: .leading){
                     Text("Paid by")
                         .padding([.top, .bottom], 5)
                     Menu {
@@ -129,10 +137,10 @@ struct AddExpenseView: View {
                         HStack{
                             Text("Rp")
                             TextField("", text: Bindable(eventExpenseViewModel).expenseTotal)
-                            .keyboardType(.numberPad)
-                            .onReceive(Just(eventExpenseViewModel.expenseTotal)) { _ in
-                                eventExpenseViewModel.expenseTotal = eventExpenseViewModel.expenseTotal.formatPrice()
-                            }
+                                .keyboardType(.numberPad)
+                                .onReceive(Just(eventExpenseViewModel.expenseTotal)) { _ in
+                                    eventExpenseViewModel.expenseTotal = eventExpenseViewModel.expenseTotal.formatPrice()
+                                }
                         }
                         .padding(10)
                         .background(Color(.midLightGray))
