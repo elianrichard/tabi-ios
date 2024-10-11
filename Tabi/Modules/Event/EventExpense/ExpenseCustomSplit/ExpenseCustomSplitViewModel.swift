@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 @Observable
-class AssignCustomSplitViewModel{
+class ExpenseCustomSplitViewModel: ObservableObject{
     var gridItem: [GridItem] = []
     var items: [Item] = [
         Item(itemName: "Salad", itemPrice: 30500, itemQuantity: 3),
@@ -23,7 +23,16 @@ class AssignCustomSplitViewModel{
         People(name: "Mario", share: 0.25),
         People(name: "Renaldi", share: 0.25),
         People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
+        People(name: "Leo", share: 0.25),
     ]
-    var selectedAsignee: People? = nil
+    var selectedAsignee: People = People(name: "")
     var expenseTitle: String = "Lunch at Yoshinoya"
 }

@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct EventDetailView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventViewModel: EventViewModel
+    @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
     @State private var showingCompletionAlert = false
-    
+
     let rect = CGRect(x: 0, y: 0, width: 500, height: 100)
     var body: some View {
         ZStack {
@@ -55,7 +55,7 @@ struct EventDetailView: View {
                             .padding(.vertical, 18)
                             .background(Color(UIColor(hex: "#EBEBEB")))
                             .clipShape(RoundedRectangle(cornerRadius: 18))
-                            
+
                             VStack (spacing: 16) {
                                 HStack (spacing: 0) {
                                     ForEach(EventSectionEnum.allCases) { section in
@@ -75,7 +75,7 @@ struct EventDetailView: View {
                                 .padding(.horizontal, 8)
                                 .background(Color(UIColor(hex: "#EBEBEB")))
                                 .clipShape(RoundedRectangle(cornerRadius: 40))
-                                
+
                                 VStack{
                                     if eventViewModel.selectedSection == .expenses {
                                         EventExpenseView()
@@ -94,7 +94,7 @@ struct EventDetailView: View {
                 Spacer(minLength: 80)
             }
             .ignoresSafeArea()
-            
+
             VStack {
                 ZStack {
                     Text("\(eventViewModel.selectedEvent?.eventName ?? "undefined")")
@@ -131,7 +131,7 @@ struct EventDetailView: View {
                 Spacer()
             }
             .padding()
-            
+
             VStack {
                 if eventViewModel.isEventCompleted {
                     VStack {
@@ -146,7 +146,7 @@ struct EventDetailView: View {
                 } else {
                     HStack {
                         Button {
-                            routes.navigate(to: .EventFormView)
+                          routes.navigate(to: .AddExpenseView)
                         } label: {
                             Label("Add Expenses", systemImage: "plus")
                                 .padding(.vertical, 20)
@@ -163,7 +163,7 @@ struct EventDetailView: View {
                    alignment: eventViewModel.isEventCompleted ? .center : .trailing)
             .padding(20)
             .ignoresSafeArea()
-            
+
         }
         .navigationBarBackButtonHidden(true)
         .alert("Do you want to completed this event?",
@@ -180,5 +180,6 @@ struct EventDetailView: View {
 
 #Preview {
     EventDetailView()
-        .environmentObject(EventViewModel())
+        .environment(EventViewModel())
+        .environment(Routes())
 }

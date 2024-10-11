@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct EventFormView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var eventFormViewModel: EventViewModel
-    
+    @State var isEdit: Bool = false
+    @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
+
     var body : some View {
         VStack (spacing: 40) {
             ZStack {
-                Text(eventFormViewModel.selectedEvent != nil ? "Edit Event" : "Create Event")
+                Text(isEdit ? "Edit Event" : "Create Event")
                     .font(.title2)
                 HStack {
                     Button {
@@ -39,7 +41,7 @@ struct EventFormView: View {
                 VStack (alignment: .leading, spacing: 12) {
                     Text("Event name")
                         .font(.title3)
-                    TextField("Event name", text: $eventFormViewModel.eventName)
+                    TextField("Event name", text: Bindable(eventViewModel).eventName)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
                         .font(.body)
@@ -50,15 +52,30 @@ struct EventFormView: View {
                     Text("Participants")
                         .font(.title3)
                     HStack (alignment: .top, spacing: 10) {
-                        VStack {
-                            Circle()
-                                .fill(Color(UIColor(hex: "#D9D9D9")))
-                                .frame(width: 40)
-                            Text("You")
-                                .font(.caption)
+                        ScrollView (showsIndicators: false) {
+                            HStack (alignment: .top, spacing: 10) {
+                                if !isEdit {
+                                    VStack {
+                                        Circle()
+                                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                                            .frame(width: 40)
+                                        Text("You")
+                                            .font(.caption)
+                                    }
+                                }
+                                ForEach ( isEdit ? (eventViewModel.selectedEvent?.participants ?? []) : eventInviteViewModel.selectedContacts) { user in
+                                    VStack {
+                                        Circle()
+                                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                                            .frame(width: 40)
+                                        Text("\(user.name.split(separator: " ").first ?? "error")")
+                                            .font(.caption)
+                                    }
+                                }
+                            }
                         }
                         Button {
-                            print("add participant")
+                            routes.navigate(to: .EventInviteView)
                         } label: {
                             ZStack {
                                 Circle()
@@ -77,16 +94,21 @@ struct EventFormView: View {
             }
             Spacer()
             Button {
-                eventFormViewModel.handleCreateEditEvent()
+                eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()
             } label: {
-                Text(eventFormViewModel.selectedEvent != nil ? "Edit" : "Create")
+                Text(eventViewModel.selectedEvent != nil ? "Edit" : "Create")
                     .frame(maxWidth: .infinity)
                     .font(.callout)
                     .foregroundStyle(.black)
                     .padding(.vertical, 16)
                     .background(Color(UIColor(hex: "#D9D9D9")))
                     .clipShape(RoundedRectangle(cornerRadius: 32))
+            }
+        }
+        .onAppear {
+            if eventViewModel.selectedEvent != nil {
+                isEdit = true
             }
         }
         .padding()
@@ -96,4 +118,7 @@ struct EventFormView: View {
 
 #Preview {
     EventFormView()
+        .environment(EventViewModel())
+        .environment(EventInviteViewModel())
+        .environment(Routes())
 }

@@ -8,15 +8,15 @@
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject var routes: Routes
-    @EnvironmentObject var homeViewModel: HomeViewModel
-    @EnvironmentObject var eventViewModel: EventViewModel
-    
+    @Environment(Routes.self) private var routes
+    @State var homeViewModel = HomeViewModel()
+    @Environment(EventViewModel.self) var eventViewModel: EventViewModel
+
     var body: some View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
                 HStack (spacing: 10){
-                    HStack (spacing: 10 ){
+                    HStack (spacing: 10){
                         Circle()
                             .fill(Color(UIColor(hex: "#D9D9D9")))
                             .frame(width: 40)
@@ -74,7 +74,7 @@ struct HomeView: View {
                     Spacer()
                 }
                 Spacer(minLength: 50)
-                
+
             }
             .padding()
             VStack {
@@ -106,4 +106,6 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environment(EventViewModel())
+        .environment(Routes())
 }

@@ -5,35 +5,49 @@
 //  Created by Dharmawan Ruslan on 03/10/24.
 //
 
-import Foundation
+import SwiftData
 import SwiftUI
 
-struct Item: Identifiable, Codable, Equatable{
+struct Item: Identifiable, Codable, Equatable {
     var id: UUID = UUID.init()
     var itemName: String
     var itemPrice: Float?
-    var itemQuantity: Int
-    var people: [People] = []
+    var itemQuantity: Float
+    var asignees: [People] = []
 }
 
-struct People: Identifiable, Codable, Equatable{
+struct People: Identifiable, Codable, Equatable {
     var id: UUID = UUID.init()
     var name: String
     var share: Float = 0
 }
 
-struct Expense: Identifiable{
-    var id: UUID = UUID.init()
+@Model
+class Expense {
     var name: String
     var coverer: String
     var dateOfCreation: Date
-    var price: Int
+    var price: Double
+    
+    init(name: String, coverer: String, dateOfCreation: Date, price: Double) {
+        self.name = name
+        self.coverer = coverer
+        self.dateOfCreation = dateOfCreation
+        self.price = price
+    }
 }
 
-struct AdditionalCharge: Identifiable, Equatable{
+struct AdditionalCharge: Identifiable, Equatable {
     var id: UUID = UUID.init()
     var additionalChargeType: AdditionalChargeType
     var amount: Float?
+}
+
+struct PeopleItem: Identifiable, Equatable{
+    var id: UUID = UUID.init()
+    var name: String
+    var totalSpending: Float
+    var items: [Item]
 }
 
 enum SplitMethod: Identifiable {
@@ -48,7 +62,7 @@ enum SplitMethod: Identifiable {
             "custom"
         }
     }
-    
+
     var splitDescription: String {
         switch self {
         case .equally:
@@ -63,7 +77,7 @@ enum SplitMethod: Identifiable {
     }
 }
 
-enum AdditionalChargeType: Identifiable, Equatable{
+enum AdditionalChargeType: Identifiable, Equatable {
     case tax
     case serviceCharge
     case discount

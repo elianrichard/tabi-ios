@@ -11,7 +11,7 @@ import SwiftUI
 struct AddItemContainer: View {
     @State var itemNum: Int
     @Binding var item: Item
-    @Binding var viewModel: ExpenseSplitViewModel
+    @Binding var viewModel: ExpenseEqualSplitViewModel
     
     var body: some View {
         VStack{

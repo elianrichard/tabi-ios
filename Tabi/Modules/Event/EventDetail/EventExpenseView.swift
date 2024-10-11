@@ -8,14 +8,13 @@
 import SwiftUI
 
 struct EventExpenseView: View {
+    @Environment(EventViewModel.self) private var eventViewModel
     var body: some View {
         ScrollView (showsIndicators: false) {
             VStack {
-                EventDetailCardView()
-                EventDetailCardView()
-                EventDetailCardView()
-                EventDetailCardView()
-                EventDetailCardView()
+                ForEach(eventViewModel.selectedEvent?.expenses ?? []) { expense in
+                    EventDetailCardView(expense: expense)
+                }
             }
         }
     }

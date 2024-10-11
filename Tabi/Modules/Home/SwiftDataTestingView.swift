@@ -28,8 +28,8 @@ class NoteData {
 
 // VIEW
 struct SwiftDataTestingView: View {
-    @EnvironmentObject var routes: Routes
-    @StateObject var swiftDataTestingViewModel = SwiftDataTestingViewModel()
+    @Environment(Routes.self) private var routes
+    @State var swiftDataTestingViewModel = SwiftDataTestingViewModel()
     
     var body: some View {
             List {
@@ -104,7 +104,7 @@ struct SwiftDataTestingView: View {
 }
 
 // VIEW MODEL
-@Observable class SwiftDataTestingViewModel: ObservableObject {
+@Observable class SwiftDataTestingViewModel {
     var notes: [NoteData] = []
     var textField: String = ""
     var posts: [PostListModel] = []

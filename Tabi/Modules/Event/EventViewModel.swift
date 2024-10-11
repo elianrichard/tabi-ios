@@ -8,12 +8,12 @@
 import SwiftUI
 
 @Observable
-final class EventViewModel: ObservableObject {
+final class EventViewModel {
     var eventName: String = ""
-    
+
     var isEventCompleted: Bool = false
     var completionDate: Date?
-    
+
     var selectedEvent: EventData? {
         didSet {
             eventName = self.selectedEvent?.eventName ?? ""
@@ -21,23 +21,24 @@ final class EventViewModel: ObservableObject {
         }
     }
     var selectedSection: EventSectionEnum = .expenses
-    
+
     @MainActor
-    func handleCreateEditEvent () {
-        if (selectedEvent != nil) {
-            selectedEvent?.eventName = eventName
+    func handleCreateEditEvent (selectedContacts: [UserData]) {
+        if let selectedEvent = selectedEvent {
+            selectedEvent.eventName = eventName
+            selectedEvent.participants = selectedContacts
         } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: eventName))
+            SwiftDataService.shared.addEvent(EventData(eventName: eventName, participants: [UserData(name: "You", phone: "08123456789")] + selectedContacts))
         }
     }
-    
+
     @MainActor
     func handleDeleteEvent () {
         if let selectedEvent {
             SwiftDataService.shared.deleteEvent(selectedEvent)
         }
     }
-    
+
     @MainActor
     func completeEvent() {
         isEventCompleted = true
