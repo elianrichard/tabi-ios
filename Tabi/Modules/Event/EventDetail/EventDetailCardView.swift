@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EventDetailCardView : View {
     var expense: Expense
-    
+
     var body : some View {
         HStack (alignment: .top) {
             HStack (alignment: .top, spacing: 16) {

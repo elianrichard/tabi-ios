@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
-    
+
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {

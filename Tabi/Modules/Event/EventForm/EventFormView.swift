@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct EventFormView: View {    
+struct EventFormView: View {
     @State var isEdit: Bool = false
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
-    
+
     var body : some View {
         VStack (spacing: 40) {
             ZStack {

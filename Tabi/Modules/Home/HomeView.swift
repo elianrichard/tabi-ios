@@ -11,7 +11,7 @@ struct HomeView: View {
     @Environment(Routes.self) private var routes
     @State var homeViewModel = HomeViewModel()
     @Environment(EventViewModel.self) var eventViewModel: EventViewModel
-    
+
     var body: some View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
@@ -74,7 +74,7 @@ struct HomeView: View {
                     Spacer()
                 }
                 Spacer(minLength: 50)
-                
+
             }
             .padding()
             VStack {
