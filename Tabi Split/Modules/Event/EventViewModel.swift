@@ -8,10 +8,15 @@
 import SwiftUI
 
 @Observable
-class EventViewModel {
+final class EventViewModel {
     var eventName: String = ""
+
+    var isEventCompleted: Bool = false
+    var completionDate: Date?
+
     var selectedEvent: EventData? {
         didSet {
+            eventName = self.selectedEvent?.eventName ?? ""
             selectedSection = .expenses
         }
     }
@@ -26,11 +31,17 @@ class EventViewModel {
             SwiftDataService.shared.addEvent(EventData(eventName: eventName, participants: [UserData(name: "You", phone: "08123456789")] + selectedContacts))
         }
     }
-    
+
     @MainActor
     func handleDeleteEvent () {
         if let selectedEvent {
-            SwiftDataService.shared.deleteEvent(selectedEvent)            
+            SwiftDataService.shared.deleteEvent(selectedEvent)
         }
+    }
+
+    @MainActor
+    func completeEvent() {
+        isEventCompleted = true
+        completionDate = Date()
     }
 }

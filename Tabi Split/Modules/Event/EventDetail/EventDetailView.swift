@@ -10,7 +10,8 @@ import SwiftUI
 struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
-    
+    @State private var showingCompletionAlert = false
+
     let rect = CGRect(x: 0, y: 0, width: 500, height: 100)
     var body: some View {
         ZStack {
@@ -54,7 +55,7 @@ struct EventDetailView: View {
                             .padding(.vertical, 18)
                             .background(Color(UIColor(hex: "#EBEBEB")))
                             .clipShape(RoundedRectangle(cornerRadius: 18))
-                            
+
                             VStack (spacing: 16) {
                                 HStack (spacing: 0) {
                                     ForEach(EventSectionEnum.allCases) { section in
@@ -74,7 +75,7 @@ struct EventDetailView: View {
                                 .padding(.horizontal, 8)
                                 .background(Color(UIColor(hex: "#EBEBEB")))
                                 .clipShape(RoundedRectangle(cornerRadius: 40))
-                                
+
                                 VStack{
                                     if eventViewModel.selectedSection == .expenses {
                                         EventExpenseView()
@@ -93,7 +94,7 @@ struct EventDetailView: View {
                 Spacer(minLength: 80)
             }
             .ignoresSafeArea()
-            
+
             VStack {
                 ZStack {
                     Text("\(eventViewModel.selectedEvent?.eventName ?? "undefined")")
@@ -110,8 +111,10 @@ struct EventDetailView: View {
                             Button("Edit Event") {
                                 routes.navigate(to: .EventFormView)
                             }
-                            Button("Complete Event") {
-                                print("Complete Event")
+                            if !eventViewModel.isEventCompleted {
+                                Button("Complete Event") {
+                                    showingCompletionAlert = true
+                                }
                             }
                             Button("Delete Event") {
                                 eventViewModel.handleDeleteEvent()
@@ -128,27 +131,50 @@ struct EventDetailView: View {
                 Spacer()
             }
             .padding()
-            
+
             VStack {
-                HStack {
-                    Button {
-                        routes.navigate(to: .AddExpenseView)
-                    } label: {
-                        Label("Add Expenses", systemImage: "plus")
-                            .padding(.vertical, 20)
-                            .padding(.horizontal, 20)
-                            .background(Color(UIColor(hex: "#EBEBEB")))
-                            .foregroundStyle(.black)
-                            .clipShape(RoundedRectangle(cornerRadius: 50))
+                if eventViewModel.isEventCompleted {
+                    VStack {
+                        Text("This event has been completed")
+                            .font(.headline)
+                        if let completionDate = eventViewModel.completionDate {
+                            Text("on \(completionDate, style: .date)")
+                                .font(.subheadline)
+                        }
                     }
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                } else {
+                    HStack {
+                        Button {
+                          routes.navigate(to: .AddExpenseView)
+                        } label: {
+                            Label("Add Expenses", systemImage: "plus")
+                                .padding(.vertical, 20)
+                                .padding(.horizontal, 20)
+                                .background(Color(UIColor(hex: "#EBEBEB")))
+                                .foregroundStyle(.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 50))
+                        }
+                    }
+                    .frame(maxHeight: .infinity, alignment: .bottom)
                 }
-                .frame(maxHeight: .infinity, alignment: .bottom)
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .frame(maxWidth: .infinity,
+                   alignment: eventViewModel.isEventCompleted ? .center : .trailing)
             .padding(20)
             .ignoresSafeArea()
+
         }
         .navigationBarBackButtonHidden(true)
+        .alert("Do you want to completed this event?",
+               isPresented: $showingCompletionAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Yes") {
+                eventViewModel.completeEvent()
+            }
+        } message: {
+            Text("You cannot undo this action")
+        }
     }
 }
 
