@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Tabi
+@testable import Tabi_Split
 
 final class TabiTests: XCTestCase {
 
