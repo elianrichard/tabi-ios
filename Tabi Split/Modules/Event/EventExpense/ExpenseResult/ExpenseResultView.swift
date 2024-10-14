@@ -11,6 +11,7 @@ import SwiftUI
 struct ExpenseResultView: View {
     @Environment(Routes.self) var routes
     @Environment(EventExpenseViewModel.self) var eventExpenseViewModel
+    @Environment(EventViewModel.self) var eventViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -104,7 +105,14 @@ struct ExpenseResultView: View {
                     }
                 }
             }
-            BottomButton(text: "Done")
+            Button {
+                if let event = eventViewModel.selectedEvent {
+                    eventExpenseViewModel.finalizeExpense(event)
+                    routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                }
+            } label: {
+                BottomButton(text: "Done")
+            }
         }
         .padding()
         .navigationBarBackButtonHidden(true)

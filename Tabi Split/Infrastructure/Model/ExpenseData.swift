@@ -11,17 +11,19 @@ import SwiftUI
 @Model
 class Expense {
     var name: String
-    var coverer: String
+    var coverer: UserData
     var dateOfCreation: Date
     var price: Float
+    var splitMethod: SplitMethod.ID
     var items: [ExpenseItem]
     var additionalCharges: [AdditionalCharge]
     
-    init(name: String, coverer: String, dateOfCreation: Date, price: Float, items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
+    init(name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
         self.name = name
         self.coverer = coverer
         self.dateOfCreation = dateOfCreation
         self.price = price
+        self.splitMethod = splitMethod.id
         self.items = items
         self.additionalCharges = additionalCharges
     }

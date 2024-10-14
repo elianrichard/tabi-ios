@@ -17,6 +17,12 @@ import SwiftUI
     func navigate(to destination: Destination) {
         navPath.append(destination)
     }
+    
+    func mutlipleNavigate(to destinations: [Destination]) {
+        for destination in destinations {
+            navPath.append(destination)
+        }
+    }
 
     func navigateBack() {
         navPath.removeLast()
