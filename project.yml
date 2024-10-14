@@ -35,7 +35,7 @@ targets:
           ["UIInterfaceOrientationPortrait"]
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.travel"
-        INFOPLIST_KEY_CFBundleDisplayName: "Tabi Split"
+        INFOPLIST_KEY_CFBundleDisplayName: "Tabi"
         ENABLE_TESTABILITY: YES
         SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
         SUPPORTS_MACCATALYST: NO
