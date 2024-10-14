@@ -11,10 +11,10 @@ import SwiftUI
 @Observable
 class ExpenseResultViewModel{
     var peoples: [ExpensePerson] = [
-//        People(name: "Dharma", share: 0.25),
-//        People(name: "Mario", share: 0.25),
-//        People(name: "Renaldi", share: 0.25),
-//        People(name: "Leo", share: 0.25),
+        ExpensePerson(user: UserData(name: "Dharma", phone: "081234567890"), share: 0.25),
+        ExpensePerson(user: UserData(name: "Mario", phone: "081234567890"), share: 0.25),
+        ExpensePerson(user: UserData(name: "Renaldi", phone: "081234567890"), share: 0.25),
+        ExpensePerson(user: UserData(name: "Leo", phone: "081234567890"), share: 0.25),
     ]
     var totalSpentAll: Float = 0
     var splitMethod: SplitMethod = .custom

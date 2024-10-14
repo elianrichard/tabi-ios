@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import SwiftData
 
-struct ExpenseAddItems: View {
+struct ExpenseAddItemsView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     
@@ -85,7 +85,7 @@ struct ExpenseAddItems: View {
                     .fontWeight(.heavy)
             }
             Button {
-                print(eventExpenseViewModel.items, eventExpenseViewModel.additionalCharges)
+                routes.navigate(to: .ExpenseAssignView)
             } label: {
                 BottomButton(text: "Next")
             }
@@ -96,7 +96,7 @@ struct ExpenseAddItems: View {
 }
 
 #Preview {
-    ExpenseAddItems()
+    ExpenseAddItemsView()
         .environment(Routes())
         .environment(EventExpenseViewModel())
 }

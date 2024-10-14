@@ -171,9 +171,9 @@ struct AddExpenseView: View {
             }
             Button {
                 if (eventExpenseViewModel.selectedMethod == .custom) {
-                    routes.navigate(to: .ExpenseAddItems)
+                    routes.navigate(to: .ExpenseAddItemsView)
                 } else {
-                    routes.navigate(to: .ExpenseAddItems)
+                    routes.navigate(to: .ExpenseAddItemsView)
                 }
             } label: {
                 BottomButton(text: "Next")

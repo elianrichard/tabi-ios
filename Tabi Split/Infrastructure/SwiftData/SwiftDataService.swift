@@ -19,7 +19,6 @@ class SwiftDataService {
     private init() {
         do {
             self.modelContainer = try ModelContainer(
-                //            for: NoteData.self, EventData.self, Expense.self, ExpenseItem.self, ExpensePerson.self,
                 for: NoteData.self, EventData.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: false)
             )

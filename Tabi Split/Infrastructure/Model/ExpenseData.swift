@@ -30,14 +30,14 @@ class ExpenseItem {
     var itemName: String
     var itemPrice: Float?
     var itemQuantity: Float
-    var asignees: [ExpensePerson]
+    var assignees: [ExpensePerson]
     var additionalCharges: [AdditionalCharge]
     
-    init(itemName: String, itemPrice: Float? = nil, itemQuantity: Float, asignees: [ExpensePerson] = [], additionalCharges: [AdditionalCharge] = []) {
+    init(itemName: String, itemPrice: Float? = nil, itemQuantity: Float, assignees: [ExpensePerson] = [], additionalCharges: [AdditionalCharge] = []) {
         self.itemName = itemName
         self.itemPrice = itemPrice
         self.itemQuantity = itemQuantity
-        self.asignees = asignees
+        self.assignees = assignees
         self.additionalCharges = additionalCharges
     }
 }

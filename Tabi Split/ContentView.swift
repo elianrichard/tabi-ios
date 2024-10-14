@@ -23,24 +23,36 @@ struct ContentView: View {
                 switch destination {
                 case .HomeView:
                     HomeView()
+                    
                 case .EventFormView:
                     EventFormView()
+                    
                 case .EventDetailView:
                     EventDetailView()
+                    
                 case .EventInviteView:
                     EventInviteView()
+                    
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
+                    
                 case .LoginView:
                     LoginView()
+                    
                 case .RegisterView:
                     RegisterView()
+                    
                 case .AddExpenseView:
                     AddExpenseView()
-                case .ExpenseAddItems:
-                    ExpenseAddItems()
-                case .ExpenseCustomSplitView:
-                    ExpenseCustomSplitView()
+                    
+                case .ExpenseAddItemsView:
+                    ExpenseAddItemsView()
+                    
+                case .ExpenseAssignView:
+                    ExpenseAssignView()
+                    
+                case .ExpenseResultView:
+                    ExpenseResultView()
                 }
             }
         }
