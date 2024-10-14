@@ -14,7 +14,7 @@ struct ExpenseAddItemsView: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24){
+        VStack (alignment: .leading, spacing: 24){
             ZStack {
                 Text("Add Items")
                     .font(.title2)
@@ -69,7 +69,7 @@ struct ExpenseAddItemsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Button{
-                        eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: nil))
+                        eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
                     } label: {
                         Text("+ Add more")
                             .padding()
@@ -81,7 +81,7 @@ struct ExpenseAddItemsView: View {
                 Text("Total Bill")
                     .fontWeight(.heavy)
                 Spacer()
-                Text("Rp \(eventExpenseViewModel.totalSpending?.formatPrice() ?? "")")
+                Text("Rp \(eventExpenseViewModel.totalSpending.formatPrice())")
                     .fontWeight(.heavy)
             }
             Button {

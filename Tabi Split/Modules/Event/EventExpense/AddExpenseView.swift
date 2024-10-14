@@ -69,7 +69,7 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Participants")
                         .padding([.top, .bottom], 5)
-                    LazyVGrid(columns: eventExpenseViewModel.gridItem, spacing: 16){
+                    LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 5), spacing: 16){
                         ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
                             VStack{
                                 Circle()
@@ -100,9 +100,6 @@ struct AddExpenseView: View {
                         Color(.midLightGray)
                     )
                     .cornerRadius(5)
-                    .onAppear{
-                        eventExpenseViewModel.gridItem = Array(repeating: .init(.flexible()), count: 5)
-                    }
                 } // Participants
                 VStack(alignment: .leading){
                     Text("Split Method")
@@ -172,8 +169,9 @@ struct AddExpenseView: View {
             Button {
                 if (eventExpenseViewModel.selectedMethod == .custom) {
                     routes.navigate(to: .ExpenseAddItemsView)
-                } else {
-                    routes.navigate(to: .ExpenseAddItemsView)
+                } else if (eventExpenseViewModel.selectedMethod == .equally) {
+                    eventExpenseViewModel.totalSpending = Float(eventExpenseViewModel.expenseTotalInput.removeDots()) ?? 0
+                    routes.navigate(to: .ExpenseResultView)
                 }
             } label: {
                 BottomButton(text: "Next")

@@ -49,7 +49,7 @@ struct ExpenseAssignView: View {
                                         .foregroundColor(.gray)
                                         .opacity(expenseAssignViewModel.selectedAsignee != person ? 0 : 0.5)
                                 }
-                            Text(person.name)
+                            Text(person.name.getFirstName())
                                 .font(.subheadline)
                                 .lineLimit(1)
                         }
@@ -71,7 +71,7 @@ struct ExpenseAssignView: View {
                     HStack(alignment: .center){
                         VStack(alignment: .leading){
                             Text(item.itemName)
-                            Text("Rp " + String((item.itemPrice?.formatted(.number))!))
+                            Text("Rp \(item.itemPrice.formatPrice())")
                                 .fontWeight(.semibold)
                             if !item.assignees.isEmpty{
                                 HStack (spacing: 5) {
@@ -114,7 +114,8 @@ struct ExpenseAssignView: View {
             Spacer()
             
             Button {
-                routes.navigate(to: .ExpenseAssignView)
+                eventExpenseViewModel.calculatePeopleItems()
+                routes.navigate(to: .ExpenseResultView)
             } label: {
                 BottomButton(text: "Next")
             }

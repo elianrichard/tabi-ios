@@ -12,50 +12,76 @@ import PhotosUI
 @Observable
 final class EventExpenseViewModel {
     var expenseName: String = ""
+    var expenseTotalInput: String = ""
     var selectedParticipants: [UserData] = []
     var selectedMethod: SplitMethod?
     var selectedCoverer: UserData?
-    var expenseTotalInput: String = ""
-    
-    var totalSpending: Float? = 0
-
+    var peopleItems: [PersonItem] = []
+    var totalItemCosts: Float = 0
+    var totalAdditionalCharges: Float = 0
+    var totalSpending: Float = 0
     var items: [ExpenseItem] = [
-        ExpenseItem(itemName: "", itemPrice: nil, itemQuantity: 1)
-    ] {
-        didSet {
-            calculateTotal()
-        }
-    }
-    
+        ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 1)
+    ]
     var additionalCharges: [AdditionalCharge] = [
-        AdditionalCharge(additionalChargeType: .tax, amount: nil)
-    ] {
-        didSet {
-            calculateTotal()
-        }
-    }
+        AdditionalCharge(additionalChargeType: .tax, amount: 0)
+    ]
     
     func deleteItem(item: ExpenseItem){
-        if let itemIndex = items.firstIndex(of: item){
-            items.remove(at: itemIndex)
-        }
+        items.removeAll(where: { $0 == item })
     }
-    
-    func calculateTotal(){
+    func calculateTotal() {
         var total: Float = 0
+        var totalCosts: Float = 0
+        var totalAdditional: Float = 0
         for item in items {
-            total += (item.itemPrice ?? 0) * Float(item.itemQuantity)
+            total += (item.itemPrice) * Float(item.itemQuantity)
+            totalCosts += (item.itemPrice) * Float(item.itemQuantity)
         }
         for charge in additionalCharges{
-            total += (charge.amount ?? 0)
+            total += (charge.amount)
+            totalAdditional += (charge.amount)
         }
         totalSpending = total
+        totalItemCosts = totalCosts
+        totalAdditionalCharges = totalAdditional
     }
-    
     func createNewExpenseItem () {
-        items.append(ExpenseItem(itemName: "", itemPrice: nil, itemQuantity: 1))
+        items.append(ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 1))
+    }
+    func calculatePersonSpending(person: PersonItem) -> Float {
+        let totalSpent = person.items.reduce(0) { $0 + ($1.itemPrice) * Float($1.itemQuantity) }
+        return totalSpent + person.additional.reduce(0) { $0 + ($1.amount) }
+    }
+    func calculatePeopleItems() {
+        calculateTotal()
+        for person in selectedParticipants {
+            var personItems: [ExpenseItem] = []
+            var additional: [AdditionalCharge] = []
+            var totalSpentPerson: Float = 0
+            print(person.name)
+            for item in items {
+                if item.assignees.filter({ $0.user.name == person.name }).count > 0 {
+                    let itemName = item.itemName
+                    let itemPrice = item.itemPrice
+                    if let itemQuantity = item.assignees.first(where: { $0.user.name == person.name })?.share {
+                        totalSpentPerson += itemPrice * Float(itemQuantity)
+                        print(itemName, itemPrice, itemQuantity, totalSpentPerson)
+                        personItems.append(ExpenseItem(itemName: itemName, itemPrice: itemPrice, itemQuantity: itemQuantity))
+                    }
+                }
+            }
+            for additionalCharge in additionalCharges {
+                let amount = (additionalCharge.amount) * totalSpentPerson / totalItemCosts
+                print(AdditionalChargeType(rawValue: additionalCharge.additionalChargeType)?.name ?? "", amount, totalItemCosts, additionalCharge.amount)
+                additional.append(AdditionalCharge(additionalChargeType: AdditionalChargeType(rawValue: additionalCharge.additionalChargeType) ?? .other, amount: amount.properRound() ))
+            }
+            peopleItems.append(PersonItem(name: person.name, items: personItems, additional: additional))
+        }
+    }
+    func calculateEqualSplit() -> Float {
+        return Float(totalSpending / Float(selectedParticipants.count))
     }
     
-    var gridItem: [GridItem] = []
     var receiptImage: PhotosPickerItem? = nil
 }

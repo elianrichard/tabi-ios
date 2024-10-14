@@ -15,30 +15,30 @@ class Expense {
     var dateOfCreation: Date
     var price: Float
     var items: [ExpenseItem]
+    var additionalCharges: [AdditionalCharge]
     
-    init(name: String, coverer: String, dateOfCreation: Date, price: Float, items: [ExpenseItem] = []) {
+    init(name: String, coverer: String, dateOfCreation: Date, price: Float, items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
         self.name = name
         self.coverer = coverer
         self.dateOfCreation = dateOfCreation
         self.price = price
         self.items = items
+        self.additionalCharges = additionalCharges
     }
 }
 
 @Model
 class ExpenseItem {
     var itemName: String
-    var itemPrice: Float?
+    var itemPrice: Float
     var itemQuantity: Float
     var assignees: [ExpensePerson]
-    var additionalCharges: [AdditionalCharge]
     
-    init(itemName: String, itemPrice: Float? = nil, itemQuantity: Float, assignees: [ExpensePerson] = [], additionalCharges: [AdditionalCharge] = []) {
+    init(itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
         self.itemName = itemName
         self.itemPrice = itemPrice
         self.itemQuantity = itemQuantity
         self.assignees = assignees
-        self.additionalCharges = additionalCharges
     }
 }
 
@@ -56,9 +56,9 @@ class ExpensePerson {
 @Model
 class AdditionalCharge {
     var additionalChargeType: AdditionalChargeType.ID
-    var amount: Float?
+    var amount: Float
     
-    init(additionalChargeType: AdditionalChargeType, amount: Float? = nil) {
+    init(additionalChargeType: AdditionalChargeType, amount: Float) {
         self.additionalChargeType = additionalChargeType.id
         self.amount = amount
     }
@@ -67,8 +67,8 @@ class AdditionalCharge {
 struct PersonItem: Identifiable {
     var id: UUID = UUID()
     var name: String
-    var totalSpending: Float
     var items: [ExpenseItem]
+    var additional: [AdditionalCharge]
 }
 
 enum SplitMethod: Identifiable {
@@ -87,9 +87,9 @@ enum SplitMethod: Identifiable {
     var splitDescription: String {
         switch self {
         case .equally:
-            "Equally Split"
+            "Splitted Equally"
         case .custom:
-            "Custom Split"
+            "Custom Splitted"
         }
     }
     

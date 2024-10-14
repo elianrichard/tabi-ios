@@ -30,7 +30,7 @@ struct AddItemContainer: View {
                 VStack(alignment: .leading){
                     Text("Name")
                         .padding([.top, .bottom], 5)
-                    TextField("Item Name", text: Bindable(eventExpenseViewModel).items[index].itemName)
+                    TextField("Item Name", text: $item.itemName)
                         .padding(10)
                         .background(Color(.midLightGray))
                         .cornerRadius(5)
@@ -44,7 +44,7 @@ struct AddItemContainer: View {
                             .keyboardType(.numberPad)
                             .onReceive(Just(price)) { _ in
                                 price = price.formatPrice()
-                                item.itemPrice = Float(price.removeDots())
+                                item.itemPrice = Float(price.removeDots()) ?? 0
                                 eventExpenseViewModel.calculateTotal()
                             }
                             .padding(10)

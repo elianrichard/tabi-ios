@@ -40,7 +40,7 @@ struct AdditionalChargeContainer: View {
                     .keyboardType(.numberPad)
                     .onReceive(Just(price)) { _ in
                         price = price.formatPrice()
-                        item.amount = Float(price.removeDots())
+                        item.amount = Float(price.removeDots()) ?? 0
                         eventExpenseViewModel.calculateTotal()
                     }
             }
