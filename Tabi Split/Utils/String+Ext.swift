@@ -32,6 +32,10 @@ extension String {
         return self.replacingOccurrences(of: ".", with: "")
     }
     
+    func convertToFloat() -> Float? {
+        return Float(self.removeDots())
+    }
+    
     func getFirstName() -> String {
         return String(self.split(separator: " ").first ?? "")
     }

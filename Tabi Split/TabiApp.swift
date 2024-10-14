@@ -13,7 +13,10 @@ struct TabiApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             NoteData.self,
-            EventData.self
+            EventData.self,
+//            Expense.self,
+//            ExpenseItem.self,
+//            ExpensePerson.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

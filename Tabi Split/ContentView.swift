@@ -37,8 +37,8 @@ struct ContentView: View {
                     RegisterView()
                 case .AddExpenseView:
                     AddExpenseView()
-                case .ExpenseEqualSplitView:
-                    ExpenseEqualSplitView()
+                case .ExpenseAddItems:
+                    ExpenseAddItems()
                 case .ExpenseCustomSplitView:
                     ExpenseCustomSplitView()
                 }

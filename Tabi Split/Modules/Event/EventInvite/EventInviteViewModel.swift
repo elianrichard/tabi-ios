@@ -10,7 +10,7 @@ import Contacts
 
 @Observable
 final class EventInviteViewModel: ObservableObject {
-    var searchUserText: String {
+    var searchUserText: String = "" {
         didSet {
             if (self.searchUserText != "") {
                 filteredContacts = self.allContacts.filter {
@@ -22,20 +22,13 @@ final class EventInviteViewModel: ObservableObject {
             }
         }
     }
-    var allContacts: [CNContact] {
+    var allContacts: [CNContact] = [] {
         didSet {
             filteredContacts = self.allContacts
         }
     }
     var filteredContacts: [CNContact] = []
     var selectedContacts: [UserData] = []
-    
-    init() {
-        self.searchUserText = ""
-        self.allContacts = []
-        self.filteredContacts = []
-    }
-    
     
     func fetchContacts () -> Void {
         let CNStore = CNContactStore()

@@ -51,8 +51,8 @@ struct AddExpenseView: View {
                         }
                     } label: {
                         HStack{
-                            if eventExpenseViewModel.selectedCoverer != nil{
-                                Text(eventExpenseViewModel.selectedCoverer!.name)
+                            if let coverer = eventExpenseViewModel.selectedCoverer {
+                                Text(coverer.name)
                             } else{
                                 Text("Paid by")
                             }
@@ -88,8 +88,9 @@ struct AddExpenseView: View {
                                 if !eventExpenseViewModel.selectedParticipants.contains(person){
                                     eventExpenseViewModel.selectedParticipants.append(person)
                                 } else {
-                                    let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person)
-                                    eventExpenseViewModel.selectedParticipants.remove(at: removeIndex!)
+                                    if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
+                                        eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
+                                    }
                                 }
                             }
                         }
@@ -136,10 +137,10 @@ struct AddExpenseView: View {
                             .padding([.top, .bottom], 5)
                         HStack{
                             Text("Rp")
-                            TextField("", text: Bindable(eventExpenseViewModel).expenseTotal)
+                            TextField("", text: Bindable(eventExpenseViewModel).expenseTotalInput)
                                 .keyboardType(.numberPad)
-                                .onReceive(Just(eventExpenseViewModel.expenseTotal)) { _ in
-                                    eventExpenseViewModel.expenseTotal = eventExpenseViewModel.expenseTotal.formatPrice()
+                                .onReceive(Just(eventExpenseViewModel.expenseTotalInput)) { _ in
+                                    eventExpenseViewModel.expenseTotalInput = eventExpenseViewModel.expenseTotalInput.formatPrice()
                                 }
                         }
                         .padding(10)
@@ -170,9 +171,9 @@ struct AddExpenseView: View {
             }
             Button {
                 if (eventExpenseViewModel.selectedMethod == .custom) {
-                    routes.navigate(to: .ExpenseCustomSplitView)
+                    routes.navigate(to: .ExpenseAddItems)
                 } else {
-                    routes.navigate(to: .ExpenseEqualSplitView)
+                    routes.navigate(to: .ExpenseAddItems)
                 }
             } label: {
                 BottomButton(text: "Next")
