@@ -48,3 +48,6 @@ else
     echo "Failed to generate Package.resolved."
     exit 1
 fi
+
+ls -la "Tabi Split.xcodeproj/project.xcworkspace/xcshareddata/swiftpm" 
+cat "Tabi Split.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved" 
