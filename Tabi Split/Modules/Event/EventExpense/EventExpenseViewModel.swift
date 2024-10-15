@@ -13,7 +13,7 @@ import PhotosUI
 final class EventExpenseViewModel {
     var selectedExpense: Expense? = nil {
         didSet {
-            populateViewModel()
+           populateViewModel()
         }
     }
     var isEdit = false
@@ -69,10 +69,10 @@ final class EventExpenseViewModel {
             var additional: [AdditionalCharge] = []
             var totalSpentPerson: Float = 0
             for item in items {
-                if item.assignees.filter({ $0.user.name == person.name }).count > 0 {
+                if item.assignees.filter({ $0.user.id == person.id }).count > 0 {
                     let itemName = item.itemName
                     let itemPrice = item.itemPrice
-                    if let itemQuantity = item.assignees.first(where: { $0.user.name == person.name })?.share {
+                    if let itemQuantity = item.assignees.first(where: { $0.user.id == person.id })?.share {
                         totalSpentPerson += itemPrice * Float(itemQuantity)
                         personItems.append(ExpenseItem(itemName: itemName, itemPrice: itemPrice, itemQuantity: itemQuantity))
                     }
@@ -109,6 +109,7 @@ final class EventExpenseViewModel {
     }
     func populateViewModel() {
         if let expense = selectedExpense {
+            print("populating expense: \(expense.name)")
             expenseName = expense.name
             isEdit = false
             selectedCoverer = expense.coverer
@@ -116,7 +117,7 @@ final class EventExpenseViewModel {
             items = expense.items
             additionalCharges = expense.additionalCharges
             selectedParticipants = expense.participants
-            print(expense.participants, "populate")
+            print("participatns", expense.participants, expense.items, expense.coverer, expense.name, expense.splitMethod)
             if (expense.splitMethod == SplitMethod.equally.id) {
                 totalSpending = expense.price
                 expenseTotalInput = expense.price.formatPrice()
@@ -131,8 +132,8 @@ final class EventExpenseViewModel {
             print("Error")
             return
         }
-        event.expenses.append(Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges))
-        SwiftDataService.shared.saveModelContext()
+        let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
+        SwiftDataService.shared.addExpenseToEvent(event, expense)
     }
     @MainActor
     func handleDeleteExpense(_ event: EventData) {

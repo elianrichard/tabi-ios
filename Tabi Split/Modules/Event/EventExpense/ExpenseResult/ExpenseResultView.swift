@@ -31,8 +31,8 @@ struct ExpenseResultView: View {
                     if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
                         Menu {
                             Button("Edit Expense") {
-                                routes.navigate(to: .AddExpenseView)
                                 eventExpenseViewModel.isEdit = true
+                                routes.navigate(to: .AddExpenseView)
                             }
                             Button("Delete Expense") {
                                 if let event = eventViewModel.selectedEvent {
@@ -60,7 +60,6 @@ struct ExpenseResultView: View {
             ScrollView{
                 if eventExpenseViewModel.selectedMethod == .equally {
                     ForEach(eventExpenseViewModel.selectedParticipants){ person in
-                        Text(person.name)
                         HStack{
                             Circle()
                                 .frame(width: 40, height: 40)
@@ -140,6 +139,7 @@ struct ExpenseResultView: View {
                     Button {
                         if let event = eventViewModel.selectedEvent {
                             eventExpenseViewModel.handleUpdateExpense(event)
+                            eventExpenseViewModel.isEdit = false
                             routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                         }
                     } label: {

@@ -11,8 +11,9 @@ import Combine
 
 struct AddItemContainer: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @Bindable var item: ExpenseItem
+    var item: ExpenseItem
     @State var price: String = ""
+    @State var itemName: String = ""
     var index: Int
     
     var body: some View {
@@ -30,7 +31,7 @@ struct AddItemContainer: View {
                 VStack(alignment: .leading){
                     Text("Name")
                         .padding([.top, .bottom], 5)
-                    TextField("Item Name", text: $item.itemName)
+                    TextField("Item Name", text: $itemName)
                         .padding(10)
                         .background(Color(.midLightGray))
                         .cornerRadius(5)

@@ -34,10 +34,10 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Title")
                         .padding([.top, .bottom], 5)
-                    TextField("Title", text: Bindable(eventExpenseViewModel).expenseName)
-                        .padding(10)
-                        .background(Color(.midLightGray))
-                        .cornerRadius(5)
+                        TextField("Title", text: Bindable(eventExpenseViewModel).expenseName)
+                            .padding(10)
+                            .background(Color(.midLightGray))
+                            .cornerRadius(5)
                 } // Title
                 VStack(alignment: .leading){
                     Text("Paid by")

@@ -9,6 +9,7 @@ import Foundation
 
 extension Float {
     func formatPrice() -> String {
+        guard self.isFinite else { return "0" }
         return String(Int(self)).formatPrice()
     }
     
