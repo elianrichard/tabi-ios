@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EventExpenseView: View {
+struct EventDetailExpenseView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     var body: some View {
         ScrollView (showsIndicators: false) {
