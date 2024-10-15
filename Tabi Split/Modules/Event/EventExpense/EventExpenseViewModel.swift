@@ -11,21 +11,30 @@ import PhotosUI
 
 @Observable
 final class EventExpenseViewModel {
-    var expenseName: String = "" //
+    var selectedExpense: Expense? = nil {
+        didSet {
+            populateViewModel()
+        }
+    }
+    var isEdit = false
+    
+    var expenseName: String = ""
     var expenseTotalInput: String = ""
-    var selectedParticipants: [UserData] = [] //
-    var selectedMethod: SplitMethod? //
-    var selectedCoverer: UserData? //
+    var selectedParticipants: [UserData] = []
+    var selectedMethod: SplitMethod?
+    var selectedCoverer: UserData?
+    
     var peopleItems: [PersonItem] = []
     var totalItemCosts: Float = 0
     var totalAdditionalCharges: Float = 0
     var totalSpending: Float = 0
+    
     var items: [ExpenseItem] = [
         ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 1)
-    ] //
+    ]
     var additionalCharges: [AdditionalCharge] = [
         AdditionalCharge(additionalChargeType: .tax, amount: 0)
-    ] //
+    ]
     
     func deleteItem(item: ExpenseItem){
         items.removeAll(where: { $0 == item })
@@ -80,6 +89,8 @@ final class EventExpenseViewModel {
         return Float(totalSpending / Float(selectedParticipants.count))
     }
     func resetViewModel() {
+        selectedExpense = nil
+        isEdit = false
         expenseName = ""
         expenseTotalInput = ""
         selectedParticipants = []
@@ -96,13 +107,47 @@ final class EventExpenseViewModel {
             AdditionalCharge(additionalChargeType: .tax, amount: 0)
         ]
     }
+    func populateViewModel() {
+        if let expense = selectedExpense {
+            expenseName = expense.name
+            isEdit = false
+            selectedCoverer = expense.coverer
+            selectedMethod = SplitMethod(rawValue: expense.splitMethod)
+            items = expense.items
+            additionalCharges = expense.additionalCharges
+            selectedParticipants = expense.participants
+            print(expense.participants, "populate")
+            if (expense.splitMethod == SplitMethod.equally.id) {
+                totalSpending = expense.price
+                expenseTotalInput = expense.price.formatPrice()
+            } else if (expense.splitMethod == SplitMethod.custom.id) {
+                calculatePeopleItems()
+            }
+        }
+    }
     @MainActor
     func finalizeExpense(_ event: EventData) {
         guard let selectedCoverer, let selectedMethod else {
             print("Error")
             return
         }
-        event.expenses.append(Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, items: items, additionalCharges: additionalCharges))
+        event.expenses.append(Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges))
+        SwiftDataService.shared.saveModelContext()
+    }
+    @MainActor
+    func handleDeleteExpense(_ event: EventData) {
+        if let expense = selectedExpense {
+            event.expenses.removeAll(where: { $0 == expense })
+            SwiftDataService.shared.saveModelContext()
+        }
+    }
+    @MainActor
+    func handleUpdateExpense (_ event: EventData) {
+        if let expense = selectedExpense, let selectedCoverer = selectedCoverer, let selectedMethod = selectedMethod {
+            guard let index = event.expenses.firstIndex(of: expense) else { return }
+            event.expenses[index] = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
+            SwiftDataService.shared.saveModelContext()
+        }
     }
     
     var receiptImage: PhotosPickerItem? = nil

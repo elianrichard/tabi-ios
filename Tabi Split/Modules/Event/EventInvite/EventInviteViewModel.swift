@@ -9,7 +9,7 @@ import Foundation
 import Contacts
 
 @Observable
-final class EventInviteViewModel: ObservableObject {
+final class EventInviteViewModel {
     var searchUserText: String = "" {
         didSet {
             if (self.searchUserText != "") {

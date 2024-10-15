@@ -15,15 +15,17 @@ class Expense {
     var dateOfCreation: Date
     var price: Float
     var splitMethod: SplitMethod.ID
+    var participants: [UserData]
     var items: [ExpenseItem]
     var additionalCharges: [AdditionalCharge]
     
-    init(name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
+    init(name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
         self.name = name
         self.coverer = coverer
         self.dateOfCreation = dateOfCreation
         self.price = price
         self.splitMethod = splitMethod.id
+        self.participants = participants
         self.items = items
         self.additionalCharges = additionalCharges
     }
@@ -73,7 +75,7 @@ struct PersonItem: Identifiable {
     var additional: [AdditionalCharge]
 }
 
-enum SplitMethod: Identifiable {
+enum SplitMethod: String, Identifiable {
     case equally
     case custom
     

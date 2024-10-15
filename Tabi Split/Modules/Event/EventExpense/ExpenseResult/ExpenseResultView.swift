@@ -16,18 +16,38 @@ struct ExpenseResultView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             ZStack {
-                Text("Add Items")
-                    .font(.title2)
                 HStack {
-                    Button {
-                        eventExpenseViewModel.peopleItems = []
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
+                    HStack {
+                        Button {
+                            eventExpenseViewModel.peopleItems = []
+                            routes.navigateBack()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .foregroundStyle(.black)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer()
+                    if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
+                        Menu {
+                            Button("Edit Expense") {
+                                routes.navigate(to: .AddExpenseView)
+                                eventExpenseViewModel.isEdit = true
+                            }
+                            Button("Delete Expense") {
+                                if let event = eventViewModel.selectedEvent {
+                                    eventExpenseViewModel.handleDeleteExpense(event)
+                                    routes.navigateBack()
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .foregroundStyle(.black)
+                                .frame(width: 40, height: 40)
+                        }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                
             }
             VStack (alignment: .leading, spacing: 10) {
                 Text(eventExpenseViewModel.expenseName)
@@ -40,6 +60,7 @@ struct ExpenseResultView: View {
             ScrollView{
                 if eventExpenseViewModel.selectedMethod == .equally {
                     ForEach(eventExpenseViewModel.selectedParticipants){ person in
+                        Text(person.name)
                         HStack{
                             Circle()
                                 .frame(width: 40, height: 40)
@@ -60,7 +81,7 @@ struct ExpenseResultView: View {
                             HStack {
                                 Circle()
                                     .frame(width: 40, height: 40)
-                                Text(person.name)
+                                Text(person.name.getFirstName())
                                     .font(.title3)
                                 Spacer()
                                 Text("Rp \(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")
@@ -105,13 +126,32 @@ struct ExpenseResultView: View {
                     }
                 }
             }
-            Button {
-                if let event = eventViewModel.selectedEvent {
-                    eventExpenseViewModel.finalizeExpense(event)
-                    routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+            if eventExpenseViewModel.selectedExpense == nil {
+                Button {
+                    if let event = eventViewModel.selectedEvent {
+                        eventExpenseViewModel.finalizeExpense(event)
+                        routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                    }
+                } label: {
+                    BottomButton(text: "Done")
                 }
-            } label: {
-                BottomButton(text: "Done")
+            } else {
+                if eventExpenseViewModel.isEdit {
+                    Button {
+                        if let event = eventViewModel.selectedEvent {
+                            eventExpenseViewModel.handleUpdateExpense(event)
+                            routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                        }
+                    } label: {
+                        BottomButton(text: "Done")
+                    }
+                } else {
+                    Button {
+                        print("Check Receipt")
+                    } label: {
+                        BottomButton(text: "Check Receipt")
+                    }
+                }
             }
         }
         .padding()
@@ -122,5 +162,6 @@ struct ExpenseResultView: View {
 #Preview {
     ExpenseResultView()
         .environment(Routes())
+        .environment(EventViewModel())
         .environment(EventExpenseViewModel())
 }
