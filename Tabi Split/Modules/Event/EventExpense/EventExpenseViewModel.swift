@@ -117,7 +117,6 @@ final class EventExpenseViewModel {
             items = expense.items
             additionalCharges = expense.additionalCharges
             selectedParticipants = expense.participants
-            print("participatns", expense.participants, expense.items, expense.coverer, expense.name, expense.splitMethod)
             if (expense.splitMethod == SplitMethod.equally.id) {
                 totalSpending = expense.price
                 expenseTotalInput = expense.price.formatPrice()

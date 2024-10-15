@@ -102,20 +102,6 @@ struct HomeView: View {
             let data = SwiftDataService.shared.fetchAllEvents()
             homeViewModel.populateEvents(data: data ?? [])
         }
-        .onAppear {
-            let events = SwiftDataService.shared.fetchAllEvents() ?? []
-            for event in events {
-                print(event.eventName)
-                let expenses = SwiftDataService.shared.fetchAllExpense(event)
-                for expense in expenses {
-                    print(expense.name)
-                    for person in expense.participants {
-                        print(person.name)
-                    }
-                    
-                }
-            }
-        }
     }
 }
 
