@@ -79,7 +79,7 @@ struct EventDetailView: View {
                                 
                                 VStack{
                                     if eventViewModel.selectedSection == .expenses {
-                                        EventExpenseView()
+                                        EventDetailExpenseView()
                                     } else {
                                         EventTotalsView()
                                     }

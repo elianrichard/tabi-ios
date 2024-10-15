@@ -23,5 +23,5 @@ struct EventDetailExpenseView: View {
 }
 
 #Preview {
-    EventExpenseView()
+    EventDetailExpenseView()
 }
