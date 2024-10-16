@@ -6,7 +6,7 @@
 //
 
 extension String {
-    func formatPrice() -> String {
+    func formatPrice(isShowSign: Bool = true) -> String {
         var price = self
         let isNegative = price.hasPrefix("-")
         if isNegative {
@@ -22,7 +22,7 @@ extension String {
             formatted.append(char)
         }
         let final = String(formatted.reversed())
-        if isNegative {
+        if isNegative && isShowSign {
             return "-\(final)"
         }
         return final
