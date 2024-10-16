@@ -59,6 +59,9 @@ struct ContentView: View {
                     
                 case .EventSettlementView:
                     EventSettlementView()
+                    
+                case .SettlementPaymentMethodView:
+                    SettlementPaymentMethodView()
                 }
             }
         }
