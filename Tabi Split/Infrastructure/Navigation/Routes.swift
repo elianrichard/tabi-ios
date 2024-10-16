@@ -11,11 +11,17 @@ import SwiftUI
     var navPath = NavigationPath()
 
     public enum Destination {
-        case HomeView, SwiftDataTestingView, AddExpenseView, ExpenseEqualSplitView, ExpenseCustomSplitView, EventFormView, LoginView, RegisterView, EventDetailView, EventInviteView
+        case HomeView, SwiftDataTestingView, AddExpenseView, ExpenseAddItemsView, ExpenseAssignView, ExpenseResultView, EventFormView, LoginView, RegisterView, EventDetailView, EventInviteView
     }
 
     func navigate(to destination: Destination) {
         navPath.append(destination)
+    }
+    
+    func mutlipleNavigate(to destinations: [Destination]) {
+        for destination in destinations {
+            navPath.append(destination)
+        }
     }
 
     func navigateBack() {

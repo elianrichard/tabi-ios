@@ -97,6 +97,7 @@ struct HomeView: View {
             .padding(20)
             .ignoresSafeArea()
         }
+        .navigationBarBackButtonHidden(true)
         .onAppear {
             let data = SwiftDataService.shared.fetchAllEvents()
             homeViewModel.populateEvents(data: data ?? [])

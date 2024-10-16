@@ -34,10 +34,10 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Title")
                         .padding([.top, .bottom], 5)
-                    TextField("Title", text: Bindable(eventExpenseViewModel).expenseName)
-                        .padding(10)
-                        .background(Color(.midLightGray))
-                        .cornerRadius(5)
+                        TextField("Title", text: Bindable(eventExpenseViewModel).expenseName)
+                            .padding(10)
+                            .background(Color(.midLightGray))
+                            .cornerRadius(5)
                 } // Title
                 VStack(alignment: .leading){
                     Text("Paid by")
@@ -51,8 +51,8 @@ struct AddExpenseView: View {
                         }
                     } label: {
                         HStack{
-                            if eventExpenseViewModel.selectedCoverer != nil{
-                                Text(eventExpenseViewModel.selectedCoverer!.name)
+                            if let coverer = eventExpenseViewModel.selectedCoverer {
+                                Text(coverer.name)
                             } else{
                                 Text("Paid by")
                             }
@@ -69,7 +69,7 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Participants")
                         .padding([.top, .bottom], 5)
-                    LazyVGrid(columns: eventExpenseViewModel.gridItem, spacing: 16){
+                    LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 5), spacing: 16){
                         ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
                             VStack{
                                 Circle()
@@ -88,8 +88,9 @@ struct AddExpenseView: View {
                                 if !eventExpenseViewModel.selectedParticipants.contains(person){
                                     eventExpenseViewModel.selectedParticipants.append(person)
                                 } else {
-                                    let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person)
-                                    eventExpenseViewModel.selectedParticipants.remove(at: removeIndex!)
+                                    if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
+                                        eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
+                                    }
                                 }
                             }
                         }
@@ -99,9 +100,6 @@ struct AddExpenseView: View {
                         Color(.midLightGray)
                     )
                     .cornerRadius(5)
-                    .onAppear{
-                        eventExpenseViewModel.gridItem = Array(repeating: .init(.flexible()), count: 5)
-                    }
                 } // Participants
                 VStack(alignment: .leading){
                     Text("Split Method")
@@ -136,10 +134,10 @@ struct AddExpenseView: View {
                             .padding([.top, .bottom], 5)
                         HStack{
                             Text("Rp")
-                            TextField("", text: Bindable(eventExpenseViewModel).expenseTotal)
+                            TextField("", text: Bindable(eventExpenseViewModel).expenseTotalInput)
                                 .keyboardType(.numberPad)
-                                .onReceive(Just(eventExpenseViewModel.expenseTotal)) { _ in
-                                    eventExpenseViewModel.expenseTotal = eventExpenseViewModel.expenseTotal.formatPrice()
+                                .onReceive(Just(eventExpenseViewModel.expenseTotalInput)) { _ in
+                                    eventExpenseViewModel.expenseTotalInput = eventExpenseViewModel.expenseTotalInput.formatPrice()
                                 }
                         }
                         .padding(10)
@@ -170,9 +168,10 @@ struct AddExpenseView: View {
             }
             Button {
                 if (eventExpenseViewModel.selectedMethod == .custom) {
-                    routes.navigate(to: .ExpenseCustomSplitView)
-                } else {
-                    routes.navigate(to: .ExpenseEqualSplitView)
+                    routes.navigate(to: .ExpenseAddItemsView)
+                } else if (eventExpenseViewModel.selectedMethod == .equally) {
+                    eventExpenseViewModel.totalSpending = Float(eventExpenseViewModel.expenseTotalInput.removeDots()) ?? 0
+                    routes.navigate(to: .ExpenseResultView)
                 }
             } label: {
                 BottomButton(text: "Next")

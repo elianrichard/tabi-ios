@@ -9,6 +9,8 @@ import SwiftUI
 
 struct EventDetailCardView : View {
     var expense: Expense
+    @Environment(Routes.self) private var routes
+    @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
 
     var body : some View {
         HStack (alignment: .top) {
@@ -19,7 +21,7 @@ struct EventDetailCardView : View {
                 VStack (alignment: .leading, spacing: 4) {
                     Text("\(expense.name.capitalized)")
                         .font(.body)
-                    Text("\(expense.coverer.getFirstName().capitalized) paid this bill")
+                    Text("\(expense.coverer.name.getFirstName().capitalized) paid this bill")
                         .foregroundStyle(.black.opacity(0.5))
                         .font(.subheadline)
                 }
@@ -36,10 +38,16 @@ struct EventDetailCardView : View {
         .padding(16)
         .background(Color(UIColor(hex: "#EBEBEB")))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .onTapGesture {
+            eventExpenseViewModel.selectedExpense = expense
+            routes.navigate(to: .ExpenseResultView)
+        }
     }
 }
 
 #Preview {
     EventDetailCardView(expense:
-        Expense(name: "Sate", coverer: "Naufal", dateOfCreation: Date(), price: 100000))
+                            Expense(name: "Sate", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
+    .environment(Routes())
+    .environment(EventExpenseViewModel())
 }
