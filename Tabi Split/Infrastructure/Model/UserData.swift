@@ -18,3 +18,19 @@ class UserData {
         self.phone = phone
     }
 }
+
+struct PaymentMethod: Identifiable {
+    var id: UUID
+    var name: String
+    var bankName: String
+    var bankNumber: String
+    var isFavorite: Bool
+    
+    init(name: String, bankName: String, bankNumber: String, isFavorite: Bool = false) {
+        self.id = UUID()
+        self.name = name
+        self.bankName = bankName
+        self.bankNumber = bankNumber
+        self.isFavorite = isFavorite
+    }
+}
