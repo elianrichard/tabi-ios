@@ -22,6 +22,9 @@ struct EventSummaryView: View {
             .padding(.vertical, 18)
             .background(Color(UIColor(hex: "#EBEBEB")))
             .clipShape(RoundedRectangle(cornerRadius: 18))
+            .onTapGesture {
+                routes.navigate(to: .EventSettlementView)
+            }
             
             VStack (spacing: 16) {
                 HStack {

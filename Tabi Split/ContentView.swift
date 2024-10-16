@@ -56,6 +56,9 @@ struct ContentView: View {
                     
                 case .EventSummaryDetailView:
                     EventSummaryDetailView()
+                    
+                case .EventSettlementView:
+                    EventSettlementView()
                 }
             }
         }

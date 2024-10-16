@@ -45,7 +45,6 @@ struct EventSummaryDetailView: View {
                 .padding(.horizontal, 20)
             }
         }
-        .ignoresSafeArea()
         .padding(.top)
         .navigationBarBackButtonHidden(true)
     }
