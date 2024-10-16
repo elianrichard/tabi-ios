@@ -52,7 +52,7 @@ struct SettlementOptimizationView: View {
             VStack (alignment: .leading) {
                 Text("Optimization Recapitulation")
                     .font(.title3)
-                ScrollView {
+                ScrollView (showsIndicators: false) {
                     VStack {
                         ForEach (recapData) { data in
                             OptimizationRecapCard(recapData: data)

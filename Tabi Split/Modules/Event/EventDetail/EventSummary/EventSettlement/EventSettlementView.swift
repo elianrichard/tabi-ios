@@ -45,7 +45,7 @@ struct EventSettlementView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             Button {
-                print("optimization result")
+                routes.navigate(to: .SettlementOptimizationView)
             } label: {
                 Text("See optimization details")
             }
