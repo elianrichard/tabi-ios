@@ -9,6 +9,7 @@ import SwiftUI
 
 
 struct SettlementCard: View {
+    @Environment(Routes.self) private var routes
     var name: String
     var amount: Float
     var type: SettlementCardTypeEnum
@@ -38,7 +39,7 @@ struct SettlementCard: View {
                     Spacer()
                     if (type == .NeedPayment) {
                         Button {
-                            print("payment method page")
+                            routes.navigate(to: .SettlementPaymentMethodView)
                         } label: {
                             Text("Payment Method")
                         }
@@ -82,4 +83,5 @@ struct SettlementCard: View {
 
 #Preview {
     SettlementCard(name: "Elian", amount: 250_000, type: .NeedConfirmation)
+        .environment(Routes())
 }
