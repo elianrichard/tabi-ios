@@ -61,7 +61,6 @@ struct EventInviteCardView: View {
             }
         }
         .onAppear {
-//            print(eventInviteViewModelsel)
             isSelected = eventInviteViewModel.selectedContacts.contains(where: { $0.phone == number })
         }
     }

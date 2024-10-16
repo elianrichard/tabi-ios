@@ -53,6 +53,12 @@ struct ContentView: View {
                     
                 case .ExpenseResultView:
                     ExpenseResultView()
+                    
+                case .EventSummaryDetailView:
+                    EventSummaryDetailView()
+                    
+                case .EventSettlementView:
+                    EventSettlementView()
                 }
             }
         }

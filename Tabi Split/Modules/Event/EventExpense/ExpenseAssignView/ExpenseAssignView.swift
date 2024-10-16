@@ -101,6 +101,7 @@ struct ExpenseAssignView: View {
                                         .padding([.leading], 50)
                                 }
                             }
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 expenseAssignViewModel.assignExpenseItem(item: item)
                             }

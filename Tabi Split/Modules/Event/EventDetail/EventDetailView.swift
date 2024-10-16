@@ -21,19 +21,23 @@ struct EventDetailView: View {
                     .fill(Color(UIColor(hex: "#F1F1F1")))
                     .frame(maxWidth: .infinity, maxHeight: 200)
                 HStack {
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                }
+                    if let selectedEvent = eventViewModel.selectedEvent {
+                        ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
+                            if index < 4 {
+                                Circle()
+                                    .fill(Color(UIColor(hex: "#D9D9D9")))
+                                    .frame(width: 40)
+                            }
+                        }
+                        if selectedEvent.participants.count > 4 {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(UIColor(hex: "#D9D9D9")))
+                                    .frame(width: 40)
+                                Text("+\(selectedEvent.participants.count - 4)")
+                            }
+                        }
+                    }                }
                 .padding(.top, -20)
                 VStack {
                     if false {
@@ -46,17 +50,6 @@ struct EventDetailView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     } else {
                         VStack (spacing: 40) {
-                            VStack (spacing: 4) {
-                                Text("You owe")
-                                    .font(.subheadline)
-                                Text("Rp 200.000")
-                                    .font(.title)
-                            }
-                            .padding(.horizontal, 72)
-                            .padding(.vertical, 18)
-                            .background(Color(UIColor(hex: "#EBEBEB")))
-                            .clipShape(RoundedRectangle(cornerRadius: 18))
-                            
                             VStack (spacing: 16) {
                                 HStack (spacing: 0) {
                                     ForEach(EventSectionEnum.allCases) { section in
@@ -81,7 +74,7 @@ struct EventDetailView: View {
                                     if eventViewModel.selectedSection == .expenses {
                                         EventDetailExpenseView()
                                     } else {
-                                        EventTotalsView()
+                                        EventSummaryView()
                                     }
                                 }
                                 .transaction { transaction in

@@ -25,6 +25,11 @@ extension Date {
           }
     }
     
+    func yesterday() -> Date {
+        let calendar = Calendar.current
+        return calendar.date(byAdding: .day, value: -1, to: self) ?? Date()
+    }
+    
     func toProperText() -> String {
         let calendar = Calendar.current
         if (calendar.isDateInToday(self)) {
