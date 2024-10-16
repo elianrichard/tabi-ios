@@ -7,32 +7,33 @@
 
 import SwiftUI
 
-struct EventTotalsOptimizationCardView : View {
-    var payorName: String
-    var recipientName: String
+struct EventSummaryHistoryCard : View {
+    var itemName: String
     var amount: Double
+    var date: Date
     var isLast: Bool = false
     
     var body : some View {
-        HStack (spacing: 12) {
+        HStack (alignment: .top, spacing: 12) {
             Circle()
                 .fill(Color(UIColor(hex: "#D9D9D9")))
                 .frame(width: 40)
+                .frame(maxHeight: .infinity, alignment: .center)
             VStack (alignment: .leading, spacing: 4) {
-                HStack (spacing: 4) {
-                    Text(payorName)
-                        .fontWeight(payorName == "You" ? .medium : .regular)
-                    Image(systemName: "arrow.forward")
-                    Text(recipientName)
-                        .fontWeight(recipientName == "You" ? .medium : .regular)
-                }
+                Text(itemName)
                 Text("Rp \(String(format: "%.0f", amount).formatPrice())")
                     .font(.headline)
                     .fontWeight(.medium)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(amount > 0 ? Color(UIColor(hex: "#D4FFDA")) : Color(UIColor(hex: "#FBD0DA")))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
             }
+            Spacer()
+            Text(date.toProperText())
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .padding(.vertical, 20)
+        .padding(.vertical, 6)
         
         if (isLast == false) {
             Rectangle()
@@ -43,5 +44,5 @@ struct EventTotalsOptimizationCardView : View {
 }
 
 #Preview {
-    EventTotalsOptimizationCardView(payorName: "Naufal", recipientName: "You", amount: 500_000)
+    EventSummaryHistoryCard(itemName: "KFC", amount: 500_000, date: Date())
 }
