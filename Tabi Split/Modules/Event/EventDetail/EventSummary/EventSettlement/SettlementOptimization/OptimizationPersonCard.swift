@@ -39,7 +39,6 @@ struct OptimizationPersonCard: View {
                     .background(Color(UIColor(hex: data.lentAmount < data.debtAmount ? "#D4FFDA" : "#FBD0DA")))
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
-//            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding()
         .overlay {
