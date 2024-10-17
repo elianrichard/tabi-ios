@@ -9,16 +9,17 @@ import Foundation
 import SwiftUI
 
 struct BottomButton: View {
-    @State var text: String
+    @State var text: String = "Next"
+    @State var color: Color = Color(.buttonBlue)
     
     var body: some View {
         VStack(alignment: .center){
             Text(text)
-                .foregroundColor(.black)
+                .foregroundColor(.white)
         }
         .frame(height: 40)
         .frame(maxWidth: .infinity, alignment: .center)
-        .background(Color(.lightGray))
+        .background(color)
         .cornerRadius(20)
     }
 }

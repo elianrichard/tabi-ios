@@ -17,7 +17,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
-                HomeView()
+                ReceiptUploadView()
             }
             .navigationDestination(for: Routes.Destination.self) { destination in
                 switch destination {
@@ -41,6 +41,8 @@ struct ContentView: View {
                     ExpenseEqualSplitView()
                 case .ExpenseCustomSplitView:
                     ExpenseCustomSplitView()
+                case .ReceiptUploadView:
+                    ReceiptUploadView()
                 }
             }
         }
