@@ -65,6 +65,12 @@ struct ContentView: View {
                     
                 case .SettlementOptimizationView:
                     SettlementOptimizationView()
+                    
+                case .SettlementReceiptView:
+                    SettlementReceiptView()
+                    
+                case .SettlementConfirmationView:
+                    SettlementConfirmationView()
                 }
                 
             }
