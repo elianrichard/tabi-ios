@@ -15,15 +15,6 @@ final class ReceiptUploadViewModel{
     var isShowingScanner: Bool = false
     var receiptImage: UIImage?
     var receiptImageFromGallery: PhotosPickerItem?
-    var items: [Item] = []
-    var additionalCharges: [AdditionalCharge] = []
-    var words: [VNRecognizedTextObservation] = []
-    var totalPrice: Float = 0
-    
-    enum ocrError: Error {
-        case imageError
-        case textRecognizerError
-    }
     
     func getImage() async{
         if let data = try? await receiptImageFromGallery?.loadTransferable(type: Data.self) {
@@ -67,7 +58,7 @@ final class ReceiptUploadViewModel{
         }
     }
     
-    private func performPerspectiveCorrection(rectangle: VNRectangleObservation, image: CGImage) -> UIImage? {
+    func performPerspectiveCorrection(rectangle: VNRectangleObservation, image: CGImage) -> UIImage? {
         let ciImage = CIImage(cgImage: image)
         let size = CGSize(width: image.width, height: image.height)
         
@@ -91,118 +82,5 @@ final class ReceiptUploadViewModel{
         }
         
         return nil
-    }
-    
-    func normalizeString(_ input: String) -> String {
-        // Lowercase the string
-        let lowercasedString = input.lowercased()
-        
-        // Remove whitespaces, punctuation, and symbols
-        let filteredString = lowercasedString.unicodeScalars.filter {
-            CharacterSet.letters.contains($0) || CharacterSet.decimalDigits.contains($0)
-        }
-        
-        // Convert the filtered result back to a String
-        return String(String.UnicodeScalarView(filteredString))
-    }
-    
-    func stringToFloat(_ input: String) -> Float {
-        // Replace commas used for thousand separators with an empty string
-        let cleanedString = input.replacingOccurrences(of: "[.,]", with: "", options: .regularExpression)
-        
-        // Convert the cleaned string to Float
-        return Float(cleanedString) ?? 0
-    }
-    
-    func performOCROnImage(_ image: UIImage) throws {
-        var itemsAndPrice: [[String]] = []
-        var totalFound: Bool = false
-        var subTotalFound: Bool = false
-        var taxKeywords: [String] = ["tax", "ppn", "pb10", "prest10", "pajak", "taxes", "pb1"]
-        var serviceKeywords: [String] = ["service", "charge"]
-        
-        guard let cgImage = image.cgImage else {
-            throw ocrError.imageError
-        }
-        
-        let request = VNRecognizeTextRequest { (request, error) in
-            guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                print("No recognized text.")
-                return
-            }
-            
-            for observation in observations {
-                self.words.append(observation)
-            }
-        }
-        
-        request.recognitionLevel = .accurate // You can also use .fast for faster but less accurate recognition
-        
-        let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        
-        do {
-            try requestHandler.perform([request])
-        } catch {
-            throw ocrError.textRecognizerError
-        }
-        
-        for word in words {
-            if let topCandidate = word.topCandidates(1).first {
-                let recognizedText = topCandidate.string
-                let pattern = "^((Rp|rp|RP|Rp | rp | Rp )?\\d{1,3})((,|.)\\d{3})*$"
-                let regex = try? NSRegularExpression(pattern: pattern)
-                let range = NSRange(location: 0, length: recognizedText.utf16.count)
-                if regex?.firstMatch(in: recognizedText, options: [], range: range) != nil {
-                    if word.boundingBox.minX > 0.6 {
-                        for word2 in words {
-                            if (((word2.boundingBox.midY) <= word.boundingBox.maxY) && ((word2.boundingBox.midY) >= (word.boundingBox.minY))){
-                                let recognizedText2 = word2.topCandidates(1).first?.string
-                                if recognizedText2 != recognizedText {
-                                    itemsAndPrice.append([recognizedText2 ?? "", normalizeString(recognizedText2 ?? ""), recognizedText])
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        for item in itemsAndPrice {
-            let isItTax = taxKeywords.contains { additionalChargeKeywords in
-                item[1].contains(additionalChargeKeywords)
-            }
-            if isItTax {
-                if !item[1].contains("dasar") {
-                    additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: stringToFloat(item[2])))
-                    itemsAndPrice.remove(item)
-                    continue
-                }
-            }
-            
-            let isItService = serviceKeywords.contains { serviceKeywords in
-                item[1].contains(serviceKeywords)
-            }
-            if isItService {
-                additionalCharges.append(AdditionalCharge(additionalChargeType: .serviceCharge, amount: stringToFloat(item[2])))
-                itemsAndPrice.remove(item)
-                continue
-            }
-            
-            if (item[1].contains("total") && item[1] != "subtotal"){
-                totalFound.toggle()
-                totalPrice = stringToFloat(item[2])
-                itemsAndPrice.remove(item)
-                break
-            }
-            
-            if !subTotalFound{
-                if (item[1].contains("subtotal")){
-                    subTotalFound.toggle()
-                    continue
-                }
-                items.append(Item(itemName: item[0], itemPrice: stringToFloat(item[2]), itemQuantity: 1))
-                itemsAndPrice.remove(item)
-            }
-        }
     }
 }

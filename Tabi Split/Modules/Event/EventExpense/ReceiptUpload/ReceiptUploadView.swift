@@ -10,8 +10,8 @@ import SwiftUI
 import PhotosUI
 
 struct ReceiptUploadView: View {
-//    @Environment(ReceiptUploadViewModel.self) private var receiptViewModel
-    @State var viewModel = ReceiptUploadViewModel()
+    @State var receiptUploadViewModel = ReceiptUploadViewModel()
+    @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(Routes.self) private var routes
     
     var body: some View {
@@ -29,7 +29,7 @@ struct ReceiptUploadView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            PhotosPicker(selection: $viewModel.receiptImageFromGallery, matching: .images, photoLibrary: .shared()){
+            PhotosPicker(selection: $receiptUploadViewModel.receiptImageFromGallery, matching: .images, photoLibrary: .shared()){
                 VStack(spacing: 10){
                     Image(systemName: "photo")
                         .resizable()
@@ -39,22 +39,24 @@ struct ReceiptUploadView: View {
                     Text("Upload an image")
                         .foregroundColor(.gray)
                 }
-                .opacity(viewModel.receiptImage != nil ? 0 : 1)
+                .opacity(receiptUploadViewModel.receiptImage != nil ? 0 : 1)
                 .frame(height: 250)
                 .frame(maxWidth: .infinity)
             }
-            .onChange(of: viewModel.receiptImageFromGallery) {
+            .onChange(of: receiptUploadViewModel.receiptImageFromGallery) {
                 Task{
-                    await viewModel.getImage()
-                    viewModel.straightenDocument(in: viewModel.receiptImage!) { image in
-                        viewModel.receiptImage = image
+                    if receiptUploadViewModel.receiptImageFromGallery != nil {
+                        await receiptUploadViewModel.getImage()
+                        receiptUploadViewModel.straightenDocument(in: receiptUploadViewModel.receiptImage ?? UIImage()) { image in
+                            receiptUploadViewModel.receiptImage = image
+                        }
                     }
                 }
             }
             .foregroundColor(.gray)
             .background{
-                if viewModel.receiptImage != nil{
-                    Image(uiImage: viewModel.receiptImage!)
+                if receiptUploadViewModel.receiptImage != nil{
+                    Image(uiImage: receiptUploadViewModel.receiptImage ?? UIImage())
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 }else{
@@ -67,7 +69,7 @@ struct ReceiptUploadView: View {
                 .padding()
             
             Button{
-                viewModel.isShowingScanner.toggle()
+                receiptUploadViewModel.isShowingScanner.toggle()
             }label: {
                 Text("Take Photo")
             }
@@ -80,22 +82,35 @@ struct ReceiptUploadView: View {
             
             Spacer()
             
-            BottomButton(text: "Upload", color: viewModel.receiptImage != nil ? Color(.buttonBlue) : Color(.midLightGray))
+            BottomButton(text: "Upload", color: Color(.midLightGray))
+                .overlay(content: {
+                    ZStack{
+                        receiptUploadViewModel.receiptImage != nil ? Color(.buttonBlue) : Color(.midLightGray)
+                        Text("Upload")
+                            .foregroundColor(receiptUploadViewModel.receiptImage != nil ? .white: .gray)
+                    }
+                })
+                .cornerRadius(100)
                 .onTapGesture {
                     do {
-                        try viewModel.performOCROnImage(viewModel.receiptImage ?? UIImage())
+                        try eventExpenseViewModel.performOCROnImage(receiptUploadViewModel.receiptImage ?? UIImage())
                     } catch {
                         print(error)
                     }
+                    
+                    eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
+                    
+                    routes.navigateBack()
                 }
-                .disabled(viewModel.receiptImage == nil)
+                .disabled(receiptUploadViewModel.receiptImage == nil)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationBarBackButtonHidden(true)
         .padding()
-        .sheet(isPresented: $viewModel.isShowingScanner) {
+        .sheet(isPresented: Bindable(receiptUploadViewModel).isShowingScanner) {
             DocumentScannerView { image in
-                viewModel.receiptImage = image
+                receiptUploadViewModel.receiptImageFromGallery = nil
+                receiptUploadViewModel.receiptImage = image
             }
         }
     }
@@ -104,6 +119,5 @@ struct ReceiptUploadView: View {
 #Preview {
     ReceiptUploadView()
         .environment(Routes())
-//        .environment(EventViewModel())
-//        .environment(EventExpenseViewModel())
+        .environment(EventExpenseViewModel())
 }

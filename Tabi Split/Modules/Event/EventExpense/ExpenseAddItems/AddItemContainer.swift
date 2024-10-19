@@ -11,9 +11,8 @@ import Combine
 
 struct AddItemContainer: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    var item: ExpenseItem
+    @State var item: ExpenseItem
     @State var price: String = ""
-    @State var itemName: String = ""
     var index: Int
     
     var body: some View {
@@ -31,7 +30,7 @@ struct AddItemContainer: View {
                 VStack(alignment: .leading){
                     Text("Name")
                         .padding([.top, .bottom], 5)
-                    TextField("Item Name", text: $itemName)
+                    TextField("Item Name", text: Bindable(eventExpenseViewModel).items.first(where: {$0.id == item.id})!.itemName)
                         .padding(10)
                         .background(Color(.midLightGray))
                         .cornerRadius(5)
@@ -41,13 +40,13 @@ struct AddItemContainer: View {
                         .padding([.top, .bottom], 5)
                     HStack{
                         Text("Rp")
-                        TextField("10.000", text: $price)
+                        TextField("10.000", value: Bindable(eventExpenseViewModel).items.first(where: {$0.id == item.id})!.itemPrice, formatter: NumberFormatter())
                             .keyboardType(.numberPad)
-                            .onReceive(Just(price)) { _ in
-                                price = price.formatPrice()
-                                item.itemPrice = Float(price.removeDots()) ?? 0
-                                eventExpenseViewModel.calculateTotal()
-                            }
+//                            .onReceive(Just(price)) { _ in
+//                                price = price.formatPrice()
+//                                item.itemPrice = Float(price.removeDots()) ?? 0
+//                                eventExpenseViewModel.calculateTotal()
+//                            }
                             .padding(10)
                             .background(Color(.midLightGray))
                             .cornerRadius(5)
@@ -60,13 +59,13 @@ struct AddItemContainer: View {
                                 .frame(width: 30, height: 30)
                                 .background(
                                     Circle()
-                                        .fill(item.itemQuantity != 1 ? Color(.lightGray) : Color(.midLightGray))
+                                        .fill(eventExpenseViewModel.items[index].itemQuantity != 1 ? Color(.lightGray) : Color(.midLightGray))
                                 )
                                 .onTapGesture {
-                                    item.itemQuantity-=1
+                                    eventExpenseViewModel.items[index].itemQuantity-=1
                                 }
-                                .disabled(item.itemQuantity == 1 ? true : false)
-                            Text(String(item.itemQuantity))
+                                .disabled(eventExpenseViewModel.items[index].itemQuantity == 1 ? true : false)
+                            Text(String(eventExpenseViewModel.items[index].itemQuantity.formatted(.number)))
                                 .padding([.leading, .trailing], 10)
                             Text("+")
                                 .frame(width: 30, height: 30)
@@ -75,7 +74,7 @@ struct AddItemContainer: View {
                                         .fill(Color(.lightGray))
                                 )
                                 .onTapGesture {
-                                    item.itemQuantity+=1
+                                    eventExpenseViewModel.items[index].itemQuantity+=1
                                 }
                         }
                         .padding(10)

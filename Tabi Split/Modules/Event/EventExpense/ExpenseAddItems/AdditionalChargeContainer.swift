@@ -18,13 +18,13 @@ struct AdditionalChargeContainer: View {
             Menu {
                 ForEach(AdditionalChargeType.allCases) { type in
                     Button(type.name, action: {
-                        item.additionalChargeType = type.id
+                        eventExpenseViewModel.additionalCharges.first(where: {$0.id == item.id})?.additionalChargeType = type.id
                     })
                     .frame(maxWidth: .infinity)
                 }
             } label: {
                 HStack{
-                    Text(AdditionalChargeType(rawValue: item.additionalChargeType)?.name ?? "unknown")
+                    Text(AdditionalChargeType(rawValue: eventExpenseViewModel.additionalCharges.first(where: {$0.id == item.id})!.additionalChargeType)?.name ?? "unknown")
                     Spacer()
                     Image(systemName: "chevron.down")
                 }
@@ -36,13 +36,13 @@ struct AdditionalChargeContainer: View {
             }
             HStack{
                 Text("Rp")
-                TextField("10.000", text: $price)
+                TextField("10.000", value: Bindable(eventExpenseViewModel).additionalCharges.first(where: {$0.id == item.id})!.amount, formatter: NumberFormatter())
                     .keyboardType(.numberPad)
-                    .onReceive(Just(price)) { _ in
-                        price = price.formatPrice()
-                        item.amount = Float(price.removeDots()) ?? 0
-                        eventExpenseViewModel.calculateTotal()
-                    }
+//                    .onReceive(Just(price)) { _ in
+//                        price = price.formatPrice()
+//                        item.amount = Float(price.removeDots()) ?? 0
+//                        eventExpenseViewModel.calculateTotal()
+//                    }
             }
             .padding(10)
             .background(Color(.midLightGray))
