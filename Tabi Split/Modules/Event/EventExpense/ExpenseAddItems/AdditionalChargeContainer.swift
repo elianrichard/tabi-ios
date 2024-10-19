@@ -18,13 +18,13 @@ struct AdditionalChargeContainer: View {
             Menu {
                 ForEach(AdditionalChargeType.allCases) { type in
                     Button(type.name, action: {
-                        eventExpenseViewModel.additionalCharges.first(where: {$0.id == item.id})?.additionalChargeType = type.id
+                        item.additionalChargeType = type.id
                     })
                     .frame(maxWidth: .infinity)
                 }
             } label: {
                 HStack{
-                    Text(AdditionalChargeType(rawValue: eventExpenseViewModel.additionalCharges.first(where: {$0.id == item.id})!.additionalChargeType)?.name ?? "unknown")
+                    Text(AdditionalChargeType(rawValue: item.additionalChargeType)?.name ?? "unknown")
                     Spacer()
                     Image(systemName: "chevron.down")
                 }
@@ -36,17 +36,26 @@ struct AdditionalChargeContainer: View {
             }
             HStack{
                 Text("Rp")
-                TextField("10.000", value: Bindable(eventExpenseViewModel).additionalCharges.first(where: {$0.id == item.id})!.amount, formatter: NumberFormatter())
+                TextField("10.000", text: $price)
                     .keyboardType(.numberPad)
-//                    .onReceive(Just(price)) { _ in
-//                        price = price.formatPrice()
-//                        item.amount = Float(price.removeDots()) ?? 0
-//                        eventExpenseViewModel.calculateTotal()
-//                    }
+                    .onChange(of: price) {
+                        price = price.formatPrice()
+                        item.amount = Float(price.removeDots()) ?? 0
+                        eventExpenseViewModel.calculateTotal()
+                    }
+            }
+            .onReceive(Just(item.amount)) { _ in
+                price = item.amount != 0 ? String(item.amount.formatPrice()) : ""
             }
             .padding(10)
             .background(Color(.midLightGray))
             .cornerRadius(5)
+            
+            Image(systemName: "trash")
+                .onTapGesture {
+                    eventExpenseViewModel.deleteAdditionalCharge(item: item)
+                    eventExpenseViewModel.calculateTotal()
+                }
         }
     }
 }

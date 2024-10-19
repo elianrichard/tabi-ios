@@ -41,7 +41,7 @@ struct ExpenseAddItemsView: View {
                     Text("Add Items")
                         .font(.title2)
                     ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
-                        AddItemContainer(item: item, index: index)
+                        AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)
                     }
                     Button {
                         eventExpenseViewModel.createNewExpenseItem()

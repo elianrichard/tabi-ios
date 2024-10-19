@@ -11,7 +11,7 @@ import Combine
 
 struct AddItemContainer: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @State var item: ExpenseItem
+    @Binding var item: ExpenseItem
     @State var price: String = ""
     var index: Int
     
@@ -24,13 +24,14 @@ struct AddItemContainer: View {
                     Image(systemName: "trash")
                         .onTapGesture {
                             eventExpenseViewModel.deleteItem(item: item)
+                            eventExpenseViewModel.calculateTotal()
                         }
                 }
                 Divider()
                 VStack(alignment: .leading){
                     Text("Name")
                         .padding([.top, .bottom], 5)
-                    TextField("Item Name", text: Bindable(eventExpenseViewModel).items.first(where: {$0.id == item.id})!.itemName)
+                    TextField("Item Name", text: Bindable(item).itemName)
                         .padding(10)
                         .background(Color(.midLightGray))
                         .cornerRadius(5)
@@ -40,16 +41,19 @@ struct AddItemContainer: View {
                         .padding([.top, .bottom], 5)
                     HStack{
                         Text("Rp")
-                        TextField("10.000", value: Bindable(eventExpenseViewModel).items.first(where: {$0.id == item.id})!.itemPrice, formatter: NumberFormatter())
+                        TextField("10.000", text: $price)
                             .keyboardType(.numberPad)
-//                            .onReceive(Just(price)) { _ in
-//                                price = price.formatPrice()
-//                                item.itemPrice = Float(price.removeDots()) ?? 0
-//                                eventExpenseViewModel.calculateTotal()
-//                            }
+                            .onChange(of: price) {
+                                price = price.formatPrice()
+                                item.itemPrice = Float(price.removeDots()) ?? 0
+                                eventExpenseViewModel.calculateTotal()
+                            }
                             .padding(10)
                             .background(Color(.midLightGray))
                             .cornerRadius(5)
+                    }
+                    .onReceive(Just(item.itemPrice)) { _ in
+                        price = item.itemPrice != 0 ? String(item.itemPrice.formatPrice()) : ""
                     }
                     VStack(alignment: .leading){
                         Text("Quantity")
@@ -59,13 +63,14 @@ struct AddItemContainer: View {
                                 .frame(width: 30, height: 30)
                                 .background(
                                     Circle()
-                                        .fill(eventExpenseViewModel.items[index].itemQuantity != 1 ? Color(.lightGray) : Color(.midLightGray))
+                                        .fill(item.itemQuantity != 1 ? Color(.lightGray) : Color(.midLightGray))
                                 )
                                 .onTapGesture {
                                     eventExpenseViewModel.items[index].itemQuantity-=1
+                                    eventExpenseViewModel.calculateTotal()
                                 }
-                                .disabled(eventExpenseViewModel.items[index].itemQuantity == 1 ? true : false)
-                            Text(String(eventExpenseViewModel.items[index].itemQuantity.formatted(.number)))
+                                .disabled(item.itemQuantity == 1 ? true : false)
+                            Text(String(item.itemQuantity.formatted(.number)))
                                 .padding([.leading, .trailing], 10)
                             Text("+")
                                 .frame(width: 30, height: 30)
@@ -74,7 +79,8 @@ struct AddItemContainer: View {
                                         .fill(Color(.lightGray))
                                 )
                                 .onTapGesture {
-                                    eventExpenseViewModel.items[index].itemQuantity+=1
+                                    item.itemQuantity+=1
+                                    eventExpenseViewModel.calculateTotal()
                                 }
                         }
                         .padding(10)

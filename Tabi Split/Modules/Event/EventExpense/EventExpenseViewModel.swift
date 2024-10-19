@@ -46,7 +46,10 @@ final class EventExpenseViewModel {
     }
     
     func deleteItem(item: ExpenseItem){
-        items.removeAll(where: { $0 == item })
+        items.removeAll(where: { $0.id == item.id })
+    }
+    func deleteAdditionalCharge(item: AdditionalCharge){
+        additionalCharges.removeAll(where: { $0.id == item.id })
     }
     func calculateTotal() {
         var total: Float = 0
