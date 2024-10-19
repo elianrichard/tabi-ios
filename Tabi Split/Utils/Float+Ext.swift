@@ -8,9 +8,9 @@
 import Foundation
 
 extension Float {
-    func formatPrice() -> String {
+    func formatPrice(isShowSign: Bool = true) -> String {
         guard self.isFinite else { return "0" }
-        return String(Int(self)).formatPrice()
+        return String(Int(self)).formatPrice(isShowSign: isShowSign)
     }
     
     func properRound() -> Float {

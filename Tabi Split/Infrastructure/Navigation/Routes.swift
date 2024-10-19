@@ -23,7 +23,10 @@ import SwiftUI
              EventInviteView, 
              EventSummaryDetailView, 
              EventSettlementView, 
-             SettlementPaymentMethodView,
+             SettlementPaymentMethodView, 
+             SettlementOptimizationView, 
+             SettlementConfirmationView, 
+             SettlementReceiptView,
              ReceiptUploadView
     }
 

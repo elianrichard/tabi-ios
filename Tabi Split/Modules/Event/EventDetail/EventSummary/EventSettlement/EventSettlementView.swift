@@ -44,9 +44,8 @@ struct EventSettlementView: View {
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: contentSize.height)
-            .scrollBounceBehavior(.basedOnSize, axes: [.vertical])
             Button {
-                print("optimization result")
+                routes.navigate(to: .SettlementOptimizationView)
             } label: {
                 Text("See optimization details")
             }

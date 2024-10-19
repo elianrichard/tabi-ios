@@ -55,7 +55,7 @@ struct SettlementCard: View {
                 }
                 if (type == .NeedConfirmation || type == .NeedPayment) {
                     Button {
-                        print("upload payment")
+                        routes.navigate(to: .SettlementConfirmationView)
                     } label: {
                         HStack {
                             Image(systemName: "\(type.actionIcon)")

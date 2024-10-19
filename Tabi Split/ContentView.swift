@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
-
+    
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
@@ -63,9 +63,19 @@ struct ContentView: View {
                 case .SettlementPaymentMethodView:
                     SettlementPaymentMethodView()
                     
+                case .SettlementOptimizationView:
+                    SettlementOptimizationView()
+                    
+                case .SettlementReceiptView:
+                    SettlementReceiptView()
+                    
+                case .SettlementConfirmationView:
+                    SettlementConfirmationView()
+                    
                 case .ReceiptUploadView:
                     ReceiptUploadView()
                 }
+                
             }
         }
         .ignoresSafeArea(.keyboard)
