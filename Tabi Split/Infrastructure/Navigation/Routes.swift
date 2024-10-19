@@ -14,18 +14,27 @@ import SwiftUI
         case HomeView,
              SwiftDataTestingView,
              AddExpenseView,
-             ExpenseEqualSplitView,
-             ExpenseCustomSplitView,
+             ExpenseAddItemsView, ExpenseAssignView,
+             ExpenseResultView,
              EventFormView,
              LoginView,
              RegisterView,
              EventDetailView,
-             EventInviteView,
+             EventInviteView, 
+             EventSummaryDetailView, 
+             EventSettlementView, 
+             SettlementPaymentMethodView,
              ReceiptUploadView
     }
 
     func navigate(to destination: Destination) {
         navPath.append(destination)
+    }
+    
+    func mutlipleNavigate(to destinations: [Destination]) {
+        for destination in destinations {
+            navPath.append(destination)
+        }
     }
 
     func navigateBack() {

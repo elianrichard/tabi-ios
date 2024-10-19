@@ -1,0 +1,33 @@
+//
+//  AssignCustomSplitViewModel.swift
+//  Tabi
+//
+//  Created by Dharmawan Ruslan on 07/10/24.
+//
+
+import Foundation
+import SwiftUI
+
+@Observable
+class ExpenseAssignViewModel {
+    var selectedAsignee: UserData? = nil
+    
+    func assignExpenseItem(item: ExpenseItem) {
+        let isAssigned = item.assignees.filter { $0.user == selectedAsignee }.count > 0
+        if let user = selectedAsignee {
+            if !isAssigned {
+                item.assignees.append(ExpensePerson(user: user, share: 1))
+            } else {
+                item.assignees.removeAll(where: { $0.user == user })
+            }
+        }
+    }
+    
+    func toggleAsignee(user: UserData) {
+        if selectedAsignee != user {
+            selectedAsignee = user
+        } else {
+            selectedAsignee = nil
+        }
+    }
+}

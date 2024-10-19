@@ -20,7 +20,7 @@ final class EventViewModel {
             selectedSection = .expenses
         }
     }
-    var selectedSection: EventSectionEnum = .expenses
+    var selectedSection: EventSectionEnum = .summary
 
     @MainActor
     func handleCreateEditEvent (selectedContacts: [UserData]) {

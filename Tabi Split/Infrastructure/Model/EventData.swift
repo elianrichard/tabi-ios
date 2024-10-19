@@ -34,14 +34,14 @@ var mockEventData: [EventData] = [
 
 enum EventSectionEnum: Identifiable {
     case expenses
-    case totals
+    case summary
     
     var id: String {
         switch self {
         case .expenses:
             "expenses"
-        case .totals:
-            "totals"
+        case .summary:
+            "summary"
         }
     }
     
@@ -49,13 +49,13 @@ enum EventSectionEnum: Identifiable {
         switch self {
         case .expenses:
             "Expenses"
-        case .totals:
-            "Totals"
+        case .summary:
+            "Summary"
         }
     }
     
     static var allCases: [EventSectionEnum] {
-        [.expenses, .totals]
+        [.expenses, .summary]
     }
 }
 

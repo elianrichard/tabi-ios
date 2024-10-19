@@ -49,7 +49,7 @@ struct EventInviteView: View {
                     VStack {
                         ForEach(eventInviteViewModel.filteredContacts) { contact in
                             ForEach(contact.phoneNumbers, id: \.identifier) { number in
-                                EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label!).capitalized)
+                                EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
                             }
                         }
                     }

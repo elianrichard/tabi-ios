@@ -10,8 +10,9 @@ import SwiftUI
 struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @State private var showingCompletionAlert = false
-
+    
     let rect = CGRect(x: 0, y: 0, width: 500, height: 100)
     var body: some View {
         ZStack {
@@ -20,19 +21,23 @@ struct EventDetailView: View {
                     .fill(Color(UIColor(hex: "#F1F1F1")))
                     .frame(maxWidth: .infinity, maxHeight: 200)
                 HStack {
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                }
+                    if let selectedEvent = eventViewModel.selectedEvent {
+                        ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
+                            if index < 4 {
+                                Circle()
+                                    .fill(Color(UIColor(hex: "#D9D9D9")))
+                                    .frame(width: 40)
+                            }
+                        }
+                        if selectedEvent.participants.count > 4 {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(UIColor(hex: "#D9D9D9")))
+                                    .frame(width: 40)
+                                Text("+\(selectedEvent.participants.count - 4)")
+                            }
+                        }
+                    }                }
                 .padding(.top, -20)
                 VStack {
                     if false {
@@ -45,17 +50,6 @@ struct EventDetailView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     } else {
                         VStack (spacing: 40) {
-                            VStack (spacing: 4) {
-                                Text("You owe")
-                                    .font(.subheadline)
-                                Text("Rp 200.000")
-                                    .font(.title)
-                            }
-                            .padding(.horizontal, 72)
-                            .padding(.vertical, 18)
-                            .background(Color(UIColor(hex: "#EBEBEB")))
-                            .clipShape(RoundedRectangle(cornerRadius: 18))
-
                             VStack (spacing: 16) {
                                 HStack (spacing: 0) {
                                     ForEach(EventSectionEnum.allCases) { section in
@@ -75,12 +69,12 @@ struct EventDetailView: View {
                                 .padding(.horizontal, 8)
                                 .background(Color(UIColor(hex: "#EBEBEB")))
                                 .clipShape(RoundedRectangle(cornerRadius: 40))
-
+                                
                                 VStack{
                                     if eventViewModel.selectedSection == .expenses {
-                                        EventExpenseView()
+                                        EventDetailExpenseView()
                                     } else {
-                                        EventTotalsView()
+                                        EventSummaryView()
                                     }
                                 }
                                 .transaction { transaction in
@@ -94,7 +88,7 @@ struct EventDetailView: View {
                 Spacer(minLength: 80)
             }
             .ignoresSafeArea()
-
+            
             VStack {
                 ZStack {
                     Text("\(eventViewModel.selectedEvent?.eventName ?? "undefined")")
@@ -131,7 +125,7 @@ struct EventDetailView: View {
                 Spacer()
             }
             .padding()
-
+            
             VStack {
                 if eventViewModel.isEventCompleted {
                     VStack {
@@ -146,7 +140,8 @@ struct EventDetailView: View {
                 } else {
                     HStack {
                         Button {
-                          routes.navigate(to: .AddExpenseView)
+                            eventExpenseViewModel.resetViewModel()
+                            routes.navigate(to: .AddExpenseView)
                         } label: {
                             Label("Add Expenses", systemImage: "plus")
                                 .padding(.vertical, 20)
@@ -163,7 +158,7 @@ struct EventDetailView: View {
                    alignment: eventViewModel.isEventCompleted ? .center : .trailing)
             .padding(20)
             .ignoresSafeArea()
-
+            
         }
         .navigationBarBackButtonHidden(true)
         .alert("Do you want to completed this event?",
@@ -182,4 +177,5 @@ struct EventDetailView: View {
     EventDetailView()
         .environment(EventViewModel())
         .environment(Routes())
+        .environment(EventExpenseViewModel())
 }
