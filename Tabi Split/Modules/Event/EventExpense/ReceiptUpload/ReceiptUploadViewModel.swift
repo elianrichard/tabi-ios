@@ -42,7 +42,8 @@ final class ReceiptUploadViewModel{
             }
             
             // Perform perspective correction on the image
-            let correctedImage = self.performPerspectiveCorrection(rectangle: rectangle, image: cgImage)
+            var correctedImage = self.performPerspectiveCorrection(rectangle: rectangle, image: cgImage)
+            correctedImage = correctedImage?.cgImage?.width ?? 0 > correctedImage?.cgImage?.height ?? 0 ? correctedImage?.rotate(radians: .pi/2) : correctedImage
             completion(correctedImage)
         }
         
