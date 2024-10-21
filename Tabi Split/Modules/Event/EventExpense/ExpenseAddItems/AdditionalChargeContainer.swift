@@ -10,7 +10,7 @@ import Combine
 
 struct AdditionalChargeContainer: View {
     @Environment(EventExpenseViewModel.self) var eventExpenseViewModel
-    @Bindable var item: AdditionalCharge
+    @Binding var item: AdditionalCharge
     @State var price: String = ""
     
     var body: some View {
@@ -44,8 +44,11 @@ struct AdditionalChargeContainer: View {
                         eventExpenseViewModel.calculateTotal()
                     }
             }
-            .onReceive(Just(item.amount)) { _ in
-                price = item.amount != 0 ? String(item.amount.formatPrice()) : ""
+            .onAppear(){
+                price = item.amount != 0 ? String(item.amount.formatted()) : ""
+            }
+            .onChange(of: item.amount){
+                price = item.amount != 0 ? String(item.amount.formatted()) : ""
             }
             .padding(10)
             .background(Color(.midLightGray))

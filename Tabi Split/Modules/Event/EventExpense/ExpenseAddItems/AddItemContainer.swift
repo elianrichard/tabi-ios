@@ -66,7 +66,7 @@ struct AddItemContainer: View {
                                         .fill(item.itemQuantity != 1 ? Color(.lightGray) : Color(.midLightGray))
                                 )
                                 .onTapGesture {
-                                    eventExpenseViewModel.items[index].itemQuantity-=1
+                                    item.itemQuantity-=1
                                     eventExpenseViewModel.calculateTotal()
                                 }
                                 .disabled(item.itemQuantity == 1 ? true : false)

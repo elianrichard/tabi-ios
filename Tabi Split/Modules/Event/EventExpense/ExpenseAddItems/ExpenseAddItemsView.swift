@@ -38,7 +38,7 @@ struct ExpenseAddItemsView: View {
             }
             ScrollView (showsIndicators: false) {
                 VStack (alignment: .leading, spacing: 18) {
-                    Text("Add Items")
+                    Text("Items")
                         .font(.title2)
                     ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
                         AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)
@@ -62,8 +62,8 @@ struct ExpenseAddItemsView: View {
                             .font(.title3)
                             .padding([.bottom], 10)
                         Text("Amount")
-                        ForEach(eventExpenseViewModel.additionalCharges) { additionalCharge in
-                            AdditionalChargeContainer(item: additionalCharge)
+                        ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
+                            AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index], index: index)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

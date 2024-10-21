@@ -14,7 +14,7 @@ import Vision
 final class EventExpenseViewModel {
     var selectedExpense: Expense? = nil {
         didSet {
-           populateViewModel()
+            populateViewModel()
         }
     }
     var isEdit = false
@@ -84,10 +84,9 @@ final class EventExpenseViewModel {
                 if item.assignees.filter({ $0.user.id == person.id }).count > 0 {
                     let itemName = item.itemName
                     let itemPrice = item.itemPrice
-                    if let itemQuantity = item.assignees.first(where: { $0.user.id == person.id })?.share {
-                        totalSpentPerson += itemPrice * Float(itemQuantity)
-                        personItems.append(ExpenseItem(itemName: itemName, itemPrice: itemPrice, itemQuantity: itemQuantity))
-                    }
+                    let itemQuantity = item.itemQuantity / item.assignees.map({$0.share}).reduce(0, +)
+                    totalSpentPerson += itemPrice * Float(itemQuantity)
+                    personItems.append(ExpenseItem(itemName: itemName, itemPrice: itemPrice, itemQuantity: itemQuantity))
                 }
             }
             for additionalCharge in additionalCharges {
