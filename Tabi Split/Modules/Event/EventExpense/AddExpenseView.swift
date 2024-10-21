@@ -148,22 +148,33 @@ struct AddExpenseView: View {
                 VStack(alignment: .leading){
                     Text("Payment Receipt")
                         .padding([.top, .bottom], 5)
-                    PhotosPicker(selection: Bindable(eventExpenseViewModel).receiptImage, matching: .images, photoLibrary: .shared()){
-                        VStack(spacing: 10){
-                            Image(systemName: "photo")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.gray)
-                            Text("Upload an image")
-                                .foregroundColor(.gray)
-                        }
+                    VStack(spacing: 10){
+                        Image(systemName: "photo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.gray)
+                        Text("Upload an image")
+                            .foregroundColor(.gray)
                     }
+                    .opacity(eventExpenseViewModel.uploadedReceiptImage != nil ? 0 : 1)
                     .frame(height: 150)
                     .frame(maxWidth: .infinity)
                     .foregroundColor(.gray)
-                    .background(Color(.midLightGray))
+                    .background{
+                        if eventExpenseViewModel.uploadedReceiptImage != nil{
+                            Image(uiImage: eventExpenseViewModel.uploadedReceiptImage ?? UIImage())
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        }else{
+                            Color(.midLightGray)
+                        }
+                    }
                     .cornerRadius(5)
+                    .onTapGesture {
+                        routes.navigate(to: .ReceiptUploadView)
+                    }
+                    .contentShape(Rectangle())
                 }
             }
             Button {

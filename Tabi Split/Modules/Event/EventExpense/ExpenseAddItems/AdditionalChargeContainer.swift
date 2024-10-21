@@ -10,7 +10,7 @@ import Combine
 
 struct AdditionalChargeContainer: View {
     @Environment(EventExpenseViewModel.self) var eventExpenseViewModel
-    @Bindable var item: AdditionalCharge
+    @Binding var item: AdditionalCharge
     @State var price: String = ""
     
     var body: some View {
@@ -38,15 +38,27 @@ struct AdditionalChargeContainer: View {
                 Text("Rp")
                 TextField("10.000", text: $price)
                     .keyboardType(.numberPad)
-                    .onReceive(Just(price)) { _ in
+                    .onChange(of: price) {
                         price = price.formatPrice()
                         item.amount = Float(price.removeDots()) ?? 0
                         eventExpenseViewModel.calculateTotal()
                     }
             }
+            .onAppear(){
+                price = item.amount != 0 ? String(item.amount.formatted()) : ""
+            }
+            .onChange(of: item.amount){
+                price = item.amount != 0 ? String(item.amount.formatted()) : ""
+            }
             .padding(10)
             .background(Color(.midLightGray))
             .cornerRadius(5)
+            
+            Image(systemName: "trash")
+                .onTapGesture {
+                    eventExpenseViewModel.deleteAdditionalCharge(item: item)
+                    eventExpenseViewModel.calculateTotal()
+                }
         }
     }
 }

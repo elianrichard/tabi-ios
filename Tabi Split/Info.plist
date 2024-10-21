@@ -6,5 +6,7 @@
 	<string>We would like to access your contacts to see all available users for you to add in a event</string>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We would like to access your camera to scan receipts</string>
 </dict>
 </plist>

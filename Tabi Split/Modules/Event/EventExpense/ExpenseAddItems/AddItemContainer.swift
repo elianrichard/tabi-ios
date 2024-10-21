@@ -11,9 +11,8 @@ import Combine
 
 struct AddItemContainer: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    var item: ExpenseItem
+    @Binding var item: ExpenseItem
     @State var price: String = ""
-    @State var itemName: String = ""
     var index: Int
     
     var body: some View {
@@ -25,13 +24,14 @@ struct AddItemContainer: View {
                     Image(systemName: "trash")
                         .onTapGesture {
                             eventExpenseViewModel.deleteItem(item: item)
+                            eventExpenseViewModel.calculateTotal()
                         }
                 }
                 Divider()
                 VStack(alignment: .leading){
                     Text("Name")
                         .padding([.top, .bottom], 5)
-                    TextField("Item Name", text: $itemName)
+                    TextField("Item Name", text: Bindable(item).itemName)
                         .padding(10)
                         .background(Color(.midLightGray))
                         .cornerRadius(5)
@@ -43,7 +43,7 @@ struct AddItemContainer: View {
                         Text("Rp")
                         TextField("10.000", text: $price)
                             .keyboardType(.numberPad)
-                            .onReceive(Just(price)) { _ in
+                            .onChange(of: price) {
                                 price = price.formatPrice()
                                 item.itemPrice = Float(price.removeDots()) ?? 0
                                 eventExpenseViewModel.calculateTotal()
@@ -51,6 +51,9 @@ struct AddItemContainer: View {
                             .padding(10)
                             .background(Color(.midLightGray))
                             .cornerRadius(5)
+                    }
+                    .onReceive(Just(item.itemPrice)) { _ in
+                        price = item.itemPrice != 0 ? String(item.itemPrice.formatPrice()) : ""
                     }
                     VStack(alignment: .leading){
                         Text("Quantity")
@@ -64,9 +67,10 @@ struct AddItemContainer: View {
                                 )
                                 .onTapGesture {
                                     item.itemQuantity-=1
+                                    eventExpenseViewModel.calculateTotal()
                                 }
                                 .disabled(item.itemQuantity == 1 ? true : false)
-                            Text(String(item.itemQuantity))
+                            Text(String(item.itemQuantity.formatted(.number)))
                                 .padding([.leading, .trailing], 10)
                             Text("+")
                                 .frame(width: 30, height: 30)
@@ -76,6 +80,7 @@ struct AddItemContainer: View {
                                 )
                                 .onTapGesture {
                                     item.itemQuantity+=1
+                                    eventExpenseViewModel.calculateTotal()
                                 }
                         }
                         .padding(10)
