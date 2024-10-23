@@ -60,7 +60,7 @@ struct ExpenseAssignView: View {
                 }
                 .padding()
                 .background(
-                    Color(.midLightGray)
+                    .uiGray
                 )
                 .cornerRadius(5)
                 Text("All Items")
@@ -108,7 +108,7 @@ struct ExpenseAssignView: View {
                         }
                     }
                     .padding(10)
-                    .background(Color(.midLightGray))
+                    .background(.uiGray)
                     .cornerRadius(10)
                 }
             }

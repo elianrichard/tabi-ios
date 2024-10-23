@@ -36,7 +36,7 @@ struct AddExpenseView: View {
                         .padding([.top, .bottom], 5)
                         TextField("Title", text: Bindable(eventExpenseViewModel).expenseName)
                             .padding(10)
-                            .background(Color(.midLightGray))
+                            .background(.highlightRed)
                             .cornerRadius(5)
                 } // Title
                 VStack(alignment: .leading){
@@ -62,7 +62,7 @@ struct AddExpenseView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(10)
                         .foregroundColor(.black)
-                        .background(Color(.midLightGray))
+                        .background(Color(.uiGray))
                         .cornerRadius(5)
                     }
                 } // Paid  by
@@ -97,7 +97,7 @@ struct AddExpenseView: View {
                     }
                     .padding()
                     .background(
-                        Color(.midLightGray)
+                        Color(.uiGray)
                     )
                     .cornerRadius(5)
                 } // Participants
@@ -124,7 +124,7 @@ struct AddExpenseView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(10)
                         .foregroundColor(.black)
-                        .background(Color(.midLightGray))
+                        .background(Color(.uiGray))
                         .cornerRadius(5)
                     }
                 } // Split Method
@@ -141,7 +141,7 @@ struct AddExpenseView: View {
                                 }
                         }
                         .padding(10)
-                        .background(Color(.midLightGray))
+                        .background(Color(.uiGray))
                         .cornerRadius(5)
                     }
                 } // Input nominal kalau equally
@@ -167,7 +167,7 @@ struct AddExpenseView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                         }else{
-                            Color(.midLightGray)
+                            Color(.uiGray)
                         }
                     }
                     .cornerRadius(5)
