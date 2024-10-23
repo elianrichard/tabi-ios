@@ -92,6 +92,7 @@ struct EventFormView: View {
                     .background(Color(UIColor(hex: "#F7F7F7")))
                 }
             }
+            .fixedSize(horizontal: false, vertical: true)
             Spacer()
             Button {
                 eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
@@ -107,8 +108,9 @@ struct EventFormView: View {
             }
         }
         .onAppear {
-            if eventViewModel.selectedEvent != nil {
+            if let selectedEvent = eventViewModel.selectedEvent {
                 isEdit = true
+                eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
         }
         .padding()

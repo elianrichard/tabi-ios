@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
-
+    
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
@@ -23,25 +23,59 @@ struct ContentView: View {
                 switch destination {
                 case .HomeView:
                     HomeView()
+                    
                 case .EventFormView:
                     EventFormView()
+                    
                 case .EventDetailView:
                     EventDetailView()
+                    
                 case .EventInviteView:
                     EventInviteView()
+                    
                 case .SwiftDataTestingView:
                     SwiftDataTestingView()
+                    
                 case .LoginView:
                     LoginView()
+                    
                 case .RegisterView:
                     RegisterView()
+                    
                 case .AddExpenseView:
                     AddExpenseView()
-                case .ExpenseEqualSplitView:
-                    ExpenseEqualSplitView()
-                case .ExpenseCustomSplitView:
-                    ExpenseCustomSplitView()
+                    
+                case .ExpenseAddItemsView:
+                    ExpenseAddItemsView()
+                    
+                case .ExpenseAssignView:
+                    ExpenseAssignView()
+                    
+                case .ExpenseResultView:
+                    ExpenseResultView()
+                    
+                case .EventSummaryDetailView:
+                    EventSummaryDetailView()
+                    
+                case .EventSettlementView:
+                    EventSettlementView()
+                    
+                case .SettlementPaymentMethodView:
+                    SettlementPaymentMethodView()
+                    
+                case .SettlementOptimizationView:
+                    SettlementOptimizationView()
+                    
+                case .SettlementReceiptView:
+                    SettlementReceiptView()
+                    
+                case .SettlementConfirmationView:
+                    SettlementConfirmationView()
+                    
+                case .ReceiptUploadView:
+                    ReceiptUploadView()
                 }
+                
             }
         }
         .ignoresSafeArea(.keyboard)

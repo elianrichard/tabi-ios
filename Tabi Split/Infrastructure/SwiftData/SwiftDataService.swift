@@ -17,8 +17,15 @@ class SwiftDataService {
     
     @MainActor
     private init() {
-        self.modelContainer = try! ModelContainer(for: NoteData.self, EventData.self, configurations: ModelConfiguration(isStoredInMemoryOnly: false))
-        self.modelContext = modelContainer.mainContext
+        do {
+            self.modelContainer = try ModelContainer(
+                for: NoteData.self, EventData.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: false)
+            )
+            self.modelContext = modelContainer.mainContext
+        } catch {
+            fatalError("Failed to create the application's model container: \(error.localizedDescription)")
+        }
     }
     
     func saveModelContext(){

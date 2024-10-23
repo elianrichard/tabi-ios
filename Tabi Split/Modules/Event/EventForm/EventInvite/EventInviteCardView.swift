@@ -9,7 +9,7 @@ import SwiftUI
 import Contacts
 
 struct EventInviteCardView: View {
-    @EnvironmentObject var eventInviteViewModel: EventInviteViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     
     var name: String
     var number: String
@@ -61,7 +61,6 @@ struct EventInviteCardView: View {
             }
         }
         .onAppear {
-//            print(eventInviteViewModelsel)
             isSelected = eventInviteViewModel.selectedContacts.contains(where: { $0.phone == number })
         }
     }
