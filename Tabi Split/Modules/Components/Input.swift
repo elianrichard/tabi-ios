@@ -33,7 +33,7 @@ struct Input: View {
                     Button {
                         isShowPassword.toggle()
                     } label: {
-                        Image(systemName: isShowPassword ? "eye.slash" : "eye")
+                        Icon(isShowPassword ? .eyeIcon : .hiddenEyeIcon)
                             .foregroundStyle(.textGrey)
                     }
                 }
