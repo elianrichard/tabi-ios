@@ -11,102 +11,67 @@ struct RegisterView: View {
     @Environment(Routes.self) private var routes
     @State private var registerViewModel = RegisterViewModel()
     
-    
     var body: some View {
-        VStack {
-            Spacer()
+        Spacer()
+        VStack (alignment: .leading, spacing: UIConfig.Spacing.Large) {
+            Text("Ready to Take\nYour Bills?")
+                .font(.tabiLargeTitle)
             
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Register")
-                    .font(.system(size: 22, weight: .medium))
-                    .padding()
-                
-                InputWithLabel(label: "Name",
-                               placeholder: "Name",
-                               text: $registerViewModel.name)
-                .onSubmit(registerViewModel.validateName)
-                if registerViewModel.hasAttemptedValidation, let error = registerViewModel.nameError {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                }
-                
+            VStack (spacing: UIConfig.Spacing.Medium) {
+                InputWithLabel(label: "Fullname",
+                               placeholder: "Your name",
+                               text: $registerViewModel.name,
+                               errorMessage: registerViewModel.nameError)
                 InputWithLabel(label: "Phone Number",
-                               placeholder: "(+62)",
-                               text: $registerViewModel.phoneNumber)
-                .onSubmit(registerViewModel.validatePhoneNumber)
-                if registerViewModel.hasAttemptedValidation, let error = registerViewModel.phoneNumberError {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                }
-                
+                               placeholder: "628123456789",
+                               text: $registerViewModel.phoneNumber,
+                               errorMessage: registerViewModel.phoneNumberError)
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
                                isSecure: true,
-                               text: $registerViewModel.password)
-                .onSubmit(registerViewModel.validatePassword)
-                if registerViewModel.hasAttemptedValidation, let error = registerViewModel.passwordError {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                }
-                
+                               text: $registerViewModel.password,
+                               errorMessage: registerViewModel.passwordError)
                 InputWithLabel(label: "Confirm Password",
                                placeholder: "Confirm Password",
                                isSecure: true,
-                               text: $registerViewModel.confirmPassword)
-                if !registerViewModel.confirmPassword.isEmpty, let error = registerViewModel.confirmPasswordError {
-                    HStack {
-                        Image(systemName: "x.circle.fill")
-                            .foregroundColor(.red)
-                        
-                        Text(error)
-                            .foregroundColor(.red)
+                               text: $registerViewModel.confirmPassword,
+                               errorMessage: registerViewModel.confirmPasswordError)
+            }
+            VStack (spacing: UIConfig.Spacing.Small) {
+                VStack (spacing: UIConfig.Spacing.Medium) {
+                    CustomButton(text: "Sign Up", isEnabled: registerViewModel.isSignUpEnabled) {
+                        withAnimation (nil) {
+                            registerViewModel.register()
+                        }
                     }
-                    .font(.caption)
-                    .padding(.horizontal)
+                    
+                    DividerWithText(text: "Or")
+                    
+                    CustomButton(text: "Sign Up With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                        print("SignUp with Apple")
+                    }
+                }
+                
+                HStack (spacing: 3) {
+                    Text("Already have an account?")
+                        .font(.tabiBody)
+                    Button {
+                        routes.navigate(to: .LoginView)
+                    } label: {
+                        Text("Sign In")
+                            .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
+                            .foregroundStyle(.textBlue)
+                    }
                 }
             }
-            
-            Spacer()
-                .frame(height: 60)
-            
-            Button(action: {
-                registerViewModel.validateAllFields()
-                if registerViewModel.isFormValid() {
-                    registerViewModel.register()
-                }
-            }) {
-                Text("Register")
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 58)
-                    .background(registerViewModel.hasAttemptedValidation && registerViewModel.isFormValid() ? Color.blue : Color.gray)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-            }
-            .padding(.horizontal)
-            
-            Button(action: {
-                routes.navigate(to: .LoginView)
-            }) {
-                Text("Already have an account? Login")
-                    .font(.system(size: 12))
-                    .padding(.top, 20)
-                    .foregroundStyle(.black)
-                    .underline()
-            }
-            
-            Spacer()
-            Spacer()
-            
         }
+        .fixedSize(horizontal: false, vertical: true)
+        .navigationBarBackButtonHidden(true)
+        .padding()
     }
 }
 
 #Preview {
     RegisterView()
+        .environment(Routes())
 }

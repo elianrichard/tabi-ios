@@ -9,12 +9,24 @@ import Foundation
 
 @Observable
 class RegisterViewModel {
-    var name: String = ""
-    var phoneNumber: String = ""
-    var password: String = "" 
+    var name: String = "" {
+        didSet {
+            isFormValid()
+        }
+    }
+    var phoneNumber: String = "" {
+        didSet {
+            isFormValid()
+        }
+    }
+    var password: String = ""  {
+        didSet {
+            isFormValid()
+        }
+    }
     var confirmPassword: String = "" {
         didSet {
-            validateConfirmPassword()
+            isFormValid()
         }
     }
     
@@ -23,7 +35,8 @@ class RegisterViewModel {
     var passwordError: String?
     var confirmPasswordError: String?
     
-    var hasAttemptedValidation = false
+    var isSignUpEnabled = true
+    var hasSubmitted = false
     
     func validateName() {
         if name.isEmpty {
@@ -34,14 +47,7 @@ class RegisterViewModel {
     }
     
     func validatePhoneNumber() {
-        let digitsOnly = phoneNumber.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        if !digitsOnly.hasPrefix("62") {
-            phoneNumberError = "Phone number must start with 62"
-        } else if digitsOnly.count < 12 || digitsOnly.count > 15 {
-            phoneNumberError = "Phone number must be 10-13 digits long"
-        } else {
-            phoneNumberError = nil
-        }
+        phoneNumberError = phoneNumber.validatePhoneNumber()
     }
     
     func validatePassword() {
@@ -65,7 +71,6 @@ class RegisterViewModel {
     }
     
     func validateAllFields() {
-        hasAttemptedValidation = true
         validateName()
         validatePhoneNumber()
         validatePassword()
@@ -73,14 +78,23 @@ class RegisterViewModel {
     }
     
     func isFormValid() -> Bool {
+        guard hasSubmitted else { return true }
         validateAllFields()
-        return nameError == nil &&
-        phoneNumberError == nil &&
-        passwordError == nil &&
-        confirmPasswordError == nil
+        if (nameError == nil &&
+            phoneNumberError == nil &&
+            passwordError == nil &&
+            confirmPasswordError == nil
+        ) {
+            isSignUpEnabled = true
+            return true
+        } else {
+            isSignUpEnabled = false
+            return false
+        }
     }
     
     func register() {
+        hasSubmitted = true
         guard isFormValid() else {
             print("Cannot register: form is invalid")
             return
