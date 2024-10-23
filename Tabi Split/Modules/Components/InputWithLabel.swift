@@ -15,10 +15,9 @@ struct InputWithLabel: View {
     @Binding var text: String
     
     var body: some View {
-        VStack(alignment: .leading){
+        VStack(alignment: .leading, spacing: 8){
             Text(label)
-                .font(.system(size: 16))
-                .padding(.horizontal)
+                .font(.tabiBody)
             Input(placeholder: placeholder,
                   isSecure: isSecure,
                   text: $text)

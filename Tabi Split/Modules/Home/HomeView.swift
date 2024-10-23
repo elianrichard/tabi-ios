@@ -95,7 +95,6 @@ struct HomeView: View {
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(20)
-            .ignoresSafeArea()
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {

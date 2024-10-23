@@ -10,23 +10,29 @@ import SwiftUI
 struct Input: View {
     var placeholder: String = ""
     var isSecure: Bool = false
+    
     @Binding var text: String
     
     var body: some View {
-        Group {
+        HStack {
             if isSecure {
-                SecureField(placeholder, text: $text)
-                    .padding()
-                    .background(Color.gray.opacity(0.5))
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                    .padding(.horizontal)
+                SecureField("", text: $text,
+                            prompt: Text(placeholder).foregroundStyle(.textGrey))
             } else {
-                TextField(placeholder, text: $text)
-                    .padding()
-                    .background(Color.gray.opacity(0.5))
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                    .padding(.horizontal)
+                TextField("", text: $text,
+                          prompt: Text(placeholder).foregroundStyle(.textGrey))
             }
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .background(.uiWhite)
+        .clipShape(RoundedRectangle(cornerRadius: .infinity))
+        .foregroundStyle(.black)
+        .font(.tabiBody)
+        .overlay {
+            RoundedRectangle(cornerRadius: .infinity)
+                .fill(.clear)
+                .stroke(.bgGreyOverlay, lineWidth: 0.5)
         }
     }
 }
