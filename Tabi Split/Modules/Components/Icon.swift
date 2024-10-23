@@ -9,6 +9,7 @@ import SwiftUI
 
 struct Icon: View {
     var resource: ImageResource
+    var size: CGFloat = 20
     
     init(_ resource: ImageResource) {
         self.resource = resource
@@ -18,7 +19,7 @@ struct Icon: View {
         Image(resource)
             .resizable()
             .scaledToFit()
-            .frame(width: 20)
+            .frame(width: size)
     }
 }
 
