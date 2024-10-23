@@ -63,7 +63,7 @@ struct ExpenseAddItemsView: View {
                             .padding([.bottom], 10)
                         Text("Amount")
                         ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
-                            AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index], index: index)
+                            AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
