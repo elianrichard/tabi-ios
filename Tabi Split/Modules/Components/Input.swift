@@ -10,17 +10,38 @@ import SwiftUI
 struct Input: View {
     var placeholder: String = ""
     var isSecure: Bool = false
-    
     @Binding var text: String
+    var isError: Bool = false
+    var type: UIKeyboardType = .default
+    
+    @State var isShowPassword = false
     
     var body: some View {
         HStack {
             if isSecure {
-                SecureField("", text: $text,
-                            prompt: Text(placeholder).foregroundStyle(.textGrey))
+                HStack {
+                    if !isShowPassword {
+                        SecureField("", text: $text,
+                                    prompt: Text(placeholder).foregroundStyle(.textGrey))
+                        .frame(height: 20)
+                    } else {
+                        TextField("", text: $text,
+                                  prompt: Text(placeholder).foregroundStyle(.textGrey))
+                        .frame(height: 20)
+                    }
+                    
+                    Button {
+                        isShowPassword.toggle()
+                    } label: {
+                        Image(systemName: isShowPassword ? "eye.slash" : "eye")
+                            .foregroundStyle(.textGrey)
+                    }
+                }
             } else {
                 TextField("", text: $text,
                           prompt: Text(placeholder).foregroundStyle(.textGrey))
+                .frame(height: 20)
+                .keyboardType(type)
             }
         }
         .padding(.vertical, 16)
@@ -32,7 +53,7 @@ struct Input: View {
         .overlay {
             RoundedRectangle(cornerRadius: .infinity)
                 .fill(.clear)
-                .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                .stroke(isError ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
         }
     }
 }

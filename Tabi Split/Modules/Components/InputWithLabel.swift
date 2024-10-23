@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct InputWithLabel: View {
-    var label: String = "Label"
-    var placeholder: String = "Placeholder"
+    var label: String
+    var placeholder: String
     var isSecure: Bool = false
+    var type: UIKeyboardType = .default
     
     @Binding var text: String
+    var errorMessage: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8){
@@ -20,11 +22,16 @@ struct InputWithLabel: View {
                 .font(.tabiBody)
             Input(placeholder: placeholder,
                   isSecure: isSecure,
-                  text: $text)
+                  text: $text, isError: errorMessage != nil, type: type)
+            if let message = errorMessage {
+                Text(message)
+                    .font(.tabiBody)
+                    .foregroundStyle(.buttonRed)
+            }
         }
     }
 }
 
 #Preview {
-    InputWithLabel(text: .constant(""))
+    InputWithLabel(label: "Label", placeholder: "Placeholder", text: .constant(""))
 }

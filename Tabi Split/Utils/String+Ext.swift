@@ -39,4 +39,18 @@ extension String {
     func getFirstName() -> String {
         return String(self.split(separator: " ").first ?? "")
     }
+    
+    func validatePhoneNumber () -> String? {
+        let phoneNumberFormatRegex = /^(628|08)[0-9]{0,}$/
+        if !self.contains(phoneNumberFormatRegex) {
+            return "Phone number should start with 628 or 08"
+        }
+        
+        let phoneNumberLengthRegex = /^[0-9]{9,12}$/
+        if !self.contains(phoneNumberLengthRegex) {
+            return "Phone number should contain 9-12 digits"
+        }
+        
+        return nil
+    }
 }

@@ -52,10 +52,10 @@ struct CustomButton: View {
                 callback()
             }
         } label: {
-            HStack (spacing: UIConfig.Spacing.Small) {
+            HStack (spacing: 8) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.title3)
+                        .font(.subheadline)
                         .foregroundStyle(.white)
                 }
                 Text("\(text)")

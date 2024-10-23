@@ -21,11 +21,11 @@ struct LoginView: View {
                 VStack(alignment: .leading, spacing: UIConfig.Spacing.Medium) {
                     InputWithLabel(label: "Phone Number",
                                    placeholder: "Your phone number",
-                                   text: $loginViewModel.phoneNumber)
+                                   type: .numberPad, text: $loginViewModel.phoneNumber, errorMessage: loginViewModel.phoneNumberError)
                     InputWithLabel(label: "Password",
                                    placeholder: "Password",
                                    isSecure: true,
-                                   text: $loginViewModel.password)
+                                   text: $loginViewModel.password, errorMessage: loginViewModel.passwordError)
                 }
                 Button {
                     print("forgot password")
@@ -37,13 +37,15 @@ struct LoginView: View {
             }
             
             VStack (spacing: UIConfig.Spacing.Medium) {
-                CustomButton(text: "Put Me In") {
-                    loginViewModel.login()
+                CustomButton(text: "Sign In") {
+                    withAnimation (nil) {
+                        loginViewModel.login()
+                    }
                 }
                 
                 DividerWithText()
                 
-                CustomButton(text: "Login With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
                     print("Login with Apple")
                 }
                 
@@ -53,13 +55,14 @@ struct LoginView: View {
                     Button {
                         routes.navigate(to: .RegisterView)
                     } label: {
-                        Text("Make one")
+                        Text("Sign Up")
                             .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
                             .foregroundStyle(.textBlue)
                     }
                 }
             }
         }
+        .fixedSize(horizontal: false, vertical: true)
         .padding()
         .navigationBarBackButtonHidden(true)
     }
