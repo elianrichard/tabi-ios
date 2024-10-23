@@ -11,22 +11,24 @@ import Foundation
 class RegisterViewModel {
     var name: String = "" {
         didSet {
-            isFormValid()
+            validateName()
         }
     }
     var phoneNumber: String = "" {
         didSet {
-            isFormValid()
+            validatePhoneNumber()
         }
     }
     var password: String = ""  {
         didSet {
-            isFormValid()
+            validatePassword()
+            validateConfirmPassword()
         }
     }
     var confirmPassword: String = "" {
         didSet {
-            isFormValid()
+            validatePassword()
+            validateConfirmPassword()
         }
     }
     
@@ -35,10 +37,14 @@ class RegisterViewModel {
     var passwordError: String?
     var confirmPasswordError: String?
     
-    var isSignUpEnabled = true
+    var isSignUpEnabled: Bool {
+        if (!hasSubmitted) { return true }
+        else { return isFormValid() }
+    }
     var hasSubmitted = false
     
     func validateName() {
+        guard hasSubmitted else { return }
         if name.isEmpty {
             nameError = "Name cannot be empty"
         } else {
@@ -47,10 +53,12 @@ class RegisterViewModel {
     }
     
     func validatePhoneNumber() {
+        guard hasSubmitted else { return }
         phoneNumberError = phoneNumber.validatePhoneNumber()
     }
     
     func validatePassword() {
+        guard hasSubmitted else { return }
         if password.count < 8 {
             passwordError = "Password must be at least 8 characters long"
         } else {
@@ -59,6 +67,7 @@ class RegisterViewModel {
     }
     
     func validateConfirmPassword() {
+        guard hasSubmitted else { return }
         if password.isEmpty {
             confirmPasswordError = "Password cannot be empty"
         } else {
@@ -70,27 +79,18 @@ class RegisterViewModel {
         }
     }
     
-    func validateAllFields() {
+    func isFormValid() -> Bool {
         validateName()
         validatePhoneNumber()
         validatePassword()
         validateConfirmPassword()
-    }
-    
-    func isFormValid() -> Bool {
-        guard hasSubmitted else { return true }
-        validateAllFields()
-        if (nameError == nil &&
+        
+        return (
+            nameError == nil &&
             phoneNumberError == nil &&
             passwordError == nil &&
             confirmPasswordError == nil
-        ) {
-            isSignUpEnabled = true
-            return true
-        } else {
-            isSignUpEnabled = false
-            return false
-        }
+        )
     }
     
     func register() {
