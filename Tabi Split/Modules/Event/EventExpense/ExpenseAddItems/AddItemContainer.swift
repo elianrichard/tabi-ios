@@ -33,7 +33,7 @@ struct AddItemContainer: View {
                         .padding([.top, .bottom], 5)
                     TextField("Item Name", text: Bindable(item).itemName)
                         .padding(10)
-                        .background(Color(.midLightGray))
+                        .background(.uiGray)
                         .cornerRadius(5)
                 } // Title
                 VStack(alignment: .leading){
@@ -49,7 +49,7 @@ struct AddItemContainer: View {
                                 eventExpenseViewModel.calculateTotal()
                             }
                             .padding(10)
-                            .background(Color(.midLightGray))
+                            .background(.uiGray)
                             .cornerRadius(5)
                     }
                     .onReceive(Just(item.itemPrice)) { _ in
@@ -63,7 +63,7 @@ struct AddItemContainer: View {
                                 .frame(width: 30, height: 30)
                                 .background(
                                     Circle()
-                                        .fill(item.itemQuantity != 1 ? Color(.lightGray) : Color(.midLightGray))
+                                        .fill(item.itemQuantity != 1 ? Color(.lightGray) : .uiGray)
                                 )
                                 .onTapGesture {
                                     item.itemQuantity-=1

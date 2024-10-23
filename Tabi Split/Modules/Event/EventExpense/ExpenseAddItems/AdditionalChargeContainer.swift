@@ -31,7 +31,7 @@ struct AdditionalChargeContainer: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
                 .foregroundColor(.black)
-                .background(Color(.midLightGray))
+                .background(.uiGray)
                 .cornerRadius(5)
             }
             HStack{
@@ -51,7 +51,7 @@ struct AdditionalChargeContainer: View {
                 price = item.amount != 0 ? String(item.amount.formatted()) : ""
             }
             .padding(10)
-            .background(Color(.midLightGray))
+            .background(.uiGray)
             .cornerRadius(5)
             
             Image(systemName: "trash")

@@ -10,7 +10,7 @@ import SwiftUI
 struct SettlementConfirmationView: View {
     @Environment(Routes.self) private var routes
     @State var status: SettlementCardTypeEnum = .WaitingPayment
-    @State var imageName: String? = nil
+    @State var imageName: UIImage? = nil
     
     var body: some View {
         VStack (spacing: 24) {
@@ -48,12 +48,12 @@ struct SettlementConfirmationView: View {
                                 .font(.title)
                             Text("Upload an image")
                         }
-                    } else if status == .WaitingPayment && imageName != nil {
-                        Image("\(imageName ?? "")")
+                    } else if status == .WaitingPayment, let image = imageName {
+                        Image(uiImage: image)
                             .resizable()
                             .scaledToFit()
                     } else if status == .WaitingConfirmation{
-                        Image("BuktiTransferBCA")
+                        Image(.samplePaymentReceipt)
                             .resizable()
                             .scaledToFit()
                     }
@@ -61,7 +61,7 @@ struct SettlementConfirmationView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .onTapGesture {
                     if (status == .WaitingPayment && imageName == nil) {
-                        imageName = "BuktiTransferBCA"
+                        imageName = UIImage(resource: .samplePaymentReceipt)
                     } else {
                         routes.navigate(to: .SettlementReceiptView)
                     }

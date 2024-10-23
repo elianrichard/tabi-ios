@@ -59,8 +59,8 @@ struct ReceiptUploadView: View {
                     Image(uiImage: receiptUploadViewModel.receiptImage ?? UIImage())
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                }else{
-                    Color(.midLightGray)
+                } else {
+                    Color(.uiGray)
                 }
             }
             .cornerRadius(20)
@@ -82,10 +82,10 @@ struct ReceiptUploadView: View {
             
             Spacer()
             
-            BottomButton(text: "Upload", color: Color(.midLightGray))
+            BottomButton(text: "Upload", color: Color(.uiGray))
                 .overlay(content: {
                     ZStack{
-                        receiptUploadViewModel.receiptImage != nil ? Color(.buttonBlue) : Color(.midLightGray)
+                        receiptUploadViewModel.receiptImage != nil ? Color(.buttonBlue) : Color(.uiGray)
                         Text("Upload")
                             .foregroundColor(receiptUploadViewModel.receiptImage != nil ? .white: .gray)
                     }

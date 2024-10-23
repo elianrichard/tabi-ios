@@ -71,7 +71,7 @@ struct ExpenseResultView: View {
                                 .font(.title2)
                         }
                         .padding()
-                        .background(Color(.midLightGray))
+                        .background(.uiGray)
                         .cornerRadius(20)
                     }
                 } else if eventExpenseViewModel.selectedMethod == .custom {
@@ -120,7 +120,7 @@ struct ExpenseResultView: View {
                             }
                         }
                         .padding()
-                        .background(Color(.midLightGray))
+                        .background(.uiGray)
                         .cornerRadius(10)
                     }
                 }
