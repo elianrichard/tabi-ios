@@ -17,8 +17,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
-//                HomeView()
-                LoginView()
+                HomeView()
             }
             .navigationDestination(for: Routes.Destination.self) { destination in
                 switch destination {
