@@ -18,10 +18,10 @@ struct HomeView: View {
                 HStack (spacing: 10){
                     HStack (spacing: 10){
                         Circle()
-                            .fill(Color(UIColor(hex: "#D9D9D9")))
+                            .fill(.uiGray)
                             .frame(width: 40)
-                        Text("Hi, You!")
-                            .font(.body)
+                        Text("Hi, User!")
+                            .font(.tabiHeadline)
                     }
                     Spacer()
                     Button {
