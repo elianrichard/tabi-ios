@@ -14,6 +14,8 @@ struct AddExpenseView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(Routes.self) private var routes
+    @State var toggleSeeAll: Bool = false
+    @State var settingsDetent = PresentationDetent.medium
     
     var body: some View {
         VStack {
@@ -67,34 +69,46 @@ struct AddExpenseView: View {
                     }
                 } // Paid  by
                 VStack(alignment: .leading){
-                    Text("Participants")
-                        .padding([.top, .bottom], 5)
-                    LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 5), spacing: 16){
-                        ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
-                            VStack{
-                                Circle()
-                                    .frame(width: 40, height: 40)
-                                    .background{
-                                        Circle()
-                                            .frame(width: 50, height: 50)
-                                            .foregroundColor(.gray)
-                                            .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 0.5)
-                                    }
-                                Text(person.name.getFirstName())
-                                    .font(.subheadline)
-                                    .lineLimit(1)
-                            }
-                            .onTapGesture {
-                                if !eventExpenseViewModel.selectedParticipants.contains(person){
-                                    eventExpenseViewModel.selectedParticipants.append(person)
-                                } else {
-                                    if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
-                                        eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
+                    HStack{
+                        Text("Participants")
+                            .padding([.top, .bottom], 5)
+                        Spacer()
+                        Button{
+                            toggleSeeAll.toggle()
+                        }label: {
+                            Text("See All")
+                        }
+                    }
+                    ScrollView(.vertical) {
+                        HStack(alignment: .center){
+                            ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
+                                VStack(alignment: .center){
+                                    Circle()
+                                        .frame(width: 40, height: 40)
+                                        .padding(5)
+                                        .background{
+                                            Circle()
+                                                .frame(width: 50, height: 50)
+                                                .foregroundColor(.gray)
+                                                .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 0.5)
+                                        }
+                                    Text(person.name.getFirstName())
+                                        .font(.subheadline)
+                                        .lineLimit(1)
+                                }
+                                .onTapGesture {
+                                    if !eventExpenseViewModel.selectedParticipants.contains(person){
+                                        eventExpenseViewModel.selectedParticipants.append(person)
+                                    } else {
+                                        if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
+                                            eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
                     .background(
                         Color(.uiGray)
@@ -106,10 +120,11 @@ struct AddExpenseView: View {
                         .padding([.top, .bottom], 5)
                     Menu {
                         ForEach(SplitMethod.allCases) { method in
-                            Button(method.splitDescription, action: {
+                            Button{
                                 eventExpenseViewModel.selectedMethod = method
-                            })
-                            .frame(maxWidth: .infinity)
+                            } label: {
+                                Text(method.splitDescription)
+                            }
                         }
                     } label: {
                         HStack{
@@ -187,6 +202,13 @@ struct AddExpenseView: View {
             } label: {
                 BottomButton(text: "Next")
             }
+        }
+        .sheet(isPresented: $toggleSeeAll) {
+            ShowAllParticipantsGrid(close: $toggleSeeAll)
+                .presentationDetents(
+                    [.medium, .large],
+                    selection: $settingsDetent
+                )
         }
         .padding()
         .navigationBarBackButtonHidden(true)

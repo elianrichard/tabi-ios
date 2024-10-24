@@ -93,7 +93,7 @@ struct ExpenseResultView: View {
                                     Text(item.itemName)
                                         .font(.subheadline)
                                     Spacer()
-                                    Text("x" + String(item.itemQuantity))
+                                    Text("x" + String(item.itemQuantity.formatted(.number)))
                                         .font(.subheadline)
                                     Text("Rp \((Float(item.itemQuantity) * item.itemPrice).formatPrice())")
                                         .frame(width: 100, alignment: .trailing)

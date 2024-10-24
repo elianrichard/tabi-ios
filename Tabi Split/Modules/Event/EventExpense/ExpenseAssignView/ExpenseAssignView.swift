@@ -86,10 +86,14 @@ struct ExpenseAssignView: View {
                                         .aspectRatio(contentMode: .fit)
                                         .frame(width: 10, height: 10)
                                 }
+                                .onTapGesture {
+                                    expenseAssignViewModel.selectedItem = item
+                                    expenseAssignViewModel.isShowingQuantityChangeSheet.toggle()
+                                }
                             }
                         }
                         Spacer()
-                        Text (String(item.itemQuantity) + "x")
+                        Text (String(item.itemQuantity.formatted(.number)) + "x")
                             .fontWeight(.bold)
                         if (expenseAssignViewModel.selectedAsignee != nil) {
                             VStack{
@@ -125,6 +129,15 @@ struct ExpenseAssignView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             expenseAssignViewModel.selectedAsignee = eventExpenseViewModel.selectedParticipants.first
+        }
+        .sheet(isPresented: Bindable(expenseAssignViewModel).isShowingQuantityChangeSheet) {
+            if let item = Bindable(eventExpenseViewModel).items.first(where: { $0.id == expenseAssignViewModel.selectedItem.id }){
+                QuantityChangeView(item: item, close: $expenseAssignViewModel.isShowingQuantityChangeSheet)
+                    .presentationDetents(
+                        [.medium, .large],
+                        selection: Bindable(expenseAssignViewModel).settingsDetent
+                    )
+            }
         }
     }
 }

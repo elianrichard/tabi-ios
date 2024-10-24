@@ -58,32 +58,11 @@ struct AddItemContainer: View {
                     VStack(alignment: .leading){
                         Text("Quantity")
                             .padding([.top, .bottom], 5)
-                        HStack{
-                            Text("-")
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    Circle()
-                                        .fill(item.itemQuantity != 1 ? Color(.lightGray) : .uiGray)
-                                )
-                                .onTapGesture {
-                                    item.itemQuantity-=1
-                                    eventExpenseViewModel.calculateTotal()
-                                }
-                                .disabled(item.itemQuantity == 1 ? true : false)
-                            Text(String(item.itemQuantity.formatted(.number)))
-                                .padding([.leading, .trailing], 10)
-                            Text("+")
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    Circle()
-                                        .fill(Color(.lightGray))
-                                )
-                                .onTapGesture {
-                                    item.itemQuantity+=1
-                                    eventExpenseViewModel.calculateTotal()
-                                }
-                        }
-                        .padding(10)
+                        QuantityCounter(quantity: Bindable(item).itemQuantity)
+                            .onChange(of: item.itemQuantity){
+                                eventExpenseViewModel.calculateTotal()
+                            }
+                            .padding(10)
                     }
                 }
             }

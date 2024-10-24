@@ -11,6 +11,9 @@ import SwiftUI
 @Observable
 class ExpenseAssignViewModel {
     var selectedAsignee: UserData? = nil
+    var isShowingQuantityChangeSheet: Bool = false
+    var selectedItem: ExpenseItem = ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 0)
+    var settingsDetent = PresentationDetent.medium
     
     func assignExpenseItem(item: ExpenseItem) {
         let isAssigned = item.assignees.filter { $0.user == selectedAsignee }.count > 0
