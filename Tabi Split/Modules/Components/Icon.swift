@@ -9,10 +9,11 @@ import SwiftUI
 
 struct Icon: View {
     var resource: ImageResource
-    var size: CGFloat = 20
+    var size: CGFloat
     
-    init(_ resource: ImageResource) {
+    init(_ resource: ImageResource, size: CGFloat = 20) {
         self.resource = resource
+        self.size = size
     }
     
     var body: some View {
