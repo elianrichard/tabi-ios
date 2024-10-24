@@ -24,4 +24,10 @@ struct UIConfig {
             static let Body: CGFloat = 15
         }
     }
+    
+    struct Spacing {
+        static let Large: CGFloat = 48
+        static let Medium: CGFloat = 24
+        static let Small: CGFloat = 12
+    }
 }
