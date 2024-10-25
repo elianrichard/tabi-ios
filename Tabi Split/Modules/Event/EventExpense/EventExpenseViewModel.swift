@@ -20,7 +20,7 @@ final class EventExpenseViewModel {
     var isEdit = false
     
     var expenseName: String = ""
-    var expenseTotalInput: String = ""
+    var expenseTotalInput: Float = 0
     var selectedParticipants: [UserData] = []
     var selectedMethod: SplitMethod?
     var selectedCoverer: UserData?
@@ -103,7 +103,7 @@ final class EventExpenseViewModel {
         selectedExpense = nil
         isEdit = false
         expenseName = ""
-        expenseTotalInput = ""
+        expenseTotalInput = 0
         selectedParticipants = []
         selectedMethod = nil
         selectedCoverer = nil
@@ -131,7 +131,7 @@ final class EventExpenseViewModel {
             selectedParticipants = expense.participants
             if (expense.splitMethod == SplitMethod.equally.id) {
                 totalSpending = expense.price
-                expenseTotalInput = expense.price.formatPrice()
+                expenseTotalInput = expense.price
             } else if (expense.splitMethod == SplitMethod.custom.id) {
                 calculatePeopleItems()
             }

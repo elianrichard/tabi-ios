@@ -11,7 +11,6 @@ struct RegisterView: View {
     @Environment(Routes.self) private var routes
     @State private var registerViewModel = RegisterViewModel()
     
-    
     var body: some View {
         VStack {
             Spacer()
@@ -109,4 +108,5 @@ struct RegisterView: View {
 
 #Preview {
     RegisterView()
+        .environment(Routes())
 }

@@ -14,203 +14,194 @@ struct AddExpenseView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(Routes.self) private var routes
-    @State var toggleSeeAll: Bool = false
-    @State var settingsDetent = PresentationDetent.medium
+    @State private var viewModel = AddExpenseViewModel()
     
     var body: some View {
         VStack {
             ZStack {
-                Text("Add Expense")
-                    .font(.title2)
+                Text("Add New Expense")
+                    .font(.tabiSubtitle)
                 HStack {
                     Button {
                         routes.navigateBack()
                     } label: {
                         Image(systemName: "chevron.left")
                             .foregroundStyle(.black)
+                            .font(.tabiSubtitle)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding([.bottom], 30)
             ScrollView() {
-                VStack(alignment: .leading){
-                    Text("Title")
-                        .padding([.top, .bottom], 5)
-                        TextField("Title", text: Bindable(eventExpenseViewModel).expenseName)
-                            .padding(10)
-                            .background(.highlightRed)
-                            .cornerRadius(5)
-                } // Title
-                VStack(alignment: .leading){
-                    Text("Paid by")
-                        .padding([.top, .bottom], 5)
-                    Menu {
-                        ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
-                            Button(person.name, action: {
-                                eventExpenseViewModel.selectedCoverer = person
-                            })
-                            .frame(maxWidth: .infinity)
-                        }
-                    } label: {
+                VStack(spacing: 20){
+                    InputWithLabel(label: "Expense Name",
+                                   placeholder: "Expense Name",
+                                   inputBackgroundColor: .bgWhite,
+                                   inputCornerRadius: 16,
+                                   text: Bindable(eventExpenseViewModel).expenseName)
+                    //                .onSubmit(registerViewModel.validateName)
+                    DropDownInput(
+                        label: "Paid by",
+                        items: eventViewModel.selectedEvent?.participants ?? [],
+                        keyPath: \UserData.name,
+                        backgroundColor: .bgWhite,
+                        cornerRadius: 16,
+                        selectedItem: Bindable(eventExpenseViewModel).selectedCoverer
+                    )
+                    VStack(alignment: .leading, spacing: 8){
                         HStack{
-                            if let coverer = eventExpenseViewModel.selectedCoverer {
-                                Text(coverer.name)
-                            } else{
-                                Text("Paid by")
-                            }
+                            Text("Select Participants")
+                                .font(.tabiBody)
                             Spacer()
-                            Image(systemName: "chevron.down")
+                            Button{
+                                viewModel.toggleSeeAll.toggle()
+                            }label: {
+                                Text("See All")
+                                    .font(.tabiBody)
+                            }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(10)
-                        .foregroundColor(.black)
-                        .background(Color(.uiGray))
-                        .cornerRadius(5)
-                    }
-                } // Paid  by
-                VStack(alignment: .leading){
-                    HStack{
-                        Text("Participants")
-                            .padding([.top, .bottom], 5)
-                        Spacer()
-                        Button{
-                            toggleSeeAll.toggle()
-                        }label: {
-                            Text("See All")
-                        }
-                    }
-                    ScrollView(.vertical) {
-                        HStack(alignment: .center){
-                            ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
-                                VStack(alignment: .center){
-                                    Circle()
-                                        .frame(width: 40, height: 40)
-                                        .padding(5)
-                                        .background{
-                                            Circle()
-                                                .frame(width: 50, height: 50)
-                                                .foregroundColor(.gray)
-                                                .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 0.5)
-                                        }
-                                    Text(person.name.getFirstName())
-                                        .font(.subheadline)
-                                        .lineLimit(1)
-                                }
-                                .onTapGesture {
-                                    if !eventExpenseViewModel.selectedParticipants.contains(person){
-                                        eventExpenseViewModel.selectedParticipants.append(person)
-                                    } else {
-                                        if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
-                                            eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
+                        ScrollView(.vertical) {
+                            HStack(alignment: .center){
+                                ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
+                                    VStack(alignment: .center){
+                                        Circle()
+                                            .frame(width: 40, height: 40)
+                                            .padding(5)
+                                            .background{
+                                                Circle()
+                                                    .frame(width: 50, height: 50)
+                                                    .foregroundColor(.gray)
+                                                    .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 0.5)
+                                            }
+                                        Text(person.name.getFirstName())
+                                            .font(.subheadline)
+                                            .lineLimit(1)
+                                    }
+                                    .onTapGesture {
+                                        if !eventExpenseViewModel.selectedParticipants.contains(person){
+                                            eventExpenseViewModel.selectedParticipants.append(person)
+                                        } else {
+                                            if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
+                                                eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        Color(.uiGray)
-                    )
-                    .cornerRadius(5)
-                } // Participants
-                VStack(alignment: .leading){
-                    Text("Split Method")
-                        .padding([.top, .bottom], 5)
-                    Menu {
-                        ForEach(SplitMethod.allCases) { method in
-                            Button{
-                                eventExpenseViewModel.selectedMethod = method
-                            } label: {
-                                Text(method.splitDescription)
-                            }
-                        }
-                    } label: {
-                        HStack{
-                            if let method = eventExpenseViewModel.selectedMethod {
-                                Text(method.splitDescription)
-                            } else{
-                                Text("Select Split Method")
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.down")
-                        }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(10)
-                        .foregroundColor(.black)
-                        .background(Color(.uiGray))
-                        .cornerRadius(5)
-                    }
-                } // Split Method
-                if eventExpenseViewModel.selectedMethod ==  .equally {
-                    VStack(alignment: .leading){
-                        Text("Total Bill (Rp)")
-                            .padding([.top, .bottom], 5)
-                        HStack{
-                            Text("Rp")
-                            TextField("", text: Bindable(eventExpenseViewModel).expenseTotalInput)
-                                .keyboardType(.numberPad)
-                                .onReceive(Just(eventExpenseViewModel.expenseTotalInput)) { _ in
-                                    eventExpenseViewModel.expenseTotalInput = eventExpenseViewModel.expenseTotalInput.formatPrice()
-                                }
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 16)
+                        .background(.bgWhite)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .foregroundStyle(.black)
+                        .font(.tabiBody)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.clear)
+                                .stroke(viewModel.isParticipantsError ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
                         }
-                        .padding(10)
-                        .background(Color(.uiGray))
-                        .cornerRadius(5)
-                    }
-                } // Input nominal kalau equally
-                VStack(alignment: .leading){
-                    Text("Payment Receipt")
-                        .padding([.top, .bottom], 5)
-                    VStack(spacing: 10){
-                        Image(systemName: "photo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.gray)
-                        Text("Upload an image")
-                            .foregroundColor(.gray)
-                    }
-                    .opacity(eventExpenseViewModel.uploadedReceiptImage != nil ? 0 : 1)
-                    .frame(height: 150)
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(.gray)
-                    .background{
-                        if eventExpenseViewModel.uploadedReceiptImage != nil{
-                            Image(uiImage: eventExpenseViewModel.uploadedReceiptImage ?? UIImage())
+                    } // Participants
+                    DropDownInput(
+                        label: "Split Bill Method",
+                        label2: "Split by",
+                        items: SplitMethod.allCases,
+                        keyPath: \.splitDescription,
+                        backgroundColor: .bgWhite,
+                        cornerRadius: 16,
+                        selectedItem: Bindable(eventExpenseViewModel).selectedMethod
+                    )
+                    if eventExpenseViewModel.selectedMethod ==  .equally {
+                        VStack(alignment: .leading){
+                            Text("Total Bill (Rp)")
+                                .padding([.top, .bottom], 5)
+                            HStack{
+                                Text("Rp")
+                                TextField("10.000", text: $viewModel.placeholderPrice)
+                                    .keyboardType(.numberPad)
+                                    .onChange(of: viewModel.placeholderPrice) {
+                                        viewModel.placeholderPrice = viewModel.placeholderPrice.formatPrice()
+                                        eventExpenseViewModel.expenseTotalInput = Float(viewModel.placeholderPrice.removeDots()) ?? 0
+                                    }
+                                    .padding(10)
+                                    .background(.uiGray)
+                                    .cornerRadius(5)
+                                    .onReceive(Just(eventExpenseViewModel.expenseTotalInput)) { _ in
+                                        viewModel.placeholderPrice =  eventExpenseViewModel.expenseTotalInput  != 0 ? eventExpenseViewModel.expenseTotalInput.formatPrice() : ""
+                                    }
+                            }
+                            .padding(10)
+                            .background(Color(.uiGray))
+                            .cornerRadius(5)
+                        }
+                    } // Input nominal kalau equally
+                    VStack(alignment: .leading, spacing: 8){
+                        HStack(spacing: 0){
+                            Text("Purchase Receipt ")
+                                .font(.tabiBody)
+                            Text("(optional)")
+                                .font(.tabiBody)
+                                .foregroundColor(.textGrey)
+                        }
+                        VStack(spacing: 10){
+                            Image(systemName: "photo")
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        }else{
-                            Color(.uiGray)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.gray)
+                            Text("Upload an image")
+                                .foregroundColor(.gray)
                         }
+                        .opacity(eventExpenseViewModel.uploadedReceiptImage != nil ? 0 : 1)
+                        .frame(height: 150)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 16)
+                        .foregroundStyle(.black)
+                        .font(.tabiBody)
+                        .background{
+                            if eventExpenseViewModel.uploadedReceiptImage != nil{
+                                Image(uiImage: eventExpenseViewModel.uploadedReceiptImage ?? UIImage())
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            }else{
+                                Color(.bgWhite)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(.clear)
+                                            .stroke(viewModel.isParticipantsError ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
+                                    }
+                            }
+                        }
+                        .onTapGesture {
+                            routes.navigate(to: .ReceiptUploadView)
+                        }
+                        .contentShape(Rectangle())
                     }
-                    .cornerRadius(5)
-                    .onTapGesture {
-                        routes.navigate(to: .ReceiptUploadView)
-                    }
-                    .contentShape(Rectangle())
                 }
             }
             Button {
                 if (eventExpenseViewModel.selectedMethod == .custom) {
                     routes.navigate(to: .ExpenseAddItemsView)
                 } else if (eventExpenseViewModel.selectedMethod == .equally) {
-                    eventExpenseViewModel.totalSpending = Float(eventExpenseViewModel.expenseTotalInput.removeDots()) ?? 0
+                    eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
                     routes.navigate(to: .ExpenseResultView)
                 }
             } label: {
                 BottomButton(text: "Next")
             }
         }
-        .sheet(isPresented: $toggleSeeAll) {
-            ShowAllParticipantsGrid(close: $toggleSeeAll)
+        .sheet(isPresented: $viewModel.toggleSeeAll) {
+            ShowAllParticipantsGrid(close: $viewModel.toggleSeeAll)
                 .presentationDetents(
                     [.medium, .large],
-                    selection: $settingsDetent
+                    selection: $viewModel.settingsDetent
                 )
         }
         .padding()
+        .background(.bgBlueElevated)
         .navigationBarBackButtonHidden(true)
     }
 }

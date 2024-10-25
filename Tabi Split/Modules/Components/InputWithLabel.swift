@@ -1,10 +1,11 @@
 //
-//  InputWithLabel.swift
-//  Tabi
+//  DropDownInput.swift
+//  Tabi Split
 //
-//  Created by ahmad naufal alfakhar on 03/10/24.
+//  Created by Dharmawan Ruslan on 24/10/24.
 //
 
+import Foundation
 import SwiftUI
 
 struct InputWithLabel: View {
@@ -12,6 +13,8 @@ struct InputWithLabel: View {
     var placeholder: String
     var isSecure: Bool = false
     var type: UIKeyboardType = .default
+    var inputBackgroundColor: Color = .uiWhite
+    var inputCornerRadius: CGFloat = .infinity
     
     @Binding var text: String
     var errorMessage: String?
@@ -22,7 +25,7 @@ struct InputWithLabel: View {
                 .font(.tabiBody)
             Input(placeholder: placeholder,
                   isSecure: isSecure,
-                  text: $text, isError: errorMessage != nil, type: type)
+                  text: $text, isError: errorMessage != nil, type: type, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
             if let message = errorMessage {
                 Text(message)
                     .font(.tabiBody)
@@ -35,3 +38,4 @@ struct InputWithLabel: View {
 #Preview {
     InputWithLabel(label: "Label", placeholder: "Placeholder", text: .constant(""))
 }
+
