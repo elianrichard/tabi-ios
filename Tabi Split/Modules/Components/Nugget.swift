@@ -7,25 +7,24 @@
 
 import SwiftUI
 
-struct NuggetView : View {
+struct Nugget : View {
     var text: String
     var isSelected: Bool
     
     var body: some View {
         Text("\(text)")
-            .padding(.horizontal, 14)
-            .padding(.vertical, 7)
-            .background(isSelected ? Color(UIColor(hex: "#C9C9C9")) : .clear)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 8)
+            .background(isSelected ? .buttonBlueSelected : .clear)
             .foregroundStyle(.black)
             .clipShape(RoundedRectangle(cornerRadius: 30))
             .overlay {
                 RoundedRectangle(cornerRadius: 30)
-                    .strokeBorder(Color(UIColor(hex: "#C9C9C9")), lineWidth: 1)
-                
+                    .strokeBorder(isSelected ? .buttonBlue : .uiGray, lineWidth: 1)
             }
     }
 }
 
 #Preview {
-    NuggetView(text: "All", isSelected: true)
+    Nugget(text: "All", isSelected: true)
 }

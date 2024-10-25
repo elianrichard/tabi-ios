@@ -29,55 +29,73 @@ struct EventCardView : View {
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
             HStack (spacing: 12) {
-                Circle()
-                    .fill(Color(UIColor(hex: "#D9D9D9")))
+                Image(.sampleEventPicture)
+                    .resizable()
+                    .scaledToFit()
                     .frame(width: 40)
+                    .clipShape(Circle())
                 VStack (alignment: .leading, spacing: 4) {
                     Text("\(event.eventName)")
-                        .font(.body)
-                        HStack (spacing: 8) {
+                        .font(.tabiHeadline)
+                    HStack (alignment: .center, spacing: 8) {
                             Circle()
-                                .fill(event.completionDate != nil ? .gray : .green)
-                                .frame(width: 10)
+                                .fill(event.completionDate != nil ? .gray : .buttonGreen)
+                                .frame(width: 12)
                             Text(event.completionDate != nil
                                  ? "Completed on \(Date().customDateFormat("dd MMMM yyyy").string(from: event.completionDate ?? Date()))"
                                  : "Ongoing Event"
-                            ).font(.caption)
+                            )
+                            .font(.tabiBody)
                         }
                 }
             }
             Rectangle()
                 .fill(Color(UIColor(hex: "#D9D9D9")))
                 .frame(height: 1)
-            HStack (spacing: 32) {
+            HStack {
                 HStack (spacing: -20) {
-                    Circle()
-                        .fill(Color(UIColor(hex: "#C2C2C2")))
+                    Image(.samplePersonProfile1)
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D3D3D3")))
+                        .clipShape(Circle())
+                        .zIndex(3)
+                    Image(.samplePersonProfile2)
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 40)
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
+                        .clipShape(Circle())
+                        .zIndex(2)
+                    Image(.samplePersonProfile3)
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 40)
-                    
+                        .clipShape(Circle())
+                        .zIndex(1)
                 }
+                Spacer()
                 Text(isNew ? "New Event" : status == .settled ? "\(status.statusDisplay)" : "\(status.statusDisplay) \(String(format: "%.0f", event.userEventBalance).formatPrice())")
-                    .font(.subheadline)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(isNew ? .white : status.statusColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .font(.tabiBody)
+                    .padding(.vertical, UIConfig.Spacing.Small)
+                    .padding(.horizontal, UIConfig.Spacing.Large)
+                    .background(isNew ? .uiGray : status.statusColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(UIColor(hex: "#EBEBEB")))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.clear)
+                .stroke(.uiGray, lineWidth: 2)
+        }
     }
 }
 
 #Preview {
-    EventCardView(
-        event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0)
-    )
+    VStack {
+        EventCardView(
+            event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0)
+        )
+    }
 }

@@ -17,9 +17,12 @@ struct HomeView: View {
             VStack (alignment: .leading, spacing: 0) {
                 HStack (spacing: 10){
                     HStack (spacing: 10){
-                        Circle()
-                            .fill(.uiGray)
+                        Image(.sampleUserProfile1)
+                            .resizable()
+                            .scaledToFit()
                             .frame(width: 40)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.2),radius: 4, y: 3)
                         Text("Hi, User!")
                             .font(.tabiHeadline)
                     }
@@ -27,22 +30,22 @@ struct HomeView: View {
                     Button {
                         print("Notifications")
                     } label: {
-                        Image(systemName: "bell.circle.fill")
-                            .font(.title)
+                        Image(systemName: "bell")
+                            .font(.title3)
                             .foregroundStyle(.black)
                     }
                 }
                 Spacer(minLength: 52)
                 VStack (alignment: .leading, spacing: 15) {
                     Text("Events")
-                        .font(.title)
+                        .font(.tabiLargeTitle)
                     ScrollView (.horizontal, showsIndicators: false) {
                         HStack (spacing: 10) {
                             ForEach(HomeFilterEnum.allCases) { item in
                                 Button {
                                     homeViewModel.selectedFilter = item
                                 } label: {
-                                    NuggetView(text: item.displayName, isSelected: item == homeViewModel.selectedFilter)
+                                    Nugget(text: item.displayName, isSelected: item == homeViewModel.selectedFilter)
                                 }
                             }
                         }
@@ -66,7 +69,7 @@ struct HomeView: View {
                         RoundedRectangle(cornerRadius: 24)
                             .fill(Color(UIColor(hex: "#D9D9D9")))
                             .frame(width: 300, height: 180)
-                        Text("You don't have any\nevents yet.")
+                        Text("You don't have any\nevent yet...")
                             .multilineTextAlignment(.center)
                             .font(.title3)
                     }
@@ -84,10 +87,10 @@ struct HomeView: View {
                         routes.navigate(to: .EventFormView)
                     } label: {
                         Image(systemName: "plus")
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.white)
                             .font(.title)
-                            .frame(width: 70, height: 70)
-                            .background(Color(UIColor(hex: "#EBEBEB")))
+                            .frame(width: 56, height: 56)
+                            .background(.buttonBlue)
                             .clipShape(RoundedRectangle(cornerRadius: 50))
                     }
                 }
