@@ -21,11 +21,11 @@ struct LoginView: View {
                 VStack(alignment: .leading, spacing: UIConfig.Spacing.Medium) {
                     InputWithLabel(label: "Phone Number",
                                    placeholder: "Your phone number",
-                                   type: .numberPad, text: $loginViewModel.phoneNumber, errorMessage: loginViewModel.phoneNumberError)
+                                   text: $loginViewModel.phoneNumber, errorMessage: loginViewModel.phoneNumberError)
                     InputWithLabel(label: "Password",
                                    placeholder: "Password",
-                                   isSecure: true,
-                                   text: $loginViewModel.password, errorMessage: loginViewModel.passwordError)
+                                   text: $loginViewModel.password,
+                                   errorMessage: loginViewModel.passwordError, isSecure: true)
                 }
                 Button {
                     print("forgot password")

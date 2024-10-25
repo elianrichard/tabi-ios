@@ -44,8 +44,8 @@ struct RegisterView: View {
                 
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
-                               isSecure: true,
-                               text: $registerViewModel.password)
+                               text: $registerViewModel.password,
+                               isSecure: true)
                 .onSubmit(registerViewModel.validatePassword)
                 if registerViewModel.hasAttemptedValidation, let error = registerViewModel.passwordError {
                     Text(error)
@@ -56,8 +56,8 @@ struct RegisterView: View {
                 
                 InputWithLabel(label: "Confirm Password",
                                placeholder: "Confirm Password",
-                               isSecure: true,
-                               text: $registerViewModel.confirmPassword)
+                               text: $registerViewModel.confirmPassword,
+                               isSecure: true)
                 if !registerViewModel.confirmPassword.isEmpty, let error = registerViewModel.confirmPasswordError {
                     HStack {
                         Image(systemName: "x.circle.fill")

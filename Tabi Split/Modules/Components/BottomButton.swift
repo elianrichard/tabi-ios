@@ -11,11 +11,13 @@ import SwiftUI
 struct BottomButton: View {
     @State var text: String = "Next"
     @State var color: Color = Color(.buttonBlue)
+    @State var isDisabled: Bool = false
     
     var body: some View {
         VStack(alignment: .center){
             Text(text)
-                .foregroundColor(.white)
+                .font(.headline)
+                .foregroundColor(.bgWhite)
         }
         .frame(height: 40)
         .frame(maxWidth: .infinity, alignment: .center)

@@ -12,7 +12,6 @@ struct DropDownInput<T: Identifiable & Hashable>: View {
     var label2: String?
     let items: [T]
     let keyPath: KeyPath<T, String>
-    var isError: Bool = false
     var backgroundColor: Color = .uiWhite
     var cornerRadius: CGFloat = .infinity
     
@@ -49,7 +48,7 @@ struct DropDownInput<T: Identifiable & Hashable>: View {
                 .overlay {
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .fill(.clear)
-                        .stroke(isError ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
+                        .stroke(errorMessage != nil ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
                 }
             }
             if let message = errorMessage {

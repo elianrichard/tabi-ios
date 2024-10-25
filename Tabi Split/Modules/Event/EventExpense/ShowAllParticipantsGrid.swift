@@ -14,7 +14,9 @@ struct ShowAllParticipantsGrid: View {
     @Binding var close: Bool
     
     var body: some View {
-        VStack{
+        VStack(alignment: .leading, spacing: 20){
+            Text("Select Participants")
+                .font(.tabiTitle)
             ScrollView{
                 LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 5), spacing: 16){
                     ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
@@ -24,8 +26,12 @@ struct ShowAllParticipantsGrid: View {
                                 .background{
                                     Circle()
                                         .frame(width: 50, height: 50)
-                                        .foregroundColor(.gray)
-                                        .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 0.5)
+                                        .foregroundColor(.buttonGreen)
+                                        .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 1)
+                                    Circle()
+                                        .frame(width: 45, height: 45)
+                                        .foregroundColor(.bgWhite)
+                                        .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 1)
                                 }
                             Text(person.name.getFirstName())
                                 .font(.subheadline)
@@ -42,16 +48,16 @@ struct ShowAllParticipantsGrid: View {
                         }
                     }
                 }
-                .padding()
-                .background(
-                    Color(.uiGray)
-                )
-                .cornerRadius(5)
-            }
-            BottomButton(text: "Save")
-                .onTapGesture {
-                    close.toggle()
+                .padding(12)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.clear)
+                        .stroke(.bgGreyOverlay, lineWidth: 0.5)
                 }
+            }
+            CustomButton(text: "Done", isEnabled: !eventExpenseViewModel.selectedParticipants.isEmpty ? true : false) {
+                close.toggle()
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding()
