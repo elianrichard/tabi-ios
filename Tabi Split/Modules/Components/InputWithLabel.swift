@@ -73,7 +73,7 @@ struct InputWithLabel: View {
                       isSecure: isSecure,
                       text: $text, isError: errorMessage != nil, type: inputTypePicked.keyboard, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
             case .price:
-                PriceInput(price: $price, type: inputTypePicked.keyboard, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
+                PriceInput(placeholder: placeholder, price: $price, type: inputTypePicked.keyboard, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
             case .phone:
                 Input(placeholder: placeholder,
                       isSecure: isSecure,

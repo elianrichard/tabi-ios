@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct PriceInput: View {
+    var placeholder: String = ""
     @State var placeholderPrice: String = ""
     @Binding var price: Float
     var type: UIKeyboardType = .numberPad
@@ -19,7 +20,7 @@ struct PriceInput: View {
     var body: some View {
         HStack{
             Text("Rp")
-            TextField("10.000", text: $placeholderPrice)
+            TextField(placeholder, text: $placeholderPrice)
                 .keyboardType(type)
                 .onChange(of: placeholderPrice) {
                     placeholderPrice = placeholderPrice.formatPrice()
