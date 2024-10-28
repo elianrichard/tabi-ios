@@ -16,10 +16,48 @@ struct EventDetailView: View {
     let rect = CGRect(x: 0, y: 0, width: 500, height: 100)
     var body: some View {
         ZStack {
+            TopNavigation (title: eventViewModel.eventName, isCircleBackButton: true) {
+                Menu {
+                    Button("Edit Event") {
+                        routes.navigate(to: .EventFormView)
+                    }
+                    if !eventViewModel.isEventCompleted {
+                        Button("Complete Event") {
+                            showingCompletionAlert = true
+                        }
+                    }
+                    Button("Delete Event") {
+                        eventViewModel.handleDeleteEvent()
+                        routes.navigateBack()
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.tabiTitle1)
+                        .foregroundStyle(.textWhite)
+                        .frame(width: 40, height: 40)
+                }
+            }
+            
             VStack (spacing: 0) {
-                Rectangle()
-                    .fill(Color(UIColor(hex: "#F1F1F1")))
-                    .frame(maxWidth: .infinity, maxHeight: 200)
+                
+                ZStack {
+                    Rectangle()
+                        .fill(.black.opacity(0.5))
+                        .frame(maxWidth: .infinity, maxHeight: 200)
+                        .overlay{
+                            ZStack {
+                                Image(.sampleEventBanner)
+                                    .resizable()
+                                    .scaledToFill()
+                                Color(.black)
+                                    .opacity(0.5)
+                            }
+                        }
+                        .clipped()
+                    
+                }
+                
+                
                 HStack {
                     if let selectedEvent = eventViewModel.selectedEvent {
                         ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
@@ -39,6 +77,7 @@ struct EventDetailView: View {
                         }
                     }                }
                 .padding(.top, -20)
+                
                 VStack {
                     if false {
                         VStack (alignment: .center, spacing: 10) {
@@ -89,42 +128,7 @@ struct EventDetailView: View {
             }
             .ignoresSafeArea()
             
-            VStack {
-                ZStack {
-                    Text("\(eventViewModel.selectedEvent?.eventName ?? "undefined")")
-                        .font(.title2)
-                    HStack {
-                        Button {
-                            routes.navigateBack()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .foregroundStyle(.black)
-                        }
-                        Spacer()
-                        Menu {
-                            Button("Edit Event") {
-                                routes.navigate(to: .EventFormView)
-                            }
-                            if !eventViewModel.isEventCompleted {
-                                Button("Complete Event") {
-                                    showingCompletionAlert = true
-                                }
-                            }
-                            Button("Delete Event") {
-                                eventViewModel.handleDeleteEvent()
-                                routes.navigateBack()
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .foregroundStyle(.black)
-                                .frame(width: 40, height: 40)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                Spacer()
-            }
-            .padding()
+            
             
             VStack {
                 if eventViewModel.isEventCompleted {

@@ -11,7 +11,7 @@ struct UIConfig {
     struct Font {
         struct Name {
             static let Bold = "Figtree-Bold"
-            static let Semibold = "Figtree-Semibold"
+            static let Semibold = "Figtree-SemiBold"
             static let Medium = "Figtree-Medium"
             static let Regular = "Figtree-Regular"
         }
