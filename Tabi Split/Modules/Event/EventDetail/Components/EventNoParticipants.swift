@@ -15,7 +15,7 @@ struct EventNoParticipants : View {
                 .scaledToFit()
                 .frame(width: 240, height: 240)
             Text("You’re the only participant here")
-                .font(.tabiTitle2)
+                .font(.tabiSubtitle)
             Button {
                 print("invite friend")
             } label: {

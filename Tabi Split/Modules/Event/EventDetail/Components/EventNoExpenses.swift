@@ -16,7 +16,7 @@ struct EventNoExpenses: View {
                 .frame(width: 200)
             Text("We don't have any\nexpenses yet...")
                 .multilineTextAlignment(.center)
-                .font(.tabiTitle2)
+                .font(.tabiSubtitle)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }

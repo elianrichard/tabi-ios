@@ -25,7 +25,7 @@ struct EventSummarySpendingCard: View {
                     .minimumScaleFactor(0.8)
                     .multilineTextAlignment(.leading)
                 Text("Rp \(String(format: "%.0f", amount).formatPrice())")
-                    .font(.tabiTitle2)
+                    .font(.tabiSubtitle)
                     .fontWeight(.medium)
                     .multilineTextAlignment(.leading)
             }

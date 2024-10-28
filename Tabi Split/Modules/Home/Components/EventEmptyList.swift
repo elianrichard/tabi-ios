@@ -16,7 +16,7 @@ struct EventEmptyList: View {
                 .frame(width: 200)
             Text("You don't have any\nevents yet...")
                 .multilineTextAlignment(.center)
-                .font(.tabiTitle2)
+                .font(.tabiSubtitle)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }

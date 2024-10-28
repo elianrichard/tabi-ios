@@ -113,8 +113,8 @@ struct EventCard : View {
 }
 
 #Preview {
-    var tempExpense: [Expense] = [Expense(name: "Test", coverer: UserData(name: "test", phone: "test"), price: 10_000, splitMethod: .equally)]
-    var tempParticipants: [UserData] = [
+    let tempExpense: [Expense] = [Expense(name: "Test", coverer: UserData(name: "test", phone: "test"), price: 10_000, splitMethod: .equally)]
+    let tempParticipants: [UserData] = [
         UserData(name: "A", phone: "A"),
         UserData(name: "A", phone: "A"),
         UserData(name: "A", phone: "A"),

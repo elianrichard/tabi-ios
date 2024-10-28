@@ -26,7 +26,7 @@ struct TopNavigation<Content: View>: View {
         VStack {
             ZStack {
                 Text(title)
-                    .font(.tabiTitle2)
+                    .font(.tabiSubtitle)
                     .foregroundStyle(.textWhite)
                 HStack {
                     Button {

@@ -19,7 +19,7 @@ struct EventSummaryView: View {
                     Text("You should pay")
                         .font(.tabiBody)
                     Text("Rp 250.000")
-                        .font(.tabiTitle1)
+                        .font(.tabiTitle)
                 }
                 Icon(systemName: "chevron.right", color: .textWhite, size: 8)
                     .offset(x: 2)
