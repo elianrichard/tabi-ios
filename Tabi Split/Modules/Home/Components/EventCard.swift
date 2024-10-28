@@ -76,7 +76,7 @@ struct EventCard : View {
                 Spacer()
                 Text(isNew ? "New Event" : status == .settled ? "\(status.statusDisplay)" : "\(status.statusDisplay) \(String(format: "%.0f", event.userEventBalance).formatPrice())")
                     .font(.tabiBody)
-                    .padding(.vertical, UIConfig.Spacing.Small)
+                    .padding(.vertical, UIConfig.Spacing.Tight)
                     .padding(.horizontal, UIConfig.Spacing.Large)
                     .background(isNew ? .uiGray : status.statusColor)
                     .clipShape(RoundedRectangle(cornerRadius: 12))

@@ -63,7 +63,7 @@ struct CustomButton: View {
                 Text("\(text)")
                     .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
             }
-            .padding(.vertical, UIConfig.Spacing.Small)
+            .padding(.vertical, UIConfig.Spacing.Tight)
             .frame(maxWidth: .infinity)
             .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
             .clipShape(RoundedRectangle(cornerRadius: .infinity))
