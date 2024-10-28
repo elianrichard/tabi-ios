@@ -17,8 +17,8 @@ struct AddExpenseView: View {
     @State var viewModel: AddExpenseViewModel?
     
     var body: some View {
-        VStack {
-            CustomNavTitle(title: "Add New Expenses")
+        VStack (spacing: UIConfig.Spacing.Regular) {
+            TopNavigation(title: "Add New Expenses")
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20){
                     InputWithLabel(label: "Expense Name",

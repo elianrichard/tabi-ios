@@ -15,7 +15,7 @@ struct EventDetailView: View {
     
     var body: some View {
         ZStack {
-            TopNavigation (title: eventViewModel.eventName, isCircleBackButton: true) {
+            TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
                 Menu {
                     Button("Edit Event") {
                         routes.navigate(to: .EventFormView)
@@ -32,7 +32,7 @@ struct EventDetailView: View {
                 } label: {
                     Icon(systemName: "ellipsis", color: .textWhite)
                 }
-            }
+            })
             
             VStack (spacing: 0) {
                 EventBanner()
