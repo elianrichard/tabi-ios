@@ -29,6 +29,7 @@ struct RegisterView: View {
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
                                text: $registerViewModel.password,
+                               errorMessage: registerViewModel.passwordError,
                                isSecure: true)
                 InputWithLabel(label: "Confirm Password",
                                placeholder: "Confirm Password",
