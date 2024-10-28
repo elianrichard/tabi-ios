@@ -78,9 +78,9 @@ enum EventCardStatusEnum {
     var statusDisplay: String {
         switch self {
         case .credit:
-            "Ows you"
+            "Receive"
         case .debt:
-            "You owe"
+            "Pay"
         case .settled:
             "Settled"
         }
@@ -89,11 +89,11 @@ enum EventCardStatusEnum {
     var statusColor: Color {
         switch self {
         case .credit:
-            Color(UIColor(hex: "#CBFFCC"))
+                .highlightGreen
         case .debt:
-            Color(UIColor(hex: "#FFCBCC"))
+                .highlightRed
         case .settled:
-            Color(UIColor(hex: "#B8B5B5"))
+                .bgBlueElevated
         }
     }
 }

@@ -26,6 +26,8 @@ struct EventCard : View {
         }
     }
     
+    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
+    
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
             HStack (spacing: 12) {
@@ -38,48 +40,66 @@ struct EventCard : View {
                     Text("\(event.eventName)")
                         .font(.tabiHeadline)
                     HStack (alignment: .center, spacing: 8) {
-                            Circle()
-                                .fill(event.completionDate != nil ? .gray : .buttonGreen)
-                                .frame(width: 12)
-                            Text(event.completionDate != nil
-                                 ? "Completed on \(Date().customDateFormat("dd MMMM yyyy").string(from: event.completionDate ?? Date()))"
-                                 : "Ongoing Event"
-                            )
-                            .font(.tabiBody)
-                        }
+                        Circle()
+                            .fill(event.completionDate != nil ? .buttonPurple : .buttonGreen)
+                            .frame(width: 12)
+                        Text(event.completionDate != nil
+                             ? "Completed on \(Date().customDateFormat("dd MMMM yyyy").string(from: event.completionDate ?? Date()))"
+                             : "Ongoing Event"
+                        )
+                        .font(.tabiBody)
+                    }
                 }
             }
             Rectangle()
                 .fill(Color(UIColor(hex: "#D9D9D9")))
                 .frame(height: 1)
-            HStack {
-                HStack (spacing: -20) {
-                    Image(.samplePersonProfile1)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40)
-                        .clipShape(Circle())
-                        .zIndex(3)
-                    Image(.samplePersonProfile2)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40)
-                        .clipShape(Circle())
-                        .zIndex(2)
-                    Image(.samplePersonProfile3)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40)
-                        .clipShape(Circle())
-                        .zIndex(1)
+            HStack (spacing: UIConfig.Spacing.Tight) {
+                HStack (spacing: -6) {
+                    ForEach(Array(event.participants.enumerated()), id: \.offset) { index, user in
+                        if (index < 4) {
+                            if (event.participants.count > 4 && index == 3) {
+                                Circle()
+                                    .fill(.uiGray)
+                                    .frame(width: 40)
+                                    .overlay {
+                                        Text("+\(event.participants.count - 3)")
+                                            .font(.tabiBody)
+                                    }
+                            } else {
+                                Image(images.randomElement() ?? images[0])
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 40)
+                                    .clipShape(Circle())
+                                    .zIndex(Double(4-index))
+                            }
+                        }
+                    }
+                    if (event.participants.count < 4) {
+                        ForEach(Array(0 ..< (4-event.participants.count)), id: \.self) { _ in
+                            Circle()
+                                .frame(width: 40)
+                                .opacity(0)
+                        }
+                    }
                 }
-                Spacer()
-                Text(isNew ? "New Event" : status == .settled ? "\(status.statusDisplay)" : "\(status.statusDisplay) \(String(format: "%.0f", event.userEventBalance).formatPrice())")
-                    .font(.tabiBody)
-                    .padding(.vertical, UIConfig.Spacing.Tight)
-                    .padding(.horizontal, UIConfig.Spacing.Large)
-                    .background(isNew ? .uiGray : status.statusColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                HStack {
+                    if (isNew) {
+                        Text("New Event")
+                    } else if (status == .settled) {
+                        Text(status.statusDisplay)
+                    } else {
+                        Text(status.statusDisplay)
+                        Spacer()
+                        Text("Rp \(String(format: "%.0f", abs(event.userEventBalance)).formatPrice())")
+                    }
+                }
+                .font(.tabiBody)
+                .padding(.horizontal, UIConfig.Spacing.Tight)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(isNew ? .uiWhite : status.statusColor)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
         .padding()
@@ -93,9 +113,45 @@ struct EventCard : View {
 }
 
 #Preview {
-    VStack {
+    var tempExpense: [Expense] = [Expense(name: "Test", coverer: UserData(name: "test", phone: "test"), price: 10_000, splitMethod: .equally)]
+    var tempParticipants: [UserData] = [
+        UserData(name: "A", phone: "A"),
+        UserData(name: "A", phone: "A"),
+        UserData(name: "A", phone: "A"),
+        UserData(name: "A", phone: "A"),
+        UserData(name: "A", phone: "A"),
+        UserData(name: "A", phone: "A"),
+        UserData(name: "A", phone: "A"),
+        UserData(name: "A", phone: "A"),
+    ]
+    
+    ScrollView {
         EventCard(
-            event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0)
+            event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, participants: tempParticipants)
         )
-    }
+        EventCard(
+            event: EventData(eventName: "New York Trip",
+                             completionDate: nil,
+                             userEventBalance: 2_500_000,
+                             participants: tempParticipants,
+                             expenses: tempExpense
+                            )
+        )
+        EventCard(
+            event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: -1_000_000,
+                             participants: tempParticipants, expenses: tempExpense)
+        )
+        EventCard(
+            event: EventData(eventName: "New York Trip", completionDate: Date(), userEventBalance: 500_000,
+                             participants: tempParticipants, expenses: tempExpense)
+        )
+        EventCard(
+            event: EventData(eventName: "New York Trip", completionDate: Date(), userEventBalance: -100_000,
+                             participants: tempParticipants, expenses: tempExpense)
+        )
+        EventCard(
+            event: EventData(eventName: "New York Trip", completionDate: Date(), userEventBalance: 0,
+                             participants: tempParticipants, expenses: tempExpense)
+        )
+    }.padding()
 }
