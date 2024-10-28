@@ -42,6 +42,8 @@ struct CustomButton: View {
     var type: ButtonType = .primary
     var isEnabled: Bool = true
     var icon: String?
+    var iconResource: ImageResource?
+    var iconSize: CGFloat = 20
     var customBackgroundColor: Color?
     var customTextColor: Color?
     var callback: () -> Void
@@ -54,9 +56,9 @@ struct CustomButton: View {
         } label: {
             HStack (spacing: 8) {
                 if let icon = icon {
-                    Image(systemName: icon)
-                        .font(.subheadline)
-                        .foregroundStyle(.white)
+                    Icon(systemName: icon, color: .textWhite, size: iconSize)
+                } else if let resource = iconResource {
+                    Icon(resource, color: .textWhite, size: iconSize)
                 }
                 Text("\(text)")
                     .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))

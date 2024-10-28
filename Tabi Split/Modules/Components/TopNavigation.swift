@@ -35,12 +35,10 @@ struct TopNavigation<Content: View>: View {
                         }
                         routes.navigateBack()
                     } label: {
-                        Image(systemName: "arrow.left")
+                        Icon(systemName: "arrow.left", size: 14)
                             .frame(width: 28, height: 28)
                             .background(isCircleBackButton ? .white : .clear)
                             .cornerRadius(.infinity)
-                            .foregroundStyle(.textBlack)
-                            .font(.tabiBody)
                     }
                     Spacer()
                     RightToolbar

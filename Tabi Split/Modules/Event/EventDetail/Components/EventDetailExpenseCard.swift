@@ -7,37 +7,44 @@
 
 import SwiftUI
 
-struct EventDetailCardView : View {
+struct EventDetailExpenseCard : View {
     var expense: Expense
     @Environment(Routes.self) private var routes
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
 
     var body : some View {
         HStack (alignment: .top) {
-            HStack (alignment: .top, spacing: 16) {
-                Circle()
-                    .fill(Color(UIColor(hex: "#D9D9D9")))
-                    .frame(width: 40)
+            HStack (alignment: .center, spacing: 16) {
+                Image(.sampleExpenseCard)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
                 VStack (alignment: .leading, spacing: 4) {
                     Text("\(expense.name.capitalized)")
-                        .font(.body)
+                        .font(.tabiHeadline)
                     Text("\(expense.coverer.name.getFirstName().capitalized) paid this bill")
-                        .foregroundStyle(.black.opacity(0.5))
-                        .font(.subheadline)
+                        .foregroundStyle(.textGrey)
+                        .font(.tabiBody)
                 }
             }
             Spacer()
-            VStack (alignment: .trailing) {
+            VStack (alignment: .trailing, spacing: 4) {
                 Text("Rp \(String(format: "%.0f", expense.price).formatPrice())")
+                    .font(.tabiHeadline)
+                    .foregroundStyle(.textBlack)
                 Text("\(expense.dateOfCreation.toProperText())")
-                    .font(.subheadline)
-                    .foregroundStyle(.black.opacity(0.5))
+                    .font(.tabiBody)
+                    .foregroundStyle(.textGrey)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(16)
-        .background(Color(UIColor(hex: "#EBEBEB")))
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(.uiGray, lineWidth: 1)
+        }
         .onTapGesture {
             eventExpenseViewModel.selectedExpense = expense
             routes.navigate(to: .ExpenseResultView)
@@ -46,8 +53,8 @@ struct EventDetailCardView : View {
 }
 
 #Preview {
-    EventDetailCardView(expense:
-                            Expense(name: "Sate", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
+    EventDetailExpenseCard(expense:
+                            Expense(name: "Kain Tenun Jepara", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
     .environment(Routes())
     .environment(EventExpenseViewModel())
 }

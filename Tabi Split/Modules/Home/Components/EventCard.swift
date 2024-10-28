@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EventCardView : View {
+struct EventCard : View {
     var event: EventData
     var status: EventCardStatusEnum = .settled
     var isNew: Bool = false
@@ -94,7 +94,7 @@ struct EventCardView : View {
 
 #Preview {
     VStack {
-        EventCardView(
+        EventCard(
             event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0)
         )
     }
