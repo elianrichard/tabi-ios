@@ -76,22 +76,15 @@ struct PersonItem: Identifiable {
 }
 
 enum SplitMethod: String, Identifiable {
-    case equally
-    case custom
+    case equally = "equally"
+    case custom = "custom"
     
-    var id: String{
-        switch self{
-        case .equally:
-            "equally"
-        case .custom:
-            "custom"
-        }
-    }
-
+    var id: String { rawValue }
+    
     var splitDescription: String {
         switch self {
         case .equally:
-            "Splitted Equally"
+            "Equally Splitted"
         case .custom:
             "Custom Splitted"
         }

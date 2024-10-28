@@ -13,6 +13,8 @@ struct Input: View {
     @Binding var text: String
     var isError: Bool = false
     var type: UIKeyboardType = .default
+    var backgroundColor: Color = .uiWhite
+    var cornerRadius: CGFloat = .infinity
     
     @State var isShowPassword = false
     
@@ -46,12 +48,12 @@ struct Input: View {
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 16)
-        .background(.uiWhite)
-        .clipShape(RoundedRectangle(cornerRadius: .infinity))
+        .background(backgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         .foregroundStyle(.black)
         .font(.tabiBody)
         .overlay {
-            RoundedRectangle(cornerRadius: .infinity)
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .fill(.clear)
                 .stroke(isError ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
         }

@@ -18,8 +18,8 @@ struct UIConfig {
         
         struct Size {
             static let LargeTitle: CGFloat = 32
-            static let Title1: CGFloat = 24
-            static let Title2: CGFloat = 20
+            static let Title: CGFloat = 24
+            static let Subtitle: CGFloat = 20
             static let Headline: CGFloat = 17
             static let Body: CGFloat = 15
         }
