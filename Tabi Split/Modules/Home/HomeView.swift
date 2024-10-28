@@ -20,7 +20,7 @@ struct HomeView: View {
                 EventFilterList(homeViewModel: homeViewModel)
                 Spacer(minLength: 30)
                 if (!homeViewModel.filteredEvents.isEmpty) {
-                    ScrollView {
+                    ScrollView (showsIndicators: false) {
                         VStack (spacing: 11) {
                             ForEach(homeViewModel.filteredEvents) { event in
                                 EventCard(event: event)
@@ -31,12 +31,24 @@ struct HomeView: View {
                                     }
                             }
                         }
+                        .padding(.bottom, 90)
                     }
                 } else {
                     EventEmptyList()
                 }
             }
             .padding()
+            
+            if homeViewModel.filteredEvents.count != 0 {
+                VStack {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black.opacity(0)]), startPoint: .bottom, endPoint: .top))
+                        .frame(maxWidth: .infinity, maxHeight: 120)
+                        .allowsHitTesting(false)
+                }
+                .frame(maxHeight: .infinity, alignment: .bottom)
+            }
             
             VStack {
                 HStack {
@@ -55,6 +67,8 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(20)
         }
+        .ignoresSafeArea()
+        .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
             let data = SwiftDataService.shared.fetchAllEvents()
