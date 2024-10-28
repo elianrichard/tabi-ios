@@ -28,15 +28,16 @@ struct RegisterView: View {
                                errorMessage: registerViewModel.phoneNumberError)
                 InputWithLabel(label: "Password",
                                placeholder: "Password",
-                               isSecure: true,
                                text: $registerViewModel.password,
-                               errorMessage: registerViewModel.passwordError)
+                               errorMessage: registerViewModel.passwordError,
+                               isSecure: true)
                 InputWithLabel(label: "Confirm Password",
                                placeholder: "Confirm Password",
-                               isSecure: true,
                                text: $registerViewModel.confirmPassword,
-                               errorMessage: registerViewModel.confirmPasswordError)
+                               errorMessage: registerViewModel.confirmPasswordError,
+                               isSecure: true)
             }
+            
             VStack (spacing: UIConfig.Spacing.Small) {
                 VStack (spacing: UIConfig.Spacing.Medium) {
                     CustomButton(text: "Sign Up", isEnabled: registerViewModel.isSignUpEnabled) {
