@@ -12,30 +12,34 @@ struct EventSummarySpendingCard: View {
     var amount: Double
     
     var body: some View {
-        VStack (alignment: .leading) {
-            Circle()
-                .fill(Color(UIColor(hex: "#D9D9D9")))
-                .frame(width: 40)
-                .frame(maxWidth: .infinity, alignment: .center)
-            Spacer()
-            Text(text)
-                .font(.body)
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
-                .frame(maxWidth: .infinity, alignment: .center)
-            Text("Rp \(String(format: "%.0f", amount).formatPrice())")
-                .font(.title2)
-                .fontWeight(.medium)
-                .frame(maxWidth: .infinity, alignment: .center)
-
+        HStack (spacing: UIConfig.Spacing.Tight) {
+            Image(.samplePersonProfile1)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 40, height: 40)
+                .clipShape(Circle())
+            VStack (alignment: .leading, spacing: UIConfig.Spacing.XSmall) {
+                Text(text)
+                    .font(.tabiBody)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .multilineTextAlignment(.leading)
+                Text("Rp \(String(format: "%.0f", amount).formatPrice())")
+                    .font(.tabiTitle2)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.leading)
+            }
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, maxHeight: 130, alignment: .center)
-        .background(Color(UIColor(hex: "#EBEBEB")))
+        .padding(UIConfig.Spacing.Tight)
+        .frame(maxWidth: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(.uiGray, lineWidth: 1)
+        }
     }
 }
 
 #Preview {
-    EventSummarySpendingCard(text: "Total Group Spending", amount: 790000)
+    EventSummarySpendingCard(text: "Your total spending", amount: 790000)
 }

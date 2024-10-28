@@ -24,6 +24,7 @@ struct HomeView: View {
                         VStack (spacing: 11) {
                             ForEach(homeViewModel.filteredEvents) { event in
                                 EventCard(event: event)
+                                    .contentShape(Rectangle())
                                     .onTapGesture {
                                         eventViewModel.selectedEvent = event
                                         routes.navigate(to: .EventDetailView)
