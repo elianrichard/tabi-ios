@@ -9,9 +9,9 @@ import Foundation
 import SwiftUI
 
 struct BottomButton: View {
-    @State var text: String = "Next"
-    @State var color: Color = Color(.buttonBlue)
-    @State var isDisabled: Bool = false
+    var text: String = "Next"
+    var color: Color = Color(.buttonBlue)
+    var isDisabled: Bool = false
     
     var body: some View {
         VStack(alignment: .center){

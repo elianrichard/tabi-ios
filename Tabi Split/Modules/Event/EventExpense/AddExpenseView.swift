@@ -103,7 +103,7 @@ struct AddExpenseView: View {
                     } // Participants
                     DropDownInput(
                         label: "Split Bill Method",
-                        label2: "Split by",
+                        placeholder: "Split by",
                         items: SplitMethod.allCases,
                         keyPath: \.splitDescription,
                         backgroundColor: .bgWhite,

@@ -31,7 +31,11 @@ struct EventDetailView: View {
                     }
                 } label: {
                     Icon(systemName: "ellipsis", color: .textWhite)
+                        .contentShape(Rectangle())
+                        .frame(width: 44, height: 44)
                 }
+                .padding(.vertical, -11)
+                .padding(.horizontal, -11)
             })
             
             VStack (spacing: 0) {
@@ -82,7 +86,7 @@ struct EventDetailView: View {
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
                         }
-                        CustomButton(text: "Add Manually", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
+                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
                             print("OCR")
                         }
                     }

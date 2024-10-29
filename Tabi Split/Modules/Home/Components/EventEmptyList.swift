@@ -13,7 +13,7 @@ struct EventEmptyList: View {
             Image(.homeEmptyView)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 200)
+                .frame(width: 140)
             Text("You don't have any\nevents yet...")
                 .multilineTextAlignment(.center)
                 .font(.tabiSubtitle)

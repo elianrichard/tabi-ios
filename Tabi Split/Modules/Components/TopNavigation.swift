@@ -1,4 +1,3 @@
-//
 //  TopNavigation.swift
 //  Tabi Split
 //
@@ -41,16 +40,16 @@ struct TopNavigation<Content: View>: View {
                     } label: {
                         if isCircleBackButton {
                             Icon(systemName: "arrow.left", size: 16)
+                                .frame(width: 28, height: 28)
                                 .background(
                                     Circle()
                                         .fill(.white)
-                                        .frame(width: 44, height: 44)
                                 )
                         } else {
                             Icon(systemName: "arrow.left", size: 16)
                         }
                     }
-                    .padding(16)
+                    .padding(isCircleBackButton ? 8 : 16)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         if let backFunction = additionalBackFunction {
@@ -58,7 +57,7 @@ struct TopNavigation<Content: View>: View {
                         }
                         routes.navigateBack()
                     }
-                    .padding(-16)
+                    .padding(isCircleBackButton ? -8 : -16)
                     Spacer()
                     RightToolbar
                 }
@@ -76,7 +75,7 @@ struct TopNavigation<Content: View>: View {
 #Preview {
     ZStack {
         Color(.red)
-        TopNavigation(title: "Testing", isCircleBackButton: false, isInline: true)
+        TopNavigation(title: "Testing", isCircleBackButton: true, isInline: true)
             .environment(Routes())
     }
 }

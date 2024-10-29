@@ -10,6 +10,16 @@ import SwiftUI
 struct TappablePadding: ViewModifier {
   let insets: EdgeInsets
   let onTap: () -> Void
+    
+    init(insets: EdgeInsets, onTap: @escaping () -> Void) {
+        self.insets = insets
+        self.onTap = onTap
+    }
+
+    init(insetValue: CGFloat, onTap: @escaping () -> Void) {
+        self.insets = EdgeInsets(top: insetValue, leading: insetValue, bottom: insetValue, trailing: insetValue)
+        self.onTap = onTap
+    }
   
   func body(content: Content) -> some View {
     content

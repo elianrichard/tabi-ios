@@ -16,7 +16,7 @@ struct HomeView: View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
                 HomeTopBar()
-                Spacer(minLength: 52)
+                Spacer(minLength: UIConfig.Spacing.Large)
                 EventFilterList(homeViewModel: homeViewModel)
                 Spacer(minLength: 30)
                 if (!homeViewModel.filteredEvents.isEmpty) {
