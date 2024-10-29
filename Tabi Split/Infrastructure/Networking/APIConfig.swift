@@ -12,7 +12,7 @@ struct APIConfig {
     let unauthorizedMessages: [String]
     
     static let `default` = APIConfig(
-        baseURL: "http://127.0.0.1:3000",
+        baseURL: ENV.BASE_API_URL,
         unauthorizedMessages: ["Is not authorized", "Access is denied"]
     )
 }
