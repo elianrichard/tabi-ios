@@ -39,7 +39,7 @@ struct ExpenseAddItemsView: View {
                         CustomButton(text: "+ Add Item", type: .secondary) {
                             eventExpenseViewModel.createNewExpenseItem()
                         }
-                        .frame(width: 108)
+                        .frame(width: 120)
                     }
                     .frame(maxWidth: .infinity)
                     
