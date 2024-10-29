@@ -68,7 +68,7 @@ struct AddExpenseView: View {
                                                     .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 1)
                                             }
                                         Text(person.name.getFirstName())
-                                            .font(.subheadline)
+                                            .font(.tabiBody)
                                             .lineLimit(1)
                                     }
                                     .onTapGesture {
@@ -94,6 +94,7 @@ struct AddExpenseView: View {
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(.clear)
                                 .stroke(viewModel?.participantsError != nil ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
+                                .padding(0.5)
                         }
                         if let message = viewModel?.participantsError {
                             Text(message)
@@ -157,6 +158,7 @@ struct AddExpenseView: View {
                                         RoundedRectangle(cornerRadius: 16)
                                             .fill(.clear)
                                             .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                            .padding(0.5)
                                     }
                             }
                         }

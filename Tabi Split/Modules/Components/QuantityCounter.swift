@@ -15,7 +15,9 @@ struct QuantityCounter: View {
     var body: some View {
         HStack{
             Text("-")
-                .frame(width: 30, height: 30)
+                .font(Font.system(size: 15))
+                .foregroundColor(.white)
+                .frame(width: 29, height: 29)
                 .background(
                     Circle()
                         .fill(quantity != (letZero ? 0 : 1) ? .buttonBlue : .buttonGrey)
@@ -24,10 +26,14 @@ struct QuantityCounter: View {
                     quantity -= 1
                 }
                 .disabled(quantity == (letZero ? 0 : 1) ? true : false)
-            Text(String(quantity.formatted(.number)))
-                .padding([.leading, .trailing], 10)
+            Text(quantity.formatted(.number))
+                .frame(width: 40, alignment: .center)
+                .foregroundColor(.black)
+                .lineLimit(1)
             Text("+")
-                .frame(width: 30, height: 30)
+                .font(Font.system(size: 15))
+                .foregroundColor(.white)
+                .frame(width: 29, height: 29)
                 .background(
                     Circle()
                         .fill(.buttonBlue)
@@ -36,6 +42,5 @@ struct QuantityCounter: View {
                     quantity += 1
                 }
         }
-        .padding(10)
     }
 }

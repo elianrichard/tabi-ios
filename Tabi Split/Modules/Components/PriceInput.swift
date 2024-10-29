@@ -37,6 +37,7 @@ struct PriceInput: View {
             RoundedRectangle(cornerRadius: cornerRadius)
                 .fill(.clear)
                 .stroke(isError ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
+                .padding(0.5)
         }
         .onAppear{
             placeholderPrice = price != 0 ? price.formatPrice() : ""
