@@ -46,9 +46,9 @@ extension String {
             return "Phone number should start with 628 or 08"
         }
         
-        let phoneNumberLengthRegex = /^[0-9]{9,12}$/
+        let phoneNumberLengthRegex = /^[0-9]{10,13}$/
         if !self.contains(phoneNumberLengthRegex) {
-            return "Phone number should contain 9-12 digits"
+            return "Phone number should contain 10-13 digits"
         }
         
         return nil

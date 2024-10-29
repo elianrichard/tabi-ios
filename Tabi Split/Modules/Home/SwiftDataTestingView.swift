@@ -138,7 +138,7 @@ struct SwiftDataTestingView: View {
     }
     
     func fetchPosts() {
-        APIService.shared.getRequest(urlString: "https://jsonplaceholder.typicode.com/posts") { (result: Result<[PostListModel], Error>) in
+        APIServiceOld.shared.getRequest(urlString: "https://jsonplaceholder.typicode.com/posts") { (result: Result<[PostListModel], Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let data):
@@ -151,7 +151,7 @@ struct SwiftDataTestingView: View {
     }
     
     func createPost () {
-        APIService.shared.postRequest(urlString: "https://jsonplaceholder.typicode.com/posts", body: PostListModel(id: 1, userId: 1, title: "title", body: "body")) { (result: Result<PostListModel, Error>) in
+        APIServiceOld.shared.postRequest(urlString: "https://jsonplaceholder.typicode.com/posts", body: PostListModel(id: 1, userId: 1, title: "title", body: "body")) { (result: Result<PostListModel, Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let data):

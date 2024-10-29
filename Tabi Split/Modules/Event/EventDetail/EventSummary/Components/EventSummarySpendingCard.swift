@@ -12,13 +12,13 @@ struct EventSummarySpendingCard: View {
     var amount: Double
     
     var body: some View {
-        HStack (spacing: UIConfig.Spacing.Tight) {
+        HStack (spacing: .spacingTight) {
             Image(.samplePersonProfile1)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 40, height: 40)
                 .clipShape(Circle())
-            VStack (alignment: .leading, spacing: UIConfig.Spacing.XSmall) {
+            VStack (alignment: .leading, spacing: .spacingXSmall) {
                 Text(text)
                     .font(.tabiBody)
                     .lineLimit(2)
@@ -30,7 +30,7 @@ struct EventSummarySpendingCard: View {
                     .multilineTextAlignment(.leading)
             }
         }
-        .padding(UIConfig.Spacing.Tight)
+        .padding(.spacingTight)
         .frame(maxWidth: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay {

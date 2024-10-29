@@ -17,7 +17,7 @@ struct AddExpenseView: View {
     @State var viewModel: AddExpenseViewModel?
     
     var body: some View {
-        VStack (spacing: UIConfig.Spacing.Regular) {
+        VStack (spacing: .spacingRegular) {
             TopNavigation(title: "Add New Expenses")
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20){
