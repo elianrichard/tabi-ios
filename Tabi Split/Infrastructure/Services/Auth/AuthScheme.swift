@@ -7,16 +7,6 @@
 
 import Foundation
 
-struct TokenPair: Codable {
-    let accessToken: String
-    let refreshToken: String
-    
-    enum CodingKeys: String, CodingKey {
-        case accessToken = "token"
-        case refreshToken = "refresh_token"
-    }
-}
-
 struct LoginRequest: Codable {
     let phone: String
     let password: String

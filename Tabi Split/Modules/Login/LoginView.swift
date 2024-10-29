@@ -37,11 +37,13 @@ struct LoginView: View {
             }
             
             VStack (spacing: UIConfig.Spacing.Medium) {
-                CustomButtonAsync(text: "Sign In") {
-                    await loginViewModel.login()
-                    
-                    if loginViewModel.isLoginSuccess {
-                        routes.navigate(to: .HomeView)
+                CustomButton(text: "Sign In") {
+                    Task {
+                        await loginViewModel.login()
+                        
+                        if loginViewModel.isLoginSuccess {
+                            routes.navigate(to: .HomeView)
+                        }
                     }
                 }
                 
