@@ -16,28 +16,16 @@ struct ReceiptUploadView: View {
     
     var body: some View {
         VStack{
-            ZStack {
-                Text("Upload Payment")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            TopNavigation(title: "Upload Purchase Receipt")
             PhotosPicker(selection: $receiptUploadViewModel.receiptImageFromGallery, matching: .images, photoLibrary: .shared()){
                 VStack(spacing: 10){
                     Image(systemName: "photo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 30, height: 30)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.textGrey)
                     Text("Upload an image")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.textGrey)
                 }
                 .opacity(receiptUploadViewModel.receiptImage != nil ? 0 : 1)
                 .frame(height: 250)
@@ -60,7 +48,7 @@ struct ReceiptUploadView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 } else {
-                    Color(.uiGray)
+                    Color(.bgWhite)
                 }
             }
             .cornerRadius(20)
@@ -68,27 +56,29 @@ struct ReceiptUploadView: View {
             DividerWithText()
                 .padding()
             
-            CustomButton (text: "Take Photo", type: .secondary, hPadding: 40) {
+            CustomButton(text: "Take Photo", type: .secondary) {
                 receiptUploadViewModel.isShowingScanner.toggle()
             }
+            .frame(width: 200)
             
             Spacer()
-
+            
             CustomButton(text: "Upload", isEnabled: receiptUploadViewModel.receiptImage != nil) {
                 do {
                     try eventExpenseViewModel.performOCROnImage(receiptUploadViewModel.receiptImage ?? UIImage())
                 } catch {
                     print(error)
                 }
-
+                
                 eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
-
+                
                 routes.navigateBack()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationBarBackButtonHidden(true)
         .padding()
+        .background(.bgBlueElevated)
         .sheet(isPresented: Bindable(receiptUploadViewModel).isShowingScanner) {
             DocumentScannerView { image in
                 receiptUploadViewModel.receiptImageFromGallery = nil

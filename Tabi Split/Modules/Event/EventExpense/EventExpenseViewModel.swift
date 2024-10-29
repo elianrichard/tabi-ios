@@ -75,6 +75,7 @@ final class EventExpenseViewModel {
         return totalSpent + person.additional.reduce(0) { $0 + ($1.amount) }
     }
     func calculatePeopleItems() {
+        peopleItems.removeAll()
         calculateTotal()
         for person in selectedParticipants {
             var personItems: [ExpenseItem] = []

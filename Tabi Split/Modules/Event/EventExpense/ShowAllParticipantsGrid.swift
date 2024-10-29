@@ -53,6 +53,7 @@ struct ShowAllParticipantsGrid: View {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(.clear)
                         .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                        .padding(0.5)
                 }
             }
             CustomButton(text: "Done", isEnabled: !eventExpenseViewModel.selectedParticipants.isEmpty ? true : false) {
