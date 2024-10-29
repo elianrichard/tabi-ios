@@ -15,14 +15,26 @@ class LoginViewModel {
     var phoneNumberError: String? = nil
     var passwordError: String? = nil
     
-    func login() {
+    var isLoading: Bool = false
+    var isLoginSuccess: Bool = false
+    
+    let authService = AuthenticationService()
+    
+    func login() async {
         guard validateInput() else { return }
-        if password == "invalid" {
-            passwordError = "Password incorrect"
-            return
+        
+        isLoading = true
+        
+        do {
+            try await authService.login(phone: phoneNumber, password: password)
+            isLoginSuccess = true
+            print("Login successful!")
+        } catch {
+            print("Login failed: \(error)")
+            isLoginSuccess = false
         }
-        // Implement login logic
-        print("Logging in with phone number: \(phoneNumber) and password: \(password)")
+        
+        isLoading = false
     }
     
     func validateInput () -> Bool {
