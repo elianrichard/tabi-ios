@@ -17,7 +17,7 @@ struct AddItemContainer: View {
     
     var body: some View {
         VStack{
-            VStack(alignment: .leading){
+            VStack(alignment: .leading, spacing: 16){
                 HStack{
                     Text("Item " + String(index + 1))
                     Spacer()
@@ -27,20 +27,29 @@ struct AddItemContainer: View {
                             eventExpenseViewModel.calculateTotal()
                         }
                 }
+                .font(.tabiBody)
                 Divider()
-                VStack(alignment: .leading){
+                HStack(){
                     Text("Name")
-                        .padding([.top, .bottom], 5)
+                        .foregroundColor(.textGrey)
+                        .frame(width: 45)
                     TextField("Item Name", text: Bindable(item).itemName)
-                        .padding(10)
-                        .background(Color(.midLightGray))
-                        .cornerRadius(5)
-                } // Title
-                VStack(alignment: .leading){
-                    Text("Price")
-                        .padding([.top, .bottom], 5)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(.bgWhite)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.clear)
+                                .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                .padding(0.5)
+                        }
+                }
+                .font(.tabiBody)
+                HStack(spacing: 8){
                     HStack{
-                        Text("Rp")
+                        Text("Price")
+                            .foregroundColor(.textGrey)
+                            .frame(width: 45)
                         TextField("10.000", text: $price)
                             .keyboardType(.numberPad)
                             .onChange(of: price) {
@@ -48,50 +57,51 @@ struct AddItemContainer: View {
                                 item.itemPrice = Float(price.removeDots()) ?? 0
                                 eventExpenseViewModel.calculateTotal()
                             }
-                            .padding(10)
-                            .background(Color(.midLightGray))
-                            .cornerRadius(5)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(.bgWhite)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(.clear)
+                                    .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                    .padding(0.5)
+                            }
+                            .frame(width: 110)
                     }
                     .onReceive(Just(item.itemPrice)) { _ in
                         price = item.itemPrice != 0 ? String(item.itemPrice.formatPrice()) : ""
                     }
-                    VStack(alignment: .leading){
-                        Text("Quantity")
-                            .padding([.top, .bottom], 5)
+                    Spacer()
+                    HStack{
+                        Text("Qty")
+                            .foregroundColor(.textGrey)
                         HStack{
-                            Text("-")
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    Circle()
-                                        .fill(item.itemQuantity != 1 ? Color(.lightGray) : Color(.midLightGray))
-                                )
-                                .onTapGesture {
-                                    item.itemQuantity-=1
-                                    eventExpenseViewModel.calculateTotal()
-                                }
-                                .disabled(item.itemQuantity == 1 ? true : false)
-                            Text(String(item.itemQuantity.formatted(.number)))
-                                .padding([.leading, .trailing], 10)
-                            Text("+")
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    Circle()
-                                        .fill(Color(.lightGray))
-                                )
-                                .onTapGesture {
-                                    item.itemQuantity+=1
+                            QuantityCounter(quantity: Bindable(item).itemQuantity)
+                                .onChange(of: item.itemQuantity){
                                     eventExpenseViewModel.calculateTotal()
                                 }
                         }
-                        .padding(10)
+                        .frame(maxWidth: .infinity)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .font(.tabiBody)
             }
             .padding()
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color(.lightGray), lineWidth: 1)
-            )
+            .background(.bgWhite)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.clear)
+                    .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                    .padding(0.5)
+            }
         }
     }
+}
+
+#Preview {
+    AddItemContainer(item: .constant(ExpenseItem(itemName: "Test", itemPrice: 20000, itemQuantity: 1)), price: "30000", index: 0)
+        .environment(EventExpenseViewModel())
 }

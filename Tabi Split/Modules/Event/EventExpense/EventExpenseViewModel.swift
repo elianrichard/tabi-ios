@@ -20,7 +20,7 @@ final class EventExpenseViewModel {
     var isEdit = false
     
     var expenseName: String = ""
-    var expenseTotalInput: String = ""
+    var expenseTotalInput: Float = 0
     var selectedParticipants: [UserData] = []
     var selectedMethod: SplitMethod?
     var selectedCoverer: UserData?
@@ -31,7 +31,7 @@ final class EventExpenseViewModel {
     var totalSpending: Float = 0
     
     var items: [ExpenseItem] = [
-        ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 1)
+        ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 1),
     ]
     var additionalCharges: [AdditionalCharge] = [
         AdditionalCharge(additionalChargeType: .tax, amount: 0)
@@ -75,6 +75,7 @@ final class EventExpenseViewModel {
         return totalSpent + person.additional.reduce(0) { $0 + ($1.amount) }
     }
     func calculatePeopleItems() {
+        peopleItems.removeAll()
         calculateTotal()
         for person in selectedParticipants {
             var personItems: [ExpenseItem] = []
@@ -84,7 +85,7 @@ final class EventExpenseViewModel {
                 if item.assignees.filter({ $0.user.id == person.id }).count > 0 {
                     let itemName = item.itemName
                     let itemPrice = item.itemPrice
-                    let itemQuantity = item.itemQuantity / item.assignees.map({$0.share}).reduce(0, +)
+                    let itemQuantity = item.itemQuantity / item.assignees.map({$0.share}).reduce(0, +) * (item.assignees.first(where: { $0.user.id == person.id })?.share ?? 0)
                     totalSpentPerson += itemPrice * Float(itemQuantity)
                     personItems.append(ExpenseItem(itemName: itemName, itemPrice: itemPrice, itemQuantity: itemQuantity))
                 }
@@ -103,7 +104,7 @@ final class EventExpenseViewModel {
         selectedExpense = nil
         isEdit = false
         expenseName = ""
-        expenseTotalInput = ""
+        expenseTotalInput = 0
         selectedParticipants = []
         selectedMethod = nil
         selectedCoverer = nil
@@ -131,7 +132,7 @@ final class EventExpenseViewModel {
             selectedParticipants = expense.participants
             if (expense.splitMethod == SplitMethod.equally.id) {
                 totalSpending = expense.price
-                expenseTotalInput = expense.price.formatPrice()
+                expenseTotalInput = expense.price
             } else if (expense.splitMethod == SplitMethod.custom.id) {
                 calculatePeopleItems()
             }
@@ -251,6 +252,15 @@ final class EventExpenseViewModel {
                 }
                 items.append(ExpenseItem(itemName: item[0], itemPrice: stringToFloat(item[2]), itemQuantity: 1))
                 itemsAndPrice.remove(item)
+            }
+        }
+    }
+    func removeZeroShareAssignee(item: ExpenseItem){
+        if let item = items.first(where: { $0.id == item.id }){
+            for person in item.assignees{
+                if person.share == 0{
+                    item.assignees.remove(person)
+                }
             }
         }
     }

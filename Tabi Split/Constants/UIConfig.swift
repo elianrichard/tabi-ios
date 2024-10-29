@@ -10,21 +10,34 @@ import Foundation
 struct UIConfig {
     struct Font {
         struct Name {
-            static let Black = "CeraPro-Black"
-            static let BlackItalic = "CeraPro-BlackItalic"
-            static let Bold = "CeraPro-Bold"
-            static let BoldItalic = "CeraPro-BoldItalic"
-            static let Light = "CeraPro-Light"
-            static let LightItalic = "CeraPro-LightItalic"
-            static let Medium = "CeraPro-Medium"
-            static let MediumItalic = "CeraPro-MediumItalic"
-            static let Regular = "CeraPro-Regular"
-            static let RegularItalic = "CeraPro-RegularItalic"
-            static let Thin = "CeraPro-Thin"
-            static let ThinItalic = "CeraPro-ThinItalic"
+            static let Bold = "Figtree-Bold"
+            static let Semibold = "Figtree-SemiBold"
+            static let Medium = "Figtree-Medium"
+            static let Regular = "Figtree-Regular"
         }
+        
         struct Size {
-            static let Title = 24
+            static let LargeTitle: CGFloat = 32
+            static let Title: CGFloat = 24
+            static let Subtitle: CGFloat = 20
+            static let Headline: CGFloat = 17
+            static let Body: CGFloat = 15
         }
+    }
+    
+    struct Spacing {
+        static let XLarge: CGFloat = 64
+        static let Large: CGFloat = 36
+        static let Medium: CGFloat = 24
+        static let Regular: CGFloat = 16
+        static let Tight: CGFloat = 12
+        static let Small: CGFloat = 8
+        static let XSmall: CGFloat = 4
+    }
+
+    struct Radius {
+        static let Large: CGFloat = 24
+        static let Medium: CGFloat = 16
+        static let Small: CGFloat = 12
     }
 }

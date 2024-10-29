@@ -14,10 +14,16 @@ struct ContentView: View {
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
     
+    @State private var isAuthenticated = false
+    
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
-                HomeView()
+                if isAuthenticated {
+                    HomeView()
+                } else {
+                    LoginView()
+                }
             }
             .navigationDestination(for: Routes.Destination.self) { destination in
                 switch destination {
@@ -83,6 +89,18 @@ struct ContentView: View {
         .environment(eventViewModel)
         .environment(eventInviteViewModel)
         .environment(eventExpenseViewModel)
+        .onAppear {
+            checkAuthentication()
+        }
+    }
+    
+    private func checkAuthentication() {
+        do {
+            let accessToken = try KeychainService.shared.getAccessToken()
+            isAuthenticated = !accessToken.isEmpty
+        } catch {
+            isAuthenticated = false
+        }
     }
 }
 

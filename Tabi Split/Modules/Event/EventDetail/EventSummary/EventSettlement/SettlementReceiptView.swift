@@ -14,7 +14,7 @@ struct SettlementReceiptView: View {
     var body: some View {
         ZStack {
             ZoomableScrollView {
-                Image("BuktiTransferBCA")
+                Image(.samplePaymentReceipt)
                     .resizable()
                     .scaledToFit()
             }

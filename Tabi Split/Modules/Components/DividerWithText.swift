@@ -14,15 +14,14 @@ struct DividerWithText: View {
         HStack {
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(Color.gray)
+                .foregroundColor(.uiGray)
             
             Text(text)
-                .padding(.horizontal)
-                .font(.headline)
+                .font(.tabiBody)
             
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(Color.gray)
+                .foregroundColor(.uiGray)
         }
     }
 }

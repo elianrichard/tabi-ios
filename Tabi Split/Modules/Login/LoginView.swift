@@ -8,69 +8,71 @@
 import SwiftUI
 
 struct LoginView: View {
-    
+    @Environment(Routes.self) var routes
     @State private var loginViewModel = LoginViewModel()
     
     var body: some View {
-        VStack {
+        VStack (alignment: .leading, spacing: .spacingLarge) {
+            Text("Hey There,\nYou're Back!")
+                .font(.tabiLargeTitle)
+                .multilineTextAlignment(.leading)
             
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Login")
-                    .font(.system(size: 22, weight: .medium))
-                    .padding()
-                
-                
-                InputWithLabel(label: "Phone Number",
-                               placeholder: "+62",
-                               text: $loginViewModel.phoneNumber)
-                
-                InputWithLabel(label: "Password",
-                               placeholder: "Password",
-                               isSecure: true,
-                               text: $loginViewModel.password)
-                
-                Text("Forgot Password?")
-                    .font(.system(size: 10))
-                    .padding(.horizontal)
-                    .padding(.top, 8)
+            VStack (alignment: .trailing, spacing: 8) {
+                VStack(alignment: .leading, spacing: .spacingMedium) {
+                    InputWithLabel(label: "Phone Number",
+                                   placeholder: "Your phone number",
+                                   text: $loginViewModel.phoneNumber, errorMessage: loginViewModel.phoneNumberError)
+                    InputWithLabel(label: "Password",
+                                   placeholder: "Password",
+                                   text: $loginViewModel.password,
+                                   errorMessage: loginViewModel.passwordError, isSecure: true)
+                }
+                Button {
+                    print("forgot password")
+                } label: {
+                    Text("Forgot Password?")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textBlue)
+                }
             }
             
-            Spacer()
-                .frame(height: 60)
-            
-            Button(action: loginViewModel.login) {
-                Text("Login")
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 58)
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            VStack (spacing: .spacingMedium) {
+                CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In") {
+                    Task {
+                        await loginViewModel.login()
+                        
+                        if loginViewModel.isLoginSuccess {
+                            routes.navigate(to: .HomeView)
+                        }
+                    }
+                }
+                
+                DividerWithText()
+                
+                CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                    print("Login with Apple")
+                }
+                
+                HStack (spacing: 3) {
+                    Text("Don't have an account?")
+                        .font(.tabiBody)
+                    Button {
+                        routes.navigate(to: .RegisterView)
+                    } label: {
+                        Text("Sign Up")
+                            .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
+                            .foregroundStyle(.textBlue)
+                    }
+                }
             }
-            .padding(.horizontal)
-            
-            Text("Or")
-                .padding(.vertical, 12)
-            
-            Button(action: {}) {
-                Text("Apple")
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 58)
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-            }
-            .padding(.horizontal)
-            
-            Text("Don't have an account? Register")
-                .font(.system(size: 12))
-                .padding(.top, 20)
-                .underline()
-            
-            
         }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding()
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
     LoginView()
+        .environment(Routes())
 }

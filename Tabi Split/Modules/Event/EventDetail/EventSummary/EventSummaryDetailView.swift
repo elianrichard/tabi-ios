@@ -40,7 +40,7 @@ struct EventSummaryDetailView: View {
                     EventSummaryHistoryCard(itemName: "McDonald", amount: -500000, date: Date().yesterday())
                     EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"))
                     EventSummaryHistoryCard(itemName: "Hokben", amount: 500000, date: Date(dateString: "2024-10-11"))
-                    EventSummaryHistoryCard(itemName: "Pizza Hut", amount: 500000, date: Date(dateString: "2024-10-11"), isLast: true)
+                    EventSummaryHistoryCard(itemName: "Pizza Hut", amount: 500000, date: Date(dateString: "2024-10-11"))
                 }
                 .padding(.horizontal, 20)
             }
