@@ -36,8 +36,8 @@ struct UIConfig {
     }
 
     struct Radius {
-        static let Large: CGFloat = 16
-        static let Medium: CGFloat = 8
-        static let Small: CGFloat = 4
+        static let Large: CGFloat = 24
+        static let Medium: CGFloat = 16
+        static let Small: CGFloat = 12
     }
 }

@@ -56,22 +56,22 @@ struct ReceiptUploadView: View {
             DividerWithText()
                 .padding()
             
-            CustomButton(text: "Take Photo", type: .secondary) {
+            CustomButton (text: "Take Photo", type: .secondary, hPadding: 40) {
                 receiptUploadViewModel.isShowingScanner.toggle()
             }
             .frame(width: 200)
             
             Spacer()
-            
+
             CustomButton(text: "Upload", isEnabled: receiptUploadViewModel.receiptImage != nil) {
                 do {
                     try eventExpenseViewModel.performOCROnImage(receiptUploadViewModel.receiptImage ?? UIImage())
                 } catch {
                     print(error)
                 }
-                
+
                 eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
-                
+
                 routes.navigateBack()
             }
         }

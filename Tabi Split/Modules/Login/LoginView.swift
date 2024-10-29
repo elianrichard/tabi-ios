@@ -12,13 +12,13 @@ struct LoginView: View {
     @State private var loginViewModel = LoginViewModel()
     
     var body: some View {
-        VStack (alignment: .leading, spacing: UIConfig.Spacing.Large) {
+        VStack (alignment: .leading, spacing: .spacingLarge) {
             Text("Hey There,\nYou're Back!")
                 .font(.tabiLargeTitle)
                 .multilineTextAlignment(.leading)
             
             VStack (alignment: .trailing, spacing: 8) {
-                VStack(alignment: .leading, spacing: UIConfig.Spacing.Medium) {
+                VStack(alignment: .leading, spacing: .spacingMedium) {
                     InputWithLabel(label: "Phone Number",
                                    placeholder: "Your phone number",
                                    text: $loginViewModel.phoneNumber, errorMessage: loginViewModel.phoneNumberError)
@@ -36,7 +36,7 @@ struct LoginView: View {
                 }
             }
             
-            VStack (spacing: UIConfig.Spacing.Medium) {
+            VStack (spacing: .spacingMedium) {
                 CustomButton(text: "Sign In") {
                     withAnimation (nil) {
                         loginViewModel.login()

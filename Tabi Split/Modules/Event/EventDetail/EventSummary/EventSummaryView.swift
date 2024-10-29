@@ -11,11 +11,11 @@ struct EventSummaryView: View {
     @Environment(Routes.self) private var routes
     
     var body: some View {
-        VStack (spacing: UIConfig.Spacing.Regular) {
+        VStack (spacing: .spacingRegular) {
             HStack (spacing: 20) {
                 Spacer()
                     .frame(width: 30)
-                VStack (spacing: UIConfig.Spacing.XSmall) {
+                VStack (spacing: .spacingXSmall) {
                     Text("You should pay")
                         .font(.tabiBody)
                     Text("Rp 250.000")
@@ -28,7 +28,7 @@ struct EventSummaryView: View {
                     .clipShape(Circle())
             }
             .foregroundStyle(.white)
-            .padding(.vertical, UIConfig.Spacing.Tight)
+            .padding(.vertical, .spacingTight)
             .frame(maxWidth: .infinity)
             .background(.buttonGreen)
             .clipShape(RoundedRectangle(cornerRadius: 18))
@@ -58,7 +58,7 @@ struct EventSummaryView: View {
                     EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"))
                 }
             }
-            .padding(UIConfig.Spacing.Regular)
+            .padding(.spacingRegular)
             .overlay {
                 RoundedRectangle(cornerRadius: 16)
                     .strokeBorder(.uiGray, lineWidth: 1)
