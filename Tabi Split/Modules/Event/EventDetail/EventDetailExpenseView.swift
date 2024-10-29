@@ -14,7 +14,7 @@ struct EventDetailExpenseView: View {
             VStack {
                 if let event = eventViewModel.selectedEvent {
                     ForEach(event.expenses) { expense in
-                        EventDetailCardView(expense: expense)
+                        EventDetailExpenseCard(expense: expense)
                     }
                 }
             }

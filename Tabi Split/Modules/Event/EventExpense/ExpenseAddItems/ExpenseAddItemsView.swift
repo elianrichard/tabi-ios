@@ -84,10 +84,8 @@ struct ExpenseAddItemsView: View {
                 Text("Rp \(eventExpenseViewModel.totalSpending.formatPrice())")
                     .fontWeight(.heavy)
             }
-            Button {
+            CustomButton(text: "Next") {
                 routes.navigate(to: .ExpenseAssignView)
-            } label: {
-                BottomButton(text: "Next")
             }
         }
         .padding()

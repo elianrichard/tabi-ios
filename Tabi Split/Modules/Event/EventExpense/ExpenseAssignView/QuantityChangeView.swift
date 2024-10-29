@@ -38,10 +38,9 @@ struct QuantityChangeView: View {
                     )
                 }
             }
-            BottomButton(text: "Save")
-                .onTapGesture {
-                    close.toggle()
-                }
+            CustomButton(text: "Save") {
+                close.toggle()
+            }
         }
         .onDisappear{
             eventExpenseViewModel.removeZeroShareAssignee(item: item)

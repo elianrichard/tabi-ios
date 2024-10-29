@@ -37,8 +37,7 @@ struct RegisterView: View {
                                errorMessage: registerViewModel.confirmPasswordError,
                                isSecure: true)
             }
-            
-            VStack (spacing: UIConfig.Spacing.Small) {
+            VStack (spacing: UIConfig.Spacing.Tight) {
                 VStack (spacing: UIConfig.Spacing.Medium) {
                     CustomButton(text: "Sign Up", isEnabled: registerViewModel.isSignUpEnabled) {
                         withAnimation (nil) {

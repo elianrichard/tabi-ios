@@ -13,63 +13,43 @@ struct EventDetailView: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @State private var showingCompletionAlert = false
     
-    let rect = CGRect(x: 0, y: 0, width: 500, height: 100)
     var body: some View {
         ZStack {
+            TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
+                Menu {
+                    Button("Edit Event") {
+                        routes.navigate(to: .EventFormView)
+                    }
+                    if !eventViewModel.isEventCompleted {
+                        Button("Complete Event") {
+                            showingCompletionAlert = true
+                        }
+                    }
+                    Button("Delete Event") {
+                        eventViewModel.handleDeleteEvent()
+                        routes.navigateBack()
+                    }
+                } label: {
+                    Icon(systemName: "ellipsis", color: .textWhite)
+                        .contentShape(Rectangle())
+                        .frame(width: 44, height: 44)
+                }
+                .padding(.vertical, -11)
+                .padding(.horizontal, -11)
+            })
+            
             VStack (spacing: 0) {
-                Rectangle()
-                    .fill(Color(UIColor(hex: "#F1F1F1")))
-                    .frame(maxWidth: .infinity, maxHeight: 200)
-                HStack {
-                    if let selectedEvent = eventViewModel.selectedEvent {
-                        ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
-                            if index < 4 {
-                                Circle()
-                                    .fill(Color(UIColor(hex: "#D9D9D9")))
-                                    .frame(width: 40)
-                            }
-                        }
-                        if selectedEvent.participants.count > 4 {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(UIColor(hex: "#D9D9D9")))
-                                    .frame(width: 40)
-                                Text("+\(selectedEvent.participants.count - 4)")
-                            }
-                        }
-                    }                }
-                .padding(.top, -20)
+                EventBanner()
+                EventParticipantsList()
                 VStack {
-                    if false {
-                        VStack (alignment: .center, spacing: 10) {
-                            Text("You are the only member in this group")
-                                .padding(.top, 200)
-                            Text("Invite Friend")
-                                .underline(true)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    if eventViewModel.isNoParticipants {
+                        EventNoParticipants()
+                    } else if (eventViewModel.selectedEvent?.expenses.count == 0) {
+                        EventNoExpenses()
                     } else {
                         VStack (spacing: 40) {
                             VStack (spacing: 16) {
-                                HStack (spacing: 0) {
-                                    ForEach(EventSectionEnum.allCases) { section in
-                                        Text("\(section.displayName)")
-                                            .padding(.vertical, 10)
-                                            .frame(width: 150)
-                                            .background(eventViewModel.selectedSection == section ? .white : .clear)
-                                            .clipShape(RoundedRectangle(cornerRadius: 40))
-                                            .onTapGesture {
-                                                withAnimation {
-                                                    eventViewModel.selectedSection = section
-                                                }
-                                            }
-                                    }
-                                }
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 8)
-                                .background(Color(UIColor(hex: "#EBEBEB")))
-                                .clipShape(RoundedRectangle(cornerRadius: 40))
-                                
+                                EventNavigation()
                                 VStack{
                                     if eventViewModel.selectedSection == .expenses {
                                         EventDetailExpenseView()
@@ -90,43 +70,6 @@ struct EventDetailView: View {
             .ignoresSafeArea()
             
             VStack {
-                ZStack {
-                    Text("\(eventViewModel.selectedEvent?.eventName ?? "undefined")")
-                        .font(.title2)
-                    HStack {
-                        Button {
-                            routes.navigateBack()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .foregroundStyle(.black)
-                        }
-                        Spacer()
-                        Menu {
-                            Button("Edit Event") {
-                                routes.navigate(to: .EventFormView)
-                            }
-                            if !eventViewModel.isEventCompleted {
-                                Button("Complete Event") {
-                                    showingCompletionAlert = true
-                                }
-                            }
-                            Button("Delete Event") {
-                                eventViewModel.handleDeleteEvent()
-                                routes.navigateBack()
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .foregroundStyle(.black)
-                                .frame(width: 40, height: 40)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                Spacer()
-            }
-            .padding()
-            
-            VStack {
                 if eventViewModel.isEventCompleted {
                     VStack {
                         Text("This event has been completed")
@@ -137,25 +80,19 @@ struct EventDetailView: View {
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
-                } else {
+                } else if (!eventViewModel.isNoParticipants) {
                     HStack {
-                        Button {
+                        CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
-                        } label: {
-                            Label("Add Expenses", systemImage: "plus")
-                                .padding(.vertical, 20)
-                                .padding(.horizontal, 20)
-                                .background(Color(UIColor(hex: "#EBEBEB")))
-                                .foregroundStyle(.black)
-                                .clipShape(RoundedRectangle(cornerRadius: 50))
+                        }
+                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
+                            print("OCR")
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 }
             }
-            .frame(maxWidth: .infinity,
-                   alignment: eventViewModel.isEventCompleted ? .center : .trailing)
             .padding(20)
             .ignoresSafeArea()
             

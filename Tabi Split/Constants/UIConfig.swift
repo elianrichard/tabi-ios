@@ -26,8 +26,18 @@ struct UIConfig {
     }
     
     struct Spacing {
-        static let Large: CGFloat = 48
+        static let XLarge: CGFloat = 64
+        static let Large: CGFloat = 36
         static let Medium: CGFloat = 24
-        static let Small: CGFloat = 12
+        static let Regular: CGFloat = 16
+        static let Tight: CGFloat = 12
+        static let Small: CGFloat = 8
+        static let XSmall: CGFloat = 4
+    }
+
+    struct Radius {
+        static let Large: CGFloat = 16
+        static let Medium: CGFloat = 8
+        static let Small: CGFloat = 4
     }
 }
