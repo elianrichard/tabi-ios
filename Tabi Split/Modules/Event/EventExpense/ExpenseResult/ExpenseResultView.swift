@@ -126,30 +126,24 @@ struct ExpenseResultView: View {
                 }
             }
             if eventExpenseViewModel.selectedExpense == nil {
-                Button {
+                CustomButton(text: "Done") {
                     if let event = eventViewModel.selectedEvent {
                         eventExpenseViewModel.finalizeExpense(event)
                         routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                     }
-                } label: {
-                    BottomButton(text: "Done")
                 }
             } else {
                 if eventExpenseViewModel.isEdit {
-                    Button {
+                    CustomButton(text: "Done") {
                         if let event = eventViewModel.selectedEvent {
                             eventExpenseViewModel.handleUpdateExpense(event)
                             eventExpenseViewModel.isEdit = false
                             routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                         }
-                    } label: {
-                        BottomButton(text: "Done")
                     }
                 } else {
-                    Button {
+                    CustomButton(text: "Done") {
                         print("Check Receipt")
-                    } label: {
-                        BottomButton(text: "Check Receipt")
                     }
                 }
             }

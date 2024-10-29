@@ -68,41 +68,23 @@ struct ReceiptUploadView: View {
             DividerWithText()
                 .padding()
             
-            Button{
+            CustomButton (text: "Take Photo", type: .secondary, hPadding: 40) {
                 receiptUploadViewModel.isShowingScanner.toggle()
-            }label: {
-                Text("Take Photo")
             }
-            .padding([.leading, .trailing], 40)
-            .padding([.top, .bottom], 10)
-            .overlay(
-                RoundedRectangle(cornerRadius: 100)
-                    .stroke(Color(.buttonBlue), lineWidth: 1)
-            )
             
             Spacer()
-            
-            BottomButton(text: "Upload", color: Color(.uiGray))
-                .overlay(content: {
-                    ZStack{
-                        receiptUploadViewModel.receiptImage != nil ? Color(.buttonBlue) : Color(.uiGray)
-                        Text("Upload")
-                            .foregroundColor(receiptUploadViewModel.receiptImage != nil ? .white: .gray)
-                    }
-                })
-                .cornerRadius(100)
-                .onTapGesture {
-                    do {
-                        try eventExpenseViewModel.performOCROnImage(receiptUploadViewModel.receiptImage ?? UIImage())
-                    } catch {
-                        print(error)
-                    }
-                    
-                    eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
-                    
-                    routes.navigateBack()
+
+            CustomButton(text: "Upload", isEnabled: receiptUploadViewModel.receiptImage != nil) {
+                do {
+                    try eventExpenseViewModel.performOCROnImage(receiptUploadViewModel.receiptImage ?? UIImage())
+                } catch {
+                    print(error)
                 }
-                .disabled(receiptUploadViewModel.receiptImage == nil)
+
+                eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
+
+                routes.navigateBack()
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationBarBackButtonHidden(true)

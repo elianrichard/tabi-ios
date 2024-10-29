@@ -46,6 +46,8 @@ struct CustomButton: View {
     var iconSize: CGFloat = 20
     var customBackgroundColor: Color?
     var customTextColor: Color?
+    var vPadding: CGFloat?
+    var hPadding: CGFloat?
     var callback: () -> Void
     
     var body : some View {
@@ -63,8 +65,9 @@ struct CustomButton: View {
                 Text("\(text)")
                     .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
             }
-            .padding(.vertical, UIConfig.Spacing.Tight)
-            .frame(maxWidth: .infinity)
+            .padding(.vertical, vPadding ?? UIConfig.Spacing.Tight)
+            .padding(.horizontal, hPadding)
+            .frame(maxWidth: hPadding != nil ? nil : .infinity)
             .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
             .clipShape(RoundedRectangle(cornerRadius: .infinity))
             .font(.tabiHeadline)
