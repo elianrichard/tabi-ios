@@ -83,6 +83,50 @@ struct CustomButton: View {
     }
 }
 
+struct CustomButtonAsync: View {
+    var text: String
+    var type: ButtonType = .primary
+    var isEnabled: Bool = true
+    var icon: String?
+    var customBackgroundColor: Color?
+    var customTextColor: Color?
+    var callback: () async -> Void 
+
+    var body: some View {
+        Button {
+            if (isEnabled) {
+                Task {
+                    await callback()
+                }
+            }
+        } label: {
+            HStack (spacing: 8) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.subheadline)
+                        .foregroundStyle(.white)
+                }
+                Text("\(text)")
+                    .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
+            }
+            .padding(.vertical, UIConfig.Spacing.Small)
+            .frame(maxWidth: .infinity)
+            .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
+            .clipShape(RoundedRectangle(cornerRadius: .infinity))
+            .font(.tabiHeadline)
+            .overlay {
+                if type == .secondary {
+                    RoundedRectangle(cornerRadius: .infinity)
+                        .fill(.clear)
+                        .stroke(isEnabled ? .buttonBlue : .bgGreyOverlay, lineWidth: 1.5)
+                }
+            }
+            .padding(type == .secondary ? 1 : 0)
+        }
+    }
+}
+
+
 #Preview {
     CustomButton(text: "Primary", type: .primary, isEnabled: true) {
         print("Hello Primary!")

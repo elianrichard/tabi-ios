@@ -37,9 +37,11 @@ struct LoginView: View {
             }
             
             VStack (spacing: UIConfig.Spacing.Medium) {
-                CustomButton(text: "Sign In") {
-                    withAnimation (nil) {
-                        loginViewModel.login()
+                CustomButtonAsync(text: "Sign In") {
+                    await loginViewModel.login()
+                    
+                    if loginViewModel.isLoginSuccess {
+                        routes.navigate(to: .HomeView)
                     }
                 }
                 
