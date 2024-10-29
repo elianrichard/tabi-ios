@@ -151,7 +151,7 @@ struct ExpenseResultView: View {
                         }
                     }
                 } else {
-                    CustomButton(text: "Done") {
+                    CustomButton(text: "Check Receipt") {
                         print("Check Receipt")
                     }
                 }
