@@ -26,13 +26,10 @@ struct QuantityCounter: View {
                     quantity -= 1
                 }
                 .disabled(quantity == (letZero ? 0 : 1) ? true : false)
-            Text("   ")
-                .padding([.leading, .trailing], 10)
-                .overlay {
-                    Text(String(quantity.formatted(.number)))
-                        .foregroundColor(.black)
-                        .lineLimit(1)
-                }
+            Text(quantity.formatted(.number))
+                .frame(width: 40, alignment: .center)
+                .foregroundColor(.black)
+                .lineLimit(1)
             Text("+")
                 .font(Font.system(size: 15))
                 .foregroundColor(.white)
