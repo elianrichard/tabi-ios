@@ -15,7 +15,7 @@ struct ExpenseAddItemsView: View {
     
     var body: some View {
         VStack (alignment: .leading){
-            CustomNavTitle(title: "Add Items")
+            TopNavigation(title: "Add Items")
             VStack (alignment: .leading, spacing: 10) {
                 Text(eventExpenseViewModel.expenseName)
                     .font(.tabiTitle)

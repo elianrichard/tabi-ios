@@ -17,7 +17,7 @@ struct ExpenseResultView: View {
         VStack(alignment: .leading) {
             ZStack {
                 HStack {
-                    CustomNavTitle(title: "Expense Result")
+                    TopNavigation(title: "Expense Result")
                     Spacer()
                     if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
                         Menu {

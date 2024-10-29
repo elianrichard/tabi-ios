@@ -15,8 +15,7 @@ struct ExpenseAssignView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            CustomNavTitle(title: "Assign Items")
-            
+            TopNavigation(title: "Assign Items")
             VStack (alignment: .leading, spacing: 10) {
                 Text(eventExpenseViewModel.expenseName)
                     .font(.tabiTitle)
@@ -28,7 +27,6 @@ struct ExpenseAssignView: View {
                 }
                 .padding([.bottom], 24)
             }
-            
             ScrollView(showsIndicators: false){
                 VStack(spacing: 0){
                     Text("Participants")

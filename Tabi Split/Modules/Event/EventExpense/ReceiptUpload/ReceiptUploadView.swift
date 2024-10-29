@@ -16,7 +16,7 @@ struct ReceiptUploadView: View {
     
     var body: some View {
         VStack{
-            CustomNavTitle(title: "Upload Purchase Receipt")
+            TopNavigation(title: "Upload Purchase Receipt")
             PhotosPicker(selection: $receiptUploadViewModel.receiptImageFromGallery, matching: .images, photoLibrary: .shared()){
                 VStack(spacing: 10){
                     Image(systemName: "photo")
