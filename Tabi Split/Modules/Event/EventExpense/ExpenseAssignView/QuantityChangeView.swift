@@ -19,23 +19,31 @@ struct QuantityChangeView: View {
                 .font(.title)
                 .fontWeight(.bold)
             Text("Quantity: " + String(item.itemQuantity.formatted(.number)))
+                .padding(.bottom, 24)
             ScrollView(){
-                ForEach(Array(item.assignees.enumerated()), id: \.offset) { (index, assignee) in
-                    HStack(alignment: .center){
-                        Circle()
-                            .frame(width: 40, height: 40)
-                            .padding([.trailing], 12)
-                        Text(assignee.user.name)
-                        Spacer()
-                        QuantityCounter(quantity: Bindable(assignee).share, letZero: true)
+                VStack{
+                    ForEach(Array(item.assignees.enumerated()), id: \.offset) { (index, assignee) in
+                        HStack(alignment: .center){
+                            Circle()
+                                .frame(width: 40, height: 40)
+                                .padding([.trailing], 12)
+                            Text(assignee.user.name)
+                            Spacer()
+                            HStack{
+                                QuantityCounter(quantity: Bindable(assignee).share, letZero: true)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(.bgWhite)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color(.lightGray), lineWidth: 0.5)
+                                .padding(0.5)
+                        )
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding([.top, .bottom], 5)
-                    .padding([.trailing, .leading], 20)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color(.lightGray), lineWidth: 1)
-                    )
                 }
             }
             CustomButton(text: "Save") {
@@ -49,4 +57,9 @@ struct QuantityChangeView: View {
         .padding()
         .padding([.top], 10)
     }
+}
+
+#Preview {
+    QuantityChangeView(item: .constant(ExpenseItem(itemName: "Teh tarik", itemPrice: 10000, itemQuantity: 10, assignees: [ExpensePerson(user: UserData(name: "Darma", phone: ""), share: 1), ExpensePerson(user: UserData(name: "Eko", phone: ""), share: 2)])), close: .constant(true))
+        .environment(EventExpenseViewModel())
 }

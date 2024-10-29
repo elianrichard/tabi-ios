@@ -14,81 +14,82 @@ struct ExpenseAddItemsView: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     
     var body: some View {
-        VStack (alignment: .leading, spacing: 24){
-            ZStack {
-                Text("Add Items")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+        VStack (alignment: .leading){
+            TopNavigation(title: "Add Items")
             VStack (alignment: .leading, spacing: 10) {
                 Text(eventExpenseViewModel.expenseName)
-                    .font(.title)
+                    .font(.tabiTitle)
                 HStack {
                     Image(systemName: "cylinder.split.1x2")
+                        .font(.tabiBody)
                     Text("Custom Splitted")
+                        .font(.tabiBody)
                 }
+                .padding([.bottom], 24)
             }
             ScrollView (showsIndicators: false) {
-                VStack (alignment: .leading, spacing: 18) {
+                VStack (alignment: .leading, spacing: 16) {
                     Text("Items")
-                        .font(.title2)
+                        .font(.tabiHeadline)
                     ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
                         AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)
                     }
-                    Button {
-                        eventExpenseViewModel.createNewExpenseItem()
-                    } label: {
-                        Text("+ Add Item")
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 20)
-                            .background(Color(.lightGray))
-                            .cornerRadius(50)
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                    
+                    HStack{
+                        CustomButton(text: "+ Add Item", type: .secondary) {
+                            eventExpenseViewModel.createNewExpenseItem()
+                        }
+                        .frame(width: 120)
                     }
+                    .frame(maxWidth: .infinity)
                     
                     Divider()
+                        .padding(.horizontal, 16)
                     
-                    VStack (alignment: .leading) {
+                    VStack (alignment: .leading, spacing: 16) {
                         Text("Additional Charge (optional)")
-                            .font(.title3)
-                            .padding([.bottom], 10)
-                        Text("Amount")
-                        ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
-                            AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
+                            .font(.tabiHeadline)
+                        VStack(alignment: .leading){
+                            Text("Amount")
+                                .font(.tabiBody)
+                            ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
+                                AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
+                            }
+                        }
+                        CustomButton(text: "+ Add more", type: .tertiary){
+                            eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    Button{
-                        eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
-                    } label: {
-                        Text("+ Add more")
-                            .padding()
-                            .foregroundColor(.black)
-                    }
                 }
             }
-            HStack{
-                Text("Total Bill")
-                    .fontWeight(.heavy)
-                Spacer()
-                Text("Rp \(eventExpenseViewModel.totalSpending.formatPrice())")
-                    .fontWeight(.heavy)
+            ZStack{
+                HStack(alignment: .top){
+                    Text("Total Amount")
+                        .font(.tabiBody)
+                    Spacer()
+                    Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
+                        .font(.tabiBody)
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 75)
+                        .foregroundColor(.uiGray)
+                        .offset(CGSize(width: 0, height: 12))
+                )
+                .offset(CGSize(width: 0, height: -40))
+                    .zIndex(1)
+                CustomButton(text: "Next", isEnabled: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0, customBackgroundColor: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0 ? .buttonBlue : .buttonGrey) {
+                    routes.navigate(to: .ExpenseAssignView)
+                }
+                .zIndex(2)
             }
-            CustomButton(text: "Next") {
-                routes.navigate(to: .ExpenseAssignView)
-            }
+            .padding([.top], 36)
         }
         .padding()
+        .background(.bgBlueElevated)
         .navigationBarBackButtonHidden(true)
     }
 }

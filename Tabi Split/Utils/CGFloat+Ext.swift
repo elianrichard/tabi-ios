@@ -20,6 +20,9 @@ extension CGFloat {
     public static let spacingTight = UIConfig.Spacing.Tight
     /// 8px Spacing
     public static let spacingSmall = UIConfig.Spacing.Small
+    /// 4px Spacing
+    public static let spacingXSmall = UIConfig.Spacing.XSmall
+
     
     /// 24px Radius
     public static let radiusLarge = UIConfig.Radius.Large

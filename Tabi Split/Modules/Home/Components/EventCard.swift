@@ -54,7 +54,7 @@ struct EventCard : View {
             Rectangle()
                 .fill(Color(UIColor(hex: "#D9D9D9")))
                 .frame(height: 1)
-            HStack (spacing: UIConfig.Spacing.Tight) {
+            HStack (spacing: .spacingTight) {
                 HStack (spacing: -6) {
                     ForEach(Array(event.participants.enumerated()), id: \.offset) { index, user in
                         if (index < 4) {
@@ -96,7 +96,7 @@ struct EventCard : View {
                     }
                 }
                 .font(.tabiBody)
-                .padding(.horizontal, UIConfig.Spacing.Tight)
+                .padding(.horizontal, .spacingTight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(isNew ? .uiWhite : status.statusColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))

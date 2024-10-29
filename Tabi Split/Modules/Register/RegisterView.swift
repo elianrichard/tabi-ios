@@ -13,11 +13,11 @@ struct RegisterView: View {
     
     var body: some View {
         Spacer()
-        VStack (alignment: .leading, spacing: UIConfig.Spacing.Large) {
+        VStack (alignment: .leading, spacing: .spacingLarge) {
             Text("Ready to Take\nYour Bills?")
                 .font(.tabiLargeTitle)
             
-            VStack (spacing: UIConfig.Spacing.Medium) {
+            VStack (spacing: .spacingMedium) {
                 InputWithLabel(label: "Fullname",
                                placeholder: "Your name",
                                text: $registerViewModel.name,
@@ -37,8 +37,8 @@ struct RegisterView: View {
                                errorMessage: registerViewModel.confirmPasswordError,
                                isSecure: true)
             }
-            VStack (spacing: UIConfig.Spacing.Tight) {
-                VStack (spacing: UIConfig.Spacing.Medium) {
+            VStack (spacing: .spacingTight) {
+                VStack (spacing: .spacingMedium) {
                     CustomButton(text: "Sign Up", isEnabled: registerViewModel.isSignUpEnabled) {
                         withAnimation (nil) {
                             registerViewModel.register()

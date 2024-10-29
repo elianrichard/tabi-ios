@@ -14,51 +14,76 @@ struct AdditionalChargeContainer: View {
     @State var price: String = ""
     
     var body: some View {
-        HStack {
-            Menu {
-                ForEach(AdditionalChargeType.allCases) { type in
-                    Button(type.name, action: {
-                        item.additionalChargeType = type.id
-                    })
-                    .frame(maxWidth: .infinity)
-                }
-            } label: {
+        GeometryReader { geometry in
+            HStack {
                 HStack{
-                    Text(AdditionalChargeType(rawValue: item.additionalChargeType)?.name ?? "unknown")
-                    Spacer()
-                    Image(systemName: "chevron.down")
+                    Menu {
+                        ForEach(AdditionalChargeType.allCases) { type in
+                            Button(type.name, action: {
+                                item.additionalChargeType = type.id
+                            })
+                            .frame(maxWidth: .infinity)
+                        }
+                    } label: {
+                        HStack{
+                            Text(AdditionalChargeType(rawValue: item.additionalChargeType)?.name ?? "unknown")
+                            Spacer()
+                            Image(systemName: "chevron.down")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(.bgWhite)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.clear)
+                                .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                .padding(0.5)
+                        }
+                        .accentColor(.textBlack)
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(10)
-                .foregroundColor(.black)
-                .background(.uiGray)
-                .cornerRadius(5)
-            }
-            HStack{
-                Text("Rp")
-                TextField("10.000", text: $price)
-                    .keyboardType(.numberPad)
-                    .onChange(of: price) {
-                        price = price.formatPrice()
-                        item.amount = Float(price.removeDots()) ?? 0
+                .frame(width: geometry.size.width * 0.4)
+                HStack{
+                    TextField("Amount (Rp)", text: $price)
+                        .keyboardType(.numberPad)
+                        .onChange(of: price) {
+                            price = price.formatPrice()
+                            item.amount = Float(price.removeDots()) ?? 0
+                            eventExpenseViewModel.calculateTotal()
+                        }
+                        .font(.tabiBody)
+                }
+                .onAppear(){
+                    price = item.amount != 0 ? String(item.amount.formatted()) : ""
+                }
+                .onChange(of: item.amount){
+                    price = item.amount != 0 ? String(item.amount.formatted()) : ""
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(.bgWhite)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.clear)
+                        .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                        .padding(0.5)
+                }
+                
+                Image(systemName: "trash")
+                    .onTapGesture {
+                        eventExpenseViewModel.deleteAdditionalCharge(item: item)
                         eventExpenseViewModel.calculateTotal()
                     }
             }
-            .onAppear(){
-                price = item.amount != 0 ? String(item.amount.formatted()) : ""
-            }
-            .onChange(of: item.amount){
-                price = item.amount != 0 ? String(item.amount.formatted()) : ""
-            }
-            .padding(10)
-            .background(.uiGray)
-            .cornerRadius(5)
-            
-            Image(systemName: "trash")
-                .onTapGesture {
-                    eventExpenseViewModel.deleteAdditionalCharge(item: item)
-                    eventExpenseViewModel.calculateTotal()
-                }
         }
+        .frame(height: 50)
     }
+}
+
+#Preview {
+    AdditionalChargeContainer(item: .constant(AdditionalCharge(additionalChargeType: .tax, amount: 10000)))
+        .environment(EventExpenseViewModel())
 }
