@@ -35,7 +35,7 @@ struct EventSummaryHistoryCard : View {
                 .font(.tabiBody)
                 .foregroundStyle(.textGrey)
         }
-        .padding(.vertical, UIConfig.Spacing.Small)
+        .padding(.vertical, .spacingSmall)
     }
 }
 
