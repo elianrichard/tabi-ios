@@ -15,19 +15,7 @@ struct EventFormView: View {
 
     var body : some View {
         VStack (spacing: 40) {
-            ZStack {
-                Text(isEdit ? "Edit Event" : "Create Event")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            TopNavigation(title: isEdit ? "Edit Event" : "Create Event")
             ZStack {
                 Circle()
                     .fill(Color(UIColor(hex: "#D9D9D9")))
@@ -37,63 +25,59 @@ struct EventFormView: View {
                     .frame(width: 24)
                     .frame(width: 80, height: 80, alignment: .bottomTrailing)
             }
-            VStack (alignment: .leading, spacing: 16) {
-                VStack (alignment: .leading, spacing: 12) {
-                    Text("Event name")
-                        .font(.title3)
-                    TextField("Event name", text: Bindable(eventViewModel).eventName)
+            
+            ScrollView {
+                VStack (alignment: .leading, spacing: 16) {
+                    InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName)
+                    VStack (alignment: .leading, spacing: 12) {
+                        Text("Participants")
+                            .font(.title3)
+                        HStack (alignment: .top, spacing: 10) {
+                            ScrollView (showsIndicators: false) {
+                                HStack (alignment: .top, spacing: 10) {
+                                    if !isEdit {
+                                        VStack {
+                                            Circle()
+                                                .fill(Color(UIColor(hex: "#D9D9D9")))
+                                                .frame(width: 40)
+                                            Text("You")
+                                                .font(.caption)
+                                        }
+                                    }
+                                    ForEach ( isEdit ? (eventViewModel.selectedEvent?.participants ?? []) : eventInviteViewModel.selectedContacts) { user in
+                                        VStack {
+                                            Circle()
+                                                .fill(Color(UIColor(hex: "#D9D9D9")))
+                                                .frame(width: 40)
+                                            Text("\(user.name.split(separator: " ").first ?? "error")")
+                                                .font(.caption)
+                                        }
+                                    }
+                                }
+                            }
+                            Button {
+                                routes.navigate(to: .EventInviteView)
+                            } label: {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(UIColor(hex: "#D9D9D9")))
+                                        .frame(width: 40)
+                                    Image(systemName: "plus")
+                                        .foregroundStyle(.black)
+                                }
+                            }
+                        }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
-                        .font(.body)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
                         .background(Color(UIColor(hex: "#F7F7F7")))
-                        .foregroundStyle(.black)
-                }
-                VStack (alignment: .leading, spacing: 12) {
-                    Text("Participants")
-                        .font(.title3)
-                    HStack (alignment: .top, spacing: 10) {
-                        ScrollView (showsIndicators: false) {
-                            HStack (alignment: .top, spacing: 10) {
-                                if !isEdit {
-                                    VStack {
-                                        Circle()
-                                            .fill(Color(UIColor(hex: "#D9D9D9")))
-                                            .frame(width: 40)
-                                        Text("You")
-                                            .font(.caption)
-                                    }
-                                }
-                                ForEach ( isEdit ? (eventViewModel.selectedEvent?.participants ?? []) : eventInviteViewModel.selectedContacts) { user in
-                                    VStack {
-                                        Circle()
-                                            .fill(Color(UIColor(hex: "#D9D9D9")))
-                                            .frame(width: 40)
-                                        Text("\(user.name.split(separator: " ").first ?? "error")")
-                                            .font(.caption)
-                                    }
-                                }
-                            }
-                        }
-                        Button {
-                            routes.navigate(to: .EventInviteView)
-                        } label: {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(UIColor(hex: "#D9D9D9")))
-                                    .frame(width: 40)
-                                Image(systemName: "plus")
-                                    .foregroundStyle(.black)
-                            }
-                        }
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .background(Color(UIColor(hex: "#F7F7F7")))
                 }
             }
-            .fixedSize(horizontal: false, vertical: true)
-            Spacer()
+            .showsIndicators
+            
+//            Spacer()
+            
             Button {
                 eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()

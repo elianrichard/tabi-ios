@@ -93,7 +93,7 @@ enum EventCardStatusEnum {
         case .debt:
                 .highlightRed
         case .settled:
-                .bgBlueElevated
+                .uiWhite
         }
     }
 }

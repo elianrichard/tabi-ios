@@ -98,7 +98,7 @@ struct EventCard : View {
                 .font(.tabiBody)
                 .padding(.horizontal, .spacingTight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(isNew ? .uiWhite : status.statusColor)
+                .background(isNew ? .bgBlueElevated : status.statusColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
