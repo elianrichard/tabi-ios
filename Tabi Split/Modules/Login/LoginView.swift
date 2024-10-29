@@ -37,7 +37,7 @@ struct LoginView: View {
             }
             
             VStack (spacing: .spacingMedium) {
-                CustomButton(text: "Sign In") {
+                CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In") {
                     Task {
                         await loginViewModel.login()
                         
