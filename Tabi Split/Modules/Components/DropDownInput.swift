@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DropDownInput<T: Identifiable & Hashable>: View {
     let label: String
-    var label2: String?
+    var placeholder: String?
     let items: [T]
     let keyPath: KeyPath<T, String>
     var backgroundColor: Color = .uiWhite
@@ -34,7 +34,7 @@ struct DropDownInput<T: Identifiable & Hashable>: View {
                     if let selected = selectedItem {
                         Text(selected[keyPath: keyPath])
                     } else {
-                        Text(label2 ?? label)
+                        Text(placeholder ?? label)
                     }
                     Spacer()
                     Image(systemName: "chevron.down")

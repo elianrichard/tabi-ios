@@ -145,11 +145,9 @@ struct ExpenseAssignView: View {
             }
             Spacer()
             
-            Button {
+            CustomButton(text: "Next") {
                 eventExpenseViewModel.calculatePeopleItems()
                 routes.navigate(to: .ExpenseResultView)
-            } label: {
-                BottomButton(text: "Next")
             }
         }
         .padding()

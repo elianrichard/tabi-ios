@@ -29,9 +29,9 @@ enum HomeFilterEnum: Identifiable, CaseIterable {
         case .all:
             "All"
         case .youOwe:
-            "You Owe"
+            "Pay"
         case .owsYou:
-            "Ows You"
+            "Receive"
         case .settled:
             "Settled"
         }

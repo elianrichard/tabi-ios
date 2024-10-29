@@ -20,7 +20,10 @@ final class EventViewModel {
             selectedSection = .expenses
         }
     }
-    var selectedSection: EventSectionEnum = .summary
+    var selectedSection: EventSectionEnum = .expenses
+    var isNoParticipants: Bool {
+        selectedEvent?.participants.count ?? 1 == 1
+    }
 
     @MainActor
     func handleCreateEditEvent (selectedContacts: [UserData]) {

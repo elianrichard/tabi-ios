@@ -5,23 +5,17 @@
 //  Created by Elian Richard on 03/10/24.
 //
 
-import Foundation
+import SwiftUI
 
 @Observable
 final class HomeViewModel {
-    var selectedFilter: HomeFilterEnum {
+    var selectedFilter: HomeFilterEnum = .all {
         didSet {
             filterEvents(by: selectedFilter)
         }
     }
-    var events: [EventData]
-    var filteredEvents: [EventData]
-
-    init() {
-        self.selectedFilter = .all
-        self.events = []
-        self.filteredEvents = []
-    }
+    var events: [EventData] = []
+    var filteredEvents: [EventData] = []
 
     func populateEvents (data: [EventData]) {
         events = data

@@ -46,8 +46,12 @@ struct CustomButton: View {
     var type: ButtonType = .primary
     var isEnabled: Bool = true
     var icon: String?
+    var iconResource: ImageResource?
+    var iconSize: CGFloat = 20
     var customBackgroundColor: Color?
     var customTextColor: Color?
+    var vPadding: CGFloat?
+    var hPadding: CGFloat?
     var callback: () -> Void
     
     var body : some View {
@@ -56,15 +60,16 @@ struct CustomButton: View {
         } label: {
             HStack (spacing: 8) {
                 if let icon = icon {
-                    Image(systemName: icon)
-                        .font(.subheadline)
-                        .foregroundStyle(.white)
+                    Icon(systemName: icon, color: .textWhite, size: iconSize)
+                } else if let resource = iconResource {
+                    Icon(resource, color: .textWhite, size: iconSize)
                 }
                 Text("\(text)")
                     .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
             }
-            .padding(.vertical, UIConfig.Spacing.Small)
-            .frame(maxWidth: .infinity)
+            .padding(.vertical, vPadding ?? UIConfig.Spacing.Tight)
+            .padding(.horizontal, hPadding)
+            .frame(maxWidth: hPadding != nil ? nil : .infinity)
             .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
             .clipShape(RoundedRectangle(cornerRadius: .infinity))
             .font(.tabiHeadline)

@@ -15,79 +15,50 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
-                HStack (spacing: 10){
-                    HStack (spacing: 10){
-                        Circle()
-                            .fill(.uiGray)
-                            .frame(width: 40)
-                        Text("Hi, User!")
-                            .font(.tabiHeadline)
-                    }
-                    Spacer()
-                    Button {
-                        print("Notifications")
-                    } label: {
-                        Image(systemName: "bell.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(.black)
-                    }
-                }
-                Spacer(minLength: 52)
-                VStack (alignment: .leading, spacing: 15) {
-                    Text("Events")
-                        .font(.title)
-                    ScrollView (.horizontal, showsIndicators: false) {
-                        HStack (spacing: 10) {
-                            ForEach(HomeFilterEnum.allCases) { item in
-                                Button {
-                                    homeViewModel.selectedFilter = item
-                                } label: {
-                                    NuggetView(text: item.displayName, isSelected: item == homeViewModel.selectedFilter)
-                                }
-                            }
-                        }
-                    }
-                }
+                HomeTopBar()
+                Spacer(minLength: UIConfig.Spacing.Large)
+                EventFilterList(homeViewModel: homeViewModel)
                 Spacer(minLength: 30)
                 if (!homeViewModel.filteredEvents.isEmpty) {
-                    ScrollView {
+                    ScrollView (showsIndicators: false) {
                         VStack (spacing: 11) {
                             ForEach(homeViewModel.filteredEvents) { event in
-                                EventCardView(event: event)
+                                EventCard(event: event)
+                                    .contentShape(Rectangle())
                                     .onTapGesture {
                                         eventViewModel.selectedEvent = event
                                         routes.navigate(to: .EventDetailView)
                                     }
                             }
                         }
+                        .padding(.bottom, 90)
                     }
                 } else {
-                    VStack (alignment: .center, spacing: 16) {
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(Color(UIColor(hex: "#D9D9D9")))
-                            .frame(width: 300, height: 180)
-                        Text("You don't have any\nevents yet.")
-                            .multilineTextAlignment(.center)
-                            .font(.title3)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    Spacer()
+                    EventEmptyList()
                 }
-                Spacer(minLength: 50)
-
             }
             .padding()
+            
+            if homeViewModel.filteredEvents.count != 0 {
+                VStack {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black.opacity(0)]), startPoint: .bottom, endPoint: .top))
+                        .frame(maxWidth: .infinity, maxHeight: 120)
+                        .allowsHitTesting(false)
+                }
+                .frame(maxHeight: .infinity, alignment: .bottom)
+            }
+            
             VStack {
                 HStack {
                     Button {
                         eventViewModel.selectedEvent = nil
                         routes.navigate(to: .EventFormView)
                     } label: {
-                        Image(systemName: "plus")
-                            .foregroundStyle(.black)
-                            .font(.title)
-                            .frame(width: 70, height: 70)
-                            .background(Color(UIColor(hex: "#EBEBEB")))
+                        Icon(systemName: "plus", color: .textWhite, size: 24)
+                            .frame(width: 56, height: 56)
+                            .background(.buttonBlue)
                             .clipShape(RoundedRectangle(cornerRadius: 50))
                     }
                 }
@@ -96,6 +67,8 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(20)
         }
+        .ignoresSafeArea()
+        .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
             let data = SwiftDataService.shared.fetchAllEvents()
