@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum ButtonType {
-    case primary, secondary
+    case primary, secondary, tertiary
     
     func backgroundColor (_ isEnabled: Bool = true) -> Color {
         switch self {
@@ -20,6 +20,8 @@ enum ButtonType {
             }
         case .secondary:
             return .buttonWhite
+        case .tertiary:
+            return .clear
         }
     }
     
@@ -33,6 +35,8 @@ enum ButtonType {
             } else {
                 return .textGrey
             }
+        case .tertiary:
+            return .textBlue
         }
     }
 }
@@ -48,9 +52,7 @@ struct CustomButton: View {
     
     var body : some View {
         Button {
-            if (isEnabled) {
-                callback()
-            }
+            callback()
         } label: {
             HStack (spacing: 8) {
                 if let icon = icon {
@@ -74,7 +76,11 @@ struct CustomButton: View {
                 }
             }
             .padding(type == .secondary ? 1 : 0)
+            .transaction { transaction in 
+                transaction.animation = nil
+            }
         }
+        .disabled(!isEnabled)
     }
 }
 
@@ -90,5 +96,8 @@ struct CustomButton: View {
     }
     CustomButton(text: "Secondary", type: .secondary, isEnabled: false) {
         print("Hello Secondary!")
+    }
+    CustomButton(text: "Tertiary", type: .tertiary, isEnabled: true) {
+        print("Hello Tertiary!")
     }
 }

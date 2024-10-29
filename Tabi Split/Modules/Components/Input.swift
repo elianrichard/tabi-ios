@@ -56,6 +56,7 @@ struct Input: View {
             RoundedRectangle(cornerRadius: cornerRadius)
                 .fill(.clear)
                 .stroke(isError ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
+                .padding(0.5)
         }
     }
 }

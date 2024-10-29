@@ -27,6 +27,6 @@ struct CustomNavTitle: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding([.bottom], 30)
+        .padding([.bottom], 36)
     }
 }

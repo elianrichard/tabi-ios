@@ -49,6 +49,7 @@ struct DropDownInput<T: Identifiable & Hashable>: View {
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .fill(.clear)
                         .stroke(errorMessage != nil ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
+                        .padding(0.5)
                 }
             }
             if let message = errorMessage {

@@ -14,19 +14,10 @@ struct ExpenseResultView: View {
     @Environment(EventViewModel.self) var eventViewModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading) {
             ZStack {
                 HStack {
-                    HStack {
-                        Button {
-                            eventExpenseViewModel.peopleItems = []
-                            routes.navigateBack()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .foregroundStyle(.black)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    CustomNavTitle(title: "Expense Result")
                     Spacer()
                     if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
                         Menu {
@@ -47,32 +38,41 @@ struct ExpenseResultView: View {
                         }
                     }
                 }
-                
             }
-            VStack (alignment: .leading, spacing: 10) {
+            VStack (alignment: .leading, spacing: 12) {
                 Text(eventExpenseViewModel.expenseName)
-                    .font(.title)
+                    .font(.tabiTitle)
                 HStack {
                     Image(systemName: "cylinder.split.1x2")
                     Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "unknown")
+                        .font(.tabiBody)
                 }
             }
-            ScrollView{
+            .padding([.bottom], 24)
+            ScrollView(showsIndicators: false){
                 if eventExpenseViewModel.selectedMethod == .equally {
                     ForEach(eventExpenseViewModel.selectedParticipants){ person in
                         HStack{
                             Circle()
                                 .frame(width: 40, height: 40)
                             Text("\(person.name.getFirstName())'s Expense")
+                                .font(.tabiHeadline)
                             Spacer()
                             Text("Rp")
-                                .font(.title2)
+                                .font(.tabiHeadline)
                             Text(eventExpenseViewModel.calculateEqualSplit().formatPrice())
-                                .font(.title2)
+                                .font(.tabiHeadline)
                         }
-                        .padding()
-                        .background(.uiGray)
-                        .cornerRadius(20)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(.bgWhite)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.clear)
+                                .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                .padding(0.5)
+                        }
+                        .cornerRadius(16)
                     }
                 } else if eventExpenseViewModel.selectedMethod == .custom {
                     ForEach(eventExpenseViewModel.peopleItems) { person in
@@ -81,28 +81,30 @@ struct ExpenseResultView: View {
                                 Circle()
                                     .frame(width: 40, height: 40)
                                 Text(person.name.getFirstName())
-                                    .font(.title3)
+                                    .font(.tabiHeadline)
                                 Spacer()
                                 Text("Rp \(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
+                                    .font(.tabiHeadline)
                             }
                             Divider()
+                                .padding(.vertical, 6)
                             ForEach (person.items) { item in
                                 HStack(alignment: .top){
                                     Text(item.itemName)
-                                        .font(.subheadline)
+                                        .font(.tabiHeadline)
                                     Spacer()
                                     Text("x" + String(item.itemQuantity.formatted(.number)))
-                                        .font(.subheadline)
+                                        .font(.tabiBody)
                                     Text("Rp \((Float(item.itemQuantity) * item.itemPrice).formatPrice())")
                                         .frame(width: 100, alignment: .trailing)
                                         .lineLimit(1)
-                                        .font(.subheadline)
+                                        .font(.tabiBody)
                                 }
                             }
                             
                             DisclosureGroup() {
+                                Divider()
+                                    .padding(6)
                                 ForEach(person.additional) { additionalItem in
                                     HStack {
                                         Text((AdditionalChargeType(rawValue: additionalItem.additionalChargeType) ?? .other).name)
@@ -113,37 +115,40 @@ struct ExpenseResultView: View {
                                 }
                             } label: {
                                 HStack {
-                                    Text("Bill Details")
-                                        .font(.headline)
-                                        .padding(.vertical, 5)
+                                    Text("See Details")
+                                        .font(.tabiBody)
                                 }
                             }
+                            .accentColor(.black)
                         }
-                        .padding()
-                        .background(.uiGray)
-                        .cornerRadius(10)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(.bgWhite)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.clear)
+                                .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                .padding(0.5)
+                        }
+                        .cornerRadius(16)
                     }
                 }
             }
             if eventExpenseViewModel.selectedExpense == nil {
-                Button {
+                CustomButton(text: "Save Expense") {
                     if let event = eventViewModel.selectedEvent {
                         eventExpenseViewModel.finalizeExpense(event)
                         routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                     }
-                } label: {
-                    BottomButton(text: "Done")
                 }
             } else {
                 if eventExpenseViewModel.isEdit {
-                    Button {
+                    CustomButton(text: "Save Expense") {
                         if let event = eventViewModel.selectedEvent {
                             eventExpenseViewModel.handleUpdateExpense(event)
                             eventExpenseViewModel.isEdit = false
                             routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                         }
-                    } label: {
-                        BottomButton(text: "Done")
                     }
                 } else {
                     Button {
@@ -155,6 +160,7 @@ struct ExpenseResultView: View {
             }
         }
         .padding()
+        .background(.bgBlueElevated)
         .navigationBarBackButtonHidden(true)
     }
 }
