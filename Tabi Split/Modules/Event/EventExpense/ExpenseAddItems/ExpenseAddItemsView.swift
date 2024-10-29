@@ -63,17 +63,6 @@ struct ExpenseAddItemsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-<<<<<<< HEAD
-            HStack{
-                Text("Total Bill")
-                    .fontWeight(.heavy)
-                Spacer()
-                Text("Rp \(eventExpenseViewModel.totalSpending.formatPrice())")
-                    .fontWeight(.heavy)
-            }
-            CustomButton(text: "Next") {
-                routes.navigate(to: .ExpenseAssignView)
-=======
             ZStack{
                 HStack(alignment: .top){
                     Text("Total Amount")
@@ -96,7 +85,6 @@ struct ExpenseAddItemsView: View {
                     routes.navigate(to: .ExpenseAssignView)
                 }
                 .zIndex(2)
->>>>>>> sprint-3
             }
             .padding([.top], 36)
         }
