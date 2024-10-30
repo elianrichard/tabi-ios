@@ -26,7 +26,7 @@ struct EventFormView: View {
                     .frame(width: 80, height: 80, alignment: .bottomTrailing)
             }
             
-            ScrollView {
+            ScrollView (showsIndicators: false) {
                 VStack (alignment: .leading, spacing: 16) {
                     InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName)
                     VStack (alignment: .leading, spacing: 12) {
@@ -74,7 +74,6 @@ struct EventFormView: View {
                     }
                 }
             }
-            .showsIndicators
             
 //            Spacer()
             
