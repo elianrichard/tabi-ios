@@ -96,7 +96,7 @@ struct EventFormView: View {
                 }
             }
             
-            CustomButton(text: isEdit ? "Edit" : "Create",
+            CustomButton(text: isEdit ? "Save" : "Create",
                          isEnabled: eventViewModel.eventName != "") {
                 eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()

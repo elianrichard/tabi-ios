@@ -32,14 +32,14 @@ struct Icon: View {
             Image(imageResource)
                 .resizable()
                 .scaledToFit()
-                .frame(width: size)
+                .frame(width: size, height: size)
                 .foregroundStyle(color)
                 
         } else if let systemResource = systemName {
             Image(systemName: systemResource)
                 .resizable()
                 .scaledToFit()
-                .frame(width: size)
+                .frame(width: size, height: size)
                 .foregroundStyle(color)
         }
     }

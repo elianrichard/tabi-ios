@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Contacts
+import UniformTypeIdentifiers
 
 
 struct EventInviteView: View {
@@ -14,24 +15,35 @@ struct EventInviteView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     
+    @State private var isLinkCopied = false
+    @State private var isShowQr = true
+    
     var body: some View {
         VStack (spacing: .spacingLarge) {
             TopNavigation(title: "Add Participants")
             HStack (spacing: .spacingMedium) {
-                EventInviteShareButtonView(text: "Copy Link",
-                                           icon: .linkIcon,
+                EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
+                                           icon: isLinkCopied ? .checkIcon : .linkIcon,
                                            action: {
-                    print("Copy Link")
+                    if !isLinkCopied {
+                        withAnimation (nil) {
+                            isLinkCopied = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation(nil)  {
+                                isLinkCopied = false
+                            }
+                        }
+                        UIPasteboard.general.setValue("https://tabieventinvitelink.com", forPasteboardType: UTType.plainText.identifier)
+                    }
                 })
-                EventInviteShareButtonView(text: "Share Link",
-                                           icon: .shareIcon,
-                                           action: {
-                    print("Share Link")
-                })
+                ShareLink(item: URL(filePath: "https://tabieventinvitelink.com")!) {
+                    EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                }
                 EventInviteShareButtonView(text: "QR Code",
                                            icon: .qrIcon,
                                            action: {
-                    print("QR Code")
+                    isShowQr = true
                 })
             }
             HStack (spacing: .spacingSmall) {
@@ -73,6 +85,41 @@ struct EventInviteView: View {
             if let selectedEvent = eventViewModel.selectedEvent {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
+        }
+        .sheet(isPresented: $isShowQr) {
+            VStack (spacing: 0) {
+                HStack{
+                    Spacer()
+                    Button {
+                        isShowQr = false
+                    } label : {
+                        Icon(systemName: "xmark", color: .textGrey, size: 12)
+                            .frame(width: 32, height: 32)
+                            .background(.uiGray)
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.top, -50)
+                VStack (alignment: .center, spacing: .spacingSmall) {
+                    Text("Show QR Code")
+                        .font(.tabiTitle)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Image(.sampleBarcodeQr)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                        .background(.red)
+                    Text("Let your friends scan it to participate in your event")
+                        .font(.tabiHeadline)
+                    
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .lineLimit(2)
+                }
+            }
+            .padding(.horizontal)
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
         .navigationBarBackButtonHidden(true)
     }

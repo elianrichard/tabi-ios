@@ -10,30 +10,44 @@ import SwiftUI
 struct EventInviteShareButtonView: View {
     var text: String
     var icon: ImageResource
-    var action: () -> Void
+    var action: (() -> Void)?
     
     var body: some View {
-        Button {
-            action()
-        } label: {
-            VStack (spacing: .spacingSmall) {
-                Icon(icon)
-                Text(text)
-                    .font(.tabiBody)
+        if let action = action {
+            Button {
+                action()
+            } label: {
+                EventInviteShareButtonViewComponent(text: text, icon: icon)
             }
-                .padding(.horizontal, .spacingTight)
-                .padding(.vertical, .spacingRegular)
-                .foregroundColor(.textBlack)
-                .font(.subheadline)
-                .frame(maxWidth: .infinity)
-                .background(.buttonBlueSelected)
-                .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
+        } else {
+            EventInviteShareButtonViewComponent(text: text, icon: icon)
         }
     }
 }
 
+struct EventInviteShareButtonViewComponent : View {
+    var text: String
+    var icon: ImageResource
+    var body: some View {
+        VStack (spacing: .spacingSmall) {
+            Icon(icon)
+            Text(text)
+                .font(.tabiBody)
+        }
+            .padding(.horizontal, .spacingTight)
+            .padding(.vertical, .spacingRegular)
+            .foregroundColor(.textBlack)
+            .font(.subheadline)
+            .frame(maxWidth: .infinity)
+            .background(.buttonBlueSelected)
+            .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
+    }
+}
+
 #Preview {
-    EventInviteShareButtonView(text: "Invite QR Code", icon: .eyeIcon, action: {
+    EventInviteShareButtonView(text: "Invite QR Code", icon: .checkIcon, action: {
         print("Hello")
     })
 }
+
+
