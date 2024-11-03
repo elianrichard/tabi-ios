@@ -9,22 +9,31 @@ import SwiftUI
 
 struct EventInviteShareButtonView: View {
     var text: String
+    var icon: ImageResource
+    var action: () -> Void
     
     var body: some View {
         Button {
-            print(text)
+            action()
         } label: {
-            Text(text)
-                .padding(.horizontal)
-                .foregroundColor(.black)
+            VStack (spacing: .spacingSmall) {
+                Icon(icon)
+                Text(text)
+                    .font(.tabiBody)
+            }
+                .padding(.horizontal, .spacingTight)
+                .padding(.vertical, .spacingRegular)
+                .foregroundColor(.textBlack)
                 .font(.subheadline)
-                .frame(maxWidth: .infinity, maxHeight: 50)
-                .background(Color(UIColor(hex: "#D9D9D9")))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .frame(maxWidth: .infinity)
+                .background(.buttonBlueSelected)
+                .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
         }
     }
 }
 
 #Preview {
-    EventInviteShareButtonView(text: "Invite QR Code")
+    EventInviteShareButtonView(text: "Invite QR Code", icon: .eyeIcon, action: {
+        print("Hello")
+    })
 }

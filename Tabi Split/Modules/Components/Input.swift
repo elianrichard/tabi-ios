@@ -13,8 +13,8 @@ struct Input: View {
     @Binding var text: String
     var isError: Bool = false
     var type: UIKeyboardType = .default
-    var backgroundColor: Color = .uiWhite
-    var cornerRadius: CGFloat = .infinity
+    var backgroundColor: Color = .bgWhite
+    var cornerRadius: CGFloat = .radiusMedium
     
     @State var isShowPassword = false
     

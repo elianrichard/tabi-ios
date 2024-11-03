@@ -12,82 +12,94 @@ struct EventFormView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
-
+    
+    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
+    
     var body : some View {
-        VStack (spacing: 40) {
+        VStack (spacing: .spacingLarge) {
             TopNavigation(title: isEdit ? "Edit Event" : "Create Event")
-            ZStack {
-                Circle()
-                    .fill(Color(UIColor(hex: "#D9D9D9")))
-                    .frame(width: 80)
-                Circle()
-                    .fill(Color(UIColor(hex: "#8E8E8E")))
-                    .frame(width: 24)
-                    .frame(width: 80, height: 80, alignment: .bottomTrailing)
-            }
-            
-            ScrollView (showsIndicators: false) {
-                VStack (alignment: .leading, spacing: 16) {
-                    InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName)
-                    VStack (alignment: .leading, spacing: 12) {
-                        Text("Participants")
-                            .font(.title3)
-                        HStack (alignment: .top, spacing: 10) {
-                            ScrollView (showsIndicators: false) {
-                                HStack (alignment: .top, spacing: 10) {
-                                    if !isEdit {
-                                        VStack {
-                                            Circle()
-                                                .fill(Color(UIColor(hex: "#D9D9D9")))
-                                                .frame(width: 40)
-                                            Text("You")
-                                                .font(.caption)
-                                        }
-                                    }
-                                    ForEach ( isEdit ? (eventViewModel.selectedEvent?.participants ?? []) : eventInviteViewModel.selectedContacts) { user in
-                                        VStack {
-                                            Circle()
-                                                .fill(Color(UIColor(hex: "#D9D9D9")))
-                                                .frame(width: 40)
-                                            Text("\(user.name.split(separator: " ").first ?? "error")")
-                                                .font(.caption)
-                                        }
-                                    }
-                                }
-                            }
-                            Button {
-                                routes.navigate(to: .EventInviteView)
-                            } label: {
-                                ZStack {
+            VStack (spacing: .spacingMedium) {
+                ZStack {
+                    Button {
+                        print("edit event picture")
+                    } label: {
+                        Image(.sampleEventPicture)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 88)
+                            .clipShape(Circle())
+                            .overlay {
+                                VStack {
                                     Circle()
-                                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                                        .frame(width: 40)
-                                    Image(systemName: "plus")
-                                        .foregroundStyle(.black)
+                                        .fill(.buttonDarkBlue)
+                                        .strokeBorder(.bgWhite, lineWidth: 1)
+                                        .frame(width: 28, height: 28)
+                                        .overlay {
+                                            Icon(systemName: "pencil", color: .textWhite, size: 12)
+                                        }
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                            }
+                    }
+                }
+                
+                ScrollView (showsIndicators: false) {
+                    VStack (alignment: .leading, spacing: .spacingRegular) {
+                        InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName)
+                        if (isEdit) {
+                            VStack (alignment: .leading, spacing: .spacingTight) {
+                                Text("Participants")
+                                    .font(.tabiBody)
+                                HStack (alignment: .top, spacing: .spacingTight) {
+                                    ScrollView (.horizontal, showsIndicators: false) {
+                                        HStack (alignment: .top, spacing: 10) {
+                                            ForEach ( eventViewModel.selectedEvent?.participants ?? []) { user in
+                                                UserAvatar(userData: user, isShowName: true)
+                                            }
+                                        }
+                                    }
+                                    
+                                    Rectangle()
+                                        .fill(.uiGray)
+                                        .frame(maxWidth: 2, maxHeight: .infinity)
+                                    
+                                    Button {
+                                        routes.navigate(to: .EventInviteView)
+                                    } label: {
+                                        ZStack {
+                                            Icon(systemName: "plus", color: .buttonBlue, size: 20)
+                                                .frame(width: 40, height: 40)
+                                                .clipShape(Circle())
+                                                .overlay {
+                                                    Circle()
+                                                        .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 5]))
+                                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                                        .foregroundColor(.bgGreyOverlay)
+                                                }
+                                        }
+                                    }
+                                    .frame(maxHeight: .infinity)
+                                }
+                                .padding(.horizontal, 18)
+                                .padding(.vertical, 12)
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
+                                .background(.bgWhite)
+                                .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: .radiusMedium)
+                                        .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                        .padding(0.5)
                                 }
                             }
                         }
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .background(Color(UIColor(hex: "#F7F7F7")))
                     }
                 }
             }
             
-//            Spacer()
-            
-            Button {
+            CustomButton(text: isEdit ? "Edit" : "Create",
+                         isEnabled: eventViewModel.eventName != "") {
                 eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()
-            } label: {
-                Text(eventViewModel.selectedEvent != nil ? "Edit" : "Create")
-                    .frame(maxWidth: .infinity)
-                    .font(.callout)
-                    .foregroundStyle(.black)
-                    .padding(.vertical, 16)
-                    .background(Color(UIColor(hex: "#D9D9D9")))
-                    .clipShape(RoundedRectangle(cornerRadius: 32))
             }
         }
         .onAppear {
@@ -97,6 +109,7 @@ struct EventFormView: View {
             }
         }
         .padding()
+        .addBackgroundColor(.bgBlueElevated)
         .navigationBarBackButtonHidden(true)
     }
 }

@@ -15,58 +15,52 @@ struct EventInviteView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     
     var body: some View {
-        VStack (spacing: 40) {
-            ZStack {
-                Text("Invite Participants")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+        VStack (spacing: .spacingLarge) {
+            TopNavigation(title: "Add Participants")
+            HStack (spacing: .spacingMedium) {
+                EventInviteShareButtonView(text: "Copy Link",
+                                           icon: .linkIcon,
+                                           action: {
+                    print("Copy Link")
+                })
+                EventInviteShareButtonView(text: "Share Link",
+                                           icon: .shareIcon,
+                                           action: {
+                    print("Share Link")
+                })
+                EventInviteShareButtonView(text: "QR Code",
+                                           icon: .qrIcon,
+                                           action: {
+                    print("QR Code")
+                })
             }
-            HStack (spacing: 10) {
-                EventInviteShareButtonView(text: "Share Link Invitation")
-                EventInviteShareButtonView(text: "Copy Link")
-                EventInviteShareButtonView(text: "Show QR Code")
+            HStack (spacing: .spacingSmall) {
+                Image(systemName: "magnifyingglass")
+                TextField("Search", text: Bindable(eventInviteViewModel).searchUserText)
+                    .font(.tabiBody)
             }
-            VStack (spacing: 12) {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                    TextField("Search", text: Bindable(eventInviteViewModel).searchUserText)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 12)
-                .background(Color(UIColor(hex: "#D9D9D9")))
-                .clipShape(RoundedRectangle(cornerRadius: 40))
-                
-                ScrollView (showsIndicators: false) {
-                    
-                    VStack {
-                        ForEach(eventInviteViewModel.filteredContacts) { contact in
-                            ForEach(contact.phoneNumbers, id: \.identifier) { number in
-                                EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
-                            }
+            .padding(.spacingTight)
+            .background(.uiWhite)
+            .clipShape(RoundedRectangle(cornerRadius: .infinity))
+            .overlay {
+                RoundedRectangle(cornerRadius: .infinity)
+                    .fill(.clear)
+                    .strokeBorder(.uiGray, lineWidth: 1)
+            }
+            
+            ScrollView (showsIndicators: false) {
+                VStack {
+                    ForEach(eventInviteViewModel.filteredContacts) { contact in
+                        ForEach(contact.phoneNumbers, id: \.identifier) { number in
+                            EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
                         }
                     }
                 }
             }
             
-            Button {
+            CustomButton(text: "Add", isEnabled: eventInviteViewModel.selectedContacts.count > 0) {
                 eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
                 routes.navigateBack()
-            } label: {
-                Text("Done")
-                    .frame(maxWidth: .infinity)
-                    .font(.callout)
-                    .foregroundStyle(.black)
-                    .padding(.vertical, 16)
-                    .background(Color(UIColor(hex: "#D9D9D9")))
-                    .clipShape(RoundedRectangle(cornerRadius: 32))
             }
         }
         .padding()

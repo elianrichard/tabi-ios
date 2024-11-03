@@ -67,7 +67,7 @@ struct CustomButton: View {
                 Text("\(text)")
                     .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
             }
-            .padding(.vertical, vPadding ?? .spacingTight)
+            .padding(.vertical, vPadding ?? .spacingRegular)
             .padding(.horizontal, hPadding)
             .frame(maxWidth: hPadding != nil ? nil : .infinity)
             .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
