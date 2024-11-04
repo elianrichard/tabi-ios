@@ -31,7 +31,7 @@ struct EventCard : View {
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
             HStack (spacing: 12) {
-                Image(.sampleEventPicture)
+                Image(EventIconEnum(rawValue: event.eventIcon)?.resource ?? .eventIcon1)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40)
@@ -98,7 +98,7 @@ struct EventCard : View {
                 .font(.tabiBody)
                 .padding(.horizontal, .spacingTight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(isNew ? .uiWhite : status.statusColor)
+                .background(isNew ? .bgBlueElevated : status.statusColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }

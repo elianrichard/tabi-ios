@@ -21,26 +21,26 @@ struct EventInviteCardView: View {
     var body: some View {
         VStack (spacing: 0) {
             HStack {
-                VStack (alignment: .leading, spacing: 6) {
-                    HStack (spacing: 0) {
+                HStack (spacing: .spacingSmall) {
+                    UserAvatar(userData: UserData(name: name, phone: number))
+                    VStack (alignment: .leading, spacing: .spacingXSmall) {
                         Text("\(name) (\(label))")
+                            .font(.tabiHeadline)
+                        Text("\(number)")
+                            .font(.tabiBody)
                     }
-                    Text("\(number)")
-                        .font(.caption)
                 }
                 Spacer()
-                if isSelected {
-                    Circle()
-                        .fill(.green)
-                        .frame(width: 16)
-                        .offset(x: -1)
-                } else {
-                    Circle()
-                        .stroke(.black, lineWidth: 1)
-                        .fill(.clear)
-                        .frame(width: 16)
-                        .offset(x: -1)
-                }
+                Circle()
+                    .stroke(isSelected ? .buttonGreen : .textGrey, lineWidth: 1)
+                    .fill(isSelected ? .buttonGreen : .clear)
+                    .frame(width: 20)
+                    .overlay {
+                        if isSelected {
+                            Icon(systemName: "checkmark", color: .textWhite, size: 10)
+                        }
+                    }
+                    .offset(x: -1)
             }
             .padding(.vertical, 12)
             .background(.clear)
@@ -67,5 +67,9 @@ struct EventInviteCardView: View {
 }
 
 #Preview {
-    EventInviteCardView(name: "Albert Einstein", number: "02134567890", label: "Home")
+    VStack{
+        EventInviteCardView(name: "Albert Einstein", number: "02134567890", label: "Home")
+    }
+    .padding()
+    .environment(EventInviteViewModel())
 }
