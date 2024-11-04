@@ -7,25 +7,25 @@
 
 import SwiftUI
 
-
 struct SettlementCard: View {
     @Environment(Routes.self) private var routes
-    var name: String
+    var user: UserData
     var amount: Float
     var type: SettlementCardTypeEnum
+    
     @State var isNotified = true
     
     var body: some View {
         VStack (spacing: 16) {
             HStack {
-                HStack {
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Text("\(name)")
+                HStack (spacing: .spacingTight) {
+                    UserAvatar(userData: user)
+                    Text("\(user.name)")
+                        .font(.tabiHeadline)
                 }
                 Spacer()
-                Text("Rp \(amount.formatPrice())")
+                Text("Rp\(amount.formatPrice())")
+                    .font(.tabiHeadline)
             }
             Divider()
             VStack (spacing: 16) {
@@ -35,13 +35,19 @@ struct SettlementCard: View {
                             .fill(type.statusColor)
                             .frame(width: 10)
                         Text("\(type.statusText)")
+                            .font(.tabiBody)
                     }
                     Spacer()
                     if (type == .NeedPayment) {
                         Button {
                             routes.navigate(to: .SettlementPaymentMethodView)
                         } label: {
-                            Text("Payment Method")
+                            HStack (spacing: .spacingXSmall) {
+                                Text("Payment Methods")
+                                    .font(.tabiBody)
+                                    .foregroundStyle(.textBlue)
+                                Icon(systemName: "chevron.right", color: .textBlue, size: 12)
+                            }
                         }
                     } else if (type == .WaitingPayment) {
                         Button {
@@ -64,24 +70,29 @@ struct SettlementCard: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(.blue)
+                        .background(.buttonBlue)
                         .clipShape(RoundedRectangle(cornerRadius: .infinity))
                     }
                 }
             }
-            
         }
-        .padding(16)
+        .padding(.vertical, .spacingTight)
+        .padding(.horizontal, .spacingMedium)
         .overlay {
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: .radiusMedium)
                 .fill(.clear)
-                .stroke(Color(UIColor(hex: "#E8E8E8")), lineWidth: 1)
+                .stroke(.uiGray, lineWidth: 1)
+                .padding(1)
         }
-        .padding(1)
     }
 }
 
 #Preview {
-    SettlementCard(name: "Elian", amount: 250_000, type: .NeedConfirmation)
+    VStack {
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedConfirmation)
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedPayment)
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingConfirmation)
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingPayment)
+    }
         .environment(Routes())
 }

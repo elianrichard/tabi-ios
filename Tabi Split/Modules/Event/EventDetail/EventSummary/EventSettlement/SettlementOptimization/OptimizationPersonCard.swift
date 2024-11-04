@@ -10,45 +10,54 @@ import SwiftUI
 struct OptimizationPersonCard: View {
     var data: OptimizationPersonData
     var body: some View {
-        VStack (alignment: .leading, spacing: 16) {
-            HStack {
-                Circle()
-                    .fill(.gray)
-                    .frame(width: 40)
-                Text("\(data.name)")
+        VStack (alignment: .leading, spacing: .spacingRegular) {
+            HStack (spacing: .spacingTight) {
+                UserAvatar(userData: data.user)
+                Text("\(data.user.name)")
+                    .font(.tabiHeadline)
                 Spacer()
             }
-            HStack (spacing: 20) {
-                VStack (alignment: .leading, spacing: 8) {
-                    Text("Total Debt")
-                    Text("Rp \(data.debtAmount.formatPrice())")
-                        .foregroundStyle(.red)
-                }
-                VStack (alignment: .leading, spacing: 8) {
+            HStack (spacing: .spacingMedium) {
+                VStack (alignment: .leading, spacing: .spacingSmall) {
                     Text("Total Lent")
+                        .font(.tabiBody)
                     Text("Rp \(data.lentAmount.formatPrice())")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.buttonGreen)
+                        .font(.tabiBody)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                VStack (alignment: .leading, spacing: .spacingSmall) {
+                    Text("Total Debt")
+                        .font(.tabiBody)
+                    Text("Rp \(data.debtAmount.formatPrice())")
+                        .foregroundStyle(.buttonRed)
+                        .font(.tabiBody)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            VStack (alignment: .leading) {
-                Text("Balance")
-                Text("\(data.lentAmount < data.debtAmount ? "+" : "-") Rp \((data.lentAmount - data.debtAmount).formatPrice(isShowSign: false))")
+            VStack (alignment: .leading, spacing: .spacingXSmall) {
+                Text(data.lentAmount < data.debtAmount ? "Should pay" : "Should recieve")
+                    .font(.tabiHeadline)
+                Text("Rp\((data.lentAmount - data.debtAmount).formatPrice(isShowSign: false))")
+                    .font(.tabiSubtitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
                     .padding(.vertical, 10)
-                    .background(Color(UIColor(hex: data.lentAmount < data.debtAmount ? "#D4FFDA" : "#FBD0DA")))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .background(data.lentAmount < data.debtAmount ? Color.highlightRed : Color.highlightGreen)
+                    .clipShape(RoundedRectangle(cornerRadius: .radiusSmall))
             }
         }
-        .padding()
+        .padding(.vertical, .spacingTight)
+        .padding(.horizontal, .spacingMedium)
+        .frame(width: 300)
         .overlay {
-            RoundedRectangle(cornerRadius: 20)
-                .strokeBorder(Color(UIColor(hex: "#C9C9C9")), lineWidth: 1)
+            RoundedRectangle(cornerRadius: .radiusLarge)
+                .strokeBorder(.uiGray, lineWidth: 1)
+                .padding(1)
         }
-        .padding(1)
     }
 }
 
 #Preview {
-    OptimizationPersonCard(data: OptimizationPersonData(name: "Elian", debtAmount: 10_000, lentAmount: 50_000))
+    OptimizationPersonCard(data: OptimizationPersonData(user: UserData(name: "Elian", phone: "Phone"), debtAmount: 10_000, lentAmount: 50_000))
 }

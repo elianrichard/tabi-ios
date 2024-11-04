@@ -15,25 +15,13 @@ struct EventSettlementView: View {
     
     var body: some View {
         VStack (spacing: 24) {
-            ZStack {
-                Text(balance > 0 ? "You Should Receive" : "You Should Pay")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            TopNavigation(title: balance > 0 ? "You Should Receive" : "You Should Pay")
             ScrollView (showsIndicators: false) {
                 VStack {
-                    SettlementCard(name: "Elian", amount: 250_000, type: .NeedConfirmation)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .NeedPayment)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .WaitingConfirmation)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .WaitingPayment)
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedConfirmation)
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedPayment)
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingConfirmation)
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingPayment)
                 }
                 .overlay(
                     GeometryReader { geo in
@@ -44,10 +32,13 @@ struct EventSettlementView: View {
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+            
             Button {
                 routes.navigate(to: .SettlementOptimizationView)
             } label: {
                 Text("See optimization details")
+                    .font(.tabiHeadline)
+                    .foregroundStyle(.textBlue)
             }
             Spacer()
             

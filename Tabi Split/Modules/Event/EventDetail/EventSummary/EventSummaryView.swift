@@ -44,7 +44,7 @@ struct EventSummaryView: View {
                             .clipShape(Circle())
                     }
                     .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
+                    .frame(maxWidth: .infinity, minHeight: 80)
                     .background(status.summaryCardBgColor)
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .padding(.bottom, 6)
@@ -55,7 +55,7 @@ struct EventSummaryView: View {
                             .font(.tabiSubtitle)
                     }
                     .foregroundStyle(.textGrey)
-                    .frame(maxWidth: .infinity, maxHeight: 80)
+                    .frame(maxWidth: .infinity, minHeight: 80)
                     .background(.uiWhite)
                     .overlay {
                         RoundedRectangle(cornerRadius: 24)
