@@ -81,17 +81,17 @@ final class APIService: APIClient {
             var modifiedRequest = request
             let url = URL(string: config.baseURL + endpoint)!
             modifiedRequest.url = url
-
+            
             if let accessToken = try? tokenManager.getAccessToken() {
                 modifiedRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
             }
-
+            
             let (data, response) = try await URLSession.shared.data(for: modifiedRequest)
-
+            
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw APIError.invalidResponse
             }
-
+            
             if httpResponse.statusCode == 401 {
                 try await authService.refresh()
                 
@@ -103,8 +103,21 @@ final class APIService: APIClient {
                     throw APIError.unauthorized
                 }
             }
-
+            
+            if httpResponse.statusCode == 500 {
+                let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data)
+                throw APIError.internalServerError(message: errorResponse?.errors ?? "Unknown server error")
+            }
+            
             if !(200...299).contains(httpResponse.statusCode) {
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    if config.unauthorizedMessages.contains(errorResponse.errors) {
+                        try? tokenManager.clearTokens()
+                        throw APIError.unauthorized
+                    }
+                    throw APIError.requestFailed(message: errorResponse.errors)
+                }
+                
                 let errorMessage = try? JSONDecoder().decode(String.self, from: data)
                 if let message = errorMessage,
                    config.unauthorizedMessages.contains(message) {
@@ -113,7 +126,7 @@ final class APIService: APIClient {
                 }
                 throw APIError.requestFailed(message: errorMessage ?? "Unknown error")
             }
-
+            
             return try JSONDecoder().decode(Response.self, from: data)
         } catch {
             throw (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
@@ -122,3 +135,7 @@ final class APIService: APIClient {
 }
 
 struct Empty: Codable {}
+
+struct ErrorResponse: Codable {
+    let errors: String
+}
