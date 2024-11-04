@@ -44,6 +44,7 @@ struct EventDetailView: View {
                 .padding(.vertical, -11)
                 .padding(.horizontal, -11)
             })
+            .padding(.bottom, 36)
             
             VStack (spacing: 0) {
                 EventBanner()

@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct EventFormView: View {
-    @State var isEdit: Bool = false
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     
+    @State var isEdit: Bool = false
+    @State var isShowEditIconSheet: Bool = false
+
     var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
     
     var body : some View {
@@ -21,12 +23,12 @@ struct EventFormView: View {
             VStack (spacing: .spacingMedium) {
                 ZStack {
                     Button {
-                        print("edit event picture")
+                        isShowEditIconSheet = true
                     } label: {
-                        Image(.sampleEventPicture)
+                        Image(eventViewModel.eventIcon.resource)
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 88)
+                            .frame(width: 88, height: 88)
                             .clipShape(Circle())
                             .overlay {
                                 VStack {
@@ -101,6 +103,56 @@ struct EventFormView: View {
                 eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
                 routes.navigateBack()
             }
+        }
+        .sheet(isPresented: $isShowEditIconSheet) {
+            VStack (spacing: 0) {
+                HStack{
+                    Spacer()
+                    Button {
+                        isShowEditIconSheet = false
+                    } label : {
+                        Icon(systemName: "xmark", color: .textGrey, size: 12)
+                            .frame(width: 32, height: 32)
+                            .background(.uiGray)
+                            .clipShape(Circle())
+                    }
+                }
+                VStack (alignment: .center, spacing: .spacingSmall) {
+                    VStack {
+                        Text("Select Image")
+                            .font(.tabiTitle)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4), spacing: .spacingRegular) {
+                            ForEach(EventIconEnum.allCases) { icon in
+                                Button {
+                                    withAnimation (nil) {
+                                        eventViewModel.eventIcon = icon
+                                    }
+                                } label: {
+                                    Circle()
+                                        .fill(icon == eventViewModel.eventIcon ? .buttonGreen : .clear)
+                                        .frame(width: 78, height: 78)
+                                        .overlay {
+                                            Image(icon.resource)
+                                                .resizable()
+                                                .scaledToFill()
+                                                .clipShape(Circle())
+                                                .padding(6)
+                                        }
+                                }
+                            }
+                        }
+                    }
+                    Spacer()
+                    CustomButton(text: "Save") {
+                        isShowEditIconSheet = false
+                    }
+                }
+            }
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
         .onAppear {
             if let selectedEvent = eventViewModel.selectedEvent {

@@ -20,7 +20,9 @@ struct EventInviteView: View {
     
     var body: some View {
         VStack (spacing: .spacingLarge) {
-            TopNavigation(title: "Add Participants")
+            TopNavigation(title: "Add Participants", additionalBackFunction: {
+                eventInviteViewModel.searchUserText = ""
+            })
             HStack (spacing: .spacingMedium) {
                 EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
                                            icon: isLinkCopied ? .checkIcon : .linkIcon,
@@ -73,6 +75,7 @@ struct EventInviteView: View {
                 
                 CustomButton(text: "Add", isEnabled: eventInviteViewModel.selectedContacts.count > 0) {
                     eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
+                    eventInviteViewModel.searchUserText = ""
                     routes.navigateBack()
                 }
             }
@@ -102,24 +105,25 @@ struct EventInviteView: View {
                             .clipShape(Circle())
                     }
                 }
-                .padding(.top, -50)
                 VStack (alignment: .center, spacing: .spacingSmall) {
                     Text("Show QR Code")
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Image(.sampleBarcodeQr)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 200, height: 200)
-                        .background(.red)
-                    Text("Let your friends scan it to participate in your event")
-                        .font(.tabiHeadline)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .lineLimit(2)
+                    VStack (alignment: .center, spacing: .spacingSmall) {
+                        Image(.sampleBarcodeQr)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 200)
+                            .background(.red)
+                        Text("Let your friends scan it to participate in your event")
+                            .font(.tabiHeadline)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .frame(maxHeight: .infinity)
                 }
             }
-            .padding(.horizontal)
+            .padding()
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
