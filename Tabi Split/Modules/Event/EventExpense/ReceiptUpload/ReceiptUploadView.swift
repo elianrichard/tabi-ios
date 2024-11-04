@@ -62,16 +62,15 @@ struct ReceiptUploadView: View {
             .frame(width: 200)
             
             Spacer()
-            
+
             CustomButton(text: "Upload", isEnabled: receiptUploadViewModel.receiptImage != nil) {
                 do {
                     try eventExpenseViewModel.performOCROnImage(receiptUploadViewModel.receiptImage ?? UIImage())
                 } catch {
                     print(error)
                 }
-                
+ 
                 eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
-                
                 routes.navigateBack()
             }
         }
