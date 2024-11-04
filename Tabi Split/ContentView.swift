@@ -13,13 +13,14 @@ struct ContentView: View {
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
+    @State private var profileViewModel = ProfileViewModel()
     
     @State private var isAuthenticated = false
     
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
-                if isAuthenticated {
+                if !isAuthenticated {
                     HomeView()
                 } else {
                     LoginView()
@@ -80,6 +81,12 @@ struct ContentView: View {
                     
                 case .ReceiptUploadView:
                     ReceiptUploadView()
+                    
+                case .Profile:
+                    ProfileView()
+                    
+                case .EditProfile:
+                    EditProfileView()
                 }
                 
             }
@@ -89,6 +96,7 @@ struct ContentView: View {
         .environment(eventViewModel)
         .environment(eventInviteViewModel)
         .environment(eventExpenseViewModel)
+        .environment(profileViewModel)
         .onAppear {
             checkAuthentication()
         }

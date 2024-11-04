@@ -28,7 +28,9 @@ import SwiftUI
              SettlementOptimizationView, 
              SettlementConfirmationView, 
              SettlementReceiptView,
-             ReceiptUploadView
+             ReceiptUploadView,
+             Profile,
+             EditProfile
     }
 
     func navigate(to destination: Destination) {
