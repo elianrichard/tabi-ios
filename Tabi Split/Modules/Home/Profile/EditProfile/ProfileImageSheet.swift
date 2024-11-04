@@ -15,22 +15,7 @@ struct ProfileImageSheet: View {
     
     var body: some View {
         VStack(){
-            HStack{
-                Button{
-                    profileViewModel.toggleProfileImagePick.toggle()
-                }label: {
-                    Circle()
-                        .frame(width: 30, height: 30)
-                        .foregroundColor(.uiGray)
-                        .overlay {
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .frame(width: 10, height: 10)
-                                .foregroundColor(.textGrey)
-                        }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            SheetXButton(toggle: Bindable(profileViewModel).toggleProfileImagePick)
             VStack(spacing: .spacingMedium){
                 Text("Select Image")
                     .font(.tabiTitle)
@@ -111,7 +96,7 @@ struct ProfileImageSheet: View {
                         }
                     }else{
                         editProfileViewModel.profileImage = profileViewModel.images[viewModel.chosenIndex-2]
-                        }
+                    }
                     profileViewModel.toggleProfileImagePick.toggle()
                 }
             }
@@ -120,13 +105,13 @@ struct ProfileImageSheet: View {
             viewModel.chosenIndex = editProfileViewModel.savedIndex
         }
         .background(
-                    GeometryReader { geometry in
-                        Color.clear
-                            .onAppear {
-                                profileViewModel.contentHeight = geometry.size.height
-                            }
+            GeometryReader { geometry in
+                Color.clear
+                    .onAppear {
+                        profileViewModel.contentHeight = geometry.size.height
                     }
-                )
+            }
+        )
         .sheet(isPresented: Bindable(profileViewModel).toggleProfileImageUpload){
             ImagePicker(selectedImage: $viewModel.chosenImage)
         }

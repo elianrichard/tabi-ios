@@ -56,6 +56,10 @@ struct ProfileView: View {
                         Image(systemName: "chevron.right")
                             .frame(width: 24, height: 24)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        routes.navigate(to: .PaymentMethods)
+                    }
                     Divider()
                     HStack(spacing: .spacingTight){
                         Icon(.logout, size: 20)
