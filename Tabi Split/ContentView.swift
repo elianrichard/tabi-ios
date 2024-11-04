@@ -17,8 +17,6 @@ struct ContentView: View {
     
     @State private var isAuthenticated = false
     
-    @State private var isAuthenticated = false
-    
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
