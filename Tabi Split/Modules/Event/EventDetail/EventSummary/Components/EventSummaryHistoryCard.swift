@@ -9,8 +9,9 @@ import SwiftUI
 
 struct EventSummaryHistoryCard : View {
     var itemName: String
-    var amount: Double
+    var amount: Float
     var date: Date
+    var isLast: Bool = false
     
     var body : some View {
         HStack (alignment: .top, spacing: 12)  {
@@ -22,7 +23,7 @@ struct EventSummaryHistoryCard : View {
             VStack (alignment: .leading, spacing: 4) {
                 Text(itemName)
                     .font(.tabiHeadline)
-                Text("\(amount < 0 ? "- " : "")Rp \(String(format: "%.0f", abs(amount)).formatPrice())")
+                Text("\(amount < 0 ? "- " : "")Rp\(abs(amount).formatPrice())")
                     .font(.tabiHeadline)
                     .fontWeight(.medium)
                     .padding(.vertical, 5)
@@ -36,6 +37,7 @@ struct EventSummaryHistoryCard : View {
                 .foregroundStyle(.textGrey)
         }
         .padding(.vertical, .spacingSmall)
+        .border(width: isLast ? 0 : 1, edges: [.bottom], color: .uiGray)
     }
 }
 

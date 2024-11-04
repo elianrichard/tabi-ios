@@ -113,4 +113,37 @@ enum EventCardStatusEnum: String {
                 .uiWhite
         }
     }
+    
+    var summaryCardText: String {
+        switch self {
+        case .credit:
+            "You should recieve"
+        case .debt:
+            "You should pay"
+        case .settled:
+            "You are all Settled!"
+        }
+    }
+    
+    var summaryCardBgColor: Color {
+        switch self {
+        case .credit:
+                .buttonGreen
+        case .debt:
+                .buttonRed
+        case .settled:
+                .uiWhite
+        }
+    }
+    
+    var summaryCardBgShadow: Color {
+        switch self {
+        case .credit:
+                .buttonGreenShadow
+        case .debt:
+                .buttonRedShadow
+        case .settled:
+                .uiGray
+        }
+    }
 }
