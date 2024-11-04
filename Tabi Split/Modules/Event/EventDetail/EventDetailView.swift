@@ -11,23 +11,30 @@ struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @State private var showingCompletionAlert = false
+    
+    @State private var isShowCompleteSheet = false
+    @State private var isShowDeleteSheet = false
     
     var body: some View {
         ZStack {
             TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
                 Menu {
-                    Button("Edit Event") {
+                    Button {
                         routes.navigate(to: .EventFormView)
+                    } label: {
+                        Label("Edit Event", systemImage: "pencil")
                     }
                     if !eventViewModel.isEventCompleted {
-                        Button("Complete Event") {
-                            showingCompletionAlert = true
+                        Button {
+                            isShowCompleteSheet = true
+                        } label: {
+                            Label("Complete Event", systemImage: "flag")
                         }
                     }
-                    Button("Delete Event") {
-                        eventViewModel.handleDeleteEvent()
-                        routes.navigateBack()
+                    Button (role: .destructive) {
+                        isShowDeleteSheet = true
+                    } label: {
+                        Label("Delete Event", systemImage: "trash")
                     }
                 } label: {
                     Icon(systemName: "ellipsis", color: .textWhite)
@@ -98,14 +105,70 @@ struct EventDetailView: View {
             
         }
         .navigationBarBackButtonHidden(true)
-        .alert("Do you want to completed this event?",
-               isPresented: $showingCompletionAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Yes") {
-                eventViewModel.completeEvent()
+        .sheet(isPresented: $isShowCompleteSheet) {
+            VStack (alignment: .center, spacing: 0) {
+                VStack (spacing: 0) {
+                    Image(.eventComplete)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                    VStack (spacing: .spacingSmall) {
+                        Text("Do you want to complete this event?")
+                            .font(.tabiSubtitle)
+                            .multilineTextAlignment(.center)
+                        Text("The expenses on this event can’t be edited or added anymore.")
+                            .font(.tabiBody)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                HStack {
+                    CustomButton(text: "Cancel", type: .secondary) {
+                        isShowCompleteSheet = false
+                    }
+                    CustomButton(text: "Complete") {
+                        eventViewModel.completeEvent()
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
-        } message: {
-            Text("You cannot undo this action")
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowDeleteSheet) {
+            VStack (alignment: .center, spacing: 0) {
+                VStack (spacing: 0) {
+                    Image(.eventDelete)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 300)
+                    VStack (spacing: .spacingSmall) {
+                        Text("Do you want to delete this event?")
+                            .font(.tabiSubtitle)
+                            .multilineTextAlignment(.center)
+                        Text("This event can no longer be accessed and can’t be recovered.")
+                            .font(.tabiBody)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                HStack {
+                    CustomButton(text: "Cancel", type: .secondary) {
+                        isShowDeleteSheet = false
+                    }
+                    CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
+                        eventViewModel.handleDeleteEvent()
+                        routes.navigateBack()
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
     }
 }

@@ -16,7 +16,7 @@ struct EventInviteView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     
     @State private var isLinkCopied = false
-    @State private var isShowQr = true
+    @State private var isShowQrSheet = false
     
     var body: some View {
         VStack (spacing: .spacingLarge) {
@@ -43,41 +43,44 @@ struct EventInviteView: View {
                 EventInviteShareButtonView(text: "QR Code",
                                            icon: .qrIcon,
                                            action: {
-                    isShowQr = true
+                    isShowQrSheet = true
                 })
             }
-            HStack (spacing: .spacingSmall) {
-                Image(systemName: "magnifyingglass")
-                TextField("Search", text: Bindable(eventInviteViewModel).searchUserText)
-                    .font(.tabiBody)
-            }
-            .padding(.spacingTight)
-            .background(.uiWhite)
-            .clipShape(RoundedRectangle(cornerRadius: .infinity))
-            .overlay {
-                RoundedRectangle(cornerRadius: .infinity)
-                    .fill(.clear)
-                    .strokeBorder(.uiGray, lineWidth: 1)
-            }
-            
-            ScrollView (showsIndicators: false) {
-                VStack {
-                    ForEach(eventInviteViewModel.filteredContacts) { contact in
-                        ForEach(contact.phoneNumbers, id: \.identifier) { number in
-                            EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
+            VStack (spacing: .spacingTight) {
+                HStack (spacing: .spacingSmall) {
+                    Image(systemName: "magnifyingglass")
+                    TextField("Search", text: Bindable(eventInviteViewModel).searchUserText)
+                        .font(.tabiBody)
+                }
+                .padding(.spacingTight)
+                .background(.uiWhite)
+                .clipShape(RoundedRectangle(cornerRadius: .infinity))
+                .overlay {
+                    RoundedRectangle(cornerRadius: .infinity)
+                        .fill(.clear)
+                        .strokeBorder(.uiGray, lineWidth: 1)
+                }
+                
+                ScrollView (showsIndicators: false) {
+                    VStack {
+                        ForEach(eventInviteViewModel.filteredContacts) { contact in
+                            ForEach(contact.phoneNumbers, id: \.identifier) { number in
+                                EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
+                            }
                         }
                     }
                 }
-            }
-            
-            CustomButton(text: "Add", isEnabled: eventInviteViewModel.selectedContacts.count > 0) {
-                eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
-                routes.navigateBack()
+                
+                CustomButton(text: "Add", isEnabled: eventInviteViewModel.selectedContacts.count > 0) {
+                    eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
+                    routes.navigateBack()
+                }
             }
         }
         .padding()
         .onAppear {
             if (eventInviteViewModel.allContacts.count == 0) {
+                print("Fetching contacts")
                 DispatchQueue.global(qos: .background).async {
                     eventInviteViewModel.fetchContacts()
                 }
@@ -86,12 +89,12 @@ struct EventInviteView: View {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
         }
-        .sheet(isPresented: $isShowQr) {
+        .sheet(isPresented: $isShowQrSheet) {
             VStack (spacing: 0) {
                 HStack{
                     Spacer()
                     Button {
-                        isShowQr = false
+                        isShowQrSheet = false
                     } label : {
                         Icon(systemName: "xmark", color: .textGrey, size: 12)
                             .frame(width: 32, height: 32)
@@ -111,7 +114,6 @@ struct EventInviteView: View {
                         .background(.red)
                     Text("Let your friends scan it to participate in your event")
                         .font(.tabiHeadline)
-                    
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                         .lineLimit(2)
