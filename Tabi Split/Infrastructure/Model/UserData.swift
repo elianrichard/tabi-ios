@@ -25,14 +25,15 @@ struct PaymentMethod: Identifiable {
     var name: String?
     var bankName: String
     var bankNumber: String
-    var paymentImage: UIImage?
+    var logoImage: UIImage?
     var isFavorite: Bool
     
-    init(name: String, bankName: String, bankNumber: String, isFavorite: Bool = false) {
+    init(name: String, bankName: String, bankNumber: String, logoImage: UIImage = UIImage(), isFavorite: Bool = false) {
         self.id = UUID()
         self.name = name
         self.bankName = bankName
         self.bankNumber = bankNumber
+        self.logoImage = logoImage
         self.isFavorite = isFavorite
     }
 }

@@ -104,6 +104,12 @@ struct ProfileImageSheet: View {
         .onAppear{
             viewModel.chosenIndex = editProfileViewModel.savedIndex
         }
+        .sheet(isPresented: Bindable(profileViewModel).toggleProfileImageUpload){
+            ImagePicker(selectedImage: $viewModel.chosenImage)
+        }
+        .navigationBarBackButtonHidden(true)
+        .padding()
+        .padding([.top], 10)
         .background(
             GeometryReader { geometry in
                 Color.clear
@@ -112,12 +118,6 @@ struct ProfileImageSheet: View {
                     }
             }
         )
-        .sheet(isPresented: Bindable(profileViewModel).toggleProfileImageUpload){
-            ImagePicker(selectedImage: $viewModel.chosenImage)
-        }
-        .navigationBarBackButtonHidden(true)
-        .padding()
-        .padding([.top], 10)
     }
 }
 

@@ -8,7 +8,9 @@
 import Foundation
 import SwiftUI
 
+@Observable
 class PaymentMethodViewModel{
     var toggleSelectBank: Bool = false
-    var settingsDetent = PresentationDetent.medium
+    var settingsDetent = PresentationDetent.large
+    var contentHeight: CGFloat = 0
 }
