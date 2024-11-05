@@ -37,6 +37,12 @@ class RegisterViewModel {
     var passwordError: String?
     var confirmPasswordError: String?
     
+    var isLoading: Bool = false
+    var isRegisterSuccess: Bool = false
+    
+    let authService = AuthenticationService()
+
+    
     var isSignUpEnabled: Bool {
         if (!hasSubmitted) { return true }
         else { return isFormValid() }
@@ -93,12 +99,23 @@ class RegisterViewModel {
         )
     }
     
-    func register() {
+    func register() async {
         hasSubmitted = true
         guard isFormValid() else {
             print("Cannot register: form is invalid")
             return
         }
-        print("Registering with name: \(name), phone number: \(phoneNumber), password: \(password)")
+        isLoading = true
+        
+        do {
+            try await authService.register(name: name, phone: phoneNumber, password: password)
+            isRegisterSuccess = true
+            print("Register successful!")
+        } catch {
+            print("Register failed: \(error)")
+            isRegisterSuccess = false
+        }
+        
+        isLoading = false
     }
 }

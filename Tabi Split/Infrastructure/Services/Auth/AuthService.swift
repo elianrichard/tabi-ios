@@ -8,6 +8,7 @@
 import Foundation
 
 protocol AuthenticationServicing {
+    func register(name: String, phone: String, password: String) async throws
     func login(phone: String, password: String) async throws
     func logout() async throws
     func refresh() async throws
@@ -20,6 +21,11 @@ final class AuthenticationService: AuthenticationServicing {
     init(apiClient: APIClient = APIService.shared, tokenManager: TokenManaging = KeychainService.shared) {
         self.apiClient = apiClient
         self.tokenManager = tokenManager
+    }
+    
+    func register(name: String, phone: String, password: String) async throws {
+        let registerRequest = RegisterRequest(name: name, phone: phone, password: password)
+        let _: RegisterResponse = try await apiClient.post(endpoint: "/auth/register", body: registerRequest)
     }
     
     func login(phone: String, password: String) async throws {
