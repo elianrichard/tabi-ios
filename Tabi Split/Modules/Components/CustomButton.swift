@@ -60,16 +60,16 @@ struct CustomButton: View {
         } label: {
             HStack (spacing: 8) {
                 if let icon = icon {
-                    Icon(systemName: icon, color: .textWhite, size: iconSize)
+                    Icon(systemName: icon, color: type.textColor(isEnabled), size: iconSize)
                 } else if let resource = iconResource {
-                    Icon(resource, color: .textWhite, size: iconSize)
+                    Icon(resource, color: type.textColor(isEnabled), size: iconSize)
                 }
                 Text("\(text)")
                     .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
             }
-            .padding(.vertical, vPadding ?? .spacingTight)
+            .padding(.vertical, vPadding ?? .spacingRegular)
             .padding(.horizontal, hPadding)
-            .frame(maxWidth: hPadding != nil ? nil : .infinity)
+            .frame(maxWidth: hPadding != nil || type == .tertiary ? nil : .infinity)
             .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
             .clipShape(RoundedRectangle(cornerRadius: .infinity))
             .font(.tabiHeadline)
@@ -90,19 +90,19 @@ struct CustomButton: View {
 }
 
 #Preview {
-    CustomButton(text: "Primary", type: .primary, isEnabled: true) {
+    CustomButton(text: "Primary", type: .primary, isEnabled: true, icon: "flag") {
         print("Hello Primary!")
     }
-    CustomButton(text: "Secondary", type: .secondary, isEnabled: true) {
+    CustomButton(text: "Secondary", type: .secondary, isEnabled: true, icon: "flag") {
         print("Hello Secondary!")
     }
-    CustomButton(text: "Primary", type: .primary, isEnabled: false) {
+    CustomButton(text: "Primary", type: .primary, isEnabled: false, icon: "flag") {
         print("Hello Primary!")
     }
-    CustomButton(text: "Secondary", type: .secondary, isEnabled: false) {
+    CustomButton(text: "Secondary", type: .secondary, isEnabled: false, icon: "flag") {
         print("Hello Secondary!")
     }
-    CustomButton(text: "Tertiary", type: .tertiary, isEnabled: true) {
+    CustomButton(text: "Tertiary", type: .tertiary, isEnabled: true, icon: "flag") {
         print("Hello Tertiary!")
     }
 }

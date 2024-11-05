@@ -8,16 +8,18 @@
 import SwiftUI
 
 struct EventNoParticipants : View {
+    @Environment(Routes.self) var routes
+    
     var body: some View {
         VStack (alignment: .center, spacing: 36) {
             Image(.eventOneParticipant)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 240, height: 240)
+                .frame(width: 340, height: 250)
             Text("You’re the only participant here")
                 .font(.tabiSubtitle)
             Button {
-                print("invite friend")
+                routes.navigate(to: .EventInviteView)
             } label: {
                 Text("+ Invite your friends")
                     .font(.tabiHeadline)

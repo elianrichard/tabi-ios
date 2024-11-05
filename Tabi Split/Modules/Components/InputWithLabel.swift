@@ -39,7 +39,7 @@ struct InputWithLabel: View {
     var errorMessage: String?
     
     // Initializer for text input only
-    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .uiWhite, inputCornerRadius: CGFloat = .infinity, isSecure: Bool = false) {
+    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, isSecure: Bool = false) {
         self.label = label
         self.placeholder = placeholder
         self._text = text
@@ -52,7 +52,7 @@ struct InputWithLabel: View {
     }
     
     // Initializer for price input only
-    init(label: String, placeholder: String, price: Binding<Float>, errorMessage: String? = nil, inputBackgroundColor: Color = .uiWhite, inputCornerRadius: CGFloat = .infinity) {
+    init(label: String, placeholder: String, price: Binding<Float>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium) {
         self.label = label
         self.placeholder = placeholder
         self._text = .constant("")  // Default to empty string
