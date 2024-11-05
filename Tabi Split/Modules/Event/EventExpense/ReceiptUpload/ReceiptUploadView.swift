@@ -56,7 +56,7 @@ struct ReceiptUploadView: View {
             DividerWithText()
                 .padding()
             
-            CustomButton (text: "Take Photo", type: .secondary, hPadding: 40) {
+            CustomButton(text: "Take Photo", type: .secondary) {
                 receiptUploadViewModel.isShowingScanner.toggle()
             }
             .frame(width: 200)
@@ -69,9 +69,8 @@ struct ReceiptUploadView: View {
                 } catch {
                     print(error)
                 }
-
+ 
                 eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
-
                 routes.navigateBack()
             }
         }
