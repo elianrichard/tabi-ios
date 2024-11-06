@@ -7,6 +7,16 @@
 
 import Foundation
 
+struct RegisterRequest: Codable {
+    let name: String
+    let phone: String
+    let password: String
+}
+
+struct RegisterResponse: Codable {
+    let message: String
+}
+
 struct LoginRequest: Codable {
     let phone: String
     let password: String

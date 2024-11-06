@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
     @State private var eventSettlementViewModel = EventSettlementViewModel()
+    @State private var profileViewModel = ProfileViewModel()
     
     @State private var isAuthenticated = false
     
@@ -84,6 +85,12 @@ struct ContentView: View {
                     
                 case .ReceiptUploadView:
                     ReceiptUploadView()
+                    
+                case .Profile:
+                    ProfileView()
+                    
+                case .EditProfile:
+                    EditProfileView()
                 }
                 
             }
@@ -94,6 +101,7 @@ struct ContentView: View {
         .environment(eventInviteViewModel)
         .environment(eventExpenseViewModel)
         .environment(eventSettlementViewModel)
+        .environment(profileViewModel)
         .onAppear {
             checkAuthentication()
         }

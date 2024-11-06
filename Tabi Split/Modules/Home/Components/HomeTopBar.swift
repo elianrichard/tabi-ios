@@ -8,16 +8,26 @@
 import SwiftUI
 
 struct HomeTopBar: View {
+    @Environment(Routes.self) var routes
+    @Environment(ProfileViewModel.self) private var profileViewModel
+    
     var body: some View {
         HStack (spacing: 10){
             HStack (spacing: 10){
-                Image(.sampleUserProfile1)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.2),radius: 4, y: 3)
-                Text("Hi, User!")
+                Circle()
+                    .frame(width: 40, height: 40)
+                    .overlay {
+                        Image(uiImage: profileViewModel.profileImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 40, height: 40)
+                            .clipShape(Circle())
+                    }
+                    .foregroundColor(.uiGray)
+                    .onTapGesture {
+                        routes.navigate(to: .Profile)
+                    }
+                Text("Hi, " + profileViewModel.user.name + "!")
                     .font(.tabiHeadline)
             }
             Spacer()
