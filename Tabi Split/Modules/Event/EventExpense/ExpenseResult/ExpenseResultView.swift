@@ -19,7 +19,7 @@ struct ExpenseResultView: View {
     var body: some View {
         VStack (alignment: .leading) {
             TopNavigation(title: "Expense Result", RightToolbar: {
-                if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
+                if !eventExpenseViewModel.isEditView {
                     ElipsisMenu {
                         Button {
                             eventExpenseViewModel.isEdit = true
@@ -40,7 +40,7 @@ struct ExpenseResultView: View {
             })
             
             VStack (alignment: .leading, spacing: .spacingSmall) {
-                if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
+                if !eventExpenseViewModel.isEditView {
                     Text("\(Date().customDateFormat("dd MMM yyyy  HH:mm").string(from: eventExpenseViewModel.selectedExpense?.dateOfCreation ?? Date()))")
                         .font(.tabiBody)
                         .foregroundStyle(.textGrey)
@@ -53,7 +53,7 @@ struct ExpenseResultView: View {
                         Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "")
                             .font(.tabiBody)
                     }
-                    if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
+                    if !eventExpenseViewModel.isEditView {
                         HStack (spacing: .spacingTight) {
                             Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
                                 .font(.tabiHeadline)
@@ -78,59 +78,7 @@ struct ExpenseResultView: View {
                         }
                     } else if eventExpenseViewModel.selectedMethod == .custom {
                         ForEach(eventExpenseViewModel.peopleItems) { person in
-                            VStack {
-                                HStack {
-                                    UserAvatar(userData: person.user)
-                                    Text("\(person.name.getFirstName())'s")
-                                        .font(.tabiHeadline)
-                                    Spacer()
-                                    Text("Rp\(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")
-                                        .font(.tabiHeadline)
-                                }
-                                Divider()
-                                    .padding(.vertical, 6)
-                                ForEach (person.items) { item in
-                                    HStack(alignment: .top){
-                                        Text(item.itemName)
-                                            .font(.tabiHeadline)
-                                        Text("x" + String(item.itemQuantity.formatted(.number)))
-                                            .font(.tabiBody)
-                                        Spacer()
-                                        Text("Rp \((Float(item.itemQuantity) * item.itemPrice).formatPrice())")
-                                            .frame(width: 100, alignment: .trailing)
-                                            .lineLimit(1)
-                                            .font(.tabiBody)
-                                    }
-                                }
-                                
-                                DisclosureGroup() {
-                                    Divider()
-                                        .padding(.vertical, 6)
-                                    ForEach(person.additional) { additionalItem in
-                                        HStack {
-                                            Text((AdditionalChargeType(rawValue: additionalItem.additionalChargeType) ?? .other).name)
-                                            Spacer()
-                                            Text("Rp \(additionalItem.amount.formatPrice())")
-                                        }
-                                        .font(.subheadline)
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text("See Details")
-                                            .font(.tabiBody)
-                                    }
-                                }
-                                .accentColor(.textBlack)
-                            }
-                            .padding(.vertical, .spacingTight)
-                            .padding(.horizontal, .spacingMedium)
-                            .background(.bgWhite)
-                            .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: .radiusMedium)
-                                    .fill(.clear)
-                                    .strokeBorder(.uiGray, lineWidth: 1)
-                            }
+                            ExpenseResultCustomCard(person: person)
                         }
                     }
                 }
@@ -144,7 +92,7 @@ struct ExpenseResultView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
-            if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit { CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
+            if !eventExpenseViewModel.isEditView { CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
                 isShowReceiptSheet = true
             }
             .frame(maxWidth: .infinity, alignment: .center)
@@ -152,20 +100,15 @@ struct ExpenseResultView: View {
             
             Spacer()
             
-            if eventExpenseViewModel.selectedExpense == nil {
+            if let event = eventViewModel.selectedEvent, eventExpenseViewModel.isEditView {
                 CustomButton(text: "Save Expense") {
-                    if let event = eventViewModel.selectedEvent {
-                        eventExpenseViewModel.finalizeExpense(event)
-                        routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
-                    }
-                }
-            } else if eventExpenseViewModel.isEdit {
-                CustomButton(text: "Save Expense") {
-                    if let event = eventViewModel.selectedEvent {
+                    if eventExpenseViewModel.isEdit {
                         eventExpenseViewModel.handleUpdateExpense(event)
                         eventExpenseViewModel.isEdit = false
-                        routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                    } else {
+                        eventExpenseViewModel.finalizeExpense(event)
                     }
+                    routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                 }
             }
         }

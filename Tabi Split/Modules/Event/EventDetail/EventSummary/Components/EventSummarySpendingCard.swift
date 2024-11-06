@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EventSummarySpendingCard: View {
     var text: String
-    var amount: Double
+    var amount: Float
     
     var body: some View {
         HStack (spacing: .spacingTight) {
@@ -24,7 +24,7 @@ struct EventSummarySpendingCard: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                     .multilineTextAlignment(.leading)
-                Text("Rp\(String(format: "%.0f", amount).formatPrice())")
+                Text("Rp\(amount.formatPrice())")
                     .font(.tabiSubtitle)
                     .fontWeight(.medium)
                     .multilineTextAlignment(.leading)
