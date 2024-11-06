@@ -9,13 +9,13 @@ import Foundation
 
 struct OptimizationPersonData: Identifiable {
     var id: UUID
-    var name: String
+    var user: UserData
     var debtAmount: Float
     var lentAmount: Float
     
-    init(id: UUID = UUID(), name: String, debtAmount: Float, lentAmount: Float) {
+    init(id: UUID = UUID(), user: UserData, debtAmount: Float, lentAmount: Float) {
         self.id = id
-        self.name = name
+        self.user = user
         self.debtAmount = debtAmount
         self.lentAmount = lentAmount
     }
@@ -23,11 +23,11 @@ struct OptimizationPersonData: Identifiable {
 
 struct OptimizationRecapData: Identifiable {
     var id: UUID
-    var sender: String
-    var recipient: String
+    var sender: UserData
+    var recipient: UserData
     var amount: Float
     
-    init(id: UUID = UUID(), sender: String, recipient: String, amount: Float) {
+    init(id: UUID = UUID(), sender: UserData, recipient: UserData, amount: Float) {
         self.id = id
         self.sender = sender
         self.recipient = recipient

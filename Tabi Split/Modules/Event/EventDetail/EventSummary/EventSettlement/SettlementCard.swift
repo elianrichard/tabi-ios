@@ -7,81 +7,109 @@
 
 import SwiftUI
 
-
 struct SettlementCard: View {
     @Environment(Routes.self) private var routes
-    var name: String
+    @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
+    
+    var user: UserData
     var amount: Float
     var type: SettlementCardTypeEnum
-    @State var isNotified = true
+    
+    @State var isNotified = false
+    @Binding var isShowUploadSheet: Bool
     
     var body: some View {
         VStack (spacing: 16) {
             HStack {
-                HStack {
-                    Circle()
-                        .fill(Color(UIColor(hex: "#D9D9D9")))
-                        .frame(width: 40)
-                    Text("\(name)")
-                }
+                UserAvatar(userData: user, namePosition: .right)
                 Spacer()
-                Text("Rp \(amount.formatPrice())")
+                Text("Rp\(amount.formatPrice())")
+                    .font(.tabiHeadline)
             }
             Divider()
             VStack (spacing: 16) {
                 HStack {
-                    HStack {
+                    HStack (spacing: .spacingSmall) {
                         Circle()
                             .fill(type.statusColor)
                             .frame(width: 10)
                         Text("\(type.statusText)")
+                            .font(.tabiBody)
                     }
                     Spacer()
                     if (type == .NeedPayment) {
                         Button {
                             routes.navigate(to: .SettlementPaymentMethodView)
                         } label: {
-                            Text("Payment Method")
+                            HStack (spacing: .spacingXSmall) {
+                                Text("Payment Methods")
+                                    .font(.tabiBody)
+                                    .foregroundStyle(.textBlue)
+                                Icon(systemName: "chevron.right", color: .textBlue, size: 12)
+                            }
                         }
                     } else if (type == .WaitingPayment) {
                         Button {
-                            isNotified.toggle()
+                            withAnimation (nil) {
+                                isNotified.toggle()
+                            }
                             print("turn on notification")
                         } label: {
-                            Image(systemName: isNotified ? "bell.and.waves.left.and.right" :  "bell")
-                                .foregroundStyle(isNotified ? .blue : .gray)
+                            HStack (spacing: .spacingXSmall){
+                                Icon(systemName: !isNotified ? "bell" : "bell.and.waves.left.and.right", color: !isNotified ? .textBlue : .textGrey, size: !isNotified ? 16 : 24)
+                                if !isNotified {
+                                    Text("Remind")
+                                        .font(.tabiBody)
+                                        .foregroundStyle(.textBlue)
+                                }
+                            }
+                            .frame(height: 20)
                         }
                     }
                 }
                 if (type == .NeedConfirmation || type == .NeedPayment) {
                     Button {
-                        routes.navigate(to: .SettlementConfirmationView)
+                        eventSettlementViewModel.selectedSettlementType = type
+                        eventSettlementViewModel.user = user
+                        if (type == .NeedConfirmation) {
+                            eventSettlementViewModel.receiptImage = .samplePaymentReceipt
+                            routes.navigate(to: .SettlementConfirmationView)
+                        } else {
+                            isShowUploadSheet = true
+                        }
                     } label: {
-                        HStack {
-                            Image(systemName: "\(type.actionIcon)")
+                        HStack (spacing: .spacingTight) {
+                            Icon(type.actionIcon, color: .textWhite, size: 20)
                             Text("\(type.actionText)")
+                                .font(.tabiBody)
                         }
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(.blue)
+                        .background(.buttonBlue)
                         .clipShape(RoundedRectangle(cornerRadius: .infinity))
                     }
                 }
             }
-            
         }
-        .padding(16)
+        .padding(.vertical, .spacingTight)
+        .padding(.horizontal, .spacingMedium)
         .overlay {
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: .radiusMedium)
                 .fill(.clear)
-                .stroke(Color(UIColor(hex: "#E8E8E8")), lineWidth: 1)
+                .stroke(.uiGray, lineWidth: 1)
+                .padding(1)
         }
-        .padding(1)
     }
 }
 
 #Preview {
-    SettlementCard(name: "Elian", amount: 250_000, type: .NeedConfirmation)
-        .environment(Routes())
+    VStack {
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedConfirmation, isShowUploadSheet: .constant(false))
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedPayment, isShowUploadSheet: .constant(false))
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingConfirmation, isShowUploadSheet: .constant(false))
+        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingPayment, isShowUploadSheet: .constant(false))
+    }
+    .environment(Routes())
+    .environment(EventSettlementViewModel())
 }

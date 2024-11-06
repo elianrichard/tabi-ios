@@ -10,30 +10,59 @@ import SwiftUI
 struct EventSummaryView: View {
     @Environment(Routes.self) private var routes
     
+    var balance: Float
+    @State var status: EventCardStatusEnum
+    
+    init(balance: Float = 250_000) {
+        self.balance = balance
+        if (balance > 0) {
+            self.status = .credit
+        } else if (balance < 0) {
+            self.status = .debt
+        } else {
+            self.status = .settled
+        }
+    }
+    
     var body: some View {
         VStack (spacing: .spacingRegular) {
-            HStack (spacing: 20) {
-                Spacer()
-                    .frame(width: 30)
-                VStack (spacing: .spacingXSmall) {
-                    Text("You should pay")
-                        .font(.tabiBody)
-                    Text("Rp 250.000")
-                        .font(.tabiTitle)
+            VStack {
+                if (status != .settled) {
+                    HStack (spacing: 20) {
+                        Spacer()
+                            .frame(width: 30)
+                        VStack (spacing: .spacingXSmall) {
+                            Text(status.summaryCardText)
+                                .font(.tabiBody)
+                            Text("Rp\(abs(balance).formatPrice())")
+                                .font(.tabiTitle)
+                        }
+                        Icon(systemName: "chevron.right", color: .textWhite, size: 12)
+                            .offset(x: 1)
+                            .frame(width: 30, height: 30, alignment: .center)
+                            .background(status.summaryCardBgShadow.opacity(0.5))
+                            .clipShape(Circle())
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, minHeight: 80)
+                    .background(status.summaryCardBgColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .padding(.bottom, 6)
+                    .background(status.summaryCardBgShadow)
+                } else {
+                    HStack {
+                        Text(status.summaryCardText)
+                            .font(.tabiSubtitle)
+                    }
+                    .foregroundStyle(.textGrey)
+                    .frame(maxWidth: .infinity, minHeight: 80)
+                    .background(.uiWhite)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24)
+                            .strokeBorder(.uiGray, lineWidth: 2)
+                    }
                 }
-                Icon(systemName: "chevron.right", color: .textWhite, size: 8)
-                    .offset(x: 2)
-                    .frame(width: 30, height: 30, alignment: .center)
-                    .background(.buttonGreenShadow.opacity(0.5))
-                    .clipShape(Circle())
             }
-            .foregroundStyle(.white)
-            .padding(.vertical, .spacingTight)
-            .frame(maxWidth: .infinity)
-            .background(.buttonGreen)
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-            .padding(.bottom, 6)
-            .background(.buttonGreenShadow)
             .clipShape(RoundedRectangle(cornerRadius: 24))
             .onTapGesture {
                 routes.navigate(to: .EventSettlementView)
@@ -53,9 +82,9 @@ struct EventSummaryView: View {
                     }
                 }
                 VStack (spacing: 0) {
-                    EventSummaryHistoryCard(itemName: "KFC", amount: 500000, date: Date())
-                    EventSummaryHistoryCard(itemName: "McDonald", amount: -500000, date: Date().yesterday())
-                    EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"))
+                    EventSummaryHistoryCard(itemName: "KFC", amount: 500000, date: Date(), isLast: true)
+                    EventSummaryHistoryCard(itemName: "McDonald", amount: -500000, date: Date().yesterday(), isLast: true)
+                    EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"), isLast: true)
                 }
             }
             .padding(.spacingRegular)

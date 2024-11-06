@@ -9,31 +9,23 @@ import SwiftUI
 
 struct EventSettlementView: View {
     @Environment(Routes.self) private var routes
+    @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
+    
     var balance: Float = 200_000
+    
     @State private var contentSize: CGSize = .zero
-
+    @State private var isShowUploadSheet: Bool = false
+    @State var receiptUploadViewModel = ReceiptUploadViewModel()
     
     var body: some View {
         VStack (spacing: 24) {
-            ZStack {
-                Text(balance > 0 ? "You Should Receive" : "You Should Pay")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            TopNavigation(title: balance > 0 ? "You Should Receive" : "You Should Pay")
             ScrollView (showsIndicators: false) {
-                VStack {
-                    SettlementCard(name: "Elian", amount: 250_000, type: .NeedConfirmation)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .NeedPayment)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .WaitingConfirmation)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .WaitingPayment)
+                VStack (spacing: .spacingTight) {
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedConfirmation, isShowUploadSheet: $isShowUploadSheet)
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedPayment, isShowUploadSheet: $isShowUploadSheet)
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingConfirmation, isShowUploadSheet: $isShowUploadSheet)
+                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingPayment, isShowUploadSheet: $isShowUploadSheet)
                 }
                 .overlay(
                     GeometryReader { geo in
@@ -44,15 +36,29 @@ struct EventSettlementView: View {
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+            
             Button {
                 routes.navigate(to: .SettlementOptimizationView)
             } label: {
                 Text("See optimization details")
+                    .font(.tabiHeadline)
+                    .foregroundStyle(.textBlue)
             }
             Spacer()
             
         }
         .padding()
+        .sheet(isPresented: $isShowUploadSheet) {
+            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.isShowingScanner, user: eventSettlementViewModel.user) {
+                Task {
+                    if receiptUploadViewModel.receiptImageFromGallery != nil {
+                        await receiptUploadViewModel.getImage()
+                        eventSettlementViewModel.receiptImage = receiptUploadViewModel.receiptImage
+                        routes.navigate(to: .SettlementUploadView)
+                    }
+                }
+            }
+        }
         .navigationBarBackButtonHidden(true)
     }
 }
@@ -61,4 +67,5 @@ struct EventSettlementView: View {
 #Preview {
     EventSettlementView()
         .environment(Routes())
+        .environment(EventSettlementViewModel())
 }

@@ -37,7 +37,7 @@ extension Date {
         } else if (calendar.isDateInYesterday(self)) {
             return "Yesterday"
         } else {
-            return customDateFormat("dd MMM YY").string(from: self)
+            return customDateFormat("dd MMM").string(from: self)
         }
     }
 }
