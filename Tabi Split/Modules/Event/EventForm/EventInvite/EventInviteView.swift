@@ -19,7 +19,7 @@ struct EventInviteView: View {
     @State private var isShowQrSheet = false
     
     var body: some View {
-        VStack (spacing: .spacingLarge) {
+        VStack {
             TopNavigation(title: "Add Participants", additionalBackFunction: {
                 eventInviteViewModel.searchUserText = ""
             })

@@ -46,6 +46,7 @@ struct EventDetailExpenseCard : View {
                 .strokeBorder(.uiGray, lineWidth: 1)
         }
         .padding(1)
+        .contentShape(Rectangle())
         .onTapGesture {
             eventExpenseViewModel.selectedExpense = expense
             routes.navigate(to: .ExpenseResultView)

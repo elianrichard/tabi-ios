@@ -18,7 +18,7 @@ struct EventFormView: View {
     var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
     
     var body : some View {
-        VStack (spacing: .spacingLarge) {
+        VStack {
             TopNavigation(title: isEdit ? "Edit Event" : "Create Event")
             VStack (spacing: .spacingMedium) {
                 ZStack {

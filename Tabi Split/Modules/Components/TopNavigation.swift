@@ -68,6 +68,7 @@ struct TopNavigation<Content: View>: View {
                 Spacer()
             }
         }
+        .padding(.bottom, .spacingLarge)
         .zIndex(isInline ? 0 :  100)
     }
 }
