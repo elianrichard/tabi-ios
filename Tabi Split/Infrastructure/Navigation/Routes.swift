@@ -28,6 +28,7 @@ import SwiftUI
              SettlementOptimizationView, 
              SettlementConfirmationView, 
              SettlementReceiptView,
+             SettlementUploadView,
              ReceiptUploadView
     }
 

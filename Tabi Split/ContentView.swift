@@ -79,6 +79,9 @@ struct ContentView: View {
                 case .SettlementConfirmationView:
                     SettlementConfirmationView()
                     
+                case .SettlementUploadView:
+                    SettlementUploadView()
+                    
                 case .ReceiptUploadView:
                     ReceiptUploadView()
                 }

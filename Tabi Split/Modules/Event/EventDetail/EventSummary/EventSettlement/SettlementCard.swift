@@ -111,4 +111,5 @@ struct SettlementCard: View {
         SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingPayment, isShowUploadSheet: .constant(false))
     }
     .environment(Routes())
+    .environment(EventSettlementViewModel())
 }
