@@ -13,13 +13,13 @@ enum SettlementCardTypeEnum {
     var statusColor: Color {
         switch self {
         case .WaitingPayment:
-            return .purple
+            return .buttonPurple
         case .NeedPayment:
-            return .red
+            return .buttonRed
         case .WaitingConfirmation:
-            return .purple
+            return .buttonPurple
         case .NeedConfirmation:
-            return .red
+            return .buttonRed
         }
     }
 
@@ -36,16 +36,16 @@ enum SettlementCardTypeEnum {
         }
     }
     
-    var actionIcon: String {
+    var actionIcon: ImageResource? {
         switch self {
         case .WaitingPayment:
-            return ""
+            return nil
         case .NeedPayment:
-            return "square.and.arrow.up"
+            return .uploadIcon
         case .WaitingConfirmation:
-            return ""
+            return nil
         case .NeedConfirmation:
-            return "checkmark.circle"
+            return nil
         }
     }
 
@@ -54,11 +54,11 @@ enum SettlementCardTypeEnum {
         case .WaitingPayment:
             return ""
         case .NeedPayment:
-            return "Upload payment receipt"
+            return "Upload Payment Receipt"
         case .WaitingConfirmation:
             return ""
         case .NeedConfirmation:
-            return "Confirm payment"
+            return "See Payment Receipt"
         }
     }
 }

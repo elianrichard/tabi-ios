@@ -9,14 +9,14 @@ import Foundation
 
 @Observable
 final class SettlementPaymentMethodViewModel {
-    var personName: String = "Elian"
+    var user: UserData = UserData(name: "Elian", phone: "phone")
     var paymentMethods: [PaymentMethod] = [
-        PaymentMethod(name: "Elian Richard", bankName: "Bank BCA", bankNumber: "000123456789", isFavorite: false),
-        PaymentMethod(name: "Elian Richard", bankName: "Bank Jago", bankNumber: "000123456789", isFavorite: false),
-        PaymentMethod(name: "Elian Richard", bankName: "Bank BNI", bankNumber: "000123456789"),
-        PaymentMethod(name: "Elian Richard", bankName: "Bank Mandiri", bankNumber: "000123456789"),
-        PaymentMethod(name: "Elian Richard", bankName: "Bank BRI", bankNumber: "000123456789"),
-        PaymentMethod(name: "Elian Richard", bankName: "Bank BTPN", bankNumber: "000123456789"),
+        PaymentMethod(name: "Elian Richard", bank: .bca, bankNumber: "000123456789", isFavorite: true),
+        PaymentMethod(name: "Elian Richard", bank: .bni, bankNumber: "000123456789", isFavorite: true),
+        PaymentMethod(name: "Elian Richard", bank: .mandiri, bankNumber: "000123456789"),
+        PaymentMethod(name: "Elian Richard", bank: .bca, bankNumber: "000123456789"),
+        PaymentMethod(name: "Elian Richard", bank: .bni, bankNumber: "000123456789"),
+        PaymentMethod(name: "Elian Richard", bank: .mandiri, bankNumber: "000123456789"),
     ]
     
     var favoritePaymentMethods: [PaymentMethod] {

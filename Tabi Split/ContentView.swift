@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
+    @State private var eventSettlementViewModel = EventSettlementViewModel()
     
     @State private var isAuthenticated = false
     
@@ -89,6 +90,7 @@ struct ContentView: View {
         .environment(eventViewModel)
         .environment(eventInviteViewModel)
         .environment(eventExpenseViewModel)
+        .environment(eventSettlementViewModel)
         .onAppear {
             checkAuthentication()
         }

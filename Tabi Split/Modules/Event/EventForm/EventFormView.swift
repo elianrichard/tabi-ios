@@ -14,7 +14,7 @@ struct EventFormView: View {
     
     @State var isEdit: Bool = false
     @State var isShowEditIconSheet: Bool = false
-
+    
     var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
     
     var body : some View {
@@ -56,7 +56,7 @@ struct EventFormView: View {
                                     ScrollView (.horizontal, showsIndicators: false) {
                                         HStack (alignment: .top, spacing: 10) {
                                             ForEach ( eventViewModel.selectedEvent?.participants ?? []) { user in
-                                                UserAvatar(userData: user, isShowName: true)
+                                                UserAvatar(userData: user, namePosition: .bottom)
                                             }
                                         }
                                     }

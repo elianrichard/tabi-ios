@@ -12,16 +12,14 @@ struct OptimizationPersonCard: View {
     var body: some View {
         VStack (alignment: .leading, spacing: .spacingRegular) {
             HStack (spacing: .spacingTight) {
-                UserAvatar(userData: data.user)
-                Text("\(data.user.name)")
-                    .font(.tabiHeadline)
+                UserAvatar(userData: data.user, namePosition: .right)
                 Spacer()
             }
             HStack (spacing: .spacingMedium) {
                 VStack (alignment: .leading, spacing: .spacingSmall) {
                     Text("Total Lent")
                         .font(.tabiBody)
-                    Text("Rp \(data.lentAmount.formatPrice())")
+                    Text("Rp\(data.lentAmount.formatPrice())")
                         .foregroundStyle(.buttonGreen)
                         .font(.tabiBody)
                 }
@@ -29,7 +27,7 @@ struct OptimizationPersonCard: View {
                 VStack (alignment: .leading, spacing: .spacingSmall) {
                     Text("Total Debt")
                         .font(.tabiBody)
-                    Text("Rp \(data.debtAmount.formatPrice())")
+                    Text("Rp\(data.debtAmount.formatPrice())")
                         .foregroundStyle(.buttonRed)
                         .font(.tabiBody)
                 }

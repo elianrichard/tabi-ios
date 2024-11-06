@@ -9,31 +9,23 @@ import SwiftUI
 
 struct SettlementReceiptView: View {
     @Environment(Routes.self) private var routes
+    @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
+    
     @State var lastScaleValue: CGFloat = 1.0
     @State private var scale: CGFloat = 1.0
+    
     var body: some View {
         ZStack {
-            ZoomableScrollView {
-                Image(.samplePaymentReceipt)
-                    .resizable()
-                    .scaledToFit()
-            }
-            .ignoresSafeArea()
-            VStack {
-                ZStack {
-                    Text("Payment Receipt")
-                        .font(.title2)
-                    HStack {
-                        Button {
-                            routes.navigateBack()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .foregroundStyle(.black)
-                                .frame(width: 40, height: 40)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            if let image = eventSettlementViewModel.receiptImage {
+                ZoomableScrollView {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
                 }
+                .ignoresSafeArea()
+            }
+            VStack {
+                TopNavigation(title: "Payment Receipt")
                 Spacer()
             }
             .padding()
@@ -45,4 +37,5 @@ struct SettlementReceiptView: View {
 #Preview {
     SettlementReceiptView()
         .environment(Routes())
+        .environment(EventSettlementViewModel())
 }
