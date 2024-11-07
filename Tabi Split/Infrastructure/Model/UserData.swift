@@ -107,19 +107,19 @@ enum TemplatePaymentMethod: Identifiable, CaseIterable {
     var logoImage: UIImage{
         switch self {
         case .bca:
-            UIImage(named: "BCA") ?? UIImage()
+                .BCA
         case .bni:
-            UIImage(named: "BNI") ?? UIImage()
+                .BNI
         case .bri:
-            UIImage(named: "BRI") ?? UIImage()
+                .BRI
         case .seabank:
-            UIImage(named: "SeaBank") ?? UIImage()
+                .seaBank
         case .ovo:
-            UIImage(named: "OVO") ?? UIImage()
+                .OVO
         case .shopeePay:
-            UIImage(named: "ShopeePay") ?? UIImage()
+                .shopeePay
         case .goPay:
-            UIImage(named: "GoPay") ?? UIImage()
+                .goPay
         }
     }
     
