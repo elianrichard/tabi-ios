@@ -12,6 +12,5 @@ import SwiftUI
 class PaymentMethodViewModel{
     var toggleDetailBankSheet: Bool = false
     var settingsDetent = PresentationDetent.large
-    var contentHeight: CGFloat = 0
     var idToBeEdited: UUID?
 }
