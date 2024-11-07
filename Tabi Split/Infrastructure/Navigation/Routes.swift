@@ -31,7 +31,8 @@ import SwiftUI
              SettlementUploadView,
              ReceiptUploadView,
              Profile,
-             EditProfile
+             EditProfile,
+             PaymentMethods
     }
 
     func navigate(to destination: Destination) {

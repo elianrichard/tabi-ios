@@ -18,4 +18,5 @@ final class ProfileViewModel{
     var contentHeight : CGFloat = 0
     var toggleProfileImageUpload: Bool = false
     var user: UserData = UserData(name: "Dharma", phone: "082123733400")
+    var userPaymentMethods: [PaymentMethod] = []
 }

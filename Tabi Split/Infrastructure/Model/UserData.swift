@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import SwiftUI
 
 @Model
 class UserData {
@@ -35,10 +36,36 @@ struct PaymentMethod: Identifiable {
     }
 }
 
-enum BankEnum: String, Identifiable {
-    case bca, bni, mandiri
+enum BankEnum: Identifiable, CaseIterable {
+    case bca
+    case bni
+    case bri
+    case seabank
+    case ovo
+    case shopeePay
+    case goPay
+    case mandiri
     
-    var id: String { rawValue }
+    var id: String {
+        switch self {
+        case .bca:
+            "bca"
+        case .bni:
+            "bni"
+        case .bri:
+            "bri"
+        case .seabank:
+            "seabank"
+        case .ovo:
+            "ovo"
+        case .shopeePay:
+            "shopeepay"
+        case .goPay:
+            "gopay"
+        case .mandiri:
+            "mandiri"
+        }
+    }
     
     var bankName: String {
         switch self {
@@ -46,23 +73,64 @@ enum BankEnum: String, Identifiable {
             "Bank BCA"
         case .bni:
             "Bank BNI"
+        case .bri:
+            "Bank BRI"
+        case .seabank:
+            "Seabank"
+        case .ovo:
+            "OVO"
+        case .shopeePay:
+            "Shopee Pay"
+        case .goPay:
+            "Gopay"
         case .mandiri:
             "Bank Mandiri"
         }
     }
     
-    var bankLogo: ImageResource {
+    var isPopular: Bool {
         switch self {
         case .bca:
-                .bankBcaLogo
+            true
         case .bni:
-                .bankBniLogo
+            true
+        case .bri:
+            true
+        case .seabank:
+            false
+        case .ovo:
+            false
+        case .shopeePay:
+            false
+        case .goPay:
+            false
         case .mandiri:
-                .bankMandiriLogo
+            false
         }
     }
     
-    static var allCases: [BankEnum] = [
-        .bca, .bni, .mandiri
-    ]
+    var bankLogo: UIImage{
+        switch self {
+        case .bca:
+                .BCA
+        case .bni:
+                .BNI
+        case .bri:
+                .BRI
+        case .seabank:
+                .seaBank
+        case .ovo:
+                .OVO
+        case .shopeePay:
+                .shopeePay
+        case .goPay:
+                .goPay
+        case .mandiri:
+                .mandiri
+        }
+    }
+    
+    static var allCases: [BankEnum] {
+        [.bca, .bni, .bri, .seabank, .ovo, .shopeePay, .goPay, .mandiri]
+    }
 }
