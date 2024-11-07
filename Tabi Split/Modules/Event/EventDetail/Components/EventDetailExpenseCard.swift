@@ -29,7 +29,7 @@ struct EventDetailExpenseCard : View {
             }
             Spacer()
             VStack (alignment: .trailing, spacing: 4) {
-                Text("Rp\(String(format: "%.0f", expense.price).formatPrice())")
+                Text("Rp\(expense.price.formatPrice())")
                     .font(.tabiHeadline)
                     .foregroundStyle(.textBlack)
                 Text("\(expense.dateOfCreation.toProperText())")
@@ -46,6 +46,7 @@ struct EventDetailExpenseCard : View {
                 .strokeBorder(.uiGray, lineWidth: 1)
         }
         .padding(1)
+        .contentShape(Rectangle())
         .onTapGesture {
             eventExpenseViewModel.selectedExpense = expense
             routes.navigate(to: .ExpenseResultView)

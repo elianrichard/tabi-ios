@@ -18,7 +18,7 @@ struct EventDetailView: View {
     var body: some View {
         ZStack {
             TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
-                Menu {
+                ElipsisMenu (color: .textWhite) {
                     Button {
                         routes.navigate(to: .EventFormView)
                     } label: {
@@ -36,13 +36,7 @@ struct EventDetailView: View {
                     } label: {
                         Label("Delete Event", systemImage: "trash")
                     }
-                } label: {
-                    Icon(systemName: "ellipsis", color: .textWhite)
-                        .contentShape(Rectangle())
-                        .frame(width: 44, height: 44)
                 }
-                .padding(.vertical, -11)
-                .padding(.horizontal, -11)
             })
             .padding(.bottom, 36)
             

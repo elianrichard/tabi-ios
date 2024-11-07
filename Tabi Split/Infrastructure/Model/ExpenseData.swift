@@ -90,6 +90,15 @@ enum SplitMethod: String, Identifiable {
         }
     }
     
+    var icon: ImageResource {
+        switch self {
+        case .equally:
+                .equalSplitIcon
+        case .custom:
+                .customSplitIcon
+        }
+    }
+    
     static var allCases: [SplitMethod] {
         [.equally, .custom]
     }

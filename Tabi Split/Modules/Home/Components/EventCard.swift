@@ -92,7 +92,7 @@ struct EventCard : View {
                     } else {
                         Text(status.statusDisplay)
                         Spacer()
-                        Text("Rp \(String(format: "%.0f", abs(event.userEventBalance)).formatPrice())")
+                        Text("Rp\(abs(event.userEventBalance).formatPrice())")
                     }
                 }
                 .font(.tabiBody)
