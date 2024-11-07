@@ -14,7 +14,7 @@ struct PaymentMethodCard: View {
     
     var body: some View {
         HStack (spacing: .spacingTight) {
-            Image(payment.bank.bankLogo)
+            Image(uiImage: payment.bank.bankLogo)
                 .resizable()
                 .scaledToFit()
                 .padding(.spacingXSmall)

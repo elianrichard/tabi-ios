@@ -18,4 +18,25 @@ final class ProfileViewModel{
     var contentHeight : CGFloat = 0
     var toggleProfileImageUpload: Bool = false
     var user: UserData = UserData(name: "Dharma", phone: "082123733400")
+
+    var isLoading: Bool = false
+    var isLogoutSuccess: Bool = false
+    let authService = AuthenticationService()
+    
+    func logout() async {
+        isLoading = true
+        
+        do {
+            try await authService.logout()
+            isLogoutSuccess = true
+            print("Logout successful!")
+        } catch {
+            print("Logout failed: \(error)")
+            isLogoutSuccess = false
+        }
+        
+        isLoading = false
+    }
+  
+    var userPaymentMethods: [PaymentMethod] = []
 }
