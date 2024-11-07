@@ -38,7 +38,7 @@ struct PaymentMethodView: View {
                                     ForEach(Array(profileViewModel.userPaymentMethods.enumerated()), id: \.offset) { index, paymentMethod in
                                         if paymentMethod.isFavorite{
                                             HStack{
-                                                Image(uiImage: paymentMethod.logoImage ?? UIImage())
+                                                Image(uiImage: paymentMethod.bank.bankLogo)
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .frame(width: 45, height: 45)
@@ -50,10 +50,10 @@ struct PaymentMethodView: View {
                                                             .padding(0.5)
                                                     }
                                                 VStack(alignment: .leading, spacing: .spacingSmall){
-                                                    Text(paymentMethod.name ?? "")
+                                                    Text(paymentMethod.name)
                                                         .font(.tabiHeadline)
                                                     VStack(alignment: .leading){
-                                                        Text(paymentMethod.bankName)
+                                                        Text(paymentMethod.bank.bankName)
                                                         Text(paymentMethod.bankNumber)
                                                     }
                                                     .font(.tabiBody)
@@ -74,7 +74,7 @@ struct PaymentMethodView: View {
                                     ForEach(Array(profileViewModel.userPaymentMethods.enumerated()), id: \.offset) { index, paymentMethod in
                                         if !paymentMethod.isFavorite{
                                             HStack{
-                                                Image(uiImage: paymentMethod.logoImage ?? UIImage())
+                                                Image(uiImage: paymentMethod.bank.bankLogo)
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .frame(width: 45, height: 45)
@@ -86,10 +86,10 @@ struct PaymentMethodView: View {
                                                             .padding(0.5)
                                                     }
                                                 VStack(alignment: .leading, spacing: .spacingSmall){
-                                                    Text(paymentMethod.name ?? "")
+                                                    Text(paymentMethod.name)
                                                         .font(.tabiHeadline)
                                                     VStack(alignment: .leading){
-                                                        Text(paymentMethod.bankName)
+                                                        Text(paymentMethod.bank.bankName)
                                                         Text(paymentMethod.bankNumber)
                                                     }
                                                     .font(.tabiBody)
@@ -118,7 +118,7 @@ struct PaymentMethodView: View {
                                 Divided{
                                     ForEach(Array(profileViewModel.userPaymentMethods.enumerated()), id: \.offset) { index, paymentMethod in
                                         HStack{
-                                            Image(uiImage: paymentMethod.logoImage ?? UIImage())
+                                            Image(uiImage: paymentMethod.bank.bankLogo)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fit)
                                                 .frame(width: 45, height: 45)
@@ -130,10 +130,10 @@ struct PaymentMethodView: View {
                                                         .padding(0.5)
                                                 }
                                             VStack(alignment: .leading, spacing: .spacingSmall){
-                                                Text(paymentMethod.name ?? "")
+                                                Text(paymentMethod.name)
                                                     .font(.tabiHeadline)
                                                 VStack(alignment: .leading){
-                                                    Text(paymentMethod.bankName)
+                                                    Text(paymentMethod.bank.bankName)
                                                     Text(paymentMethod.bankNumber)
                                                 }
                                                 .font(.tabiBody)

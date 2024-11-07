@@ -5,7 +5,7 @@
 //  Created by Elian Richard on 08/10/24.
 //
 
-import Foundation
+import SwiftUI
 import SwiftData
 import SwiftUI
 
@@ -22,23 +22,22 @@ class UserData {
 
 struct PaymentMethod: Identifiable {
     var id: UUID
-    var name: String?
-    var bankName: String
+    var name: String
+    var bank: BankEnum
     var bankNumber: String
     var logoImage: UIImage?
     var isFavorite: Bool
     
-    init(name: String, bankName: String, bankNumber: String, logoImage: UIImage = UIImage(), isFavorite: Bool = false) {
+    init(name: String, bank: BankEnum, bankNumber: String, isFavorite: Bool = false) {
         self.id = UUID()
         self.name = name
-        self.bankName = bankName
+        self.bank = bank
         self.bankNumber = bankNumber
-        self.logoImage = logoImage
         self.isFavorite = isFavorite
     }
 }
 
-enum TemplatePaymentMethod: Identifiable, CaseIterable {
+enum BankEnum: Identifiable, CaseIterable {
     case bca
     case bni
     case bri
@@ -46,6 +45,7 @@ enum TemplatePaymentMethod: Identifiable, CaseIterable {
     case ovo
     case shopeePay
     case goPay
+    case mandiri
     
     var id: String {
         switch self {
@@ -63,10 +63,12 @@ enum TemplatePaymentMethod: Identifiable, CaseIterable {
             "shopeepay"
         case .goPay:
             "gopay"
+        case .mandiri:
+            "mandiri"
         }
     }
     
-    var name: String {
+    var bankName: String {
         switch self {
         case .bca:
             "Bank BCA"
@@ -82,6 +84,8 @@ enum TemplatePaymentMethod: Identifiable, CaseIterable {
             "Shopee Pay"
         case .goPay:
             "Gopay"
+        case .mandiri:
+            "Bank Mandiri"
         }
     }
     
@@ -101,10 +105,12 @@ enum TemplatePaymentMethod: Identifiable, CaseIterable {
             false
         case .goPay:
             false
+        case .mandiri:
+            false
         }
     }
     
-    var logoImage: UIImage{
+    var bankLogo: UIImage{
         switch self {
         case .bca:
                 .BCA
@@ -120,10 +126,12 @@ enum TemplatePaymentMethod: Identifiable, CaseIterable {
                 .shopeePay
         case .goPay:
                 .goPay
+        case .mandiri:
+                .bankMandiriLogo
         }
     }
     
-    static var allCases: [TemplatePaymentMethod] {
-        [.bca, .bni, .bri, .seabank, .ovo, .shopeePay, .goPay]
+    static var allCases: [BankEnum] {
+        [.bca, .bni, .bri, .seabank, .ovo, .shopeePay, .goPay, .mandiri]
     }
 }

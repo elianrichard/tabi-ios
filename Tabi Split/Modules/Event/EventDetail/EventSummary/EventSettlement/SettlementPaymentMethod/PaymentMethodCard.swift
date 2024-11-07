@@ -6,43 +6,50 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct PaymentMethodCard: View {
-//    var name: String
-//    var bankName: String
-//    var bankNumber: String
     var payment: PaymentMethod
     var isLast = false
     
     var body: some View {
-        HStack (spacing: 12) {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(UIColor(hex: "#D9D9D9")))
-                .frame(width: 70, height: 70)
-            VStack (alignment: .leading) {
+        HStack (spacing: .spacingTight) {
+            Image(uiImage: payment.bank.bankLogo)
+                .resizable()
+                .scaledToFit()
+                .padding(.spacingXSmall)
+                .frame(width: 60, height: 60)
+                .overlay {
+                    RoundedRectangle(cornerRadius: .radiusSmall)
+                        .strokeBorder(.uiGray, lineWidth: 1)
+                        .padding(1)
+                }
+            VStack (alignment: .leading, spacing: .spacingXSmall) {
                 Text("\(payment.name)")
-                    .fontWeight(.medium)
-                    .font(.title3)
-                VStack (alignment: .leading) {
-                    Text("\(payment.bankName)")
+                    .font(.tabiHeadline)
+                VStack (alignment: .leading, spacing: 0) {
+                    Text("\(payment.bank.bankName)")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
                     Text("\(payment.bankNumber)")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
                 }
                 .foregroundStyle(.gray)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
             Button {
-                print("copy")
+                UIPasteboard.general.setValue("\(payment.bankNumber)", forPasteboardType: UTType.plainText.identifier)
             } label: {
-                Image(systemName: "document.on.document")
-                    .font(.title2)
+                Icon(.copyIcon, color: .textBlue, size: 24)
             }
         }
-        .padding(.vertical)
-        .border(width: isLast ? 0 : 1, edges: [.bottom], color: Color(UIColor(hex: "#D9D9D9")))
+        .padding(.vertical, .spacingTight)
+        .border(width: isLast ? 0 : 1, edges: [.bottom], color: .uiGray)
     }
 }
 
 #Preview {
-    PaymentMethodCard(payment: PaymentMethod(name: "Elian", bankName: "Bank BCA", bankNumber: "000123456789"), isLast: true)
+    PaymentMethodCard(payment: PaymentMethod(name: "Elian", bank: .bca, bankNumber: "000123456789"), isLast: true)
 }

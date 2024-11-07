@@ -13,7 +13,7 @@ struct Icon: View {
     var color: Color
     var size: CGFloat
     
-    init(_ resource: ImageResource, color: Color = .textBlack, size: CGFloat = 24) {
+    init(_ resource: ImageResource?, color: Color = .textBlack, size: CGFloat = 24) {
         self.resource = resource
         self.size = size
         self.systemName = nil
@@ -46,5 +46,5 @@ struct Icon: View {
 }
 
 #Preview {
-    Icon(.eyeIcon)
+    Icon(.eyeIcon, color: .textBlue)
 }

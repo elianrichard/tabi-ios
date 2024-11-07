@@ -128,6 +128,7 @@ struct EventDetailView: View {
                         isShowCompleteSheet = false
                     }
                     CustomButton(text: "Complete") {
+                        isShowCompleteSheet = false
                         eventViewModel.completeEvent()
                     }
                 }
@@ -160,6 +161,7 @@ struct EventDetailView: View {
                         isShowDeleteSheet = false
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
+                        isShowDeleteSheet = false
                         eventViewModel.handleDeleteEvent()
                         routes.navigateBack()
                     }

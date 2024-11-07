@@ -24,11 +24,11 @@ struct SelectBankSheet: View {
                             Text("Popular")
                                 .font(.tabiHeadline)
                             Divided {
-                                ForEach(TemplatePaymentMethod.allCases) { paymentMethod in
-                                    if paymentMethod.isPopular {
-                                        NavigationLink(destination: BankDetailFormSheet(viewModel: $viewModel, selectedBank: paymentMethod)){
+                                ForEach(BankEnum.allCases) { bank in
+                                    if bank.isPopular {
+                                        NavigationLink(destination: BankDetailFormSheet(viewModel: $viewModel, selectedBank: bank)){
                                             HStack{
-                                                Image(uiImage: paymentMethod.logoImage)
+                                                Image(uiImage: bank.bankLogo)
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .frame(width: 45, height: 45)
@@ -39,7 +39,7 @@ struct SelectBankSheet: View {
                                                             .stroke(.bgGreyOverlay, lineWidth: 0.5)
                                                             .padding(0.5)
                                                     }
-                                                Text(paymentMethod.name)
+                                                Text(bank.bankName)
                                                     .font(.tabiHeadline)
                                             }
                                         }
@@ -55,11 +55,11 @@ struct SelectBankSheet: View {
                             Text("All payment methods")
                                 .font(.tabiHeadline)
                             Divided {
-                                ForEach(TemplatePaymentMethod.allCases) { paymentMethod in
-                                    if !paymentMethod.isPopular {
-                                        NavigationLink(destination: BankDetailFormSheet(viewModel: $viewModel, selectedBank: paymentMethod)){
+                                ForEach(BankEnum.allCases) { bank in
+                                    if !bank.isPopular {
+                                        NavigationLink(destination: BankDetailFormSheet(viewModel: $viewModel, selectedBank: bank)){
                                             HStack{
-                                                Image(uiImage: paymentMethod.logoImage)
+                                                Image(uiImage: bank.bankLogo)
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
                                                     .frame(width: 45, height: 45)
@@ -70,7 +70,7 @@ struct SelectBankSheet: View {
                                                             .stroke(.bgGreyOverlay, lineWidth: 0.5)
                                                             .padding(0.5)
                                                     }
-                                                Text(paymentMethod.name)
+                                                Text(bank.bankName)
                                                     .font(.tabiHeadline)
                                             }
                                         }

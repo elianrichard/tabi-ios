@@ -18,6 +18,8 @@ extension Font {
     public static let tabiHeadline = Font.custom(UIConfig.Font.Name.Medium, size: UIConfig.Font.Size.Headline)
     /// Size: 15, Font: Figtree Regular
     public static let tabiBody = Font.custom(UIConfig.Font.Name.Regular, size: UIConfig.Font.Size.Body)
+    /// Size: 15, Font: Figtree Bold
+    public static let tabiBodyBold = Font.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body)
     /// Size: 15, Font: Figtree Medium
     public static let tabiBody2 = Font.custom(UIConfig.Font.Name.Medium, size: UIConfig.Font.Size.Body)
 }

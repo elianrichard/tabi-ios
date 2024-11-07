@@ -29,7 +29,7 @@ struct EventDetailExpenseCard : View {
             }
             Spacer()
             VStack (alignment: .trailing, spacing: 4) {
-                Text("Rp \(String(format: "%.0f", expense.price).formatPrice())")
+                Text("Rp\(String(format: "%.0f", expense.price).formatPrice())")
                     .font(.tabiHeadline)
                     .foregroundStyle(.textBlack)
                 Text("\(expense.dateOfCreation.toProperText())")

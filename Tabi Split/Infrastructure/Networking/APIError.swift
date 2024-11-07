@@ -13,6 +13,7 @@ enum APIError: LocalizedError {
     case unauthorized
     case requestFailed(message: String)
     case tokenMissing
+    case internalServerError(message: String)
     
     var errorDescription: String? {
         switch self {
@@ -26,6 +27,8 @@ enum APIError: LocalizedError {
             return message
         case .tokenMissing:
             return "Authentication token not found"
+        case .internalServerError(let message):
+            return "Internal Server Error: \(message)"
         }
     }
 }

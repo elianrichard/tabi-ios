@@ -11,7 +11,7 @@ import SwiftUI
 struct BankDetailFormSheet: View {
     @Environment(ProfileViewModel.self) private var profileViewModel
     @Binding var viewModel: PaymentMethodViewModel
-    @State var selectedBank: TemplatePaymentMethod
+    @State var selectedBank: BankEnum
     @State var accountNumber: String = ""
     @State var accountName: String = ""
     
@@ -22,7 +22,7 @@ struct BankDetailFormSheet: View {
                 Text("Add Payment Method")
                     .font(.tabiTitle)
                 HStack{
-                    Image(uiImage: selectedBank.logoImage)
+                    Image(uiImage: selectedBank.bankLogo)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 45, height: 45)
@@ -33,7 +33,7 @@ struct BankDetailFormSheet: View {
                                 .stroke(.bgGreyOverlay, lineWidth: 0.5)
                                 .padding(0.5)
                         }
-                    Text(selectedBank.name)
+                    Text(selectedBank.bankName)
                         .font(.tabiHeadline)
                 }
                 VStack{
@@ -42,7 +42,7 @@ struct BankDetailFormSheet: View {
                 }
                 Spacer()
                 CustomButton(text: "Save", isEnabled: accountNumber != "" && accountName != "") {
-                    profileViewModel.userPaymentMethods.append(PaymentMethod(name: accountName, bankName: selectedBank.name, bankNumber: accountNumber, logoImage: selectedBank.logoImage))
+                    profileViewModel.userPaymentMethods.append(PaymentMethod(name: accountName, bank: selectedBank, bankNumber: accountNumber))
                     viewModel.toggleSelectBank.toggle()
                 }
             }

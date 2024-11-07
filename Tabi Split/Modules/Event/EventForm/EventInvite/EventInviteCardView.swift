@@ -28,6 +28,7 @@ struct EventInviteCardView: View {
                             .font(.tabiHeadline)
                         Text("\(number)")
                             .font(.tabiBody)
+                            .foregroundStyle(.textGrey)
                     }
                 }
                 Spacer()
