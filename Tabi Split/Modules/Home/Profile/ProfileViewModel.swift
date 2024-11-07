@@ -18,7 +18,7 @@ final class ProfileViewModel{
     var contentHeight : CGFloat = 0
     var toggleProfileImageUpload: Bool = false
     var user: UserData = UserData(name: "Dharma", phone: "082123733400")
-    
+
     var isLoading: Bool = false
     var isLogoutSuccess: Bool = false
     let authService = AuthenticationService()
@@ -37,4 +37,6 @@ final class ProfileViewModel{
         
         isLoading = false
     }
+  
+    var userPaymentMethods: [PaymentMethod] = []
 }
