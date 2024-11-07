@@ -61,13 +61,25 @@ struct ProfileView: View {
                         routes.navigate(to: .PaymentMethods)
                     }
                     Divider()
-                    HStack(spacing: .spacingTight){
-                        Icon(.logout, size: 20)
-                        Text("Log Out")
-                            .font(.tabiHeadline)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .frame(width: 24, height: 24)
+                    Button {
+                        Task {
+                            await profileViewModel.logout()
+                            
+                            if profileViewModel.isLogoutSuccess {
+                                routes.navigate(to: .LoginView)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: .spacingTight){
+                            Icon(.logout, size: 20)
+                            Text("Log Out")
+                                .font(.tabiHeadline)
+                                .foregroundStyle(.black)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .frame(width: 24, height: 24)
+                                .foregroundStyle(.black)
+                        }
                     }
                     Divider()
                 }
