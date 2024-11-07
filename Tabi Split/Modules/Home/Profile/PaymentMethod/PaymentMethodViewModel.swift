@@ -10,7 +10,8 @@ import SwiftUI
 
 @Observable
 class PaymentMethodViewModel{
-    var toggleSelectBank: Bool = false
+    var toggleDetailBankSheet: Bool = false
     var settingsDetent = PresentationDetent.large
     var contentHeight: CGFloat = 0
+    var idToBeEdited: UUID?
 }
