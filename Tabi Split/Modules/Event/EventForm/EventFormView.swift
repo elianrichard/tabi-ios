@@ -106,17 +106,7 @@ struct EventFormView: View {
         }
         .sheet(isPresented: $isShowEditIconSheet) {
             VStack (spacing: 0) {
-                HStack{
-                    Spacer()
-                    Button {
-                        isShowEditIconSheet = false
-                    } label : {
-                        Icon(systemName: "xmark", color: .textGrey, size: 12)
-                            .frame(width: 32, height: 32)
-                            .background(.uiGray)
-                            .clipShape(Circle())
-                    }
-                }
+                SheetXButton(toggle: $isShowEditIconSheet)
                 VStack (alignment: .center, spacing: .spacingSmall) {
                     VStack {
                         Text("Select Image")

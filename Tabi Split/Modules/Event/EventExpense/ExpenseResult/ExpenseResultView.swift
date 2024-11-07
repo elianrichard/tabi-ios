@@ -116,17 +116,7 @@ struct ExpenseResultView: View {
         .addBackgroundColor(.bgBlueElevated)
         .sheet(isPresented: $isShowReceiptSheet) {
             VStack (spacing: 0) {
-                HStack{
-                    Spacer()
-                    Button {
-                        isShowReceiptSheet = false
-                    } label : {
-                        Icon(systemName: "xmark", color: .textGrey, size: 12)
-                            .frame(width: 32, height: 32)
-                            .background(.uiGray)
-                            .clipShape(Circle())
-                    }
-                }
+                SheetXButton(toggle: $isShowReceiptSheet)
                 VStack (alignment: .leading, spacing: .spacingMedium) {
                     Text("Purchase Receipt")
                         .font(.tabiTitle)
