@@ -33,7 +33,7 @@ struct ProfileImageSheet: View {
                                                 .frame(width: 60, height: 60)
                                                 .clipShape(Circle())
                                         }else{
-                                            Image(uiImage: profileViewModel.profileImage)
+                                            Image(uiImage: editProfileViewModel.profileImage)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 60, height: 60)
