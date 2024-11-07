@@ -25,7 +25,6 @@ struct PaymentMethod: Identifiable {
     var name: String
     var bank: BankEnum
     var bankNumber: String
-    var logoImage: UIImage?
     var isFavorite: Bool
     
     init(name: String, bank: BankEnum, bankNumber: String, isFavorite: Bool = false) {
@@ -127,7 +126,7 @@ enum BankEnum: Identifiable, CaseIterable {
         case .goPay:
                 .goPay
         case .mandiri:
-                .bankMandiriLogo
+                .mandiri
         }
     }
     
