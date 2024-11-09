@@ -14,13 +14,30 @@ struct InboxView : View {
         VStack (spacing: 0) {
             TopNavigation(title: "Inbox")
                 .padding(.horizontal)
-            ScrollView {
-                VStack (spacing: .spacingTight) {
-                    ForEach (inboxViewModel.inboxList) { inbox in
-                        InboxCard(inboxItem: inbox)
+            if (inboxViewModel.inboxList.count == 0) {
+                ScrollView {
+                    VStack (spacing: .spacingTight) {
+                        ForEach (inboxViewModel.inboxList) { inbox in
+                            InboxCard(inboxItem: inbox)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            } else {
+                VStack (spacing: .spacingLarge) {
+                    Image(.inboxEmptyView)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 250, height: 250)
+                        .offset(x: 30)
+                    VStack (spacing: .spacingMedium) {
+                        Text("No Notification Yet")
+                            .font(.tabiSubtitle)
+                        Text("When you get notifications,\nthey'll show up here")
+                            .font(.tabiHeadline)
+                            .multilineTextAlignment(.center)
                     }
                 }
-                .padding(.horizontal)
             }
             Spacer()
         }
