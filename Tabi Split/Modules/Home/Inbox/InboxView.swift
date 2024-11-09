@@ -14,7 +14,7 @@ struct InboxView : View {
         VStack (spacing: 0) {
             TopNavigation(title: "Inbox")
                 .padding(.horizontal)
-            if (inboxViewModel.inboxList.count == 0) {
+            if (inboxViewModel.inboxList.count != 0) {
                 ScrollView {
                     VStack (spacing: .spacingTight) {
                         ForEach (inboxViewModel.inboxList) { inbox in
