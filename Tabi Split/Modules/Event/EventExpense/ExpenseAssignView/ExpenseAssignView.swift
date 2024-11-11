@@ -149,7 +149,7 @@ struct ExpenseAssignView: View {
             }
         }
         .padding()
-        .background(.bgBlueElevated)
+        .background(.bgWhite)
         .navigationBarBackButtonHidden(true)
         .onAppear {
             expenseAssignViewModel.selectedAsignee = eventExpenseViewModel.selectedParticipants.first

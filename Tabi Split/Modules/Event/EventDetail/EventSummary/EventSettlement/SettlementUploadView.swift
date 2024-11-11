@@ -29,7 +29,7 @@ struct SettlementUploadView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, .spacingTight)
                     .padding(.horizontal, .spacingSmall)
-                    .background(.bgBlueElevated)
+                    .background(.bgWhite)
                     .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
                     
                     if let image = eventSettlementViewModel.receiptImage {

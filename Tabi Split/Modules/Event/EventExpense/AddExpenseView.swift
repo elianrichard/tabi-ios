@@ -194,7 +194,7 @@ struct AddExpenseView: View {
                 )
         }
         .padding()
-        .background(.bgBlueElevated)
+        .background(.bgWhite)
         .navigationBarBackButtonHidden(true)
     }
 }

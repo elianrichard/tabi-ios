@@ -34,7 +34,7 @@ struct HomeTopBar: View {
             Button {
                 print("Notifications")
             } label: {
-                Icon(systemName: "bell", size: 20)
+                Icon(.notification)
             }
         }
     }

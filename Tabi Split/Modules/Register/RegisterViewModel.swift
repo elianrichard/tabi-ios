@@ -108,7 +108,7 @@ class RegisterViewModel {
         isLoading = true
         
         do {
-            try await authService.register(name: name, phone: phoneNumber, password: password)
+            try await authService.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
             isRegisterSuccess = true
             print("Register successful!")
         } catch {

@@ -30,17 +30,23 @@ struct EventInviteShareButtonViewComponent : View {
     var icon: ImageResource
     var body: some View {
         VStack (spacing: .spacingSmall) {
-            Icon(icon)
+            Icon(icon, color: .buttonBlue)
             Text(text)
                 .font(.tabiBody)
         }
             .padding(.horizontal, .spacingTight)
             .padding(.vertical, .spacingRegular)
-            .foregroundColor(.textBlack)
+            .foregroundColor(.buttonBlue)
             .font(.subheadline)
             .frame(maxWidth: .infinity)
-            .background(.buttonBlueSelected)
+            .background(.bgWhite)
             .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
+            .overlay {
+                RoundedRectangle(cornerRadius: .radiusMedium)
+                    .fill(.clear)
+                    .stroke(.buttonBlue, lineWidth: 0.5)
+                    .padding(0.5)
+            }
     }
 }
 

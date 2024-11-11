@@ -33,7 +33,7 @@ struct EventFormView: View {
                             .overlay {
                                 VStack {
                                     Circle()
-                                        .fill(.buttonDarkBlue)
+                                        .fill(.buttonBlue)
                                         .strokeBorder(.bgWhite, lineWidth: 1)
                                         .frame(width: 28, height: 28)
                                         .overlay {
@@ -151,7 +151,7 @@ struct EventFormView: View {
             }
         }
         .padding()
-        .addBackgroundColor(.bgBlueElevated)
+        .addBackgroundColor(.bgWhite)
         .navigationBarBackButtonHidden(true)
     }
 }
