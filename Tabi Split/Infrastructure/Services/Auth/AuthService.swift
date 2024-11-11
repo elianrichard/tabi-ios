@@ -25,7 +25,8 @@ final class AuthenticationService: AuthenticationServicing {
     
     func register(name: String, phone: String, password: String) async throws {
         let registerRequest = RegisterRequest(name: name, phone: phone, password: password)
-        let _: RegisterResponse = try await apiClient.post(endpoint: "/auth/register", body: registerRequest)
+        let response: RegisterResponse = try await apiClient.post(endpoint: "/auth/register", body: registerRequest)
+        print(response, "register response")
     }
     
     func login(phone: String, password: String) async throws {
@@ -34,6 +35,8 @@ final class AuthenticationService: AuthenticationServicing {
         
         try tokenManager.saveAccessToken(response.token)
         try tokenManager.saveRefreshToken(response.refresh_token)
+        
+        print("logged in")
     }
     
     

@@ -27,13 +27,6 @@ class EventData {
     }
 }
 
-var mockEventData: [EventData] = [
-    EventData(eventName: "Korea Trip", completionDate: nil, userEventBalance: 0),
-    EventData(eventName: "London Trip", completionDate: Date(), userEventBalance: 300_000),
-    EventData(eventName: "Paris Trip", completionDate: Date(), userEventBalance: -300_000),
-    EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0)
-]
-
 enum EventIconEnum: String, Identifiable {
     case icon1, icon2, icon3, icon4, icon5, icon6, icon7,icon8
     

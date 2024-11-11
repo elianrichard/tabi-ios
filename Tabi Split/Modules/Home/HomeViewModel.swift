@@ -16,7 +16,7 @@ final class HomeViewModel {
     }
     var events: [EventData] = []
     var filteredEvents: [EventData] = []
-    var notificationCount: Int = 10
+    var notificationCount: Int = 0
 
     func populateEvents (data: [EventData]) {
         events = data
