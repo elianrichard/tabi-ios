@@ -99,6 +99,9 @@ struct EventDetailView: View {
             .ignoresSafeArea()
             
         }
+        .onAppear {
+            eventViewModel.calculateOptimization()
+        }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $isShowCompleteSheet) {
             VStack (alignment: .center, spacing: 0) {

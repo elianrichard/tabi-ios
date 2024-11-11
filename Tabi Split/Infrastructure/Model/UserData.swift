@@ -16,13 +16,15 @@ class UserData {
     @Relationship(inverse: \EventData.participants) var events: [EventData]
     @Relationship(inverse: \Expense.participants) var expenses: [Expense]
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]
+    @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]
     
-    init(name: String, phone: String, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = []) {
+    init(name: String, phone: String, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = [], expenseShare: [ExpensePerson] = []) {
         self.name = name
         self.phone = phone
         self.events = events
         self.expenses = expenses
         self.coveredExpenses = coveredExpenses
+        self.expenseShare = expenseShare
     }
 }
 

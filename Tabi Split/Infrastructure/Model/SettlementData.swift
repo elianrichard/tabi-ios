@@ -7,30 +7,59 @@
 
 import Foundation
 
-struct OptimizationPersonData: Identifiable {
+class PersonBalanceData: Identifiable {
     var id: UUID
     var user: UserData
-    var debtAmount: Float
-    var lentAmount: Float
+    var lent: Float {
+        didSet {
+            balance = lent - debt
+            calculationBalance = balance
+        }
+    }
+    var debt: Float {
+        didSet {
+            balance = lent - debt
+            calculationBalance = balance
+        }
+    }
+    var calculationBalance: Float
+    var balance: Float
+    var settlement: [PersonSettlementData]
     
-    init(id: UUID = UUID(), user: UserData, debtAmount: Float, lentAmount: Float) {
-        self.id = id
+    init(user: UserData) {
+        self.id = UUID()
         self.user = user
-        self.debtAmount = debtAmount
-        self.lentAmount = lentAmount
+        self.lent = 0
+        self.debt = 0
+        self.calculationBalance = 0
+        self.balance = 0
+        self.settlement = []
     }
 }
 
+struct PersonSettlementData: Identifiable {
+    var id: UUID = UUID()
+    var userPaid: UserData
+    var amount: Float
+}
+
+struct SummaryHistoryData: Identifiable {
+    var id: UUID = UUID()
+    var expenseName: String
+    var expenseDate: Date
+    var amount: Float
+}
+
+struct OptimizationPersonData: Identifiable {
+    var id: UUID = UUID()
+    var user: UserData
+    var debtAmount: Float
+    var lentAmount: Float
+}
+
 struct OptimizationRecapData: Identifiable {
-    var id: UUID
+    var id: UUID = UUID()
     var sender: UserData
     var recipient: UserData
     var amount: Float
-    
-    init(id: UUID = UUID(), sender: UserData, recipient: UserData, amount: Float) {
-        self.id = id
-        self.sender = sender
-        self.recipient = recipient
-        self.amount = amount
-    }
 }

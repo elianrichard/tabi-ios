@@ -92,7 +92,7 @@ struct EventCard : View {
                     } else {
                         Text(status.statusDisplay)
                         Spacer()
-                        Text("Rp\(abs(event.userEventBalance).formatPrice())")
+                        Text("Rp\(event.userEventBalance.formatPrice(isShowSign: false))")
                     }
                 }
                 .font(.tabiBody)
@@ -113,7 +113,7 @@ struct EventCard : View {
 }
 
 #Preview {
-    let tempExpense: [Expense] = [Expense(name: "Test", coverer: UserData(name: "test", phone: "test"), price: 10_000, splitMethod: .equally)]
+    let tempExpense: [Expense] = [Expense(event: EventData(eventName: "Testing"),name: "Test", coverer: UserData(name: "test", phone: "test"), price: 10_000, splitMethod: .equally)]
     let tempParticipants: [UserData] = [
         UserData(name: "A", phone: "A"),
         UserData(name: "A", phone: "A"),

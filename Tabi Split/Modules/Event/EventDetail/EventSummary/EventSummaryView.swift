@@ -9,49 +9,37 @@ import SwiftUI
 
 struct EventSummaryView: View {
     @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
     
-    var balance: Float
-    @State var status: EventCardStatusEnum
-    
-    init(balance: Float = 250_000) {
-        self.balance = balance
-        if (balance > 0) {
-            self.status = .credit
-        } else if (balance < 0) {
-            self.status = .debt
-        } else {
-            self.status = .settled
-        }
-    }
     
     var body: some View {
         VStack (spacing: .spacingRegular) {
             VStack {
-                if (status != .settled) {
+                if (eventViewModel.summaryStatus != .settled) {
                     HStack (spacing: 20) {
                         Spacer()
                             .frame(width: 30)
                         VStack (spacing: .spacingXSmall) {
-                            Text(status.summaryCardText)
+                            Text(eventViewModel.summaryStatus.summaryCardText)
                                 .font(.tabiBody)
-                            Text("Rp\(abs(balance).formatPrice())")
+                            Text("Rp\(eventViewModel.userBalance.formatPrice(isShowSign: false))")
                                 .font(.tabiTitle)
                         }
                         Icon(systemName: "chevron.right", color: .textWhite, size: 12)
                             .offset(x: 1)
                             .frame(width: 30, height: 30, alignment: .center)
-                            .background(status.summaryCardBgShadow.opacity(0.5))
+                            .background(eventViewModel.summaryStatus.summaryCardBgShadow.opacity(0.5))
                             .clipShape(Circle())
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity, minHeight: 80)
-                    .background(status.summaryCardBgColor)
+                    .background(eventViewModel.summaryStatus.summaryCardBgColor)
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .padding(.bottom, 6)
-                    .background(status.summaryCardBgShadow)
+                    .background(eventViewModel.summaryStatus.summaryCardBgShadow)
                 } else {
                     HStack {
-                        Text(status.summaryCardText)
+                        Text(eventViewModel.summaryStatus.summaryCardText)
                             .font(.tabiSubtitle)
                     }
                     .foregroundStyle(.textGrey)
@@ -82,9 +70,9 @@ struct EventSummaryView: View {
                     }
                 }
                 VStack (spacing: 0) {
-                    EventSummaryHistoryCard(itemName: "KFC", amount: 500000, date: Date(), isLast: true)
-                    EventSummaryHistoryCard(itemName: "McDonald", amount: -500000, date: Date().yesterday(), isLast: true)
-                    EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"), isLast: true)
+                    ForEach(Array(eventViewModel.userTransactionHistory.prefix(3))) { data in
+                        EventSummaryHistoryCard(data: data)
+                    }
                 }
             }
             .padding(.spacingRegular)
@@ -96,7 +84,7 @@ struct EventSummaryView: View {
             
             
             HStack (alignment: .top) {
-                EventSummarySpendingCard(text: "Your total spending", amount: 2_080_000)
+                EventSummarySpendingCard(text: "Your total spending", amount: eventViewModel.userTotalSpending)
             }
         }
     }
@@ -105,4 +93,5 @@ struct EventSummaryView: View {
 #Preview {
     EventSummaryView()
         .environment(Routes())
+        .environment(EventViewModel())
 }
