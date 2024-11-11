@@ -13,10 +13,16 @@ import SwiftUI
 class UserData {
     var name: String
     var phone: String
+    @Relationship(inverse: \EventData.participants) var events: [EventData]
+    @Relationship(inverse: \Expense.participants) var expenses: [Expense]
+    @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]
     
-    init(name: String, phone: String) {
+    init(name: String, phone: String, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = []) {
         self.name = name
         self.phone = phone
+        self.events = events
+        self.expenses = expenses
+        self.coveredExpenses = coveredExpenses
     }
 }
 
