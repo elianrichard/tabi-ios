@@ -12,18 +12,13 @@ struct SheetXButton: View {
     @Binding var toggle: Bool
     var body: some View {
         HStack{
-            Button{
-                toggle.toggle()
-            }label: {
-                Circle()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.uiGray)
-                    .overlay {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .frame(width: 10, height: 10)
-                            .foregroundColor(.textGrey)
-                    }
+            Button {
+                toggle = false
+            } label : {
+                Icon(systemName: "xmark", color: .textGrey, size: 12)
+                    .frame(width: 32, height: 32)
+                    .background(.uiGray)
+                    .clipShape(Circle())
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)

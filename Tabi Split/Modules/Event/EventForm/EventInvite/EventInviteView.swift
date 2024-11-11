@@ -19,7 +19,7 @@ struct EventInviteView: View {
     @State private var isShowQrSheet = false
     
     var body: some View {
-        VStack (spacing: .spacingLarge) {
+        VStack {
             TopNavigation(title: "Add Participants", additionalBackFunction: {
                 eventInviteViewModel.searchUserText = ""
             })
@@ -94,17 +94,7 @@ struct EventInviteView: View {
         }
         .sheet(isPresented: $isShowQrSheet) {
             VStack (spacing: 0) {
-                HStack{
-                    Spacer()
-                    Button {
-                        isShowQrSheet = false
-                    } label : {
-                        Icon(systemName: "xmark", color: .textGrey, size: 12)
-                            .frame(width: 32, height: 32)
-                            .background(.uiGray)
-                            .clipShape(Circle())
-                    }
-                }
+                SheetXButton(toggle: $isShowQrSheet)
                 VStack (alignment: .center, spacing: .spacingSmall) {
                     Text("Show QR Code")
                         .font(.tabiTitle)

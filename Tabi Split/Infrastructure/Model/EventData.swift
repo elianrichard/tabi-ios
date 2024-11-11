@@ -13,11 +13,11 @@ class EventData {
     var eventName: String
     var completionDate: Date?
     var eventIcon: EventIconEnum.ID
-    var userEventBalance: Double
+    var userEventBalance: Float
     var participants: [UserData]
     var expenses: [Expense]
     
-    init(eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Double = 0, participants: [UserData] = [], expenses: [Expense] = []) {
+    init(eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = []) {
         self.eventName = eventName
         self.completionDate = completionDate
         self.eventIcon = eventIcon.id

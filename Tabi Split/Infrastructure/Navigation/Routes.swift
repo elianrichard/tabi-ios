@@ -12,6 +12,7 @@ import SwiftUI
 
     public enum Destination {
         case HomeView,
+             InboxView,
              SwiftDataTestingView,
              AddExpenseView,
              ExpenseAddItemsView,

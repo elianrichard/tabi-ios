@@ -21,7 +21,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack (path: $routes.navPath) {
             VStack {
-                if !isAuthenticated {
+                if isAuthenticated {
                     HomeView()
                 } else {
                     LoginView()
@@ -31,6 +31,9 @@ struct ContentView: View {
                 switch destination {
                 case .HomeView:
                     HomeView()
+                    
+                case .InboxView:
+                    InboxView()
                     
                 case .EventFormView:
                     EventFormView()
