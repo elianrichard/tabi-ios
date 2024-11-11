@@ -34,10 +34,14 @@ class NoteData {
 class Author {
     var name: String
     var age: Int
+    @Relationship(inverse: \SubNote.authors) var subNotes: [SubNote]
+    @Relationship(deleteRule: .nullify, inverse: \NoteData.authors) var notes: [NoteData]
     
-    init(name: String = "", age: Int = 0) {
+    init(name: String = "", age: Int = 0, note: [NoteData] = [], subNotes: [SubNote] = []) {
         self.name = name
         self.age = age
+        self.notes = note
+        self.subNotes = subNotes
     }
 }
 
