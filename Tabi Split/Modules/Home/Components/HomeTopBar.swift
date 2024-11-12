@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeTopBar: View {
     @Environment(Routes.self) var routes
     @Environment(ProfileViewModel.self) private var profileViewModel
+    @Bindable var homeViewModel: HomeViewModel
     
     var body: some View {
         HStack (spacing: 10){
@@ -32,9 +33,25 @@ struct HomeTopBar: View {
             }
             Spacer()
             Button {
-                print("Notifications")
+                routes.navigate(to: .InboxView)
             } label: {
                 Icon(.notification)
+                    .overlay {
+                        if (homeViewModel.notificationCount > 0) {
+                            Text("\(homeViewModel.notificationCount)")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                                .foregroundStyle(.textWhite)
+                                .font(.tabiBody)
+                                .padding(2)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(.buttonRed)
+                                .clipShape(Circle())
+                                .offset(x: 10, y: -10)
+                        }
+                        
+                    }
+                    .padding(.trailing, homeViewModel.notificationCount > 0 ? 10 : 0)
             }
         }
     }

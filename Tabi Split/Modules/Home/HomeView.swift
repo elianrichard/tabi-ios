@@ -15,7 +15,7 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
-                HomeTopBar()
+                HomeTopBar(homeViewModel: homeViewModel)
                 Spacer(minLength: .spacingMedium)
                 EventFilterList(homeViewModel: homeViewModel)
                 Spacer(minLength: 30)

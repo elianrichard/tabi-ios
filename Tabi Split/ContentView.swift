@@ -32,6 +32,9 @@ struct ContentView: View {
                 case .HomeView:
                     HomeView()
                     
+                case .InboxView:
+                    InboxView()
+                    
                 case .EventFormView:
                     EventFormView()
                     
