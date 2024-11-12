@@ -32,7 +32,7 @@ struct UploadSheet: View {
                                     .foregroundStyle(.buttonBlue)
                             }
                             .frame(maxWidth: .infinity, maxHeight: 230)
-                            .background(.bgBlueElevated)
+                            .background(.bgWhite)
                             .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
                         }
                         .onChange(of: receiptImage) {

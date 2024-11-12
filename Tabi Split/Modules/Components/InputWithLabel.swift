@@ -39,13 +39,13 @@ struct InputWithLabel: View {
     var errorMessage: String?
     
     // Initializer for text input only
-    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, isSecure: Bool = false) {
+    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, isSecure: Bool = false, inputTypePicked: inputType = .text) {
         self.label = label
         self.placeholder = placeholder
         self._text = text
         self._price = .constant(0)  // Default to nil
         self.errorMessage = errorMessage
-        self.inputTypePicked = .text
+        self.inputTypePicked = inputTypePicked
         self.inputBackgroundColor = inputBackgroundColor
         self.inputCornerRadius = inputCornerRadius
         self.isSecure = isSecure
@@ -71,13 +71,13 @@ struct InputWithLabel: View {
             case .text:
                 Input(placeholder: placeholder,
                       isSecure: isSecure,
-                      text: $text, isError: errorMessage != nil, type: inputTypePicked.keyboard, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
+                      text: $text, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius, type: .text)
             case .price:
                 PriceInput(placeholder: placeholder, price: $price, type: inputTypePicked.keyboard, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
             case .phone:
                 Input(placeholder: placeholder,
                       isSecure: isSecure,
-                      text: $text, isError: errorMessage != nil, type: inputTypePicked.keyboard, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
+                      text: $text, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius, type: .phone)
             }
             if let message = errorMessage {
                 Text(message)

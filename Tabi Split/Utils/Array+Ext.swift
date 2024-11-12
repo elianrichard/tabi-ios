@@ -12,3 +12,9 @@ extension Array where Element: Equatable {
       self = filter { $0 != element }
    }
 }
+
+extension Array {
+    var firstFourElements: [Element] {
+        return self.count > 4 ? Array(self.prefix(4)) : self
+    }
+}

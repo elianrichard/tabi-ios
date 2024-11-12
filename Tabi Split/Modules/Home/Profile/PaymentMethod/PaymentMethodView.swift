@@ -26,7 +26,7 @@ struct PaymentMethodView: View {
                             .frame(width: 250)
                     }
                     CustomButton(text: "+ Add payment method", type: .tertiary) {
-                        viewModel.toggleSelectBank.toggle()
+                        viewModel.toggleDetailBankSheet.toggle()
                     }
                 }else{
                     if profileViewModel.userPaymentMethods.contains(where: { paymentMethod in paymentMethod.isFavorite}){
@@ -65,6 +65,10 @@ struct PaymentMethodView: View {
                                                         profileViewModel.userPaymentMethods[index].isFavorite.toggle()
                                                     }
                                             }
+                                            .onTapGesture {
+                                                viewModel.idToBeEdited = paymentMethod.id
+                                                viewModel.toggleDetailBankSheet.toggle()
+                                            }
                                         }
                                     }
                                 }
@@ -101,11 +105,15 @@ struct PaymentMethodView: View {
                                                         profileViewModel.userPaymentMethods[index].isFavorite.toggle()
                                                     }
                                             }
+                                            .onTapGesture {
+                                                viewModel.idToBeEdited = paymentMethod.id
+                                                viewModel.toggleDetailBankSheet.toggle()
+                                            }
                                         }
                                     }
                                 }
                                 CustomButton(text: "+ Add payment method", type: .tertiary) {
-                                    viewModel.toggleSelectBank.toggle()
+                                    viewModel.toggleDetailBankSheet.toggle()
                                 }
                                 .frame(maxWidth: .infinity)
                             }
@@ -145,10 +153,14 @@ struct PaymentMethodView: View {
                                                     profileViewModel.userPaymentMethods[index].isFavorite.toggle()
                                                 }
                                         }
+                                        .onTapGesture {
+                                            viewModel.idToBeEdited = paymentMethod.id
+                                            viewModel.toggleDetailBankSheet.toggle()
+                                        }
                                     }
                                 }
                                 CustomButton(text: "+ Add payment method", type: .tertiary) {
-                                    viewModel.toggleSelectBank.toggle()
+                                    viewModel.toggleDetailBankSheet.toggle()
                                 }
                                 .frame(maxWidth: .infinity)
                             }
@@ -158,9 +170,8 @@ struct PaymentMethodView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
-        .sheet(isPresented: $viewModel.toggleSelectBank){
-            SelectBankSheet(viewModel: $viewModel)
-                .presentationDetents([.large], selection: $viewModel.settingsDetent)
+        .sheet(isPresented: $viewModel.toggleDetailBankSheet){
+            BankDetailFormSheet(viewModel: $viewModel, isEditing: viewModel.idToBeEdited != nil ? true : false)
         }
         .navigationBarBackButtonHidden(true)
         .padding(.spacingMedium)

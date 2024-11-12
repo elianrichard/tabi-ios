@@ -24,4 +24,5 @@ struct EventDetailExpenseView: View {
 
 #Preview {
     EventDetailExpenseView()
+        .environment(EventViewModel())
 }

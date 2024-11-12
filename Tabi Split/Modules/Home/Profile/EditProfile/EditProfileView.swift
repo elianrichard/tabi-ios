@@ -75,7 +75,7 @@ struct EditProfileView: View {
         .navigationBarBackButtonHidden(true)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.spacingMedium)
-        .background(.bgBlueElevated)
+        .background(.bgWhite)
     }
 }
 

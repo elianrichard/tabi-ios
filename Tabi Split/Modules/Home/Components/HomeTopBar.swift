@@ -35,7 +35,7 @@ struct HomeTopBar: View {
             Button {
                 routes.navigate(to: .InboxView)
             } label: {
-                Icon(systemName: "bell", size: 20)
+                Icon(.notification)
                     .overlay {
                         if (homeViewModel.notificationCount > 0) {
                             Text("\(homeViewModel.notificationCount)")
