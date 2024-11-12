@@ -5,7 +5,6 @@
 //  Created by Dharmawan Ruslan on 30/10/24.
 //
 
-import Foundation
 import SwiftUI
 
 @Observable
@@ -17,25 +16,25 @@ final class ProfileViewModel{
     var images: [UIImage] = [UIImage(imageLiteralResourceName: "Wallet"), UIImage(imageLiteralResourceName: "Dragon"), UIImage(imageLiteralResourceName: "Owl"), UIImage(imageLiteralResourceName: "Octopus")]
     var contentHeight : CGFloat = 0
     var toggleProfileImageUpload: Bool = false
-    var user: UserData = UserData(name: "Dharma", phone: "082123733400")
+    var user: UserData = UserData(name: "You", phone: "628123456789", image: .owl)
 
     var isLoading: Bool = false
-    var isLogoutSuccess: Bool = false
     let authService = AuthenticationService()
     
-    func logout() async {
+    func logout() async -> Bool {
         isLoading = true
-        
+        var isSuccess = false
         do {
             try await authService.logout()
-            isLogoutSuccess = true
             print("Logout successful!")
+            isSuccess = true
         } catch {
             print("Logout failed: \(error)")
-            isLogoutSuccess = false
+            isSuccess = false
         }
         
         isLoading = false
+        return isSuccess
     }
   
     var userPaymentMethods: [PaymentMethod] = []

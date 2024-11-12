@@ -16,8 +16,6 @@ struct AddExpenseView: View {
     @Environment(Routes.self) private var routes
     @State var viewModel: AddExpenseViewModel?
     
-    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
-    
     var body: some View {
         VStack (spacing: .spacingRegular) {
             TopNavigation(title: "Add New Expenses")
@@ -60,11 +58,7 @@ struct AddExpenseView: View {
                                                             .font(.tabiBody)
                                                     }
                                             } else {
-                                                Image(images.randomElement() ?? images[0])
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 40)
-                                                    .clipShape(Circle())
+                                                UserAvatar(userData: user)
                                                     .zIndex(Double(4-index))
                                             }
                                         }

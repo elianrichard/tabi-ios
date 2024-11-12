@@ -18,36 +18,29 @@ struct EditProfileView: View {
             TopNavigation(title: "Edit Profile")
             
             VStack(spacing: .spacingTight){
-                ZStack{
-                    Circle()
-                        .frame(width: 90, height: 90)
-                        .overlay {
-                            Image(uiImage: viewModel.profileImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 90, height: 90)
-                                .clipShape(Circle())
-                        }
-                        .foregroundColor(.uiGray)
-                    Circle()
-                        .frame(width: 28, height: 28)
-                        .foregroundColor(.buttonDarkBlue)
-                        .background(
+                UserAvatar(userData: profileViewModel.user, size: 90)
+                    .overlay {
+                        VStack {
                             Circle()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.bgWhite)
-                        )
-                        .overlay {
-                            Image(systemName: "pencil")
-                                .foregroundColor(.bgWhite)
+                                .frame(width: 28, height: 28)
+                                .foregroundColor(.buttonDarkBlue)
+                                .background(
+                                    Circle()
+                                        .frame(width: 30, height: 30)
+                                        .foregroundColor(.bgWhite)
+                                )
+                                .overlay {
+                                    Image(systemName: "pencil")
+                                        .foregroundColor(.bgWhite)
+                                }
                         }
-                        .offset(CGSize(width: 30, height: 30))
-                }
-                .onTapGesture {
-                    profileViewModel.toggleProfileImagePick.toggle()
-                }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    }
+                    .onTapGesture {
+                        profileViewModel.toggleProfileImagePick = true
+                    }
                 
-                VStack(spacing: .spacingRegular){                
+                VStack(spacing: .spacingRegular){
                     InputWithLabel(label: "Fullname", placeholder: "Fullname", text: $viewModel.user.name, inputBackgroundColor: .bgWhite, inputCornerRadius: 16)
                     InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $viewModel.user.phone, inputBackgroundColor: .bgWhite, inputCornerRadius: 16)
                 }

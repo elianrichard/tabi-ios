@@ -26,8 +26,6 @@ struct EventCard : View {
         }
     }
     
-    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
-    
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
             HStack (spacing: 12) {
@@ -67,11 +65,7 @@ struct EventCard : View {
                                             .font(.tabiBody)
                                     }
                             } else {
-                                Image(images.randomElement() ?? images[0])
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 40)
-                                    .clipShape(Circle())
+                                UserAvatar(userData: user)
                                     .zIndex(Double(4-index))
                             }
                         }
@@ -98,7 +92,7 @@ struct EventCard : View {
                 .font(.tabiBody)
                 .padding(.horizontal, .spacingTight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(isNew ? .bgWhite : status.statusColor)
+                .background(isNew ? .bgBlueElevated : status.statusColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }

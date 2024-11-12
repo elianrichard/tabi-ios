@@ -11,8 +11,6 @@ struct EventParticipantsList: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(Routes.self) private var routes
     
-    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
-    
     var body: some View {
         HStack (spacing: 4) {
             if let selectedEvent = eventViewModel.selectedEvent {
@@ -21,7 +19,7 @@ struct EventParticipantsList: View {
                         Circle()
                             .fill(.bgWhite)
                             .overlay {
-                                Image(images.randomElement() ?? images[0])
+                                Image(ProfileImageEnum(rawValue: person.image)?.resource ?? .owl)
                                     .resizable()
                                     .scaledToFill()
                                     .clipShape(Circle())

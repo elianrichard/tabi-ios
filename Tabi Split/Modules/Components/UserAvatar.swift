@@ -14,16 +14,15 @@ enum AvatarTextPositionEnum {
 struct UserAvatar : View {
     var userData: UserData
     var namePosition: AvatarTextPositionEnum?
-    
-    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
+    var size: CGFloat = 40
     
     var body: some View {
         VStack (spacing: .spacingSmall) {
             HStack (spacing: .spacingTight) {
-                Image(images.randomElement() ?? images[0])
+                Image(ProfileImageEnum(rawValue: userData.image)?.resource ?? .owl)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 40, height: 40)
+                    .frame(width: size, height: size)
                     .clipShape(Circle())
                 if namePosition == .right {
                     Text(userData.name.getFirstName())

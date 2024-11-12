@@ -18,16 +18,7 @@ struct ProfileView: View {
             VStack(spacing: .spacingLarge){
                 HStack{
                     HStack(alignment: .center, spacing: .spacingTight){
-                        Circle()
-                            .frame(width: 40, height: 40)
-                            .overlay {
-                                Image(uiImage: profileViewModel.profileImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 40, height: 40)
-                                    .clipShape(Circle())
-                            }
-                            .foregroundColor(.uiGray)
+                        UserAvatar(userData: profileViewModel.user)
                         VStack(alignment: .leading){
                             Text(profileViewModel.user.name)
                                 .font(.tabiSubtitle)
@@ -63,9 +54,9 @@ struct ProfileView: View {
                     Divider()
                     Button {
                         Task {
-                            await profileViewModel.logout()
+                            let isSuccess = await profileViewModel.logout()
                             
-                            if profileViewModel.isLogoutSuccess {
+                            if isSuccess {
                                 routes.navigate(to: .LoginView)
                             }
                         }

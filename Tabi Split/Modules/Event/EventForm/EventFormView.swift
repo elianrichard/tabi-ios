@@ -11,12 +11,12 @@ struct EventFormView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     
     @State var isEdit: Bool = false
     @State var isShowEditIconSheet: Bool = false
     @State var toggleSeeAllParticipantsSheet: Bool = false
     
-    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
     
     var body : some View {
         VStack {
@@ -127,7 +127,7 @@ struct EventFormView: View {
             
             CustomButton(text: isEdit ? "Save" : "Create",
                          isEnabled: eventViewModel.eventName != "") {
-                eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts)
+                eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user)
                 routes.navigateBack()
             }
         }
@@ -192,4 +192,5 @@ struct EventFormView: View {
         .environment(EventViewModel())
         .environment(EventInviteViewModel())
         .environment(Routes())
+        .environment(ProfileViewModel())
 }

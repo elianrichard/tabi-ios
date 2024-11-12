@@ -65,9 +65,11 @@ struct EventInviteView: View {
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
                         VStack {
-                            ForEach(eventInviteViewModel.filteredContacts) { contact in
-                                ForEach(contact.phoneNumbers, id: \.identifier) { number in
-                                    EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
+                            Divided {
+                                ForEach(eventInviteViewModel.filteredContacts) { contact in
+                                    ForEach(contact.phoneNumbers, id: \.identifier) { number in
+                                        EventInviteCardView(userData: UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue), label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
+                                    }
                                 }
                             }
                         }

@@ -13,18 +13,43 @@ import SwiftUI
 class UserData {
     var name: String
     var phone: String
+    var image: ProfileImageEnum.ID
     @Relationship(inverse: \EventData.participants) var events: [EventData]
     @Relationship(inverse: \Expense.participants) var expenses: [Expense]
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]
     @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]
     
-    init(name: String, phone: String, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = [], expenseShare: [ExpensePerson] = []) {
+    init(name: String, phone: String, image: ProfileImageEnum? = nil, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = [], expenseShare: [ExpensePerson] = []) {
         self.name = name
         self.phone = phone
+        self.image = (image ?? ProfileImageEnum.allCases.randomElement() ?? .owl).id
         self.events = events
         self.expenses = expenses
         self.coveredExpenses = coveredExpenses
         self.expenseShare = expenseShare
+    }
+}
+
+enum ProfileImageEnum: String, Identifiable {
+    case owl, dragon, wallet, octopus
+    
+    var id: String { rawValue }
+    
+    var resource: ImageResource {
+        switch self {
+        case .owl:
+                .owl
+        case .dragon:
+                .dragon
+        case .wallet:
+                .wallet
+        case .octopus:
+                .octopus
+        }
+    }
+    
+    static var allCases: [ProfileImageEnum] {
+        [.owl, .dragon, .wallet, .octopus]
     }
 }
 
