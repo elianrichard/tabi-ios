@@ -35,8 +35,6 @@ final class AuthenticationService: AuthenticationServicing {
         
         try tokenManager.saveAccessToken(response.token)
         try tokenManager.saveRefreshToken(response.refresh_token)
-        
-        print("logged in")
     }
     
     

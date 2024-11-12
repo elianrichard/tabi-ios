@@ -38,48 +38,45 @@ class RegisterViewModel {
     var confirmPasswordError: String?
     
     var isLoading: Bool = false
-    var isRegisterSuccess: Bool = false
     
     let authService = AuthenticationService()
-
     
-    var isSignUpEnabled: Bool {
-        if (!hasSubmitted) { return true }
-        else { return isFormValid() }
-    }
-    var hasSubmitted = false
+    var isSignUpEnabled: Bool = true
     
     func validateName() {
-        guard hasSubmitted else { return }
         if name.isEmpty {
             nameError = "Name cannot be empty"
         } else {
+            isSignUpEnabled = true
             nameError = nil
         }
     }
     
     func validatePhoneNumber() {
-        guard hasSubmitted else { return }
-        phoneNumberError = phoneNumber.validatePhoneNumber()
+        let error = phoneNumber.validatePhoneNumber()
+        phoneNumberError = error
+        if error == nil {
+            isSignUpEnabled = true
+        }
     }
     
     func validatePassword() {
-        guard hasSubmitted else { return }
         if password.count < 8 {
             passwordError = "Password must be at least 8 characters long"
         } else {
+            isSignUpEnabled = true
             passwordError = nil
         }
     }
     
     func validateConfirmPassword() {
-        guard hasSubmitted else { return }
         if password.isEmpty {
             confirmPasswordError = "Password cannot be empty"
         } else {
             if confirmPassword != password {
                 confirmPasswordError = "Passwords do not match"
             } else {
+                isSignUpEnabled = true
                 confirmPasswordError = nil
             }
         }
@@ -99,23 +96,23 @@ class RegisterViewModel {
         )
     }
     
-    func register() async {
-        hasSubmitted = true
+    func register() async -> Bool {
         guard isFormValid() else {
+            isSignUpEnabled = false
             print("Cannot register: form is invalid")
-            return
+            return false
         }
+        var isSuccess = false
         isLoading = true
-        
         do {
             try await authService.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
-            isRegisterSuccess = true
             print("Register successful!")
+            isSuccess = true
         } catch {
             print("Register failed: \(error)")
-            isRegisterSuccess = false
+            isSuccess = false
         }
-        
         isLoading = false
+        return isSuccess
     }
 }

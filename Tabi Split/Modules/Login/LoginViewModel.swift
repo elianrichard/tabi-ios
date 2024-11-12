@@ -16,25 +16,26 @@ class LoginViewModel {
     var passwordError: String? = nil
     
     var isLoading: Bool = false
-    var isLoginSuccess: Bool = false
-    
     let authService = AuthenticationService()
     
-    func login() async {
-        guard validateInput() else { return }
+    func login() async -> Bool {
+        guard validateInput() else {
+            print("Cannot register: form is invalid")
+            return false
+        }
         
+        var isSuccess = false
         isLoading = true
-        
         do {
-            try await authService.login(phone: phoneNumber, password: password)
-            isLoginSuccess = true
+            try await authService.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
+            isSuccess = true
             print("Login successful!")
         } catch {
             print("Login failed: \(error)")
-            isLoginSuccess = false
+            isSuccess = false
         }
-        
         isLoading = false
+        return isSuccess
     }
     
     func validateInput () -> Bool {

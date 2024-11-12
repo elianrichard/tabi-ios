@@ -14,32 +14,14 @@ struct InputWithLabel: View {
     var isSecure: Bool = false
     var inputBackgroundColor: Color = .uiWhite
     var inputCornerRadius: CGFloat = .infinity
-    
-    enum inputType: String{
-        case text
-        case price
-        case phone
-        
-        var keyboard: UIKeyboardType {
-            switch self {
-            case .text:
-                    .default
-            case .price:
-                    .numberPad
-            case .phone:
-                    .phonePad
-            }
-        }
-    }
-    
-    var inputTypePicked: inputType = .text
+    var inputTypePicked: InputTypeEnum = .text
     
     @Binding var text: String
     @Binding var price: Float
     var errorMessage: String?
     
     // Initializer for text input only
-    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, isSecure: Bool = false, inputTypePicked: inputType = .text) {
+    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, isSecure: Bool = false, inputTypePicked: InputTypeEnum = .text) {
         self.label = label
         self.placeholder = placeholder
         self._text = text
@@ -68,16 +50,12 @@ struct InputWithLabel: View {
             Text(label)
                 .font(.tabiBody)
             switch inputTypePicked {
-            case .text:
+            case .text, .phone:
                 Input(placeholder: placeholder,
                       isSecure: isSecure,
-                      text: $text, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius, type: .text)
+                      text: $text, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius, type: inputTypePicked)
             case .price:
                 PriceInput(placeholder: placeholder, price: $price, type: inputTypePicked.keyboard, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
-            case .phone:
-                Input(placeholder: placeholder,
-                      isSecure: isSecure,
-                      text: $text, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius, type: .phone)
             }
             if let message = errorMessage {
                 Text(message)
