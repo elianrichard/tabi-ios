@@ -42,7 +42,7 @@ struct EventCard : View {
                             .fill(event.completionDate != nil ? .buttonPurple : .buttonGreen)
                             .frame(width: 12)
                         Text(event.completionDate != nil
-                             ? "Completed on \(Date().customDateFormat("dd MMMM yyyy").string(from: event.completionDate ?? Date()))"
+                             ? "Completed on \(Date().customDateFormat("dd MMM yyyy").string(from: event.completionDate ?? Date()))"
                              : "Ongoing Event"
                         )
                         .font(.tabiBody)
@@ -89,7 +89,7 @@ struct EventCard : View {
                         Text("Rp\(event.userEventBalance.formatPrice(isShowSign: false))")
                     }
                 }
-                .font(.tabiBody)
+                .font(.tabiBody2)
                 .padding(.horizontal, .spacingTight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(isNew ? .bgBlueElevated : status.statusColor)

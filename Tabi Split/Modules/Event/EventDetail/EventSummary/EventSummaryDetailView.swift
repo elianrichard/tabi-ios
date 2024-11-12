@@ -12,7 +12,7 @@ struct EventSummaryDetailView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     
     var body: some View {
-        VStack (spacing: .spacingMedium) {
+        VStack (spacing: 0) {
             TopNavigation(title: "Your Transaction History")
                 .padding(.horizontal)
             ScrollView {

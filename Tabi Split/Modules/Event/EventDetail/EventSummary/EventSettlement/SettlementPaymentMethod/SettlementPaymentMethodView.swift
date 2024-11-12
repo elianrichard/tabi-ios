@@ -12,7 +12,7 @@ struct SettlementPaymentMethodView: View {
     @State var settlementPaymentMethodViewModel = SettlementPaymentMethodViewModel()
     
     var body: some View {
-        VStack (spacing: .spacingMedium) {
+        VStack (spacing: 0) {
             TopNavigation(title: "\(settlementPaymentMethodViewModel.user.name)'s Payment Methods")
                 .padding([.top, .horizontal])
             ScrollView {

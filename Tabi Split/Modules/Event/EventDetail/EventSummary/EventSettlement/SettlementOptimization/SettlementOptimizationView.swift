@@ -14,48 +14,50 @@ struct SettlementOptimizationView: View {
     @State private var contentSize: CGSize = .zero
     
     var body: some View {
-        VStack (spacing: 24) {
+        VStack (spacing: 0) {
             TopNavigation(title: "Optimization Details")
                 .padding([.top, .horizontal])
-            VStack {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach (eventViewModel.participantsBalance) { data in
-                            OptimizationPersonCard(data: data)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-            }
-            VStack (alignment: .leading) {
-                Text("Recapitulation")
-                    .font(.tabiHeadline)
-                ScrollView (showsIndicators: false) {
-                    VStack (spacing: .spacingMedium) {
-                        ForEach (eventViewModel.participantsBalance) { data in
-                            OptimizationRecapCard(recapData: data)
-                        }
-                    }
-                    .padding(.vertical, .spacingTight)
-                    .overlay(
-                        GeometryReader { geo in
-                            Color.clear.onAppear {
-                                contentSize = geo.size
+            VStack (spacing: .spacingMedium) {
+                VStack {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach (eventViewModel.participantsBalance) { data in
+                                OptimizationPersonCard(data: data)
                             }
                         }
-                    )
+                        .padding(.horizontal)
+                    }
                 }
-                .padding(.horizontal, .spacingRegular)
-                .frame(maxWidth: .infinity, maxHeight: contentSize.height)
-                .overlay {
-                    RoundedRectangle(cornerRadius: .radiusLarge)
-                        .strokeBorder(.uiGray, lineWidth: 1)
+                VStack (alignment: .leading) {
+                    Text("Recapitulation")
+                        .font(.tabiHeadline)
+                    ScrollView (showsIndicators: false) {
+                        VStack (spacing: .spacingMedium) {
+                            ForEach (eventViewModel.participantsBalance) { data in
+                                OptimizationRecapCard(recapData: data)
+                            }
+                        }
+                        .padding(.vertical, .spacingTight)
+                        .overlay(
+                            GeometryReader { geo in
+                                Color.clear.onAppear {
+                                    contentSize = geo.size
+                                }
+                            }
+                        )
+                    }
+                    .padding(.horizontal, .spacingRegular)
+                    .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: .radiusLarge)
+                            .strokeBorder(.uiGray, lineWidth: 1)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
+                    .padding(1)
+                    Spacer()
                 }
-                .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
-                .padding(1)
-                Spacer()
+                .padding([.bottom, .horizontal])
             }
-            .padding([.bottom, .horizontal])
         }
         .navigationBarBackButtonHidden(true)
     }

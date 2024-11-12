@@ -17,33 +17,34 @@ struct EventSettlementView: View {
     @State var receiptUploadViewModel = ReceiptUploadViewModel()
     
     var body: some View {
-        VStack (spacing: 24) {
+        VStack (spacing: 0) {
             TopNavigation(title: eventViewModel.userBalance.status == .credit ? "You Should Receive" : "You Should Pay")
-            ScrollView (showsIndicators: false) {
-                VStack (spacing: .spacingTight) {
-                    ForEach(eventViewModel.userSettlementList) { data in
-                        SettlementCard(data: data, isShowUploadSheet: $isShowUploadSheet)
-                    }
-                }
-                .overlay(
-                    GeometryReader { geo in
-                        Color.clear.onAppear {
-                            contentSize = geo.size
+            VStack (spacing: .spacingMedium) {
+                ScrollView (showsIndicators: false) {
+                    VStack (spacing: .spacingTight) {
+                        ForEach(eventViewModel.userSettlementList) { data in
+                            SettlementCard(data: data, isShowUploadSheet: $isShowUploadSheet)
                         }
                     }
-                )
-            }
-            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
-            
-            Button {
-                routes.navigate(to: .SettlementOptimizationView)
-            } label: {
-                Text("See optimization details")
-                    .font(.tabiHeadline)
-                    .foregroundStyle(.textBlue)
+                    .overlay(
+                        GeometryReader { geo in
+                            Color.clear.onAppear {
+                                contentSize = geo.size
+                            }
+                        }
+                    )
+                }
+                .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+                
+                Button {
+                    routes.navigate(to: .SettlementOptimizationView)
+                } label: {
+                    Text("See optimization details")
+                        .font(.tabiHeadline)
+                        .foregroundStyle(.textBlue)
+                }
             }
             Spacer()
-            
         }
         .padding()
         .sheet(isPresented: $isShowUploadSheet) {

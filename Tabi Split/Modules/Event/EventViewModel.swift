@@ -24,8 +24,11 @@ final class EventViewModel {
     var eventName: String = ""
     var eventIcon: EventIconEnum = .icon1
     
-    var isEventCompleted: Bool = false
-    var completionDate: Date?
+    var isEventCompleted: Bool {
+        if let event = selectedEvent {
+            return event.completionDate != nil
+        } else { return false }
+    }
     var isNoParticipants: Bool {
         if let event = selectedEvent {
             return event.participants.count == 1
@@ -42,7 +45,7 @@ final class EventViewModel {
     
     @MainActor
     func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData) {
-        if let selectedEvent = selectedEvent {
+        if let selectedEvent {
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
             selectedEvent.participants = selectedContacts
@@ -60,8 +63,16 @@ final class EventViewModel {
     
     @MainActor
     func completeEvent() {
-        isEventCompleted = true
-        completionDate = Date()
+        if let selectedEvent {
+            SwiftDataService.shared.completeEvent(selectedEvent)
+        }
+    }
+    
+    @MainActor
+    func incompleteEvent() {
+        if let selectedEvent {
+            SwiftDataService.shared.incompleteEvent(selectedEvent)
+        }
     }
     
     func calculateOptimization() {
@@ -75,13 +86,13 @@ final class EventViewModel {
         //        FILL THE PERSON LENT AND PERSON DEBT EXPENSE
         
         for expense in event.expenses {
-            var userBalance: Float = 0
+            var userBalanceTemp: Float = 0
             if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice())") }
             guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
             personPaid.lent += expense.price
             
             if expense.coverer.name == "You" {
-                userBalance += expense.price
+                userBalanceTemp += expense.price
             }
             
             if (expense.splitMethod == SplitMethod.custom.id) {
@@ -97,7 +108,7 @@ final class EventViewModel {
                         }
                         if (assignee.user.name == "You") {
                             userTotalSpendingTemp += amountDebt
-                            userBalance -= amountDebt
+                            userBalanceTemp -= amountDebt
                         }
                     }
                 }
@@ -112,14 +123,14 @@ final class EventViewModel {
                     }
                     if (person.name == "You") {
                         userTotalSpendingTemp += amountDebt
-                        userBalance -= amountDebt
+                        userBalanceTemp -= amountDebt
                     }
                 }
             }
             
 //            record the specific user balance history data
-            if (userBalance != 0) {
-                userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalance))
+            if (userBalanceTemp != 0) {
+                userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalanceTemp))
             }
         }
         
@@ -168,6 +179,10 @@ final class EventViewModel {
                     userSettlementList.append(SummarySettlementData(targetUser: balance.user, amount: settlement.amount, status: .WaitingPayment))
                 }
             }
+        }
+        
+        if let selectedEvent {
+            selectedEvent.userEventBalance = userBalance.balance
         }
         
         if debug {

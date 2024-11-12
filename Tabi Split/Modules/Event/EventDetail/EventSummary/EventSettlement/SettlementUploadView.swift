@@ -16,7 +16,7 @@ struct SettlementUploadView: View {
     @State var isShowUploadSheet = false
     
     var body: some View {
-        VStack (spacing: .spacingMedium) {
+        VStack (spacing: 0) {
             TopNavigation(title: "Review Payment Receipt")
             VStack (alignment: .leading, spacing: .spacingTight) {
                 VStack (alignment: .center, spacing: .spacingLarge) {
