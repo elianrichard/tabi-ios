@@ -76,7 +76,7 @@ final class EventViewModel {
         
         for expense in event.expenses {
             var userBalance: Float = 0
-            if debug { print(expense.name + "-" + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice())") }
+            if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice())") }
             guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
             personPaid.lent += expense.price
             
@@ -90,8 +90,11 @@ final class EventViewModel {
                         guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
                         let amountDebt = Float(assignee.share * item.itemPrice).rounded(toDecimalPlaces: 1).properRound()
                         if debug { print("Participants: " + assignee.user.name, "debt: ", amountDebt) }
-                        personBuy.debt += amountDebt
-                        
+                        if (expense.coverer.name == "You" && personBuy.user.name == "You") {
+                            personPaid.lent -= amountDebt
+                        } else {
+                            personBuy.debt += amountDebt
+                        }
                         if (assignee.user.name == "You") {
                             userTotalSpendingTemp += amountDebt
                             userBalance -= amountDebt
@@ -99,20 +102,27 @@ final class EventViewModel {
                     }
                 }
             } else if (expense.splitMethod == SplitMethod.equally.id) {
+                let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
                 for person in expense.participants {
                     guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
-                    let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
-                    personBuy.debt += amountDebt
-                    if (expense.participants.contains(where: { $0.name == "You" })) {
+                    if (expense.coverer.name == "You" && personBuy.user.name == "You") {
+                        personPaid.lent -= amountDebt
+                    } else {
+                        personBuy.debt += amountDebt
+                    }
+                    if (person.name == "You") {
                         userTotalSpendingTemp += amountDebt
                         userBalance -= amountDebt
                     }
                 }
             }
+            
+//            record the specific user balance history data
             if (userBalance != 0) {
                 userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalance))
             }
         }
+        
         userTotalSpending = userTotalSpendingTemp
         userTransactionHistory = userSummaryData.sorted(by: { $0.expenseDate > $1.expenseDate })
         
