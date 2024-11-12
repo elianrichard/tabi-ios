@@ -77,7 +77,7 @@ struct ReceiptUploadView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationBarBackButtonHidden(true)
         .padding()
-        .background(.bgBlueElevated)
+        .background(.bgWhite)
         .sheet(isPresented: Bindable(receiptUploadViewModel).isShowingScanner) {
             DocumentScannerView { image in
                 receiptUploadViewModel.receiptImageFromGallery = nil

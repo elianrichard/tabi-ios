@@ -16,6 +16,8 @@ struct AddExpenseView: View {
     @Environment(Routes.self) private var routes
     @State var viewModel: AddExpenseViewModel?
     
+    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
+    
     var body: some View {
         VStack (spacing: .spacingRegular) {
             TopNavigation(title: "Add New Expenses")
@@ -27,8 +29,7 @@ struct AddExpenseView: View {
                                    errorMessage: viewModel?.expenseNameError,
                                    inputBackgroundColor: .bgWhite,
                                    inputCornerRadius: 16
-                                   )
-                    //              .onSubmit(registerViewModel.validateName)
+                    )
                     DropDownInput(
                         label: "Paid by",
                         items: eventViewModel.selectedEvent?.participants ?? [],
@@ -40,45 +41,63 @@ struct AddExpenseView: View {
                     )
                     VStack(alignment: .leading, spacing: 8){
                         HStack{
-                            Text("Select Participants")
+                            Text("Participants")
                                 .font(.tabiBody)
                             Spacer()
-                            Button{
-                                viewModel?.toggleSeeAll.toggle()
-                            }label: {
-                                Text("See All")
-                                    .font(.tabiBody)
-                            }
                         }
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(alignment: .center){
-                                ForEach(eventViewModel.selectedEvent?.participants ?? []) { person in
-                                    VStack(alignment: .center){
-                                        Circle()
-                                            .frame(width: 40, height: 40)
-                                            .padding(5)
-                                            .background{
+                        HStack(alignment: .center){
+                            if eventExpenseViewModel.selectedParticipants != [] {
+                                
+                                HStack (spacing: -6) {
+                                    ForEach(Array(eventExpenseViewModel.selectedParticipants.enumerated()), id: \.offset) { index, user in
+                                        if (index < 4) {
+                                            if (eventExpenseViewModel.selectedParticipants.count > 4 && index == 3) {
                                                 Circle()
-                                                    .frame(width: 50, height: 50)
-                                                    .foregroundColor(.buttonGreen)
-                                                    .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 1)
-                                                Circle()
-                                                    .frame(width: 45, height: 45)
-                                                    .foregroundColor(.bgWhite)
-                                                    .opacity(!eventExpenseViewModel.selectedParticipants.contains(person) ? 0 : 1)
-                                            }
-                                        Text(person.name.getFirstName())
-                                            .font(.tabiBody)
-                                            .lineLimit(1)
-                                    }
-                                    .onTapGesture {
-                                        if !eventExpenseViewModel.selectedParticipants.contains(person){
-                                            eventExpenseViewModel.selectedParticipants.append(person)
-                                        } else {
-                                            if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
-                                                eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
+                                                    .fill(.uiGray)
+                                                    .frame(width: 40)
+                                                    .overlay {
+                                                        Text("+\(eventExpenseViewModel.selectedParticipants.count - 3)")
+                                                            .font(.tabiBody)
+                                                    }
+                                            } else {
+                                                Image(images.randomElement() ?? images[0])
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 40)
+                                                    .clipShape(Circle())
+                                                    .zIndex(Double(4-index))
                                             }
                                         }
+                                    }
+                                    if (eventExpenseViewModel.selectedParticipants.count < 4) {
+                                        ForEach(Array(0 ..< (4-eventExpenseViewModel.selectedParticipants.count)), id: \.self) { _ in
+                                            Circle()
+                                                .frame(width: 40)
+                                                .opacity(0)
+                                        }
+                                    }
+                                }
+                                Spacer()
+                                Button{
+                                    viewModel?.toggleSeeAll.toggle()
+                                }label:{
+                                    HStack{
+                                        Text("Edit")
+                                            .font(.tabiBody)
+                                            .foregroundColor(.textBlue)
+                                        Icon(systemName: "chevron.right", color: .textBlue, size: 18)
+                                    }
+                                }
+                            }else{
+                                Button{
+                                    viewModel?.toggleSeeAll.toggle()
+                                }label:{
+                                    HStack{
+                                        Text("Select Participants")
+                                            .font(.tabiBody)
+                                            .foregroundColor(.textBlue)
+                                        Spacer()
+                                        Icon(systemName: "chevron.right", color: .textBlue, size: 18)
                                     }
                                 }
                             }
@@ -130,44 +149,12 @@ struct AddExpenseView: View {
                                 .font(.tabiBody)
                                 .foregroundColor(.textGrey)
                         }
-                        VStack(spacing: 10){
-                            Image(systemName: "photo")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.gray)
-                            Text("Upload an image")
-                                .foregroundColor(.gray)
+                        CustomButton(text: "Upload Image", type: .secondary, icon: "square.and.arrow.up", iconSize: 20){
+                            viewModel?.toggleReceiptSheet.toggle()
                         }
-                        .opacity(eventExpenseViewModel.uploadedReceiptImage != nil ? 0 : 1)
-                        .frame(height: 150)
-                        .frame(maxWidth: .infinity)
-                        .foregroundStyle(.black)
-                        .font(.tabiBody)
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 16)
-                        .background{
-                            if eventExpenseViewModel.uploadedReceiptImage != nil{
-                                Image(uiImage: eventExpenseViewModel.uploadedReceiptImage ?? UIImage())
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            }else{
-                                Color(.bgWhite)
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .fill(.clear)
-                                            .stroke(.bgGreyOverlay, lineWidth: 0.5)
-                                            .padding(0.5)
-                                    }
-                            }
-                        }
-                        .cornerRadius(16)
-                        .onTapGesture {
-                            routes.navigate(to: .ReceiptUploadView)
-                        }
-                        .contentShape(Rectangle())
+                        .frame(width: 180)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             
@@ -185,16 +172,104 @@ struct AddExpenseView: View {
         }
         .onAppear{
             viewModel = AddExpenseViewModel(eventExpenseViewModel: eventExpenseViewModel)
+            if eventExpenseViewModel.selectedParticipants == [] {
+                eventExpenseViewModel.selectedParticipants = eventViewModel.selectedEvent?.participants ?? []
+            }
         }
         .sheet(isPresented: viewModel != nil ? Bindable(viewModel!).toggleSeeAll : .constant(false)) {
-            ShowAllParticipantsGrid(close: viewModel != nil ? Bindable(viewModel!).toggleSeeAll : .constant(false))
+            ShowAllParticipants(isPresented: viewModel != nil ? Bindable(viewModel!).toggleSeeAll : .constant(false))
                 .presentationDetents(
                     [.medium, .large],
                     selection: viewModel != nil ? Bindable(viewModel!).settingsDetent : .constant(PresentationDetent.medium)
                 )
         }
+        .sheet(isPresented: viewModel != nil ? Bindable(viewModel!).toggleReceiptSheet : .constant(false)){
+            VStack(spacing: 0){
+                SheetXButton(toggle: viewModel != nil ? Bindable(viewModel!).toggleReceiptSheet : .constant(false))
+                VStack(spacing: .spacingMedium){
+                    Text("Upload Image")
+                        .font(.tabiTitle)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: .spacingTight){
+                        PhotosPicker(selection: Bindable(viewModel!).receiptImageFromGallery, matching: .images, photoLibrary: .shared()){
+                            VStack(spacing: .spacingTight){
+                                Icon(systemName: "photo", color: .buttonBlue, size: 20)
+                                Text("Open Library")
+                                    .font(.tabiHeadline)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 100)
+                        }
+                        .accentColor(.buttonBlue)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: .radiusLarge)
+                                .fill(.clear)
+                                .stroke(.buttonBlue, lineWidth: 1.5)
+                        }
+                        .onChange(of: viewModel?.receiptImageFromGallery) {
+                            Task{
+                                if viewModel?.receiptImageFromGallery != nil {
+                                    await viewModel?.getImage()
+                                    viewModel?.straightenDocument(in: viewModel?.receiptImage ?? UIImage()) { image in
+                                        viewModel?.receiptImage = image
+                                    }
+                                }
+                            }
+                        }
+                        Button{
+                            viewModel?.toggleScannerSheet.toggle()
+                        }label:{
+                            VStack(spacing: .spacingTight){
+                                Icon(systemName: "camera.fill", color: .buttonBlue, size: 20)
+                                Text("Take Photo")
+                                    .font(.tabiHeadline)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 100)
+                        }
+                        .accentColor(.buttonBlue)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: .radiusLarge)
+                                .fill(.clear)
+                                .stroke(.buttonBlue, lineWidth: 1.5)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+            }
+            .presentationDetents([.height(viewModel?.receiptSheetHeight ?? 0)])
+            .sheet(isPresented: viewModel != nil ? Bindable(viewModel!).toggleScannerSheet : .constant(false)) {
+                DocumentScannerView { image in
+                    viewModel?.receiptImageFromGallery = nil
+                    viewModel?.receiptImage = image
+                }
+            }
+            .navigationBarBackButtonHidden(true)
+            .padding()
+            .padding([.top], 10)
+            .background(
+                GeometryReader { geometry in
+                    Color.clear
+                        .onAppear {
+                            viewModel?.receiptSheetHeight = geometry.size.height
+                        }
+                }
+            )
+            .onChange(of: viewModel?.receiptImage){
+                if (viewModel?.receiptImage != nil) {
+                    do {
+                        try eventExpenseViewModel.performOCROnImage(viewModel?.receiptImage ?? UIImage())
+                    } catch {
+                        print(error)
+                    }
+                    
+                    eventExpenseViewModel.uploadedReceiptImage = viewModel?.receiptImage ?? UIImage()
+                    viewModel?.toggleReceiptSheet.toggle()
+                }
+            }
+        }
         .padding()
-        .background(.bgBlueElevated)
+        .background(.bgWhite)
         .navigationBarBackButtonHidden(true)
     }
 }

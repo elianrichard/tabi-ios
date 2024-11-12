@@ -36,10 +36,13 @@ struct EventParticipantsList: View {
                     } label: {
                         ZStack {
                             Circle()
-                                .fill(Color(UIColor(hex: "#D9D9D9")))
+                                .fill(.bgWhite)
                                 .frame(width: 40)
+                            Circle()
+                                .fill(.buttonBlue)
+                                .frame(width: 36)
                             Text("+\(selectedEvent.participants.count - 4)")
-                                .foregroundStyle(.textBlack)
+                                .foregroundStyle(.textWhite)
                         }
                     }
                 }

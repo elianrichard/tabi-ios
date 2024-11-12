@@ -19,20 +19,21 @@ struct RegisterView: View {
             
             VStack (spacing: .spacingMedium) {
                 InputWithLabel(label: "Fullname",
-                               placeholder: "Your name",
+                               placeholder: "Enter your full name",
                                text: $registerViewModel.name,
                                errorMessage: registerViewModel.nameError)
                 InputWithLabel(label: "Phone Number",
-                               placeholder: "628123456789",
+                               placeholder: "Enter your phone number",
                                text: $registerViewModel.phoneNumber,
-                               errorMessage: registerViewModel.phoneNumberError)
+                               errorMessage: registerViewModel.phoneNumberError,
+                               inputTypePicked: .phone)
                 InputWithLabel(label: "Password",
-                               placeholder: "Password",
+                               placeholder: "Enter your password",
                                text: $registerViewModel.password,
                                errorMessage: registerViewModel.passwordError,
                                isSecure: true)
                 InputWithLabel(label: "Confirm Password",
-                               placeholder: "Confirm Password",
+                               placeholder: "Re-enter your Password",
                                text: $registerViewModel.confirmPassword,
                                errorMessage: registerViewModel.confirmPasswordError,
                                isSecure: true)

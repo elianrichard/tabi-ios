@@ -14,6 +14,7 @@ struct EventFormView: View {
     
     @State var isEdit: Bool = false
     @State var isShowEditIconSheet: Bool = false
+    @State var toggleSeeAllParticipantsSheet: Bool = false
     
     var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
     
@@ -33,7 +34,7 @@ struct EventFormView: View {
                             .overlay {
                                 VStack {
                                     Circle()
-                                        .fill(.buttonDarkBlue)
+                                        .fill(.buttonBlue)
                                         .strokeBorder(.bgWhite, lineWidth: 1)
                                         .frame(width: 28, height: 28)
                                         .overlay {
@@ -43,6 +44,7 @@ struct EventFormView: View {
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                             }
                     }
+                    .frame(maxWidth: .infinity)
                 }
                 
                 ScrollView (showsIndicators: false) {
@@ -50,37 +52,62 @@ struct EventFormView: View {
                         InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName)
                         if (isEdit) {
                             VStack (alignment: .leading, spacing: .spacingTight) {
-                                Text("Participants")
+                                Text("Participants (" + String((eventViewModel.selectedEvent?.participants ?? []).count) + ")")
                                     .font(.tabiBody)
-                                HStack (alignment: .top, spacing: .spacingTight) {
-                                    ScrollView (.horizontal, showsIndicators: false) {
-                                        HStack (alignment: .top, spacing: 10) {
-                                            ForEach ( eventViewModel.selectedEvent?.participants ?? []) { user in
-                                                UserAvatar(userData: user, namePosition: .bottom)
-                                            }
-                                        }
-                                    }
-                                    
-                                    Rectangle()
-                                        .fill(.uiGray)
-                                        .frame(maxWidth: 2, maxHeight: .infinity)
-                                    
+                                VStack (alignment: .leading, spacing: .spacingTight) {
                                     Button {
                                         routes.navigate(to: .EventInviteView)
                                     } label: {
-                                        ZStack {
-                                            Icon(systemName: "plus", color: .buttonBlue, size: 20)
-                                                .frame(width: 40, height: 40)
-                                                .clipShape(Circle())
-                                                .overlay {
-                                                    Circle()
-                                                        .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 5]))
-                                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                                        .foregroundColor(.bgGreyOverlay)
-                                                }
+                                        HStack(spacing: .spacingTight){
+                                            ZStack {
+                                                Icon(systemName: "plus", color: .buttonBlue, size: 20)
+                                                    .frame(width: 40, height: 40)
+                                                    .clipShape(Circle())
+                                                    .overlay {
+                                                        Circle()
+                                                            .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 5]))
+                                                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                                            .foregroundColor(.bgGreyOverlay)
+                                                    }
+                                            }
+                                            Text("Add")
+                                                .font(.tabiBody)
+                                                .foregroundColor(.buttonBlue)
                                         }
+                                        .frame(maxHeight: .infinity, alignment: .leading)
                                     }
-                                    .frame(maxHeight: .infinity)
+                                    
+                                    Divider()
+                                        .background(.buttonGrey)
+                                    
+                                    ForEach (eventViewModel.selectedEvent?.participants.firstFourElements ?? []) { user in
+                                        HStack{
+                                            UserAvatar(userData: user)
+                                            VStack(alignment: .leading){
+                                                Text(user.name)
+                                                    .font(.tabiHeadline)
+                                                Text(user.phone)
+                                                    .font(.tabiBody)
+                                                    .foregroundColor(.textGrey)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        Divider()
+                                            .background(.buttonGrey)
+                                    }
+                                    
+                                    Button{
+                                        toggleSeeAllParticipantsSheet.toggle()
+                                    }label:{
+                                        HStack{
+                                            Text("See All")
+                                                .font(.tabiBody)
+                                                .foregroundColor(.buttonBlue)
+                                            Spacer()
+                                            Icon(systemName: "chevron.right", color: .buttonBlue, size: 18)
+                                        }
+                                        .frame(height: 40)
+                                    }
                                 }
                                 .padding(.horizontal, 18)
                                 .padding(.vertical, 12)
@@ -144,6 +171,10 @@ struct EventFormView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $toggleSeeAllParticipantsSheet){
+            SeeAllParticipantSheet(isPresented: $toggleSeeAllParticipantsSheet)
+                .presentationDetents([.large])
+        }
         .onAppear {
             if let selectedEvent = eventViewModel.selectedEvent {
                 isEdit = true
@@ -151,7 +182,7 @@ struct EventFormView: View {
             }
         }
         .padding()
-        .addBackgroundColor(.bgBlueElevated)
+        .addBackgroundColor(.bgWhite)
         .navigationBarBackButtonHidden(true)
     }
 }

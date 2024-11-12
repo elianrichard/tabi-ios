@@ -19,36 +19,36 @@ struct EventInviteView: View {
     @State private var isShowQrSheet = false
     
     var body: some View {
-        VStack {
+        VStack(){
             TopNavigation(title: "Add Participants", additionalBackFunction: {
                 eventInviteViewModel.searchUserText = ""
             })
-            HStack (spacing: .spacingMedium) {
-                EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
-                                           icon: isLinkCopied ? .checkIcon : .linkIcon,
-                                           action: {
-                    if !isLinkCopied {
-                        withAnimation (nil) {
-                            isLinkCopied = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                            withAnimation(nil)  {
-                                isLinkCopied = false
+            VStack(spacing: .spacingMedium){
+                HStack (spacing: .spacingMedium) {
+                    EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
+                                               icon: isLinkCopied ? .checkIcon : .linkIcon,
+                                               action: {
+                        if !isLinkCopied {
+                            withAnimation (nil) {
+                                isLinkCopied = true
                             }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                withAnimation(nil)  {
+                                    isLinkCopied = false
+                                }
+                            }
+                            UIPasteboard.general.setValue("https://tabieventinvitelink.com", forPasteboardType: UTType.plainText.identifier)
                         }
-                        UIPasteboard.general.setValue("https://tabieventinvitelink.com", forPasteboardType: UTType.plainText.identifier)
+                    })
+                    ShareLink(item: URL(filePath: "https://tabieventinvitelink.com")!) {
+                        EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                     }
-                })
-                ShareLink(item: URL(filePath: "https://tabieventinvitelink.com")!) {
-                    EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                    EventInviteShareButtonView(text: "QR Code",
+                                               icon: .qrIcon,
+                                               action: {
+                        isShowQrSheet = true
+                    })
                 }
-                EventInviteShareButtonView(text: "QR Code",
-                                           icon: .qrIcon,
-                                           action: {
-                    isShowQrSheet = true
-                })
-            }
-            VStack (spacing: .spacingTight) {
                 HStack (spacing: .spacingSmall) {
                     Image(systemName: "magnifyingglass")
                     TextField("Search", text: Bindable(eventInviteViewModel).searchUserText)
@@ -62,21 +62,22 @@ struct EventInviteView: View {
                         .fill(.clear)
                         .strokeBorder(.uiGray, lineWidth: 1)
                 }
-                
-                ScrollView (showsIndicators: false) {
-                    VStack {
-                        ForEach(eventInviteViewModel.filteredContacts) { contact in
-                            ForEach(contact.phoneNumbers, id: \.identifier) { number in
-                                EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
+                VStack (spacing: .spacingTight) {
+                    ScrollView (showsIndicators: false) {
+                        VStack {
+                            ForEach(eventInviteViewModel.filteredContacts) { contact in
+                                ForEach(contact.phoneNumbers, id: \.identifier) { number in
+                                    EventInviteCardView(name: "\(contact.givenName) \(contact.familyName)", number: number.value.stringValue, label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: number.label ?? "").capitalized)
+                                }
                             }
                         }
                     }
-                }
-                
-                CustomButton(text: "Add", isEnabled: eventInviteViewModel.selectedContacts.count > 0) {
-                    eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
-                    eventInviteViewModel.searchUserText = ""
-                    routes.navigateBack()
+                    
+                    CustomButton(text: "Add", isEnabled: eventInviteViewModel.selectedContacts.count > 0) {
+                        eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
+                        eventInviteViewModel.searchUserText = ""
+                        routes.navigateBack()
+                    }
                 }
             }
         }

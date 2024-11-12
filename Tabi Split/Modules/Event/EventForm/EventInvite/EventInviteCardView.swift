@@ -33,8 +33,8 @@ struct EventInviteCardView: View {
                 }
                 Spacer()
                 Circle()
-                    .stroke(isSelected ? .buttonGreen : .textGrey, lineWidth: 1)
-                    .fill(isSelected ? .buttonGreen : .clear)
+                    .stroke(isSelected ? .buttonBlue : .textGrey, lineWidth: 1)
+                    .fill(isSelected ? .buttonBlue : .clear)
                     .frame(width: 20)
                     .overlay {
                         if isSelected {

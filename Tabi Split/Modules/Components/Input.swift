@@ -12,14 +12,37 @@ struct Input: View {
     var isSecure: Bool = false
     @Binding var text: String
     var isError: Bool = false
-    var type: UIKeyboardType = .default
     var backgroundColor: Color = .bgWhite
     var cornerRadius: CGFloat = .radiusMedium
     
     @State var isShowPassword = false
     
+    enum inputType: String{
+        case text
+        case phone
+        
+        var keyboard: UIKeyboardType {
+            switch self {
+            case .text:
+                    .default
+            case .phone:
+                    .phonePad
+            }
+        }
+    }
+    var type: inputType = .text
+    var phoneCode: String = "62"
+    
     var body: some View {
-        HStack {
+        HStack(spacing: .spacingRegular){
+            if type == .phone{
+                Text("+" + phoneCode)
+                    .font(.tabiBody)
+                    .foregroundColor(.buttonGrey)
+                Divider()
+                    .frame(height: 19)
+                    .background(.buttonGrey)
+            }
             if isSecure {
                 HStack {
                     if !isShowPassword {
@@ -43,7 +66,7 @@ struct Input: View {
                 TextField("", text: $text,
                           prompt: Text(placeholder).foregroundStyle(.textGrey))
                 .frame(height: 20)
-                .keyboardType(type)
+                .keyboardType(type.keyboard)
             }
         }
         .padding(.vertical, 16)

@@ -11,12 +11,12 @@ struct HomeView: View {
     @Environment(Routes.self) private var routes
     @State var homeViewModel = HomeViewModel()
     @Environment(EventViewModel.self) var eventViewModel: EventViewModel
-
+    
     var body: some View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
                 HomeTopBar(homeViewModel: homeViewModel)
-                Spacer(minLength: .spacingLarge)
+                Spacer(minLength: .spacingMedium)
                 EventFilterList(homeViewModel: homeViewModel)
                 Spacer(minLength: 30)
                 if (!homeViewModel.filteredEvents.isEmpty) {
@@ -57,7 +57,7 @@ struct HomeView: View {
                         routes.navigate(to: .EventFormView)
                     } label: {
                         Icon(systemName: "plus", color: .textWhite, size: 24)
-                            .frame(width: 56, height: 56)
+                            .frame(width: 64, height: 64)
                             .background(.buttonBlue)
                             .clipShape(RoundedRectangle(cornerRadius: 50))
                     }

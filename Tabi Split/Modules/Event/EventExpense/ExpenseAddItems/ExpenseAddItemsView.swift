@@ -89,7 +89,7 @@ struct ExpenseAddItemsView: View {
             .padding([.top], 36)
         }
         .padding()
-        .background(.bgBlueElevated)
+        .background(.bgWhite)
         .navigationBarBackButtonHidden(true)
     }
 }

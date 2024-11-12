@@ -113,7 +113,7 @@ struct ExpenseResultView: View {
             }
         }
         .padding()
-        .addBackgroundColor(.bgBlueElevated)
+        .addBackgroundColor(.bgWhite)
         .sheet(isPresented: $isShowReceiptSheet) {
             VStack (spacing: 0) {
                 SheetXButton(toggle: $isShowReceiptSheet)
@@ -131,7 +131,7 @@ struct ExpenseResultView: View {
                 }
             }
             .padding()
-            .addBackgroundColor(.bgBlueElevated)
+            .addBackgroundColor(.bgWhite)
             .presentationDetents([.height(700)])
             .presentationDragIndicator(.visible)
         }
