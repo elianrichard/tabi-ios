@@ -20,17 +20,19 @@ struct LoginView: View {
             VStack (alignment: .trailing, spacing: 8) {
                 VStack(alignment: .leading, spacing: .spacingMedium) {
                     InputWithLabel(label: "Phone Number",
-                                   placeholder: "Your phone number",
-                                   text: $loginViewModel.phoneNumber, errorMessage: loginViewModel.phoneNumberError)
+                                   placeholder: "Enter your phone number",
+                                   text: $loginViewModel.phoneNumber,
+                                   errorMessage: loginViewModel.phoneNumberError,
+                                   inputTypePicked: .phone)
                     InputWithLabel(label: "Password",
-                                   placeholder: "Password",
+                                   placeholder: "Enter your password",
                                    text: $loginViewModel.password,
                                    errorMessage: loginViewModel.passwordError, isSecure: true)
                 }
                 Button {
                     print("forgot password")
                 } label: {
-                    Text("Forgot Password?")
+                    Text("Forget Password?")
                         .font(.tabiBody)
                         .foregroundStyle(.textBlue)
                 }
@@ -39,9 +41,9 @@ struct LoginView: View {
             VStack (spacing: .spacingMedium) {
                 CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In") {
                     Task {
-                        await loginViewModel.login()
+                        let isSuccess = await loginViewModel.login()
                         
-                        if loginViewModel.isLoginSuccess {
+                        if isSuccess {
                             routes.navigate(to: .HomeView)
                         }
                     }

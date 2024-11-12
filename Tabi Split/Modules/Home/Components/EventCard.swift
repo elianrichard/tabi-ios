@@ -26,8 +26,6 @@ struct EventCard : View {
         }
     }
     
-    var images: [ImageResource] = [.samplePersonProfile1, .samplePersonProfile2, .samplePersonProfile3]
-    
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
             HStack (spacing: 12) {
@@ -44,7 +42,7 @@ struct EventCard : View {
                             .fill(event.completionDate != nil ? .buttonPurple : .buttonGreen)
                             .frame(width: 12)
                         Text(event.completionDate != nil
-                             ? "Completed on \(Date().customDateFormat("dd MMMM yyyy").string(from: event.completionDate ?? Date()))"
+                             ? "Completed on \(Date().customDateFormat("dd MMM yyyy").string(from: event.completionDate ?? Date()))"
                              : "Ongoing Event"
                         )
                         .font(.tabiBody)
@@ -67,11 +65,7 @@ struct EventCard : View {
                                             .font(.tabiBody)
                                     }
                             } else {
-                                Image(images.randomElement() ?? images[0])
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 40)
-                                    .clipShape(Circle())
+                                UserAvatar(userData: user)
                                     .zIndex(Double(4-index))
                             }
                         }
@@ -92,13 +86,13 @@ struct EventCard : View {
                     } else {
                         Text(status.statusDisplay)
                         Spacer()
-                        Text("Rp\(abs(event.userEventBalance).formatPrice())")
+                        Text("Rp\(event.userEventBalance.formatPrice(isShowSign: false))")
                     }
                 }
-                .font(.tabiBody)
+                .font(.tabiBody2)
                 .padding(.horizontal, .spacingTight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(isNew ? .bgWhite : status.statusColor)
+                .background(isNew ? .bgBlueElevated : status.statusColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
@@ -113,7 +107,7 @@ struct EventCard : View {
 }
 
 #Preview {
-    let tempExpense: [Expense] = [Expense(name: "Test", coverer: UserData(name: "test", phone: "test"), price: 10_000, splitMethod: .equally)]
+    let tempExpense: [Expense] = [Expense(event: EventData(eventName: "Testing"),name: "Test", coverer: UserData(name: "test", phone: "test"), price: 10_000, splitMethod: .equally)]
     let tempParticipants: [UserData] = [
         UserData(name: "A", phone: "A"),
         UserData(name: "A", phone: "A"),

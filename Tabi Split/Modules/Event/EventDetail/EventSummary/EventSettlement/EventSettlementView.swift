@@ -9,43 +9,42 @@ import SwiftUI
 
 struct EventSettlementView: View {
     @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
-    
-    var balance: Float = 200_000
     
     @State private var contentSize: CGSize = .zero
     @State private var isShowUploadSheet: Bool = false
     @State var receiptUploadViewModel = ReceiptUploadViewModel()
     
     var body: some View {
-        VStack (spacing: 24) {
-            TopNavigation(title: balance > 0 ? "You Should Receive" : "You Should Pay")
-            ScrollView (showsIndicators: false) {
-                VStack (spacing: .spacingTight) {
-                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedConfirmation, isShowUploadSheet: $isShowUploadSheet)
-                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedPayment, isShowUploadSheet: $isShowUploadSheet)
-                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingConfirmation, isShowUploadSheet: $isShowUploadSheet)
-                    SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingPayment, isShowUploadSheet: $isShowUploadSheet)
-                }
-                .overlay(
-                    GeometryReader { geo in
-                        Color.clear.onAppear {
-                            contentSize = geo.size
+        VStack (spacing: 0) {
+            TopNavigation(title: eventViewModel.userBalance.status == .credit ? "You Should Receive" : "You Should Pay")
+            VStack (spacing: .spacingMedium) {
+                ScrollView (showsIndicators: false) {
+                    VStack (spacing: .spacingTight) {
+                        ForEach(eventViewModel.userSettlementList) { data in
+                            SettlementCard(data: data, isShowUploadSheet: $isShowUploadSheet)
                         }
                     }
-                )
-            }
-            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
-            
-            Button {
-                routes.navigate(to: .SettlementOptimizationView)
-            } label: {
-                Text("See optimization details")
-                    .font(.tabiHeadline)
-                    .foregroundStyle(.textBlue)
+                    .overlay(
+                        GeometryReader { geo in
+                            Color.clear.onAppear {
+                                contentSize = geo.size
+                            }
+                        }
+                    )
+                }
+                .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+                
+                Button {
+                    routes.navigate(to: .SettlementOptimizationView)
+                } label: {
+                    Text("See optimization details")
+                        .font(.tabiHeadline)
+                        .foregroundStyle(.textBlue)
+                }
             }
             Spacer()
-            
         }
         .padding()
         .sheet(isPresented: $isShowUploadSheet) {
@@ -68,4 +67,5 @@ struct EventSettlementView: View {
     EventSettlementView()
         .environment(Routes())
         .environment(EventSettlementViewModel())
+        .environment(EventViewModel())
 }

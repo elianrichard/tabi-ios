@@ -20,7 +20,7 @@ struct EventDetailExpenseCard : View {
                     .scaledToFit()
                     .frame(width: 40, height: 40)
                 VStack (alignment: .leading, spacing: 4) {
-                    Text("\(expense.name.capitalized)")
+                    Text("\(expense.name)")
                         .font(.tabiHeadline)
                     Text("\(expense.coverer.name.getFirstName().capitalized) paid this bill")
                         .foregroundStyle(.textGrey)
@@ -56,7 +56,7 @@ struct EventDetailExpenseCard : View {
 
 #Preview {
     EventDetailExpenseCard(expense:
-                            Expense(name: "Kain Tenun Jepara", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
+                            Expense(event: EventData(eventName: "Testing"),name: "Kain Tenun Jepara", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
     .environment(Routes())
     .environment(EventExpenseViewModel())
 }

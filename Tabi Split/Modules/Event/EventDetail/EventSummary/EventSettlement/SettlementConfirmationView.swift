@@ -15,7 +15,7 @@ struct SettlementConfirmationView: View {
     @State var receiptUploadViewModel = ReceiptUploadViewModel()
     
     var body: some View {
-        VStack (spacing: .spacingMedium) {
+        VStack (spacing: 0) {
             TopNavigation(title: "Confirm Payment")
             VStack (alignment: .leading, spacing: .spacingTight) {
                 UserAvatar(userData: eventSettlementViewModel.user, namePosition: .right)

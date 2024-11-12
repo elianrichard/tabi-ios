@@ -9,28 +9,21 @@ import SwiftUI
 
 struct EventSummaryDetailView: View {
     @Environment(Routes.self) private var routes
+    @Environment(EventViewModel.self) private var eventViewModel
     
     var body: some View {
-        VStack (spacing: 24) {
+        VStack (spacing: 0) {
             TopNavigation(title: "Your Transaction History")
                 .padding(.horizontal)
             ScrollView {
                 VStack {
-                    EventSummaryHistoryCard(itemName: "KFC", amount: 500000, date: Date())
-                    EventSummaryHistoryCard(itemName: "McDonald", amount: -500000, date: Date().yesterday())
-                    EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"))
-                    EventSummaryHistoryCard(itemName: "Hokben", amount: 500000, date: Date(dateString: "2024-10-11"))
-                    EventSummaryHistoryCard(itemName: "KFC", amount: 500000, date: Date())
-                    EventSummaryHistoryCard(itemName: "McDonald", amount: -500000, date: Date().yesterday())
-                    EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"))
-                    EventSummaryHistoryCard(itemName: "Hokben", amount: 500000, date: Date(dateString: "2024-10-11"))
-                    EventSummaryHistoryCard(itemName: "KFC", amount: 500000, date: Date())
-                    EventSummaryHistoryCard(itemName: "McDonald", amount: -500000, date: Date().yesterday())
-                    EventSummaryHistoryCard(itemName: "Marugame Udon", amount: 500000, date: Date(dateString: "2024-10-11"))
-                    EventSummaryHistoryCard(itemName: "Hokben", amount: 500000, date: Date(dateString: "2024-10-11"))
-                    EventSummaryHistoryCard(itemName: "Pizza Hut", amount: 500000, date: Date(dateString: "2024-10-11"), isLast: true)
+                    Divided {
+                        ForEach(eventViewModel.userTransactionHistory) { data in
+                            EventSummaryHistoryCard(data: data)
+                        }
+                    }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, .spacingMedium)
             }
         }
         .padding(.top)
@@ -41,4 +34,5 @@ struct EventSummaryDetailView: View {
 #Preview {
     EventSummaryDetailView()
         .environment(Routes())
+        .environment(EventViewModel())
 }

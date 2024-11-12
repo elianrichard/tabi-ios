@@ -13,7 +13,7 @@ struct EventDetailExpenseView: View {
         ScrollView (showsIndicators: false) {
             VStack {
                 if let event = eventViewModel.selectedEvent {
-                    ForEach(event.expenses) { expense in
+                    ForEach(event.expenses.sorted(by: { $0.dateOfCreation > $1.dateOfCreation })) { expense in
                         EventDetailExpenseCard(expense: expense)
                     }
                 }

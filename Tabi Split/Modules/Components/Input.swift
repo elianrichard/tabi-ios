@@ -7,6 +7,23 @@
 
 import SwiftUI
 
+enum InputTypeEnum: String{
+    case text
+    case price
+    case phone
+    
+    var keyboard: UIKeyboardType {
+        switch self {
+        case .text:
+                .default
+        case .price:
+                .numberPad
+        case .phone:
+                .phonePad
+        }
+    }
+}
+
 struct Input: View {
     var placeholder: String = ""
     var isSecure: Bool = false
@@ -17,20 +34,7 @@ struct Input: View {
     
     @State var isShowPassword = false
     
-    enum inputType: String{
-        case text
-        case phone
-        
-        var keyboard: UIKeyboardType {
-            switch self {
-            case .text:
-                    .default
-            case .phone:
-                    .phonePad
-            }
-        }
-    }
-    var type: inputType = .text
+    var type: InputTypeEnum = .text
     var phoneCode: String = "62"
     
     var body: some View {

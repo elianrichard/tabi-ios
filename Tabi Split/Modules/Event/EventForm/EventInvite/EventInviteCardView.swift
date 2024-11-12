@@ -10,23 +10,23 @@ import Contacts
 
 struct EventInviteCardView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
-    
-    var name: String
-    var number: String
+
+    var userData: UserData
     var label: String
     
     @State var isSelected: Bool = false
     var isLast: Bool = false
     
+    
     var body: some View {
         VStack (spacing: 0) {
             HStack {
                 HStack (spacing: .spacingSmall) {
-                    UserAvatar(userData: UserData(name: name, phone: number))
+                    UserAvatar(userData: userData)
                     VStack (alignment: .leading, spacing: .spacingXSmall) {
-                        Text("\(name) (\(label))")
+                        Text("\(userData.name) (\(label))")
                             .font(.tabiHeadline)
-                        Text("\(number)")
+                        Text("\(userData.phone)")
                             .font(.tabiBody)
                             .foregroundStyle(.textGrey)
                     }
@@ -48,29 +48,15 @@ struct EventInviteCardView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 if (!isSelected) {
-                    eventInviteViewModel.selectedContacts.append(UserData(name: name, phone: number))
+                    eventInviteViewModel.selectedContacts.append(userData)
                 } else {
-                    eventInviteViewModel.selectedContacts = eventInviteViewModel.selectedContacts.filter { $0.phone != number }
+                    eventInviteViewModel.selectedContacts = eventInviteViewModel.selectedContacts.filter { $0.phone != userData.phone }
                 }
                 isSelected = !isSelected
             }
-            
-            if (isLast == false) {
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color(UIColor(hex: "#D9D9D9")))
-            }
         }
         .onAppear {
-            isSelected = eventInviteViewModel.selectedContacts.contains(where: { $0.phone == number })
+            isSelected = eventInviteViewModel.selectedContacts.contains(where: { $0.phone == userData.phone })
         }
     }
-}
-
-#Preview {
-    VStack{
-        EventInviteCardView(name: "Albert Einstein", number: "02134567890", label: "Home")
-    }
-    .padding()
-    .environment(EventInviteViewModel())
 }

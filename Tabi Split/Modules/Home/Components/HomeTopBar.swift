@@ -15,16 +15,7 @@ struct HomeTopBar: View {
     var body: some View {
         HStack (spacing: 10){
             HStack (spacing: 10){
-                Circle()
-                    .frame(width: 40, height: 40)
-                    .overlay {
-                        Image(uiImage: profileViewModel.profileImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-                    }
-                    .foregroundColor(.uiGray)
+                UserAvatar(userData: profileViewModel.user)
                     .onTapGesture {
                         routes.navigate(to: .Profile)
                     }

@@ -125,7 +125,6 @@ final class EventExpenseViewModel {
     }
     func populateViewModel() {
         if let expense = selectedExpense {
-            print("populating expense: \(expense.name)")
             expenseName = expense.name
             isEdit = false
             selectedCoverer = expense.coverer
@@ -273,7 +272,7 @@ final class EventExpenseViewModel {
             print("Error")
             return
         }
-        let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
+        let expense = Expense(event: event, name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
         SwiftDataService.shared.addExpenseToEvent(event, expense)
     }
     @MainActor
@@ -287,7 +286,7 @@ final class EventExpenseViewModel {
     func handleUpdateExpense (_ event: EventData) {
         if let expense = selectedExpense, let selectedCoverer = selectedCoverer, let selectedMethod = selectedMethod {
             guard let index = event.expenses.firstIndex(of: expense) else { return }
-            event.expenses[index] = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
+            event.expenses[index] = Expense(event: event, name: expenseName, coverer: selectedCoverer, dateOfCreation: expense.dateOfCreation, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
             SwiftDataService.shared.saveModelContext()
         }
     }
