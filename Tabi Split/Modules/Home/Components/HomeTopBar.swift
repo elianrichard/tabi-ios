@@ -8,23 +8,41 @@
 import SwiftUI
 
 struct HomeTopBar: View {
+    @Environment(Routes.self) var routes
+    @Environment(ProfileViewModel.self) private var profileViewModel
+    @Bindable var homeViewModel: HomeViewModel
+    
     var body: some View {
         HStack (spacing: 10){
             HStack (spacing: 10){
-                Image(.sampleUserProfile1)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.2),radius: 4, y: 3)
-                Text("Hi, User!")
+                UserAvatar(userData: profileViewModel.user)
+                    .onTapGesture {
+                        routes.navigate(to: .Profile)
+                    }
+                Text("Hi, " + profileViewModel.user.name + "!")
                     .font(.tabiHeadline)
             }
             Spacer()
             Button {
-                print("Notifications")
+                routes.navigate(to: .InboxView)
             } label: {
-                Icon(systemName: "bell", size: 20)
+                Icon(.notification)
+                    .overlay {
+                        if (homeViewModel.notificationCount > 0) {
+                            Text("\(homeViewModel.notificationCount)")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                                .foregroundStyle(.textWhite)
+                                .font(.tabiBody)
+                                .padding(2)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(.buttonRed)
+                                .clipShape(Circle())
+                                .offset(x: 10, y: -10)
+                        }
+                        
+                    }
+                    .padding(.trailing, homeViewModel.notificationCount > 0 ? 10 : 0)
             }
         }
     }

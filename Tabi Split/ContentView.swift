@@ -13,6 +13,8 @@ struct ContentView: View {
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
+    @State private var eventSettlementViewModel = EventSettlementViewModel()
+    @State private var profileViewModel = ProfileViewModel()
     
     @State private var isAuthenticated = false
     
@@ -29,6 +31,9 @@ struct ContentView: View {
                 switch destination {
                 case .HomeView:
                     HomeView()
+                    
+                case .InboxView:
+                    InboxView()
                     
                 case .EventFormView:
                     EventFormView()
@@ -78,8 +83,20 @@ struct ContentView: View {
                 case .SettlementConfirmationView:
                     SettlementConfirmationView()
                     
+                case .SettlementUploadView:
+                    SettlementUploadView()
+                    
                 case .ReceiptUploadView:
                     ReceiptUploadView()
+                    
+                case .Profile:
+                    ProfileView()
+                    
+                case .EditProfile:
+                    EditProfileView()
+                
+                case .PaymentMethods:
+                    PaymentMethodView()
                 }
                 
             }
@@ -89,6 +106,8 @@ struct ContentView: View {
         .environment(eventViewModel)
         .environment(eventInviteViewModel)
         .environment(eventExpenseViewModel)
+        .environment(eventSettlementViewModel)
+        .environment(profileViewModel)
         .onAppear {
             checkAuthentication()
         }

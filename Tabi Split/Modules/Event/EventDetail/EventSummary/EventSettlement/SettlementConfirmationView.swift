@@ -6,75 +6,36 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct SettlementConfirmationView: View {
     @Environment(Routes.self) private var routes
-    @State var status: SettlementCardTypeEnum = .WaitingPayment
-    @State var imageName: UIImage? = nil
+    @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
+    
+    @State var receiptUploadViewModel = ReceiptUploadViewModel()
     
     var body: some View {
-        VStack (spacing: 24) {
-            ZStack {
-                Text("Confirm Payment")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            VStack (alignment: .leading, spacing: 28) {
-                HStack (spacing: 12) {
-                    Circle()
-                        .fill(.gray)
-                        .frame(width: 40)
-                    VStack (alignment: .leading, spacing: 4) {
-                        Text("Naufal")
-                            .font(.title3)
-                        Text("KFC")
-                            .font(.subheadline)
-                    }
-                }
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.gray)
-                    if status == .WaitingPayment && imageName == nil {
-                        VStack (spacing: 8) {
-                            Image(systemName: "photo")
-                                .font(.title)
-                            Text("Upload an image")
-                        }
-                    } else if status == .WaitingPayment, let image = imageName {
+        VStack (spacing: 0) {
+            TopNavigation(title: "Confirm Payment")
+            VStack (alignment: .leading, spacing: .spacingTight) {
+                UserAvatar(userData: eventSettlementViewModel.user, namePosition: .right)
+                VStack (alignment: .center, spacing: .spacingLarge) {
+                    if let image = eventSettlementViewModel.receiptImage {
                         Image(uiImage: image)
                             .resizable()
-                            .scaledToFit()
-                    } else if status == .WaitingConfirmation{
-                        Image(.samplePaymentReceipt)
-                            .resizable()
-                            .scaledToFit()
+                            .scaledToFill()
+                            .frame(maxWidth: 300, maxHeight: 380, alignment: .center)
+                            .background(.uiWhite)
+                            .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .onTapGesture {
-                    if (status == .WaitingPayment && imageName == nil) {
-                        imageName = UIImage(resource: .samplePaymentReceipt)
-                    } else {
-                        routes.navigate(to: .SettlementReceiptView)
-                    }
+                    routes.navigate(to: .SettlementReceiptView)
                 }
-                Button {
-                    routes.mutlipleNavigate(to: [.HomeView, .EventDetailView, .EventSettlementView])
-                } label: {
-                    Text("Confirm")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.blue)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: .infinity))
+                Spacer()
+                CustomButton(text: "Confirm") {
+                    routes.navigateBack()
                 }
             }
         }
@@ -86,4 +47,5 @@ struct SettlementConfirmationView: View {
 #Preview {
     SettlementConfirmationView()
         .environment(Routes())
+        .environment(EventSettlementViewModel())
 }

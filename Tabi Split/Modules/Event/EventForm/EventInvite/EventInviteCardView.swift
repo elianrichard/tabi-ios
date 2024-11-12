@@ -10,62 +10,53 @@ import Contacts
 
 struct EventInviteCardView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
-    
-    var name: String
-    var number: String
+
+    var userData: UserData
     var label: String
     
     @State var isSelected: Bool = false
     var isLast: Bool = false
     
+    
     var body: some View {
         VStack (spacing: 0) {
             HStack {
-                VStack (alignment: .leading, spacing: 6) {
-                    HStack (spacing: 0) {
-                        Text("\(name) (\(label))")
+                HStack (spacing: .spacingSmall) {
+                    UserAvatar(userData: userData)
+                    VStack (alignment: .leading, spacing: .spacingXSmall) {
+                        Text("\(userData.name) (\(label))")
+                            .font(.tabiHeadline)
+                        Text("\(userData.phone)")
+                            .font(.tabiBody)
+                            .foregroundStyle(.textGrey)
                     }
-                    Text("\(number)")
-                        .font(.caption)
                 }
                 Spacer()
-                if isSelected {
-                    Circle()
-                        .fill(.green)
-                        .frame(width: 16)
-                        .offset(x: -1)
-                } else {
-                    Circle()
-                        .stroke(.black, lineWidth: 1)
-                        .fill(.clear)
-                        .frame(width: 16)
-                        .offset(x: -1)
-                }
+                Circle()
+                    .stroke(isSelected ? .buttonBlue : .textGrey, lineWidth: 1)
+                    .fill(isSelected ? .buttonBlue : .clear)
+                    .frame(width: 20)
+                    .overlay {
+                        if isSelected {
+                            Icon(systemName: "checkmark", color: .textWhite, size: 10)
+                        }
+                    }
+                    .offset(x: -1)
             }
             .padding(.vertical, 12)
             .background(.clear)
             .contentShape(Rectangle())
             .onTapGesture {
                 if (!isSelected) {
-                    eventInviteViewModel.selectedContacts.append(UserData(name: name, phone: number))
+                    eventInviteViewModel.selectedContacts.append(userData)
                 } else {
-                    eventInviteViewModel.selectedContacts = eventInviteViewModel.selectedContacts.filter { $0.phone != number }
+                    eventInviteViewModel.selectedContacts = eventInviteViewModel.selectedContacts.filter { $0.phone != userData.phone }
                 }
                 isSelected = !isSelected
             }
-            
-            if (isLast == false) {
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color(UIColor(hex: "#D9D9D9")))
-            }
         }
         .onAppear {
-            isSelected = eventInviteViewModel.selectedContacts.contains(where: { $0.phone == number })
+            isSelected = eventInviteViewModel.selectedContacts.contains(where: { $0.phone == userData.phone })
         }
     }
-}
-
-#Preview {
-    EventInviteCardView(name: "Albert Einstein", number: "02134567890", label: "Home")
 }

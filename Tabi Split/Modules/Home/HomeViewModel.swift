@@ -16,13 +16,14 @@ final class HomeViewModel {
     }
     var events: [EventData] = []
     var filteredEvents: [EventData] = []
+    var notificationCount: Int = 0
 
     func populateEvents (data: [EventData]) {
         events = data
         filteredEvents = data
         selectedFilter = .all
     }
-
+    
     func filterEvents(by filter: HomeFilterEnum) {
         switch filter {
         case .all:

@@ -9,50 +9,55 @@ import SwiftUI
 
 struct EventSettlementView: View {
     @Environment(Routes.self) private var routes
-    var balance: Float = 200_000
+    @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
+    
     @State private var contentSize: CGSize = .zero
-
+    @State private var isShowUploadSheet: Bool = false
+    @State var receiptUploadViewModel = ReceiptUploadViewModel()
     
     var body: some View {
-        VStack (spacing: 24) {
-            ZStack {
-                Text(balance > 0 ? "You Should Receive" : "You Should Pay")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            ScrollView (showsIndicators: false) {
-                VStack {
-                    SettlementCard(name: "Elian", amount: 250_000, type: .NeedConfirmation)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .NeedPayment)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .WaitingConfirmation)
-                    SettlementCard(name: "Elian", amount: 250_000, type: .WaitingPayment)
-                }
-                .overlay(
-                    GeometryReader { geo in
-                        Color.clear.onAppear {
-                            contentSize = geo.size
+        VStack (spacing: 0) {
+            TopNavigation(title: eventViewModel.userBalance.status == .credit ? "You Should Receive" : "You Should Pay")
+            VStack (spacing: .spacingMedium) {
+                ScrollView (showsIndicators: false) {
+                    VStack (spacing: .spacingTight) {
+                        ForEach(eventViewModel.userSettlementList) { data in
+                            SettlementCard(data: data, isShowUploadSheet: $isShowUploadSheet)
                         }
                     }
-                )
-            }
-            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
-            Button {
-                routes.navigate(to: .SettlementOptimizationView)
-            } label: {
-                Text("See optimization details")
+                    .overlay(
+                        GeometryReader { geo in
+                            Color.clear.onAppear {
+                                contentSize = geo.size
+                            }
+                        }
+                    )
+                }
+                .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+                
+                Button {
+                    routes.navigate(to: .SettlementOptimizationView)
+                } label: {
+                    Text("See optimization details")
+                        .font(.tabiHeadline)
+                        .foregroundStyle(.textBlue)
+                }
             }
             Spacer()
-            
         }
         .padding()
+        .sheet(isPresented: $isShowUploadSheet) {
+            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.isShowingScanner, user: eventSettlementViewModel.user) {
+                Task {
+                    if receiptUploadViewModel.receiptImageFromGallery != nil {
+                        await receiptUploadViewModel.getImage()
+                        eventSettlementViewModel.receiptImage = receiptUploadViewModel.receiptImage
+                        routes.navigate(to: .SettlementUploadView)
+                    }
+                }
+            }
+        }
         .navigationBarBackButtonHidden(true)
     }
 }
@@ -61,4 +66,6 @@ struct EventSettlementView: View {
 #Preview {
     EventSettlementView()
         .environment(Routes())
+        .environment(EventSettlementViewModel())
+        .environment(EventViewModel())
 }

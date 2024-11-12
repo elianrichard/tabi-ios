@@ -13,7 +13,7 @@ struct Icon: View {
     var color: Color
     var size: CGFloat
     
-    init(_ resource: ImageResource, color: Color = .textBlack, size: CGFloat = 24) {
+    init(_ resource: ImageResource?, color: Color = .textBlack, size: CGFloat = 24) {
         self.resource = resource
         self.size = size
         self.systemName = nil
@@ -32,19 +32,19 @@ struct Icon: View {
             Image(imageResource)
                 .resizable()
                 .scaledToFit()
-                .frame(width: size)
+                .frame(width: size, height: size)
                 .foregroundStyle(color)
                 
         } else if let systemResource = systemName {
             Image(systemName: systemResource)
                 .resizable()
                 .scaledToFit()
-                .frame(width: size)
+                .frame(width: size, height: size)
                 .foregroundStyle(color)
         }
     }
 }
 
 #Preview {
-    Icon(.eyeIcon)
+    Icon(.eyeIcon, color: .textBlue)
 }

@@ -12,6 +12,7 @@ import SwiftUI
 
     public enum Destination {
         case HomeView,
+             InboxView,
              SwiftDataTestingView,
              AddExpenseView,
              ExpenseAddItemsView,
@@ -28,7 +29,11 @@ import SwiftUI
              SettlementOptimizationView, 
              SettlementConfirmationView, 
              SettlementReceiptView,
-             ReceiptUploadView
+             SettlementUploadView,
+             ReceiptUploadView,
+             Profile,
+             EditProfile,
+             PaymentMethods
     }
 
     func navigate(to destination: Destination) {

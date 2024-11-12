@@ -56,7 +56,7 @@ struct ReceiptUploadView: View {
             DividerWithText()
                 .padding()
             
-            CustomButton (text: "Take Photo", type: .secondary, hPadding: 40) {
+            CustomButton(text: "Take Photo", type: .secondary) {
                 receiptUploadViewModel.isShowingScanner.toggle()
             }
             .frame(width: 200)
@@ -69,16 +69,15 @@ struct ReceiptUploadView: View {
                 } catch {
                     print(error)
                 }
-
+ 
                 eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImage
-
                 routes.navigateBack()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationBarBackButtonHidden(true)
         .padding()
-        .background(.bgBlueElevated)
+        .background(.bgWhite)
         .sheet(isPresented: Bindable(receiptUploadViewModel).isShowingScanner) {
             DocumentScannerView { image in
                 receiptUploadViewModel.receiptImageFromGallery = nil

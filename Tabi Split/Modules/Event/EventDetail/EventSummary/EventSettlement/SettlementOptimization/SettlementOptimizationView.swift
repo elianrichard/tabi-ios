@@ -9,73 +9,56 @@ import SwiftUI
 
 struct SettlementOptimizationView: View {
     @Environment(Routes.self) private var routes
-    var personData: [OptimizationPersonData] = [
-        OptimizationPersonData(name: "You", debtAmount: 10_000, lentAmount: 50_000),
-        OptimizationPersonData(name: "Elian", debtAmount: 100_000, lentAmount: 50_000),
-        OptimizationPersonData(name: "Naufal", debtAmount: 100_000, lentAmount: 500_000)
-    ]
-    var recapData: [OptimizationRecapData] = [
-        OptimizationRecapData(sender: "Naufal", recipient: "You", amount: 50_000),
-        OptimizationRecapData(sender: "Naufal", recipient: "Mario", amount: 100_000),
-        OptimizationRecapData(sender: "Vina", recipient: "Ferry", amount: 200_000),
-        OptimizationRecapData(sender: "You", recipient: "Ferry", amount: 300_000),
-        OptimizationRecapData(sender: "Naufal", recipient: "You", amount: 400_000),
-        OptimizationRecapData(sender: "Naufal", recipient: "You", amount: 10_000),
-    ]
+    @Environment(EventViewModel.self) private var eventViewModel
     
     @State private var contentSize: CGSize = .zero
     
     var body: some View {
-        VStack (spacing: 24) {
-            ZStack {
-                Text("Optimization Details")
-                    .font(.title2)
-                HStack {
-                    Button {
-                        routes.navigateBack()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            VStack {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach (personData) { data in
-                            OptimizationPersonCard(data: data)
-                        }
-                    }
-                }
-            }
-            VStack (alignment: .leading) {
-                Text("Optimization Recapitulation")
-                    .font(.title3)
-                ScrollView (showsIndicators: false) {
-                    VStack {
-                        ForEach (recapData) { data in
-                            OptimizationRecapCard(recapData: data)
-                        }
-                    }
-                    .overlay(
-                        GeometryReader { geo in
-                            Color.clear.onAppear {
-                                contentSize = geo.size
+        VStack (spacing: 0) {
+            TopNavigation(title: "Optimization Details")
+                .padding([.top, .horizontal])
+            VStack (spacing: .spacingMedium) {
+                VStack {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach (eventViewModel.participantsBalance) { data in
+                                OptimizationPersonCard(data: data)
                             }
                         }
-                    )
+                        .padding(.horizontal)
+                    }
                 }
-                .padding(.horizontal)
-                .frame(maxWidth: .infinity, maxHeight: contentSize.height)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color(UIColor(hex: "#C9C9C9")), lineWidth: 1)
+                VStack (alignment: .leading) {
+                    Text("Recapitulation")
+                        .font(.tabiHeadline)
+                    ScrollView (showsIndicators: false) {
+                        VStack (spacing: .spacingMedium) {
+                            ForEach (eventViewModel.participantsBalance) { data in
+                                OptimizationRecapCard(recapData: data)
+                            }
+                        }
+                        .padding(.vertical, .spacingTight)
+                        .overlay(
+                            GeometryReader { geo in
+                                Color.clear.onAppear {
+                                    contentSize = geo.size
+                                }
+                            }
+                        )
+                    }
+                    .padding(.horizontal, .spacingRegular)
+                    .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: .radiusLarge)
+                            .strokeBorder(.uiGray, lineWidth: 1)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
+                    .padding(1)
+                    Spacer()
                 }
-                .padding(1)
+                .padding([.bottom, .horizontal])
             }
         }
-        .padding()
         .navigationBarBackButtonHidden(true)
     }
 }

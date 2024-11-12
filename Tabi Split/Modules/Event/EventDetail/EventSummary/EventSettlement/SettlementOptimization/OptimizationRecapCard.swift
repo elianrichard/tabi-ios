@@ -9,44 +9,41 @@ import SwiftUI
 
 struct OptimizationRecapCard: View {
     var isLast: Bool = false
-    var recapData: OptimizationRecapData
-    
-    var isHighlight: Bool {
-        return recapData.recipient == "You" || recapData.sender == "You"
-    }
-    
-    var highlightColor: Color {
-        if (recapData.recipient == "You") {
-            return Color(UIColor(hex: "#D4FFDA"))
-        } else if (recapData.sender == "You") {
-            return Color(UIColor(hex: "#FBD0DA"))
-        } else { return .clear }
-    }
+    var recapData: PersonBalanceData
     
     var body: some View {
-        HStack {
-            Circle()
-                .fill(Color(UIColor(hex: "#C9C9C9")))
-                .frame(width: 40)
-            HStack {
-                Text("\(recapData.sender)")
-                    .fontWeight(recapData.sender == "You" ? .medium : .regular)
-                Image(systemName: "arrow.right")
-                Text("\(recapData.recipient)")
-                    .fontWeight(recapData.recipient == "You" ? .medium : .regular)
+        ForEach(recapData.settlement) { settlement in
+            HStack (spacing: .spacingTight) {
+                UserAvatar(userData: recapData.user)
+                HStack (spacing: .spacingSmall) {
+                    Text("\(recapData.user.name.getFirstName())")
+                        .font(isTextBold(user: recapData.user))
+                    Icon(systemName: "arrow.right", size: 12)
+                    Text("\(settlement.userPaid.name.getFirstName())")
+                        .font(isTextBold(user: settlement.userPaid))
+                }
+                Spacer()
+                Text("Rp\(settlement.amount.formatPrice())")
+                    .padding(.horizontal, .spacingTight)
+                    .padding(.vertical, .spacingXSmall)
+                    .background(getHighlightColor(userDebt: recapData.user, userLent: settlement.userPaid))
+                    .clipShape(RoundedRectangle(cornerRadius: .spacingTight))
             }
-            Spacer()
-            Text("Rp \(recapData.amount.formatPrice())")
-                .padding(.horizontal)
-                .padding(.vertical, 10)
-                .background(highlightColor)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .padding(.vertical)
-        .border(width: isLast ? 0 : 1, edges: [.bottom], color: Color(UIColor(hex: "#C9C9C9")))
     }
-}
-
-#Preview {
-    OptimizationRecapCard(recapData: OptimizationRecapData(sender: "Naufal", recipient: "You", amount: 50_000))
+    
+    private func getHighlightColor (userDebt: UserData, userLent: UserData) -> Color {
+        if (userLent.name == "You"){
+            return .highlightGreen
+        } else if (userDebt.name == "You") {
+            return .highlightRed
+        }
+        return .clear
+    }
+    
+    private func isTextBold (user: UserData) -> Font {
+        if user.name == "You" {
+            return .tabiBodyBold
+        } else { return .tabiBody }
+    }
 }

@@ -31,12 +31,12 @@ enum ButtonType {
             return .textWhite
         case .secondary:
             if (isEnabled) {
-                return .textBlue
+                return .buttonBlue
             } else {
                 return .textGrey
             }
         case .tertiary:
-            return .textBlue
+            return .buttonBlue
         }
     }
 }
@@ -52,57 +52,79 @@ struct CustomButton: View {
     var customTextColor: Color?
     var vPadding: CGFloat?
     var hPadding: CGFloat?
-    var callback: () -> Void
+    var callback: (() -> Void)?
     
     var body : some View {
-        Button {
-            callback()
-        } label: {
-            HStack (spacing: 8) {
-                if let icon = icon {
-                    Icon(systemName: icon, color: .textWhite, size: iconSize)
-                } else if let resource = iconResource {
-                    Icon(resource, color: .textWhite, size: iconSize)
-                }
-                Text("\(text)")
-                    .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
+        if let callback = callback {
+            Button {
+                callback()
+            } label: {
+                ButtonView(text: text, type: type, isEnabled: isEnabled, icon: icon, iconResource: iconResource, iconSize: iconSize, customBackgroundColor: customBackgroundColor, customTextColor: customTextColor, vPadding: vPadding, hPadding: hPadding)
             }
-            .padding(.vertical, vPadding ?? .spacingTight)
-            .padding(.horizontal, hPadding)
-            .frame(maxWidth: hPadding != nil ? nil : .infinity)
-            .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
-            .clipShape(RoundedRectangle(cornerRadius: .infinity))
-            .font(.tabiHeadline)
-            .overlay {
-                if type == .secondary {
-                    RoundedRectangle(cornerRadius: .infinity)
-                        .fill(.clear)
-                        .stroke(isEnabled ? .buttonBlue : .bgGreyOverlay, lineWidth: 1.5)
-                }
+            .disabled(!isEnabled)
+        } else {
+            ButtonView(text: text, type: type, isEnabled: isEnabled, icon: icon, iconResource: iconResource, iconSize: iconSize, customBackgroundColor: customBackgroundColor, customTextColor: customTextColor, vPadding: vPadding, hPadding: hPadding)
+        }
+    }
+}
+
+struct ButtonView: View {
+    var text: String
+    var type: ButtonType = .primary
+    var isEnabled: Bool = true
+    var icon: String?
+    var iconResource: ImageResource?
+    var iconSize: CGFloat = 20
+    var customBackgroundColor: Color?
+    var customTextColor: Color?
+    var vPadding: CGFloat?
+    var hPadding: CGFloat?
+    
+    var body: some View {
+        HStack (spacing: 8) {
+            if let icon = icon {
+                Icon(systemName: icon, color: type.textColor(isEnabled), size: iconSize)
+            } else if let resource = iconResource {
+                Icon(resource, color: type.textColor(isEnabled), size: iconSize)
             }
-            .padding(type == .secondary ? 1 : 0)
-            .transaction { transaction in 
-                transaction.animation = nil
+            Text("\(text)")
+                .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
+        }
+        .padding(.vertical, vPadding ?? .spacingRegular)
+        .padding(.horizontal, hPadding)
+        .frame(maxWidth: hPadding != nil || type == .tertiary ? nil : .infinity)
+        .background(customBackgroundColor != nil ? customBackgroundColor : type.backgroundColor(isEnabled))
+        .clipShape(RoundedRectangle(cornerRadius: .infinity))
+        .font(.tabiHeadline)
+        .overlay {
+            if type == .secondary {
+                RoundedRectangle(cornerRadius: .infinity)
+                    .fill(.clear)
+                    .stroke(isEnabled ? .buttonBlue : .bgGreyOverlay, lineWidth: 1.5)
             }
         }
-        .disabled(!isEnabled)
+        .padding(type == .secondary ? 1 : 0)
+        .transaction { transaction in
+            transaction.animation = nil
+        }
     }
 }
 
 #Preview {
-    CustomButton(text: "Primary", type: .primary, isEnabled: true) {
+    CustomButton(text: "Primary", type: .primary, isEnabled: true, icon: "flag")
+    CustomButton(text: "Primary", type: .primary, isEnabled: true, icon: "flag") {
         print("Hello Primary!")
     }
-    CustomButton(text: "Secondary", type: .secondary, isEnabled: true) {
+    CustomButton(text: "Secondary", type: .secondary, isEnabled: true, icon: "flag") {
         print("Hello Secondary!")
     }
-    CustomButton(text: "Primary", type: .primary, isEnabled: false) {
+    CustomButton(text: "Primary", type: .primary, isEnabled: false, icon: "flag") {
         print("Hello Primary!")
     }
-    CustomButton(text: "Secondary", type: .secondary, isEnabled: false) {
+    CustomButton(text: "Secondary", type: .secondary, isEnabled: false, icon: "flag") {
         print("Hello Secondary!")
     }
-    CustomButton(text: "Tertiary", type: .tertiary, isEnabled: true) {
+    CustomButton(text: "Tertiary", type: .tertiary, isEnabled: true, icon: "flag") {
         print("Hello Tertiary!")
     }
 }

@@ -20,9 +20,41 @@ struct PostListModel: Encodable ,Decodable, Identifiable {
 @Model
 class NoteData {
     var name: String
+    var authors: [Author]
+    var subNotes: [SubNote]
     
-    init(name: String) {
+    init(name: String = "", authors: [Author] = [], subNotes: [SubNote] = []) {
         self.name = name
+        self.authors = authors
+        self.subNotes = subNotes
+    }
+}
+
+@Model
+class Author {
+    var name: String
+    var age: Int
+    @Relationship(deleteRule: .nullify, inverse: \NoteData.authors) var notes: [NoteData]
+    @Relationship(inverse: \SubNote.authors) var subNotes: [SubNote]
+    
+    init(name: String = "", age: Int = 0, note: [NoteData] = [], subNotes: [SubNote] = []) {
+        self.name = name
+        self.age = age
+        self.notes = note
+        self.subNotes = subNotes
+    }
+}
+
+@Model
+class SubNote {
+    var name: String
+    var authors: [Author]
+    var subNoteDescription: String
+    
+    init(name: String = "", authors: [Author] = [], subNoteDescription: String = "") {
+        self.name = name
+        self.authors = authors
+        self.subNoteDescription = subNoteDescription
     }
 }
 
@@ -32,24 +64,15 @@ struct SwiftDataTestingView: View {
     @State var swiftDataTestingViewModel = SwiftDataTestingViewModel()
     
     var body: some View {
+        NavigationStack {
             List {
                 ForEach(swiftDataTestingViewModel.notes) { note in
                     NavigationLink {
-                        VStack {
-                            Text("Note:")
-                            TextField("Note Name", text: $swiftDataTestingViewModel.textField )
-                                .border(.black)
-                                .multilineTextAlignment(.center)
-                            Button (action: {
-                                swiftDataTestingViewModel.updateNoteName(note)
-                            }) {
-                                Text("Rename Note")
+                        SwiftDataTestingNoteDetailView(swiftDataTestingViewModel: swiftDataTestingViewModel)
+                            .onAppear {
+                                swiftDataTestingViewModel.textField = note.name
+                                swiftDataTestingViewModel.selectedNote = note
                             }
-                        }
-                        .padding()
-                        .onAppear {
-                            swiftDataTestingViewModel.textField = note.name
-                        }
                     } label: {
                         Text("\(note.name)")
                     }
@@ -69,6 +92,7 @@ struct SwiftDataTestingView: View {
                     }
                 }
             }
+            
             
             .toolbar {
                 ToolbarItemGroup (placement: .bottomBar) {
@@ -96,18 +120,116 @@ struct SwiftDataTestingView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+struct SwiftDataTestingNoteDetailView: View {
+    @Bindable var swiftDataTestingViewModel: SwiftDataTestingViewModel
+    
+    var body : some View {
+        VStack {
+            if let note = swiftDataTestingViewModel.selectedNote {
+                VStack {
+                    Text("Note:")
+                    TextField("Note Name", text: $swiftDataTestingViewModel.textField )
+                        .border(.black)
+                        .multilineTextAlignment(.center)
+                    CustomButton(text: "Rename Note") {
+                        swiftDataTestingViewModel.updateNoteName()
+                    }
+                    HStack {
+                        CustomButton(text: "Add Authors") {
+                            swiftDataTestingViewModel.addNoteAuthors()
+                        }
+                        CustomButton(text: "Delete Authors") {
+                            swiftDataTestingViewModel.deleteNoteAuthors()
+                        }
+                    }
+                    Text("Authors")
+                    HStack {
+                        ForEach(note.authors) { author in
+                            Text("\(author.name)")
+                        }
+                    }
+                }
+                .padding()
+                List {
+                    ForEach (note.subNotes) { subnote in
+                        NavigationLink {
+                            SwiftDataTestingSubNoteDetailView(swiftDataTestingViewModel: swiftDataTestingViewModel)
+                                .onAppear {
+                                    swiftDataTestingViewModel.subNoteTextField = subnote.name
+                                    swiftDataTestingViewModel.selectedSubNote = subnote
+                                }
+                        } label: {
+                            Text("\(subnote.name)")
+                        }
+                    }
+                    .onDelete(perform: { offsetIndex in
+                        swiftDataTestingViewModel.deleteSubNote(offsetIndex)
+                    })
+                }
+                CustomButton(text: "Add Sub Note") {
+                    swiftDataTestingViewModel.addSubNote()
+                }
+            }
+        }
+    }
+}
+
+struct SwiftDataTestingSubNoteDetailView: View {
+    @Bindable var swiftDataTestingViewModel: SwiftDataTestingViewModel
+    
+    var body : some View {
+        VStack {
+            if let subnote = swiftDataTestingViewModel.selectedSubNote,
+               let note = swiftDataTestingViewModel.selectedNote {
+                VStack {
+                    Text("Note:")
+                    TextField("SubNote Name", text: $swiftDataTestingViewModel.subNoteTextField )
+                        .border(.black)
+                        .multilineTextAlignment(.center)
+                    CustomButton(text: "Rename SubNote") {
+                        swiftDataTestingViewModel.updateSubNoteName()
+                    }
+                    Text("Authors: ")
+                    ForEach (note.authors) { author in
+                        HStack {
+                            CustomButton(text: "Add \(author.name)") {
+                                swiftDataTestingViewModel.addSubNoteAuthor(author: author)
+                            }
+                            CustomButton(text: "Delete \(author.name)") {
+                                swiftDataTestingViewModel.deleteSubNoteAuthor(author: author)
+                            }
+                        }
+                    }
+                    HStack {
+                        ForEach(subnote.authors) { author in
+                            Text("\(author.name)")
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
     }
 }
 
 #Preview {
     SwiftDataTestingView()
+        .environment(Routes())
 }
 
 // VIEW MODEL
-@Observable class SwiftDataTestingViewModel {
+@Observable
+final class SwiftDataTestingViewModel {
     var notes: [NoteData] = []
-    var textField: String = ""
     var posts: [PostListModel] = []
+    var selectedNote: NoteData?
+    var textField: String = ""
+    var selectedSubNote: SubNote?
+    var subNoteTextField = ""
     
     @MainActor
     init() {
@@ -119,22 +241,89 @@ struct SwiftDataTestingView: View {
     @MainActor
     func addNote() {
         let new = NoteData(name: "New Note")
-        SwiftDataService.shared.addNote(new)
         notes.append(new)
+        SwiftDataService.shared.addNote(new)
+    }
+    
+    @MainActor
+    func addSubNote() {
+        let new = SubNote(name: "New Subnote")
+        if let note = selectedNote {
+            note.subNotes.append(new)
+            SwiftDataService.shared.saveModelContext()
+        }
     }
     
     @MainActor
     func deleteNote(_ indexSet: IndexSet) {
         for index in indexSet {
             SwiftDataService.shared.deleteNote(at: index)
-            notes.remove(at: index)
         }
     }
     
     @MainActor
-    func updateNoteName(_ note: NoteData) {
-        note.name = textField
-        SwiftDataService.shared.saveModelContext()
+    func deleteSubNote(_ indexSet: IndexSet) {
+        for index in indexSet {
+            if let currentNote = selectedNote {
+//                delete sub note does not require its own modelcontext delete because it depends on NoteData model
+                currentNote.subNotes.remove(at: index)
+                SwiftDataService.shared.saveModelContext()
+            }
+        }
+    }
+    
+    @MainActor
+    func addNoteAuthors () {
+        let authors: [Author] = [
+            Author(name: "Author 1", age: 30),
+            Author(name: "Author 2", age: 23),
+            Author(name: "Author 3", age: 50),
+        ]
+        
+        if let note = selectedNote {
+            note.authors = authors
+            SwiftDataService.shared.saveModelContext()
+        }
+    }
+    
+    @MainActor
+    func deleteNoteAuthors () {
+        if let note = selectedNote {
+            note.authors = []
+            SwiftDataService.shared.saveModelContext()
+        }
+    }
+    
+    @MainActor
+    func addSubNoteAuthor (author: Author) {
+        if let subnote = selectedSubNote {
+            subnote.authors.append(author)
+            SwiftDataService.shared.saveModelContext()
+        }
+    }
+    
+    @MainActor
+    func deleteSubNoteAuthor (author: Author) {
+        if let subnote = selectedSubNote {
+            subnote.authors.remove(author)
+            SwiftDataService.shared.saveModelContext()
+        }
+    }
+    
+    @MainActor
+    func updateSubNoteName () {
+        if let subNote = selectedSubNote {
+            subNote.name = subNoteTextField
+            SwiftDataService.shared.saveModelContext()
+        }
+    }
+    
+    @MainActor
+    func updateNoteName() {
+        if let note = selectedNote {
+            note.name = textField
+            SwiftDataService.shared.saveModelContext()
+        }
     }
     
     func fetchPosts() {
@@ -193,9 +382,6 @@ extension SwiftDataService {
             modelContext.delete(note)
             saveModelContext()
         }
-    }
-    func deleteNote (_ note: NoteData) {
-        modelContext.delete(note)
     }
     
     func deleteAllNotes () {

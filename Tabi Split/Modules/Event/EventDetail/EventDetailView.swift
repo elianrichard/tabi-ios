@@ -11,32 +11,41 @@ struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @State private var showingCompletionAlert = false
+    
+    @State private var isShowCompleteSheet = false
+    @State private var isShowIncompleteSheet = false
+    @State private var isShowDeleteSheet = false
     
     var body: some View {
         ZStack {
             TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
-                Menu {
-                    Button("Edit Event") {
+                ElipsisMenu (color: .textWhite) {
+                    Button {
                         routes.navigate(to: .EventFormView)
+                    } label: {
+                        Label("Edit Event", systemImage: "pencil")
                     }
                     if !eventViewModel.isEventCompleted {
-                        Button("Complete Event") {
-                            showingCompletionAlert = true
+                        Button {
+                            isShowCompleteSheet = true
+                        } label: {
+                            Label("Mark as Completed", systemImage: "flag")
+                        }
+                    } else {
+                        Button {
+                            isShowIncompleteSheet = true
+                        } label: {
+                            Label("Mark as Incomplete", systemImage: "flag.slash")
                         }
                     }
-                    Button("Delete Event") {
-                        eventViewModel.handleDeleteEvent()
-                        routes.navigateBack()
+                    Button (role: .destructive) {
+                        isShowDeleteSheet = true
+                    } label: {
+                        Label("Delete Event", systemImage: "trash")
                     }
-                } label: {
-                    Icon(systemName: "ellipsis", color: .textWhite)
-                        .contentShape(Rectangle())
-                        .frame(width: 44, height: 44)
                 }
-                .padding(.vertical, -11)
-                .padding(.horizontal, -11)
             })
+            .padding(.bottom, 36)
             
             VStack (spacing: 0) {
                 EventBanner()
@@ -53,7 +62,7 @@ struct EventDetailView: View {
                                 VStack{
                                     if eventViewModel.selectedSection == .expenses {
                                         EventDetailExpenseView()
-                                    } else {
+                                    } else if eventViewModel.selectedSection == .summary {
                                         EventSummaryView()
                                     }
                                 }
@@ -65,23 +74,27 @@ struct EventDetailView: View {
                     }
                 }
                 .padding()
-                Spacer(minLength: 80)
+                if eventViewModel.isEventCompleted {
+                    Spacer(minLength: 60)
+                } else if eventViewModel.selectedSection == .expenses {
+                    Spacer(minLength: 80)
+                }
             }
             .ignoresSafeArea()
             
             VStack {
-                if eventViewModel.isEventCompleted {
-                    VStack {
-                        Text("This event has been completed")
-                            .font(.headline)
-                        if let completionDate = eventViewModel.completionDate {
-                            Text("on \(completionDate, style: .date)")
-                                .font(.subheadline)
-                        }
+                if eventViewModel.isEventCompleted, let event = eventViewModel.selectedEvent, let date = event.completionDate {
+                    VStack (spacing: .spacingXSmall) {
+                        Text("This event has been completed on")
+                            .font(.tabiHeadline)
+                            .foregroundStyle(.textGrey)
+                        Text("\(Date().customDateFormat("dd MMM YYYY").string(from: date))")
+                            .font(.tabiBody2)
+                            .foregroundStyle(.textGrey)
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
-                } else if (!eventViewModel.isNoParticipants) {
-                    HStack {
+                } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .expenses) {
+                    HStack(spacing: .spacingTight){
                         CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
@@ -93,19 +106,118 @@ struct EventDetailView: View {
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 }
             }
-            .padding(20)
+            .padding(.vertical, .spacingMedium)
+            .padding(.horizontal, 20)
             .ignoresSafeArea()
+            .transaction { transaction in
+                transaction.animation = nil
+            }
             
         }
+        .onAppear {
+            eventViewModel.calculateOptimization()
+        }
         .navigationBarBackButtonHidden(true)
-        .alert("Do you want to completed this event?",
-               isPresented: $showingCompletionAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Yes") {
-                eventViewModel.completeEvent()
+        .sheet(isPresented: $isShowCompleteSheet) {
+            VStack (alignment: .center, spacing: 0) {
+                VStack (spacing: 0) {
+                    Image(.eventComplete)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                    VStack (spacing: .spacingSmall) {
+                        Text("Mark this event as completed?")
+                            .font(.tabiSubtitle)
+                            .multilineTextAlignment(.center)
+                        Text("You can’t add or edit the expenses on this event anymore.")
+                            .font(.tabiBody)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                HStack {
+                    CustomButton(text: "Cancel", type: .secondary) {
+                        isShowCompleteSheet = false
+                    }
+                    CustomButton(text: "Complete") {
+                        isShowCompleteSheet = false
+                        eventViewModel.completeEvent()
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
-        } message: {
-            Text("You cannot undo this action")
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowIncompleteSheet) {
+            VStack (alignment: .center, spacing: 0) {
+                VStack (spacing: 0) {
+                    Image(.eventComplete)
+                        .resizable()
+                        .scaledToFit()
+                        .saturation(0)
+                        .frame(width: 200, height: 200)
+                    VStack (spacing: .spacingSmall) {
+                        Text("Mark this event as incomplete?")
+                            .font(.tabiSubtitle)
+                            .multilineTextAlignment(.center)
+                        Text("The expenses on this event can be edited or added again.")
+                            .font(.tabiBody)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                HStack {
+                    CustomButton(text: "Cancel", type: .secondary) {
+                        isShowIncompleteSheet = false
+                    }
+                    CustomButton(text: "Yes") {
+                        isShowIncompleteSheet = false
+                        eventViewModel.incompleteEvent()
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowDeleteSheet) {
+            VStack (alignment: .center, spacing: 0) {
+                VStack (spacing: 0) {
+                    Image(.eventDelete)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 300)
+                    VStack (spacing: .spacingSmall) {
+                        Text("Do you want to delete this event?")
+                            .font(.tabiSubtitle)
+                            .multilineTextAlignment(.center)
+                        Text("This event can no longer be accessed and can’t be recovered.")
+                            .font(.tabiBody)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                HStack {
+                    CustomButton(text: "Cancel", type: .secondary) {
+                        isShowDeleteSheet = false
+                    }
+                    CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
+                        isShowDeleteSheet = false
+                        eventViewModel.handleDeleteEvent()
+                        routes.navigateBack()
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
     }
 }

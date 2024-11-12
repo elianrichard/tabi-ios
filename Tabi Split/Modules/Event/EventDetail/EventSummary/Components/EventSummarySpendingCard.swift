@@ -8,23 +8,20 @@
 import SwiftUI
 
 struct EventSummarySpendingCard: View {
+    @Environment(ProfileViewModel.self) private var profileViewModel
     var text: String
-    var amount: Double
+    var amount: Float
     
     var body: some View {
         HStack (spacing: .spacingTight) {
-            Image(.samplePersonProfile1)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
+            UserAvatar(userData: profileViewModel.user)
             VStack (alignment: .leading, spacing: .spacingXSmall) {
                 Text(text)
                     .font(.tabiBody)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                     .multilineTextAlignment(.leading)
-                Text("Rp \(String(format: "%.0f", amount).formatPrice())")
+                Text("Rp\(amount.formatPrice())")
                     .font(.tabiSubtitle)
                     .fontWeight(.medium)
                     .multilineTextAlignment(.leading)
@@ -42,4 +39,5 @@ struct EventSummarySpendingCard: View {
 
 #Preview {
     EventSummarySpendingCard(text: "Your total spending", amount: 790000)
+        .environment(ProfileViewModel())
 }

@@ -9,30 +9,38 @@ import SwiftUI
 
 struct EventParticipantsList: View {
     @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(Routes.self) private var routes
+    
     var body: some View {
         HStack (spacing: 4) {
-            if !eventViewModel.isNoParticipants {
-                if let selectedEvent = eventViewModel.selectedEvent {
-                    ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
-                        if index < 4 {
-                            Circle()
-                                .fill(.bgWhite)
-                                .overlay {
-                                    Image(.samplePersonProfile1)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .clipShape(Circle())
-                                        .padding(2)
-                                }
-                                .frame(width: 40, height: 40)
-                        }
+            if let selectedEvent = eventViewModel.selectedEvent {
+                ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
+                    if index < 4 {
+                        Circle()
+                            .fill(.bgWhite)
+                            .overlay {
+                                Image(ProfileImageEnum(rawValue: person.image)?.resource ?? .owl)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .clipShape(Circle())
+                                    .padding(2)
+                            }
+                            .frame(width: 40, height: 40)
                     }
-                    if selectedEvent.participants.count > 4 {
+                }
+                if selectedEvent.participants.count > 4 {
+                    Button {
+                        routes.navigate(to: .EventInviteView)
+                    } label: {
                         ZStack {
                             Circle()
-                                .fill(Color(UIColor(hex: "#D9D9D9")))
+                                .fill(.bgWhite)
                                 .frame(width: 40)
+                            Circle()
+                                .fill(.buttonBlue)
+                                .frame(width: 36)
                             Text("+\(selectedEvent.participants.count - 4)")
+                                .foregroundStyle(.textWhite)
                         }
                     }
                 }

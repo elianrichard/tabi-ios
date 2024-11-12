@@ -5,6 +5,8 @@
 //  Created by Elian Richard on 06/10/24.
 //
 
+import Foundation
+
 extension String {
     func formatPrice(isShowSign: Bool = true) -> String {
         var price = self
@@ -41,16 +43,48 @@ extension String {
     }
     
     func validatePhoneNumber () -> String? {
-        let phoneNumberFormatRegex = /^(628|08)[0-9]{0,}$/
-        if !self.contains(phoneNumberFormatRegex) {
-            return "Phone number should start with 628 or 08"
-        }
-        
         let phoneNumberLengthRegex = /^[0-9]{10,13}$/
         if !self.contains(phoneNumberLengthRegex) {
             return "Phone number should contain 10-13 digits"
         }
         
         return nil
+    }
+    
+    func formattedAsPhoneNumber() -> String {
+        // Step 1: Detect the country code for the current region
+        let countryCode = Locale.current.region?.identifier ?? "ID" // Default to "ID" for Indonesia
+        let dialingCode = Self.dialingCode(for: countryCode)
+        
+        // Step 2: Trim whitespace and check if the number needs the country code
+        var formattedNumber = self.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if formattedNumber.hasPrefix(dialingCode) {
+            // Already starts with the country code, so return as is
+            return formattedNumber
+        } else if formattedNumber.hasPrefix("0") {
+            // Starts with "0", replace it with the country code
+            formattedNumber.remove(at: formattedNumber.startIndex)
+            return dialingCode + formattedNumber
+        } else {
+            // Doesn't start with the country code or "0", so prepend the country code
+            return dialingCode + formattedNumber
+        }
+        
+    }
+    
+    /// Helper function to get dialing code based on country code
+    private static func dialingCode(for countryCode: String) -> String {
+        let dialingCodes = [
+            "ID": "62", // Indonesia
+            "US": "1",  // United States
+            "GB": "44", // United Kingdom
+            "AU": "61", // Australia
+            "IN": "91", // India
+            // Add other country codes as needed
+        ]
+        
+        // Default to "62" if the country code is not found
+        return dialingCodes[countryCode] ?? "62"
     }
 }

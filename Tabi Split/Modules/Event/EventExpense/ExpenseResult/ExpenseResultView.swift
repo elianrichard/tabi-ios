@@ -13,152 +13,128 @@ struct ExpenseResultView: View {
     @Environment(EventExpenseViewModel.self) var eventExpenseViewModel
     @Environment(EventViewModel.self) var eventViewModel
     
+    @State private var contentSize: CGSize = .zero
+    @State private var isShowReceiptSheet = false
+    
     var body: some View {
-        VStack(alignment: .leading) {
-            ZStack {
-                HStack {
-                    TopNavigation(title: "Expense Result")
-                    Spacer()
-                    if eventExpenseViewModel.selectedExpense != nil && !eventExpenseViewModel.isEdit {
-                        Menu {
-                            Button("Edit Expense") {
-                                eventExpenseViewModel.isEdit = true
-                                routes.navigate(to: .AddExpenseView)
-                            }
-                            Button("Delete Expense") {
-                                if let event = eventViewModel.selectedEvent {
-                                    eventExpenseViewModel.handleDeleteExpense(event)
-                                    routes.navigateBack()
-                                }
+        VStack (alignment: .leading) {
+            TopNavigation(title: "Expense Result", RightToolbar: {
+                if !eventExpenseViewModel.isEditView {
+                    ElipsisMenu {
+                        Button {
+                            eventExpenseViewModel.isEdit = true
+                            routes.navigate(to: .AddExpenseView)
+                        } label: {
+                            Label("Edit Expense", systemImage: "pencil")
+                        }
+                        Button (role: .destructive) {
+                            if let event = eventViewModel.selectedEvent {
+                                eventExpenseViewModel.handleDeleteExpense(event)
+                                routes.navigateBack()
                             }
                         } label: {
-                            Image(systemName: "ellipsis")
-                                .foregroundStyle(.black)
-                                .frame(width: 40, height: 40)
+                            Label("Delete Expense", systemImage: "trash")
                         }
                     }
                 }
-            }
-            VStack (alignment: .leading, spacing: 12) {
-                Text(eventExpenseViewModel.expenseName)
-                    .font(.tabiTitle)
-                HStack {
-                    Image(systemName: "cylinder.split.1x2")
-                    Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "unknown")
+            })
+            
+            VStack (alignment: .leading, spacing: .spacingSmall) {
+                if !eventExpenseViewModel.isEditView {
+                    Text("\(Date().customDateFormat("dd MMM yyyy  HH:mm").string(from: eventExpenseViewModel.selectedExpense?.dateOfCreation ?? Date()))")
                         .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
+                }
+                VStack (alignment: .leading, spacing: .spacingTight) {
+                    Text(eventExpenseViewModel.expenseName)
+                        .font(.tabiTitle)
+                    HStack {
+                        Icon(eventExpenseViewModel.selectedMethod?.icon)
+                        Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "")
+                            .font(.tabiBody)
+                    }
+                    if !eventExpenseViewModel.isEditView {
+                        HStack (spacing: .spacingTight) {
+                            Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
+                                .font(.tabiHeadline)
+                                .foregroundStyle(.buttonDarkBlue)
+                            Rectangle()
+                                .fill(.textGrey)
+                                .frame(width: 1, height: 14)
+                            Text("\(eventExpenseViewModel.selectedCoverer?.name ?? "") paid")
+                                .font(.tabiBody)
+                                .foregroundStyle(.textGrey)
+                        }
+                    }
                 }
             }
             .padding([.bottom], 24)
-            ScrollView(showsIndicators: false){
-                if eventExpenseViewModel.selectedMethod == .equally {
-                    ForEach(eventExpenseViewModel.selectedParticipants){ person in
-                        HStack{
-                            Circle()
-                                .frame(width: 40, height: 40)
-                            Text("\(person.name.getFirstName())'s Expense")
-                                .font(.tabiHeadline)
-                            Spacer()
-                            Text("Rp")
-                                .font(.tabiHeadline)
-                            Text(eventExpenseViewModel.calculateEqualSplit().formatPrice())
-                                .font(.tabiHeadline)
+            
+            ScrollView(showsIndicators: false) {
+                VStack (spacing: .spacingTight) {
+                    if eventExpenseViewModel.selectedMethod == .equally {
+                        ForEach(eventExpenseViewModel.selectedParticipants){ person in
+                            ExpenseResultEqualCard(person: person)
                         }
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
-                        .background(.bgWhite)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(.clear)
-                                .stroke(.bgGreyOverlay, lineWidth: 0.5)
-                                .padding(0.5)
+                    } else if eventExpenseViewModel.selectedMethod == .custom {
+                        ForEach(eventExpenseViewModel.peopleItems) { person in
+                            ExpenseResultCustomCard(person: person)
                         }
-                        .cornerRadius(16)
-                    }
-                } else if eventExpenseViewModel.selectedMethod == .custom {
-                    ForEach(eventExpenseViewModel.peopleItems) { person in
-                        VStack {
-                            HStack {
-                                Circle()
-                                    .frame(width: 40, height: 40)
-                                Text(person.name.getFirstName())
-                                    .font(.tabiHeadline)
-                                Spacer()
-                                Text("Rp \(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")
-                                    .font(.tabiHeadline)
-                            }
-                            Divider()
-                                .padding(.vertical, 6)
-                            ForEach (person.items) { item in
-                                HStack(alignment: .top){
-                                    Text(item.itemName)
-                                        .font(.tabiHeadline)
-                                    Spacer()
-                                    Text("x" + String(item.itemQuantity.formatted(.number)))
-                                        .font(.tabiBody)
-                                    Text("Rp \((Float(item.itemQuantity) * item.itemPrice).formatPrice())")
-                                        .frame(width: 100, alignment: .trailing)
-                                        .lineLimit(1)
-                                        .font(.tabiBody)
-                                }
-                            }
-                            
-                            DisclosureGroup() {
-                                Divider()
-                                    .padding(6)
-                                ForEach(person.additional) { additionalItem in
-                                    HStack {
-                                        Text((AdditionalChargeType(rawValue: additionalItem.additionalChargeType) ?? .other).name)
-                                        Spacer()
-                                        Text("Rp \(additionalItem.amount.formatPrice())")
-                                    }
-                                    .font(.subheadline)
-                                }
-                            } label: {
-                                HStack {
-                                    Text("See Details")
-                                        .font(.tabiBody)
-                                }
-                            }
-                            .accentColor(.black)
-                        }
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
-                        .background(.bgWhite)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(.clear)
-                                .stroke(.bgGreyOverlay, lineWidth: 0.5)
-                                .padding(0.5)
-                        }
-                        .cornerRadius(16)
                     }
                 }
+                .overlay(
+                    GeometryReader { geo in
+                        Color.clear.onAppear {
+                            contentSize = geo.size
+                        }
+                    }
+                )
             }
-            if eventExpenseViewModel.selectedExpense == nil {
+            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+            
+            if !eventExpenseViewModel.isEditView { CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
+                isShowReceiptSheet = true
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            }
+            
+            Spacer()
+            
+            if let event = eventViewModel.selectedEvent, eventExpenseViewModel.isEditView {
                 CustomButton(text: "Save Expense") {
-                    if let event = eventViewModel.selectedEvent {
+                    if eventExpenseViewModel.isEdit {
+                        eventExpenseViewModel.handleUpdateExpense(event)
+                        eventExpenseViewModel.isEdit = false
+                    } else {
                         eventExpenseViewModel.finalizeExpense(event)
-                        routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                     }
-                }
-            } else {
-                if eventExpenseViewModel.isEdit {
-                    CustomButton(text: "Save Expense") {
-                        if let event = eventViewModel.selectedEvent {
-                            eventExpenseViewModel.handleUpdateExpense(event)
-                            eventExpenseViewModel.isEdit = false
-                            routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
-                        }
-                    }
-                } else {
-                    CustomButton(text: "Check Receipt") {
-                        print("Check Receipt")
-                    }
+                    routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                 }
             }
         }
         .padding()
-        .background(.bgBlueElevated)
+        .addBackgroundColor(.bgWhite)
+        .sheet(isPresented: $isShowReceiptSheet) {
+            VStack (spacing: 0) {
+                SheetXButton(toggle: $isShowReceiptSheet)
+                VStack (alignment: .leading, spacing: .spacingMedium) {
+                    Text("Purchase Receipt")
+                        .font(.tabiTitle)
+                    RoundedRectangle(cornerRadius: .radiusLarge)
+                        .fill(.bgWhite)
+                        .overlay {
+                            Image(.samplePaymentReceipt)
+                                .resizable()
+                                .scaledToFit()
+                                .padding(.spacingRegular)
+                        }
+                }
+            }
+            .padding()
+            .addBackgroundColor(.bgWhite)
+            .presentationDetents([.height(700)])
+            .presentationDragIndicator(.visible)
+        }
         .navigationBarBackButtonHidden(true)
     }
 }

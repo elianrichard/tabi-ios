@@ -41,6 +41,22 @@ extension SwiftDataService {
         modelContext.delete(event)
     }
     
+    func completeEvent(_ event: EventData) {
+        if let allEvents = fetchAllEvents() {
+            if let selectedEvent = allEvents.first(where: { $0 == event }) {
+                selectedEvent.completionDate = Date()
+            }
+        }
+    }
+    
+    func incompleteEvent(_ event: EventData) {
+        if let allEvents = fetchAllEvents() {
+            if let selectedEvent = allEvents.first(where: { $0 == event }) {
+                selectedEvent.completionDate = nil
+            }
+        }
+    }
+    
     func deleteAllEvents () {
         do {
             try modelContext.delete(model: EventData.self)

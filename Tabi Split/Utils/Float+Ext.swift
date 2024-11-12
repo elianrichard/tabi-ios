@@ -16,4 +16,9 @@ extension Float {
     func properRound() -> Float {
         return self.rounded(.toNearestOrAwayFromZero)
     }
+    
+    func rounded(toDecimalPlaces places: Int) -> Float {
+        let multiplier = pow(10, Float(places))
+        return (self * multiplier).rounded() / multiplier
+    }
 }
