@@ -15,31 +15,31 @@ struct EventSummaryView: View {
     var body: some View {
         VStack (spacing: .spacingRegular) {
             VStack {
-                if (eventViewModel.summaryStatus != .settled) {
+                if (eventViewModel.userBalance.status != .settled) {
                     HStack (spacing: 20) {
                         Spacer()
                             .frame(width: 30)
                         VStack (spacing: .spacingXSmall) {
-                            Text(eventViewModel.summaryStatus.summaryCardText)
+                            Text(eventViewModel.userBalance.status.summaryCardText)
                                 .font(.tabiBody)
-                            Text("Rp\(eventViewModel.userBalance.formatPrice(isShowSign: false))")
+                            Text("Rp\((eventViewModel.userBalance.balance).formatPrice(isShowSign: false))")
                                 .font(.tabiTitle)
                         }
                         Icon(systemName: "chevron.right", color: .textWhite, size: 12)
                             .offset(x: 1)
                             .frame(width: 30, height: 30, alignment: .center)
-                            .background(eventViewModel.summaryStatus.summaryCardBgShadow.opacity(0.5))
+                            .background(eventViewModel.userBalance.status.summaryCardBgShadow.opacity(0.5))
                             .clipShape(Circle())
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity, minHeight: 80)
-                    .background(eventViewModel.summaryStatus.summaryCardBgColor)
+                    .background(eventViewModel.userBalance.status.summaryCardBgColor)
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .padding(.bottom, 6)
-                    .background(eventViewModel.summaryStatus.summaryCardBgShadow)
+                    .background(eventViewModel.userBalance.status.summaryCardBgShadow)
                 } else {
                     HStack {
-                        Text(eventViewModel.summaryStatus.summaryCardText)
+                        Text(eventViewModel.userBalance.status.summaryCardText)
                             .font(.tabiSubtitle)
                     }
                     .foregroundStyle(.textGrey)

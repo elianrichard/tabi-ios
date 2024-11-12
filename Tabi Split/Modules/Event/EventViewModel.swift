@@ -33,60 +33,12 @@ final class EventViewModel {
     }
     
     var participantsBalance: [PersonBalanceData] = []
-    var userTransactionHistory: [SummaryHistoryData] {
-        if let event = selectedEvent {
-            var data: [SummaryHistoryData] = []
-            var totalSpending: Float = 0
-            
-            for expense in event.expenses {
-                var balance: Float = 0
-//                calculate lent from expense
-                if expense.coverer.name == "You" {
-                    balance += expense.price
-                }
-//                calculate debt from expense
-                if (expense.splitMethod == SplitMethod.custom.id) {
-                    var tempAmount: Float = 0
-                    for item in expense.items {
-                        for assignee in item.assignees {
-                            if assignee.user.name == "You" {
-                                let amountDebt = Float(assignee.share * item.itemPrice).rounded(toDecimalPlaces: 1).properRound()
-                                tempAmount += amountDebt
-                            }
-                        }
-                    }
-                    totalSpending += tempAmount
-                    balance -= tempAmount
-                } else if (expense.splitMethod == SplitMethod.equally.id) {
-                    if (expense.participants.contains(where: { $0.name == "You" })) {
-                        let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
-                        totalSpending += amountDebt
-                        balance -= amountDebt
-                    }
-                }
-                
-                data.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: balance))
-            }
-            userTotalSpending = totalSpending
-            return data.sorted(by: { $0.expenseDate > $1.expenseDate })
-        } else { return [] }
-    }
-    var userBalance: Float {
-        if let userBalanceData = participantsBalance.first(where: { $0.user.name == "You" }) {
-            //            person balance always set whenever lent and debt are set, see PersonalBalanceData class
-            return userBalanceData.balance
-        } else { return 0 }
+    var userTransactionHistory: [SummaryHistoryData] = []
+    var userBalance: PersonBalanceData {
+        return participantsBalance.first(where: { $0.user.name == "You" }) ?? PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone"))
     }
     var userTotalSpending: Float = 0
-    var summaryStatus: EventCardStatusEnum {
-        if (userBalance > 0) {
-            return .credit
-        } else if (userBalance < 0) {
-            return .debt
-        } else {
-            return .settled
-        }
-    }
+    var userSettlementList: [SummarySettlementData] = []
     
     @MainActor
     func handleCreateEditEvent (selectedContacts: [UserData]) {
@@ -113,17 +65,24 @@ final class EventViewModel {
     }
     
     func calculateOptimization() {
-        let debug = false
+        let debug = false // enable this to debug print
         
+        var userSummaryData: [SummaryHistoryData] = []
+        var userTotalSpendingTemp: Float = 0
         guard let event = selectedEvent else { return }
         participantsBalance = event.participants.map { PersonBalanceData(user: $0) }
         
         //        FILL THE PERSON LENT AND PERSON DEBT EXPENSE
         
         for expense in event.expenses {
+            var userBalance: Float = 0
             if debug { print(expense.name + "-" + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice())") }
             guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
             personPaid.lent += expense.price
+            
+            if expense.coverer.name == "You" {
+                userBalance += expense.price
+            }
             
             if (expense.splitMethod == SplitMethod.custom.id) {
                 for item in expense.items {
@@ -132,6 +91,11 @@ final class EventViewModel {
                         let amountDebt = Float(assignee.share * item.itemPrice).rounded(toDecimalPlaces: 1).properRound()
                         if debug { print("Participants: " + assignee.user.name, "debt: ", amountDebt) }
                         personBuy.debt += amountDebt
+                        
+                        if (assignee.user.name == "You") {
+                            userTotalSpendingTemp += amountDebt
+                            userBalance -= amountDebt
+                        }
                     }
                 }
             } else if (expense.splitMethod == SplitMethod.equally.id) {
@@ -139,12 +103,20 @@ final class EventViewModel {
                     guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
                     let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
                     personBuy.debt += amountDebt
+                    if (expense.participants.contains(where: { $0.name == "You" })) {
+                        userTotalSpendingTemp += amountDebt
+                        userBalance -= amountDebt
+                    }
                 }
             }
+            if (userBalance != 0) {
+                userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalance))
+            }
         }
+        userTotalSpending = userTotalSpendingTemp
+        userTransactionHistory = userSummaryData.sorted(by: { $0.expenseDate > $1.expenseDate })
         
         //        CALCULATE EACH PERSON BALANCE BASED ON LENT AND DEBT VALUE
-        
         if debug {
             for participant in participantsBalance {
                 print("\(participant.user.name) balance: " + String(participant.balance.formatPrice()))
@@ -169,6 +141,21 @@ final class EventViewModel {
                     debtUser.settlement.append(PersonSettlementData(userPaid: lentUser.user, amount: lentUser.calculationBalance))
                     debtUser.calculationBalance = sum
                     lentUser.calculationBalance = 0
+                }
+            }
+        }
+        
+//        Fill up user's settlement list
+        userSettlementList = []
+        if userBalance.status == .debt {
+            for settlement in userBalance.settlement {
+                userSettlementList.append(SummarySettlementData(targetUser: settlement.userPaid, amount: settlement.amount, status: .NeedPayment))
+            }
+        } else if userBalance.status == .credit {
+            let relatedPersonBalance = participantsBalance.filter { $0.settlement.contains(where: { $0.userPaid.name == "You" }) }
+            for balance in relatedPersonBalance {
+                for settlement in balance.settlement {
+                    userSettlementList.append(SummarySettlementData(targetUser: balance.user, amount: settlement.amount, status: .WaitingPayment))
                 }
             }
         }

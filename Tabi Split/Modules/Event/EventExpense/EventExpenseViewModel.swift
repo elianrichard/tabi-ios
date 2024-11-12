@@ -125,7 +125,6 @@ final class EventExpenseViewModel {
     }
     func populateViewModel() {
         if let expense = selectedExpense {
-            print("populating expense: \(expense.name)")
             expenseName = expense.name
             isEdit = false
             selectedCoverer = expense.coverer

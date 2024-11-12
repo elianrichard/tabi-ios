@@ -34,14 +34,14 @@ struct OptimizationPersonCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             VStack (alignment: .leading, spacing: .spacingXSmall) {
-                Text(data.lent < data.debt ? "Should pay" : "Should recieve")
+                Text(data.status == .debt ? "Should pay" : "Should recieve")
                     .font(.tabiHeadline)
-                Text("Rp\((data.lent - data.debt).formatPrice(isShowSign: false))")
+                Text("Rp\(data.balance.formatPrice(isShowSign: false))")
                     .font(.tabiSubtitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
                     .padding(.vertical, 10)
-                    .background(data.lent < data.debt ? Color.highlightRed : Color.highlightGreen)
+                    .background(data.status == .debt ? Color.highlightRed : Color.highlightGreen)
                     .clipShape(RoundedRectangle(cornerRadius: .radiusSmall))
             }
         }

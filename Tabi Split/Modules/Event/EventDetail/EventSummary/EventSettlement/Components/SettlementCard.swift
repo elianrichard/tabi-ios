@@ -11,19 +11,17 @@ struct SettlementCard: View {
     @Environment(Routes.self) private var routes
     @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
     
-    var user: UserData
-    var amount: Float
-    var type: SettlementCardTypeEnum
+    var data: SummarySettlementData
+    @Binding var isShowUploadSheet: Bool
     
     @State var isNotified = false
-    @Binding var isShowUploadSheet: Bool
     
     var body: some View {
         VStack (spacing: 16) {
             HStack {
-                UserAvatar(userData: user, namePosition: .right)
+                UserAvatar(userData: data.targetUser, namePosition: .right)
                 Spacer()
-                Text("Rp\(amount.formatPrice())")
+                Text("Rp\(data.amount.formatPrice())")
                     .font(.tabiHeadline)
             }
             Divider()
@@ -31,13 +29,13 @@ struct SettlementCard: View {
                 HStack {
                     HStack (spacing: .spacingSmall) {
                         Circle()
-                            .fill(type.statusColor)
+                            .fill(data.status.statusColor)
                             .frame(width: 10)
-                        Text("\(type.statusText)")
+                        Text("\(data.status.statusText)")
                             .font(.tabiBody)
                     }
                     Spacer()
-                    if (type == .NeedPayment) {
+                    if (data.status == .NeedPayment) {
                         Button {
                             routes.navigate(to: .SettlementPaymentMethodView)
                         } label: {
@@ -48,7 +46,7 @@ struct SettlementCard: View {
                                 Icon(systemName: "chevron.right", color: .textBlue, size: 12)
                             }
                         }
-                    } else if (type == .WaitingPayment) {
+                    } else if (data.status == .WaitingPayment) {
                         Button {
                             withAnimation (nil) {
                                 isNotified.toggle()
@@ -67,11 +65,11 @@ struct SettlementCard: View {
                         }
                     }
                 }
-                if (type == .NeedConfirmation || type == .NeedPayment) {
+                if (data.status == .NeedConfirmation || data.status == .NeedPayment) {
                     Button {
-                        eventSettlementViewModel.selectedSettlementType = type
-                        eventSettlementViewModel.user = user
-                        if (type == .NeedConfirmation) {
+                        eventSettlementViewModel.selectedSettlementType = data.status
+                        eventSettlementViewModel.user = data.targetUser
+                        if (data.status == .NeedConfirmation) {
                             eventSettlementViewModel.receiptImage = .samplePaymentReceipt
                             routes.navigate(to: .SettlementConfirmationView)
                         } else {
@@ -79,8 +77,8 @@ struct SettlementCard: View {
                         }
                     } label: {
                         HStack (spacing: .spacingTight) {
-                            Icon(type.actionIcon, color: .textWhite, size: 20)
-                            Text("\(type.actionText)")
+                            Icon(data.status.actionIcon, color: .textWhite, size: 20)
+                            Text("\(data.status.actionText)")
                                 .font(.tabiBody)
                         }
                         .foregroundStyle(.white)
@@ -101,15 +99,4 @@ struct SettlementCard: View {
                 .padding(1)
         }
     }
-}
-
-#Preview {
-    VStack {
-        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedConfirmation, isShowUploadSheet: .constant(false))
-        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .NeedPayment, isShowUploadSheet: .constant(false))
-        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingConfirmation, isShowUploadSheet: .constant(false))
-        SettlementCard(user: UserData(name: "Elian", phone: "phone"), amount: 250_000, type: .WaitingPayment, isShowUploadSheet: .constant(false))
-    }
-    .environment(Routes())
-    .environment(EventSettlementViewModel())
 }
