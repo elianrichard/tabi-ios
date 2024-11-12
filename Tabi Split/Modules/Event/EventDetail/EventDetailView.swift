@@ -83,7 +83,7 @@ struct EventDetailView: View {
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 } else if (!eventViewModel.isNoParticipants) {
-                    HStack {
+                    HStack(spacing: .spacingTight){
                         CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
