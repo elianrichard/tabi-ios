@@ -9,19 +9,7 @@ import SwiftUI
 
 struct SettlementOptimizationView: View {
     @Environment(Routes.self) private var routes
-    var personData: [OptimizationPersonData] = [
-        OptimizationPersonData(user: UserData(name: "You", phone: "Phone"), debtAmount: 10_000, lentAmount: 50_000),
-        OptimizationPersonData(user: UserData(name: "Elian", phone: "Phone"), debtAmount: 100_000, lentAmount: 50_000),
-        OptimizationPersonData(user: UserData(name: "Dharma", phone: "Phone"), debtAmount: 100_000, lentAmount: 500_000)
-    ]
-    var recapData: [OptimizationRecapData] = [
-        OptimizationRecapData(sender: UserData(name: "Dharma", phone: "Phone"), recipient: UserData(name: "You", phone: "Phone"), amount: 50_000),
-        OptimizationRecapData(sender: UserData(name: "Dharma", phone: "Phone"), recipient: UserData(name: "Mario", phone: "Phone"), amount: 100_000),
-        OptimizationRecapData(sender: UserData(name: "Vina", phone: "Phone"), recipient: UserData(name: "Ferry", phone: "Phone"), amount: 200_000),
-        OptimizationRecapData(sender: UserData(name: "You", phone: "Phone"), recipient: UserData(name: "Ferry", phone: "Phone"), amount: 300_000),
-        OptimizationRecapData(sender: UserData(name: "Dharma", phone: "Phone"), recipient: UserData(name: "You", phone: "Phone"), amount: 400_000),
-        OptimizationRecapData(sender: UserData(name: "Dharma", phone: "Phone"), recipient: UserData(name: "You", phone: "Phone"), amount: 10_000),
-    ]
+    @Environment(EventViewModel.self) private var eventViewModel
     
     @State private var contentSize: CGSize = .zero
     
@@ -32,7 +20,7 @@ struct SettlementOptimizationView: View {
             VStack {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
-                        ForEach (personData) { data in
+                        ForEach (eventViewModel.participantsBalance) { data in
                             OptimizationPersonCard(data: data)
                         }
                     }
@@ -44,7 +32,7 @@ struct SettlementOptimizationView: View {
                     .font(.tabiHeadline)
                 ScrollView (showsIndicators: false) {
                     VStack (spacing: .spacingMedium) {
-                        ForEach (recapData) { data in
+                        ForEach (eventViewModel.participantsBalance) { data in
                             OptimizationRecapCard(recapData: data)
                         }
                     }
@@ -65,6 +53,7 @@ struct SettlementOptimizationView: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
                 .padding(1)
+                Spacer()
             }
             .padding([.bottom, .horizontal])
         }

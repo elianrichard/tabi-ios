@@ -20,7 +20,7 @@ final class EventViewModel {
             }
         }
     }
-    //    eventName and eventIcon need to be Bindable var, so user can change
+    //    eventName and eventIcon need to be Bindable var, so user can change dynamically
     var eventName: String = ""
     var eventIcon: EventIconEnum = .icon1
     
@@ -60,6 +60,7 @@ final class EventViewModel {
                 } else if (expense.splitMethod == SplitMethod.equally.id) {
                     if (expense.participants.contains(where: { $0.name == "You" })) {
                         let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
+                        totalSpending += amountDebt
                         balance -= amountDebt
                     }
                 }
@@ -76,6 +77,7 @@ final class EventViewModel {
             return userBalanceData.balance
         } else { return 0 }
     }
+    var userTotalSpending: Float = 0
     var summaryStatus: EventCardStatusEnum {
         if (userBalance > 0) {
             return .credit
