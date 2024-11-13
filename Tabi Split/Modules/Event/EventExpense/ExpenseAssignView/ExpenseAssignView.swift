@@ -16,17 +16,16 @@ struct ExpenseAssignView: View {
     var body: some View {
         VStack(alignment: .leading) {
             TopNavigation(title: "Assign Items")
-            VStack (alignment: .leading, spacing: 10) {
+            VStack (alignment: .leading, spacing: .spacingTight) {
                 Text(eventExpenseViewModel.expenseName)
                     .font(.tabiTitle)
                 HStack {
-                    Image(systemName: "cylinder.split.1x2")
-                        .font(.tabiBody)
-                    Text("Custom Splitted")
+                    Icon(eventExpenseViewModel.selectedMethod?.icon)
+                    Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "")
                         .font(.tabiBody)
                 }
-                .padding([.bottom], 24)
             }
+            .padding([.bottom], 24)
             ScrollView(showsIndicators: false){
                 VStack(spacing: 0){
                     Text("Participants")
@@ -37,8 +36,9 @@ struct ExpenseAssignView: View {
                         HStack(alignment: .center){
                             ForEach(eventExpenseViewModel.selectedParticipants) { person in
                                 VStack(alignment: .center){
-                                    Circle()
-                                        .frame(width: 40, height: 40)
+//                                    Circle()
+//                                        .frame(width: 40, height: 40)
+                                    UserAvatar(userData: person)
                                         .padding(5)
                                         .background{
                                             Circle()
@@ -111,8 +111,8 @@ struct ExpenseAssignView: View {
                                 HStack (spacing: 5) {
                                     HStack (spacing: -10){
                                         ForEach(item.assignees) { asignee in
-                                            Circle()
-                                                .frame(width: 20, height: 32)
+//                                            Circle()
+                                            UserAvatar(userData: asignee.user, size: 32)
                                         }
                                     }
                                     Image(systemName: "chevron.right")

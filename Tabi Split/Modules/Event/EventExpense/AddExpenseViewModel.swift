@@ -30,7 +30,7 @@ class AddExpenseViewModel{
     var totalBillError: String?
     var isValid: Bool = true
     
-    init(eventExpenseViewModel: EventExpenseViewModel?) {
+    init(eventExpenseViewModel: EventExpenseViewModel? = EventExpenseViewModel()) {
         self.eventExpenseViewModel = eventExpenseViewModel
     }
     

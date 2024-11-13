@@ -9,7 +9,7 @@ import SwiftUI
 
 @Observable class Routes {
     var navPath = NavigationPath()
-
+    
     public enum Destination {
         case HomeView,
              InboxView,
@@ -30,12 +30,12 @@ import SwiftUI
              SettlementConfirmationView, 
              SettlementReceiptView,
              SettlementUploadView,
-             ReceiptUploadView,
              Profile,
              EditProfile,
-             PaymentMethods
+             PaymentMethods,
+             ReceiptUploadReview
     }
-
+    
     func navigate(to destination: Destination) {
         navPath.append(destination)
     }
@@ -45,11 +45,11 @@ import SwiftUI
             navPath.append(destination)
         }
     }
-
+    
     func navigateBack() {
         navPath.removeLast()
     }
-
+    
     func navigateToRoot() {
         navPath.removeLast(navPath.count)
     }

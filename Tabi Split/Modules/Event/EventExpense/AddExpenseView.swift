@@ -14,7 +14,8 @@ struct AddExpenseView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(Routes.self) private var routes
-    @State var viewModel: AddExpenseViewModel?
+    @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
+    @State var hasPreviewed: Bool = false
     
     var body: some View {
         VStack (spacing: .spacingRegular) {
@@ -24,7 +25,7 @@ struct AddExpenseView: View {
                     InputWithLabel(label: "Expense Name",
                                    placeholder: "Expense Name",
                                    text: Bindable(eventExpenseViewModel).expenseName,
-                                   errorMessage: viewModel?.expenseNameError,
+                                   errorMessage: viewModel.expenseNameError,
                                    inputBackgroundColor: .bgWhite,
                                    inputCornerRadius: 16
                     )
@@ -35,7 +36,7 @@ struct AddExpenseView: View {
                         backgroundColor: .bgWhite,
                         cornerRadius: 16,
                         selectedItem: Bindable(eventExpenseViewModel).selectedCoverer,
-                        errorMessage: viewModel?.paidByError
+                        errorMessage: viewModel.paidByError
                     )
                     VStack(alignment: .leading, spacing: 8){
                         HStack{
@@ -73,7 +74,7 @@ struct AddExpenseView: View {
                                 }
                                 Spacer()
                                 Button{
-                                    viewModel?.toggleSeeAll.toggle()
+                                    viewModel.toggleSeeAll.toggle()
                                 }label:{
                                     HStack{
                                         Text("Edit")
@@ -84,7 +85,7 @@ struct AddExpenseView: View {
                                 }
                             }else{
                                 Button{
-                                    viewModel?.toggleSeeAll.toggle()
+                                    viewModel.toggleSeeAll.toggle()
                                 }label:{
                                     HStack{
                                         Text("Select Participants")
@@ -106,10 +107,10 @@ struct AddExpenseView: View {
                         .overlay {
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(.clear)
-                                .stroke(viewModel?.participantsError != nil ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
+                                .stroke(viewModel.participantsError != nil ? .buttonRed : .bgGreyOverlay, lineWidth: 0.5)
                                 .padding(0.5)
                         }
-                        if let message = viewModel?.participantsError {
+                        if let message = viewModel.participantsError {
                             Text(message)
                                 .font(.tabiBody)
                                 .foregroundStyle(.buttonRed)
@@ -123,14 +124,14 @@ struct AddExpenseView: View {
                         backgroundColor: .bgWhite,
                         cornerRadius: 16,
                         selectedItem: Bindable(eventExpenseViewModel).selectedMethod,
-                        errorMessage: viewModel?.splitBillMethodError
+                        errorMessage: viewModel.splitBillMethodError
                     )
                     if eventExpenseViewModel.selectedMethod ==  .equally {
                         VStack(alignment: .leading){
                             InputWithLabel(label: "Total Bill",
                                            placeholder: "0",
                                            price: Bindable( eventExpenseViewModel).expenseTotalInput,
-                                           errorMessage: viewModel?.totalBillError,
+                                           errorMessage: viewModel.totalBillError,
                                            inputBackgroundColor: .bgWhite,
                                            inputCornerRadius: 16)
                         }
@@ -143,127 +144,67 @@ struct AddExpenseView: View {
                                 .font(.tabiBody)
                                 .foregroundColor(.textGrey)
                         }
-                        CustomButton(text: viewModel?.receiptImage == nil ? "Upload Image" : viewModel?.receiptImageFromGallery?.itemIdentifier ?? "Uploaded Image", type: .secondary, icon: "square.and.arrow.up", iconSize: 20){
-                            viewModel?.toggleReceiptSheet.toggle()
+                        HStack(spacing: 0){
+                            CustomButton(text: eventExpenseViewModel.uploadedReceiptImage == nil ? "Upload Image" : "Uploaded Image", type: .tertiary, icon: eventExpenseViewModel.uploadedReceiptImage == nil ? "square.and.arrow.up" : "photo", iconSize: 20, customTextColor: .buttonBlue){
+                                viewModel.toggleReceiptSheet.toggle()
+                            }
+                            .lineLimit(1)
+                            
+                            if eventExpenseViewModel.uploadedReceiptImage != nil{
+                                Button{
+                                    eventExpenseViewModel.uploadedReceiptImage = nil
+                                }label:{
+                                    Icon(systemName: "xmark", color: .textGrey, size: 10)
+                                }
+                                .padding(.trailing, .spacingRegular)
+                            }
                         }
-                        .lineLimit(1)
-                        .frame(width: 180)
+                        .clipShape(RoundedRectangle(cornerRadius: .infinity))
+                        .font(.tabiHeadline)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: .infinity)
+                                .fill(.clear)
+                                .stroke(.buttonBlue, lineWidth: 1.5)
+                                .padding(1.5)
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             
             CustomButton(text: "Next") {
-                viewModel?.validateInput()
-                if let isValid = viewModel?.isValid {
-                    if (eventExpenseViewModel.selectedMethod == .custom && isValid) {
-                        routes.navigate(to: .ExpenseAddItemsView)
-                    } else if (eventExpenseViewModel.selectedMethod == .equally && isValid) {
-                        eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
-                        routes.navigate(to: .ExpenseResultView)
-                    }
+                viewModel.validateInput()
+                if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
+                    routes.navigate(to: .ExpenseAddItemsView)
+                } else if (eventExpenseViewModel.selectedMethod == .equally && viewModel.isValid) {
+                    eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
+                    routes.navigate(to: .ExpenseResultView)
                 }
             }
         }
         .onAppear{
+            hasPreviewed = false
             viewModel = AddExpenseViewModel(eventExpenseViewModel: eventExpenseViewModel)
             if eventExpenseViewModel.selectedParticipants == [] {
                 eventExpenseViewModel.selectedParticipants = eventViewModel.selectedEvent?.participants ?? []
             }
         }
-        .sheet(isPresented: viewModel != nil ? Bindable(viewModel!).toggleSeeAll : .constant(false)) {
-            ShowAllParticipants(isPresented: viewModel != nil ? Bindable(viewModel!).toggleSeeAll : .constant(false))
+        .sheet(isPresented: Bindable(viewModel).toggleSeeAll) {
+            ShowAllParticipants(isPresented: Bindable(viewModel).toggleSeeAll)
                 .presentationDetents(
                     [.medium, .large],
-                    selection: viewModel != nil ? Bindable(viewModel!).settingsDetent : .constant(PresentationDetent.medium)
+                    selection: Bindable(viewModel).settingsDetent
                 )
         }
-        .sheet(isPresented: viewModel != nil ? Bindable(viewModel!).toggleReceiptSheet : .constant(false)){
-            VStack(spacing: 0){
-                SheetXButton(toggle: viewModel != nil ? Bindable(viewModel!).toggleReceiptSheet : .constant(false))
-                VStack(spacing: .spacingMedium){
-                    Text("Upload Image")
-                        .font(.tabiTitle)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    HStack(spacing: .spacingTight){
-                        PhotosPicker(selection: Bindable(viewModel!).receiptImageFromGallery, matching: .images, photoLibrary: .shared()){
-                            VStack(spacing: .spacingTight){
-                                Icon(systemName: "photo", color: .buttonBlue, size: 20)
-                                Text("Open Library")
-                                    .font(.tabiHeadline)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 100)
-                        }
-                        .accentColor(.buttonBlue)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: .radiusLarge)
-                                .fill(.clear)
-                                .stroke(.buttonBlue, lineWidth: 1.5)
-                        }
-                        .onChange(of: viewModel?.receiptImageFromGallery) {
-                            Task{
-                                if viewModel?.receiptImageFromGallery != nil {
-                                    await viewModel?.getImage()
-                                    viewModel?.straightenDocument(in: viewModel?.receiptImage ?? UIImage()) { image in
-                                        viewModel?.receiptImage = image
-                                    }
-                                }
-                            }
-                        }
-                        Button{
-                            viewModel?.toggleScannerSheet.toggle()
-                        }label:{
-                            VStack(spacing: .spacingTight){
-                                Icon(systemName: "camera.fill", color: .buttonBlue, size: 20)
-                                Text("Take Photo")
-                                    .font(.tabiHeadline)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 100)
-                        }
-                        .accentColor(.buttonBlue)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: .radiusLarge)
-                                .fill(.clear)
-                                .stroke(.buttonBlue, lineWidth: 1.5)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    CustomButton(text: "Upload", isEnabled: viewModel?.receiptImage != nil){
-                        if (viewModel?.receiptImage != nil) {
-                            do {
-                                try eventExpenseViewModel.performOCROnImage(viewModel?.receiptImage ?? UIImage())
-                            } catch {
-                                print(error)
-                            }
-                            
-                            eventExpenseViewModel.uploadedReceiptImage = viewModel?.receiptImage ?? UIImage()
-                            viewModel?.toggleReceiptSheet.toggle()
-                        }
-                    }
-
-                }
+        .sheet(isPresented: Bindable(viewModel).toggleReceiptSheet){
+            ReceiptUploadSheet(height: $viewModel.receiptSheetHeight, isPresented: Bindable(viewModel).toggleReceiptSheet)
+                .presentationDetents([.height(viewModel.receiptSheetHeight)])
+        }
+        .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
+            if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
+                hasPreviewed.toggle()
+                routes.navigate(to: .ReceiptUploadReview)
             }
-            .presentationDetents([.height(viewModel?.receiptSheetHeight ?? 0)])
-            .sheet(isPresented: viewModel != nil ? Bindable(viewModel!).toggleScannerSheet : .constant(false)) {
-                DocumentScannerView { image in
-                    viewModel?.receiptImageFromGallery = nil
-                    viewModel?.receiptImage = image
-                }
-            }
-            .navigationBarBackButtonHidden(true)
-            .padding()
-            .padding([.top], 10)
-            .background(
-                GeometryReader { geometry in
-                    Color.clear
-                        .onAppear {
-                            viewModel?.receiptSheetHeight = geometry.size.height
-                        }
-                }
-            )
         }
         .padding()
         .background(.bgWhite)

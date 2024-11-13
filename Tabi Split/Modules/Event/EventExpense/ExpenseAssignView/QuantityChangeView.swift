@@ -24,8 +24,7 @@ struct QuantityChangeView: View {
                 VStack{
                     ForEach(Array(item.assignees.enumerated()), id: \.offset) { (index, assignee) in
                         HStack(alignment: .center){
-                            Circle()
-                                .frame(width: 40, height: 40)
+                            UserAvatar(userData: assignee.user, size: 40)
                                 .padding([.trailing], 12)
                             Text(assignee.user.name)
                             Spacer()
