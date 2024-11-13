@@ -149,9 +149,10 @@ struct AddExpenseView: View {
                                 .font(.tabiBody)
                                 .foregroundColor(.textGrey)
                         }
-                        CustomButton(text: "Upload Image", type: .secondary, icon: "square.and.arrow.up", iconSize: 20){
+                        CustomButton(text: viewModel?.receiptImage == nil ? "Upload Image" : viewModel?.receiptImageFromGallery?.itemIdentifier ?? "Uploaded Image", type: .secondary, icon: "square.and.arrow.up", iconSize: 20){
                             viewModel?.toggleReceiptSheet.toggle()
                         }
+                        .lineLimit(1)
                         .frame(width: 180)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -235,6 +236,20 @@ struct AddExpenseView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
+                    
+                    CustomButton(text: "Upload", isEnabled: viewModel?.receiptImage != nil){
+                        if (viewModel?.receiptImage != nil) {
+                            do {
+                                try eventExpenseViewModel.performOCROnImage(viewModel?.receiptImage ?? UIImage())
+                            } catch {
+                                print(error)
+                            }
+                            
+                            eventExpenseViewModel.uploadedReceiptImage = viewModel?.receiptImage ?? UIImage()
+                            viewModel?.toggleReceiptSheet.toggle()
+                        }
+                    }
+
                 }
             }
             .presentationDetents([.height(viewModel?.receiptSheetHeight ?? 0)])
@@ -255,18 +270,6 @@ struct AddExpenseView: View {
                         }
                 }
             )
-            .onChange(of: viewModel?.receiptImage){
-                if (viewModel?.receiptImage != nil) {
-                    do {
-                        try eventExpenseViewModel.performOCROnImage(viewModel?.receiptImage ?? UIImage())
-                    } catch {
-                        print(error)
-                    }
-                    
-                    eventExpenseViewModel.uploadedReceiptImage = viewModel?.receiptImage ?? UIImage()
-                    viewModel?.toggleReceiptSheet.toggle()
-                }
-            }
         }
         .padding()
         .background(.bgWhite)

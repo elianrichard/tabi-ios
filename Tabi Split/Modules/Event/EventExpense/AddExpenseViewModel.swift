@@ -18,6 +18,7 @@ class AddExpenseViewModel{
     var receiptSheetHeight: CGFloat = 0
     var toggleScannerSheet: Bool = false
     var receiptImage: UIImage?
+    var receiptImageProcessed: UIImage?
     var receiptImageFromGallery: PhotosPickerItem?
     
     var eventExpenseViewModel: EventExpenseViewModel?
