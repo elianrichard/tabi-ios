@@ -12,9 +12,11 @@ import Vision
 
 @Observable
 final class ReceiptUploadViewModel{
-    var isShowingScanner: Bool = false
+    var toggleScannerSheet: Bool = false
     var receiptImage: UIImage?
     var receiptImageFromGallery: PhotosPickerItem?
+    var receiptImageProcessed: UIImage?
+    var isLoading: Bool = false
     
     func getImage() async{
         if let data = try? await receiptImageFromGallery?.loadTransferable(type: Data.self) {

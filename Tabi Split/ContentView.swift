@@ -86,9 +86,6 @@ struct ContentView: View {
                 case .SettlementUploadView:
                     SettlementUploadView()
                     
-                case .ReceiptUploadView:
-                    ReceiptUploadView()
-                    
                 case .Profile:
                     ProfileView()
                     
@@ -97,6 +94,9 @@ struct ContentView: View {
                 
                 case .PaymentMethods:
                     PaymentMethodView()
+                    
+                case .ReceiptUploadReview:
+                    ReceiptImageReviewView()
                 }
                 
             }

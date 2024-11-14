@@ -18,6 +18,7 @@ class AddExpenseViewModel{
     var receiptSheetHeight: CGFloat = 0
     var toggleScannerSheet: Bool = false
     var receiptImage: UIImage?
+    var receiptImageProcessed: UIImage?
     var receiptImageFromGallery: PhotosPickerItem?
     
     var eventExpenseViewModel: EventExpenseViewModel?
@@ -29,7 +30,7 @@ class AddExpenseViewModel{
     var totalBillError: String?
     var isValid: Bool = true
     
-    init(eventExpenseViewModel: EventExpenseViewModel?) {
+    init(eventExpenseViewModel: EventExpenseViewModel? = EventExpenseViewModel()) {
         self.eventExpenseViewModel = eventExpenseViewModel
     }
     

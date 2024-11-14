@@ -21,14 +21,14 @@ struct AddItemContainer: View {
                 HStack{
                     Text("Item " + String(index + 1))
                     Spacer()
-                    Image(systemName: "trash")
-                        .onTapGesture {
-                            eventExpenseViewModel.deleteItem(item: item)
-                            eventExpenseViewModel.calculateTotal()
-                        }
+                    Button{
+                        eventExpenseViewModel.deleteItem(item: item)
+                        eventExpenseViewModel.calculateTotal()
+                    }label:{
+                        Icon(systemName: "trash", color: .buttonRed, size: 18)
+                    }
                 }
                 .font(.tabiBody)
-                Divider()
                 HStack(){
                     Text("Name")
                         .foregroundColor(.textGrey)

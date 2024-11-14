@@ -48,7 +48,7 @@ struct EventSettlementView: View {
         }
         .padding()
         .sheet(isPresented: $isShowUploadSheet) {
-            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.isShowingScanner, user: eventSettlementViewModel.user) {
+            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.toggleScannerSheet, user: eventSettlementViewModel.user) {
                 Task {
                     if receiptUploadViewModel.receiptImageFromGallery != nil {
                         await receiptUploadViewModel.getImage()

@@ -72,11 +72,12 @@ struct AdditionalChargeContainer: View {
                         .padding(0.5)
                 }
                 
-                Image(systemName: "trash")
-                    .onTapGesture {
-                        eventExpenseViewModel.deleteAdditionalCharge(item: item)
-                        eventExpenseViewModel.calculateTotal()
-                    }
+                Button{
+                    eventExpenseViewModel.deleteAdditionalCharge(item: item)
+                    eventExpenseViewModel.calculateTotal()
+                }label:{
+                    Icon(systemName: "trash", color: .buttonRed, size: 18)
+                }
             }
         }
         .frame(height: 50)
