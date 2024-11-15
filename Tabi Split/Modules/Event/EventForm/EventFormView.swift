@@ -16,7 +16,8 @@ struct EventFormView: View {
     @State var isEdit: Bool = false
     @State var isShowEditIconSheet: Bool = false
     @State var toggleSeeAllParticipantsSheet: Bool = false
-    
+
+    @FocusState private var focusedField: FocusField?
     
     var body : some View {
         VStack {
@@ -49,7 +50,7 @@ struct EventFormView: View {
                 
                 ScrollView (showsIndicators: false) {
                     VStack (alignment: .leading, spacing: .spacingRegular) {
-                        InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName)
+                        InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName, focusedField: $focusedField, focusCase: .field1)
                         if (isEdit) {
                             VStack (alignment: .leading, spacing: .spacingTight) {
                                 Text("Participants (" + String((eventViewModel.selectedEvent?.participants ?? []).count) + ")")
@@ -182,7 +183,9 @@ struct EventFormView: View {
             }
         }
         .padding()
-        .addBackgroundColor(.bgWhite)
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
         .navigationBarBackButtonHidden(true)
     }
 }

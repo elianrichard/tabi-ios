@@ -10,12 +10,16 @@ import SwiftUI
 struct LoginView: View {
     @Environment(Routes.self) var routes
     @State private var loginViewModel = LoginViewModel()
+    @State private var focusStateViewModel = FocusStateViewModel()
+    
+    @FocusState private var focusedField: FocusField?
     
     var body: some View {
         VStack (alignment: .leading, spacing: .spacingLarge) {
             Text("Hey There,\nYou're Back!")
                 .font(.tabiLargeTitle)
                 .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
             
             VStack (alignment: .trailing, spacing: 8) {
                 VStack(alignment: .leading, spacing: .spacingMedium) {
@@ -23,11 +27,15 @@ struct LoginView: View {
                                    placeholder: "Enter your phone number",
                                    text: $loginViewModel.phoneNumber,
                                    errorMessage: loginViewModel.phoneNumberError,
-                                   inputTypePicked: .phone)
+                                   inputTypePicked: .phone,
+                                   focusedField: $focusedField,
+                                   focusCase: .field1)
                     InputWithLabel(label: "Password",
                                    placeholder: "Enter your password",
                                    text: $loginViewModel.password,
-                                   errorMessage: loginViewModel.passwordError, isSecure: true)
+                                   errorMessage: loginViewModel.passwordError, isSecure: true,
+                                   focusedField: $focusedField,
+                                   focusCase: .field2)
                 }
                 Button {
                     print("forgot password")
@@ -49,10 +57,12 @@ struct LoginView: View {
                     }
                 }
                 
-                DividerWithText()
-                
-                CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
-                    print("Login with Apple")
+                if (false) {
+                    DividerWithText()
+                    
+                    CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                        print("Login with Apple")
+                    }
                 }
                 
                 HStack (spacing: 3) {
@@ -68,9 +78,11 @@ struct LoginView: View {
                 }
             }
         }
-        .fixedSize(horizontal: false, vertical: true)
         .padding()
         .navigationBarBackButtonHidden(true)
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
     }
 }
 

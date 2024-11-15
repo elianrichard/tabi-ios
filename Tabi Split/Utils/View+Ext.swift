@@ -29,7 +29,7 @@ extension View {
         overlay(EdgeBorder(width: width, edges: edges).foregroundColor(color))
     }
     
-    func addBackgroundColor(_ color: Color) -> some View {
-        self.modifier(BackgroundModifier(color: color))
+    func addBackgroundColor(_ color: Color, callback: (() -> Void)? = nil) -> some View {
+        self.modifier(BackgroundModifier(color: color) { callback?() })
     }
 }

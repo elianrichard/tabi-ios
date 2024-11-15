@@ -10,6 +10,7 @@ import SwiftUI
 struct RegisterView: View {
     @Environment(Routes.self) private var routes
     @State private var registerViewModel = RegisterViewModel()
+    @FocusState private var focusedField: FocusField?
     
     var body: some View {
         ScrollView (showsIndicators: false) {
@@ -21,22 +22,30 @@ struct RegisterView: View {
                     InputWithLabel(label: "Fullname",
                                    placeholder: "Enter your full name",
                                    text: $registerViewModel.name,
-                                   errorMessage: registerViewModel.nameError)
+                                   errorMessage: registerViewModel.nameError,
+                                   focusedField: $focusedField, focusCase: .field1
+                    )
                     InputWithLabel(label: "Phone Number",
                                    placeholder: "Enter your phone number",
                                    text: $registerViewModel.phoneNumber,
                                    errorMessage: registerViewModel.phoneNumberError,
-                                   inputTypePicked: .phone)
+                                   inputTypePicked: .phone,
+                                   focusedField: $focusedField, focusCase: .field2
+                    )
                     InputWithLabel(label: "Password",
                                    placeholder: "Enter your password",
                                    text: $registerViewModel.password,
                                    errorMessage: registerViewModel.passwordError,
-                                   isSecure: true)
+                                   isSecure: true,
+                                   focusedField: $focusedField, focusCase: .field3
+                    )
                     InputWithLabel(label: "Confirm Password",
                                    placeholder: "Re-enter your Password",
                                    text: $registerViewModel.confirmPassword,
                                    errorMessage: registerViewModel.confirmPasswordError,
-                                   isSecure: true)
+                                   isSecure: true,
+                                   focusedField: $focusedField, focusCase: .field4
+                    )
                 }
                 VStack (spacing: .spacingTight) {
                     VStack (spacing: .spacingMedium) {
@@ -73,6 +82,9 @@ struct RegisterView: View {
             .padding()
         }
         .navigationBarBackButtonHidden(true)
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
     }
 }
 

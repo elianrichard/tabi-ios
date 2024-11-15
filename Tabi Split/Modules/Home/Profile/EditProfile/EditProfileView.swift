@@ -13,6 +13,8 @@ struct EditProfileView: View {
     @Environment(ProfileViewModel.self) private var profileViewModel
     @State var viewModel = EditProfileViewModel()
     
+    @FocusState private var focusedField: FocusField?
+    
     var body: some View {
         VStack{
             TopNavigation(title: "Edit Profile")
@@ -41,8 +43,8 @@ struct EditProfileView: View {
                     }
                 
                 VStack(spacing: .spacingRegular){
-                    InputWithLabel(label: "Fullname", placeholder: "Fullname", text: $viewModel.user.name, inputBackgroundColor: .bgWhite, inputCornerRadius: 16)
-                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $viewModel.user.phone, inputBackgroundColor: .bgWhite, inputCornerRadius: 16)
+                    InputWithLabel(label: "Fullname", placeholder: "Fullname", text: $viewModel.user.name, inputBackgroundColor: .bgWhite, inputCornerRadius: 16, focusedField: $focusedField, focusCase: .field1)
+                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $viewModel.user.phone, inputBackgroundColor: .bgWhite, inputCornerRadius: 16, focusedField: $focusedField, focusCase: .field2)
                 }
             }
             
@@ -68,7 +70,9 @@ struct EditProfileView: View {
         .navigationBarBackButtonHidden(true)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.spacingMedium)
-        .background(.bgWhite)
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
     }
 }
 

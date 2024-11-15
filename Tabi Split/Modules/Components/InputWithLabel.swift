@@ -20,8 +20,11 @@ struct InputWithLabel: View {
     @Binding var price: Float
     var errorMessage: String?
     
+    @FocusState.Binding var focusedField: FocusField?
+    var focusCase: FocusField
+
     // Initializer for text input only
-    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, isSecure: Bool = false, inputTypePicked: InputTypeEnum = .text) {
+    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, isSecure: Bool = false, inputTypePicked: InputTypeEnum = .text, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
         self.label = label
         self.placeholder = placeholder
         self._text = text
@@ -31,10 +34,12 @@ struct InputWithLabel: View {
         self.inputBackgroundColor = inputBackgroundColor
         self.inputCornerRadius = inputCornerRadius
         self.isSecure = isSecure
+        self._focusedField = focusedField
+        self.focusCase = focusCase
     }
     
     // Initializer for price input only
-    init(label: String, placeholder: String, price: Binding<Float>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium) {
+    init(label: String, placeholder: String, price: Binding<Float>, errorMessage: String? = nil, inputBackgroundColor: Color = .bgWhite, inputCornerRadius: CGFloat = .radiusMedium, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
         self.label = label
         self.placeholder = placeholder
         self._text = .constant("")  // Default to empty string
@@ -43,6 +48,8 @@ struct InputWithLabel: View {
         self.inputTypePicked = .price
         self.inputBackgroundColor = inputBackgroundColor
         self.inputCornerRadius = inputCornerRadius
+        self._focusedField = focusedField
+        self.focusCase = focusCase
     }
     
     var body: some View {
@@ -53,7 +60,7 @@ struct InputWithLabel: View {
             case .text, .phone:
                 Input(placeholder: placeholder,
                       isSecure: isSecure,
-                      text: $text, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius, type: inputTypePicked)
+                      text: $text, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius, type: inputTypePicked, focusedField: $focusedField, focusCase: focusCase)
             case .price:
                 PriceInput(placeholder: placeholder, price: $price, type: inputTypePicked.keyboard, isError: errorMessage != nil, backgroundColor: inputBackgroundColor, cornerRadius: inputCornerRadius)
             }
@@ -65,8 +72,3 @@ struct InputWithLabel: View {
         }
     }
 }
-
-#Preview {
-    InputWithLabel(label: "Label", placeholder: "Placeholder", text: .constant(""))
-}
-

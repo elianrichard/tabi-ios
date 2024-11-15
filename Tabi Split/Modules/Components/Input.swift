@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+enum FocusField {
+    case field1, field2, field3, field4
+}
+
 enum InputTypeEnum: String{
     case text
     case price
@@ -37,6 +41,9 @@ struct Input: View {
     var type: InputTypeEnum = .text
     var phoneCode: String = "62"
     
+    @FocusState.Binding var focusedField: FocusField?
+    var focusCase: FocusField
+    
     var body: some View {
         HStack(spacing: .spacingRegular){
             if type == .phone{
@@ -53,10 +60,12 @@ struct Input: View {
                         SecureField("", text: $text,
                                     prompt: Text(placeholder).foregroundStyle(.textGrey))
                         .frame(height: 20)
+                        .focused($focusedField, equals: focusCase)
                     } else {
                         TextField("", text: $text,
                                   prompt: Text(placeholder).foregroundStyle(.textGrey))
                         .frame(height: 20)
+                        .focused($focusedField, equals: focusCase)
                     }
                     
                     Button {
@@ -71,6 +80,7 @@ struct Input: View {
                           prompt: Text(placeholder).foregroundStyle(.textGrey))
                 .frame(height: 20)
                 .keyboardType(type.keyboard)
+                .focused($focusedField, equals: focusCase)
             }
         }
         .padding(.vertical, 16)
@@ -86,8 +96,4 @@ struct Input: View {
                 .padding(0.5)
         }
     }
-}
-
-#Preview {
-    Input(text: .constant(""))
 }
