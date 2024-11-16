@@ -22,7 +22,7 @@ struct ShowAllParticipants: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 ScrollView{
                     VStack{
-                        VStack(spacing: .spacingTight){
+                        LazyVStack (spacing: .spacingTight){
                             Divided{
                                 ForEach (eventViewModel.selectedEvent?.participants ?? []) { person in
                                     HStack{

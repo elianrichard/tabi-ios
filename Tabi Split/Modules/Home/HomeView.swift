@@ -21,7 +21,7 @@ struct HomeView: View {
                 Spacer(minLength: 30)
                 if (!homeViewModel.filteredEvents.isEmpty) {
                     ScrollView (showsIndicators: false) {
-                        VStack (spacing: 11) {
+                        LazyVStack (spacing: 11) {
                             ForEach(homeViewModel.filteredEvents) { event in
                                 EventCard(event: event)
                                     .contentShape(Rectangle())

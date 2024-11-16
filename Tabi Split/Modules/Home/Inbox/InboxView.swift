@@ -16,7 +16,7 @@ struct InboxView : View {
                 .padding(.horizontal)
             if (inboxViewModel.inboxList.count != 0) {
                 ScrollView {
-                    VStack (spacing: .spacingTight) {
+                    LazyVStack (spacing: .spacingTight) {
                         ForEach (inboxViewModel.inboxList) { inbox in
                             InboxCard(inboxItem: inbox)
                         }

@@ -10,7 +10,6 @@ import SwiftUI
 struct LoginView: View {
     @Environment(Routes.self) var routes
     @State private var loginViewModel = LoginViewModel()
-    @State private var focusStateViewModel = FocusStateViewModel()
     
     @FocusState private var focusedField: FocusField?
     

@@ -64,7 +64,7 @@ struct EventInviteView: View {
                 }
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
-                        VStack {
+                        LazyVStack {
                             Divided {
                                 ForEach(eventInviteViewModel.filteredContacts) { contact in
                                     ForEach(contact.phoneNumbers, id: \.identifier) { number in

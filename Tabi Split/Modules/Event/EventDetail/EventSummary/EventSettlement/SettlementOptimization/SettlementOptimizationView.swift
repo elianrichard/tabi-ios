@@ -20,7 +20,7 @@ struct SettlementOptimizationView: View {
             VStack (spacing: .spacingMedium) {
                 VStack {
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
+                        LazyHStack {
                             ForEach (eventViewModel.participantsBalance) { data in
                                 OptimizationPersonCard(data: data)
                             }
@@ -32,7 +32,7 @@ struct SettlementOptimizationView: View {
                     Text("Recapitulation")
                         .font(.tabiHeadline)
                     ScrollView (showsIndicators: false) {
-                        VStack (spacing: .spacingMedium) {
+                        LazyVStack (spacing: .spacingMedium) {
                             ForEach (eventViewModel.participantsBalance) { data in
                                 OptimizationRecapCard(recapData: data)
                             }

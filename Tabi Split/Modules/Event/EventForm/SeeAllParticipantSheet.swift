@@ -37,24 +37,22 @@ struct SeeAllParticipantSheet: View {
                         .padding(0.5)
                 }
                 ScrollView{
-                    VStack{
-                        VStack(spacing: .spacingTight){
-                            Divided{
-                                ForEach (eventViewModel.selectedEvent?.participants.filter {
-                                    nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())
-                                } ?? []) { user in
-                                    HStack{
-                                        UserAvatar(userData: user)
-                                        VStack(alignment: .leading){
-                                            Text(user.name)
-                                                .font(.tabiHeadline)
-                                            Text(user.phone)
-                                                .font(.tabiBody)
-                                                .foregroundColor(.textGrey)
-                                        }
+                    LazyVStack (spacing: .spacingTight){
+                        Divided{
+                            ForEach (eventViewModel.selectedEvent?.participants.filter {
+                                nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())
+                            } ?? []) { user in
+                                HStack{
+                                    UserAvatar(userData: user)
+                                    VStack(alignment: .leading){
+                                        Text(user.name)
+                                            .font(.tabiHeadline)
+                                        Text(user.phone)
+                                            .font(.tabiBody)
+                                            .foregroundColor(.textGrey)
                                     }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
                     }
