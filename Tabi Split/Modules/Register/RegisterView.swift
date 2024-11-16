@@ -52,25 +52,27 @@ struct RegisterView: View {
                         CustomButton(text: registerViewModel.isLoading ? "Loading..." : "Sign Up",
                                      isEnabled: registerViewModel.isSignUpEnabled) {
                             Task {
-                                let isSuccess = await registerViewModel.register()
-                                if isSuccess {
+                                if await registerViewModel.register() {
                                     routes.navigate(to: .LoginView)
                                 }
                             }
                         }
                         
-                        DividerWithText(text: "Or")
-                        
-                        CustomButton(text: "Sign Up With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
-                            print("SignUp with Apple")
+//                TEMPORARILY DISABLED: REGISTER WITH APPLE ID
+                        if (false) {
+                            DividerWithText(text: "Or")
+                            
+                            CustomButton(text: "Sign Up With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                                print("SignUp with Apple")
+                            }
                         }
                     }
                     
-                    HStack (spacing: 3) {
+                    HStack (spacing: .spacingXSmall) {
                         Text("Already have an account?")
                             .font(.tabiBody)
                         Button {
-                            routes.navigate(to: .LoginView)
+                            routes.navigateBack()
                         } label: {
                             Text("Sign In")
                                 .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))

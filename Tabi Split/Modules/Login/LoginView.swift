@@ -54,7 +54,7 @@ struct LoginView: View {
                         }
                     }
                 }
-                
+//                TEMPORARILY DISABLED: LOGIN WITH APPLE ID
                 if (false) {
                     DividerWithText()
                     

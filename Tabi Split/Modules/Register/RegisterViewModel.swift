@@ -11,24 +11,31 @@ import Foundation
 class RegisterViewModel {
     var name: String = "" {
         didSet {
-            validateName()
+            if isSubmitted {
+                validateName()
+            }
         }
     }
     var phoneNumber: String = "" {
         didSet {
-            validatePhoneNumber()
+            if isSubmitted {
+                validatePhoneNumber()
+            }
         }
     }
     var password: String = ""  {
         didSet {
-            validatePassword()
-            validateConfirmPassword()
+            if isSubmitted {
+                validatePassword()
+            }
         }
     }
     var confirmPassword: String = "" {
         didSet {
-            validatePassword()
-            validateConfirmPassword()
+            if isSubmitted {
+                validatePassword()
+                validateConfirmPassword()
+            }
         }
     }
     
@@ -38,6 +45,7 @@ class RegisterViewModel {
     var confirmPasswordError: String?
     
     var isLoading: Bool = false
+    var isSubmitted: Bool = false
     
     var isSignUpEnabled: Bool = true
     
@@ -95,6 +103,7 @@ class RegisterViewModel {
     }
     
     func register() async -> Bool {
+        isSubmitted = true
         guard isFormValid() else {
             isSignUpEnabled = false
             print("Cannot register: form is invalid")
@@ -103,8 +112,7 @@ class RegisterViewModel {
         var isSuccess = false
         isLoading = true
         do {
-            try await AuthenticationService.shared.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
-            print("Register successful!")
+            let _ = try await AuthenticationService.shared.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
             isSuccess = true
         } catch {
             print("Register failed: \(error)")
