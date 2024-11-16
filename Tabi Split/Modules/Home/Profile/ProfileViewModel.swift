@@ -13,6 +13,8 @@ final class ProfileViewModel{
     var userPaymentMethods: [PaymentMethod] = []
 
     var isLogoutLoading: Bool = false
+    var isUpdateProfileLoading: Bool = false
+    var isRefreshProfileLoading: Bool = false
     
     @MainActor
     func logout() async -> Bool {
@@ -34,15 +36,47 @@ final class ProfileViewModel{
     }
     
     @MainActor
-    func updateProfile (editProfileViewModel: EditProfileViewModel) {
-        user.name = editProfileViewModel.nameText
-        //        TEMPORARILY DISABLED: UPDATE PHONE NUMBER
-        //        user.phone = editProfileViewModel.user.phone
-        if let image = editProfileViewModel.chosenImage {
-            user.image = image.id
+    func updateProfile (editProfileViewModel: EditProfileViewModel) async -> Bool {
+        var isSuccess = false
+        isUpdateProfileLoading = true
+        guard let chosenImage = editProfileViewModel.chosenImage else { return isSuccess }
+        do {
+            let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userPhone: editProfileViewModel.phoneText, userImage: chosenImage.rawValue, userId: "userId")
+            let _ = try await ProfileService.shared.editProfile(user: updatedUser)
+            UserDefaultsService.shared.saveCurrentUser(user: updatedUser)
+            user.name = editProfileViewModel.nameText
+            user.phone = editProfileViewModel.phoneText
+            if let image = editProfileViewModel.chosenImage {
+                user.image = image.id
+            }
+            SwiftDataService.shared.saveModelContext()
+            isSuccess = true
+        } catch {
+            print("Update profile failed: \(error)")
+            isSuccess = false
         }
-        SwiftDataService.shared.editCurrentUser(name: editProfileViewModel.nameText, phone: editProfileViewModel.phoneText, image: editProfileViewModel.chosenImage?.id)
-//        TO DO: UPDATE PROFILE TO BACKEND
+        isUpdateProfileLoading = false
+        return isSuccess
+    }
+    
+    @MainActor
+    func refreshUserData () {
+        if let currentUser = SwiftDataService.shared.getCurrentUser() {
+            user = currentUser
+        }
+        
+        Task {
+            isRefreshProfileLoading = true
+            do {
+                let freshUser = try await ProfileService.shared.getCurrentProfile()
+                user.name = freshUser.userName
+                user.phone = freshUser.userPhone
+                user.image = freshUser.userImage
+            } catch {
+                print("Update profile failed: \(error)")
+            }
+            isRefreshProfileLoading = false
+        }
     }
     
     func isCurrentUser (_ userData: UserData) -> Bool {

@@ -7,28 +7,17 @@
 
 import Foundation
 
-//protocol AuthenticationServicing {
-//    func register(name: String, phone: String, password: String) async throws
-//    func login(phone: String, password: String) async throws
-//    func logout() async throws
-//    func refresh() async throws
-//}
-
 final class AuthenticationService {
     static let shared = AuthenticationService()
     
-    private let apiClient: APIClient
-    private let tokenManager: TokenManaging
+    private let apiClient: APIClient = APIService.shared
+    private let tokenManager: TokenManaging = KeychainService.shared
     
-    init(apiClient: APIClient = APIService.shared, tokenManager: TokenManaging = KeychainService.shared) {
-        self.apiClient = apiClient
-        self.tokenManager = tokenManager
-    }
-    
-    func register(name: String, phone: String, password: String) async throws {
+    func register(name: String, phone: String, password: String) async throws -> RegisterResponse {
         let registerRequest = RegisterRequest(name: name, phone: phone, password: password)
         let response: RegisterResponse = try await apiClient.post(endpoint: "/auth/register", body: registerRequest)
-        print(response, "register response")
+        
+        return response
     }
     
     func login(phone: String, password: String) async throws -> LoginResponse {

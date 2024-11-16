@@ -76,8 +76,12 @@ struct HomeView: View {
                 homeViewModel.populateEvents(data: data)
             }
             
-            if let currentUser = SwiftDataService.shared.getCurrentUser() {
-                profileViewModel.user = currentUser
+            profileViewModel.refreshUserData()
+            
+            if let users = SwiftDataService.shared.fetchAllUser() {
+                for user in users {
+                    print(user.name, user.phone)
+                }
             }
         }
     }

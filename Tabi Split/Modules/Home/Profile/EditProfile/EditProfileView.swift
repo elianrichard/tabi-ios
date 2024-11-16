@@ -43,15 +43,17 @@ struct EditProfileView: View {
                 
                 VStack(spacing: .spacingRegular){
                     InputWithLabel(label: "Full Name", placeholder: "Full Name", text: $editProfileViewModel.nameText, focusedField: $focusedField, focusCase: .field1)
-//                    TEMPORARILY DISABLED: PHONE NUMBER EDIT
-                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $editProfileViewModel.phoneText, isDisabled: true, focusedField: $focusedField, focusCase: .field2)
+                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $editProfileViewModel.phoneText, focusedField: $focusedField, focusCase: .field2)
                 }
             }
             
             Spacer()
-            CustomButton(text: "Save") {
-                profileViewModel.updateProfile(editProfileViewModel: editProfileViewModel)
-                routes.navigateBack()
+            CustomButton(text: profileViewModel.isUpdateProfileLoading ? "Loading..." : "Save") {
+                Task {
+                    if await profileViewModel.updateProfile(editProfileViewModel: editProfileViewModel) {
+                        routes.navigateBack()
+                    }
+                }
             }
         }
         .onAppear{
