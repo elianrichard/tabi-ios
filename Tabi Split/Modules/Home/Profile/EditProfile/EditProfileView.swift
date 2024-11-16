@@ -11,7 +11,7 @@ import SwiftUI
 struct EditProfileView: View {
     @Environment(Routes.self) var routes
     @Environment(ProfileViewModel.self) private var profileViewModel
-    @State var viewModel = EditProfileViewModel()
+    @State var editProfileViewModel = EditProfileViewModel()
     
     @FocusState private var focusedField: FocusField?
     
@@ -20,7 +20,11 @@ struct EditProfileView: View {
             TopNavigation(title: "Edit Profile")
             
             VStack(spacing: .spacingTight){
-                UserAvatar(userData: profileViewModel.user, size: 90)
+                Image(uiImage: editProfileViewModel.profileImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 90, height: 90)
+                    .clipShape(Circle())
                     .overlay {
                         VStack {
                             Circle()
@@ -34,39 +38,32 @@ struct EditProfileView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                     }
                     .onTapGesture {
-                        profileViewModel.toggleProfileImagePick = true
+                        editProfileViewModel.toggleProfileImagePick = true
                     }
                 
                 VStack(spacing: .spacingRegular){
-                    InputWithLabel(label: "Full Name", placeholder: "Full Name", text: $viewModel.user.name, focusedField: $focusedField, focusCase: .field1)
+                    InputWithLabel(label: "Full Name", placeholder: "Full Name", text: $editProfileViewModel.nameText, focusedField: $focusedField, focusCase: .field1)
 //                    TEMPORARILY DISABLED: PHONE NUMBER EDIT
-                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $viewModel.user.phone, isDisabled: true, focusedField: $focusedField, focusCase: .field2)
+                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $editProfileViewModel.phoneText, isDisabled: true, focusedField: $focusedField, focusCase: .field2)
                 }
             }
             
             Spacer()
             CustomButton(text: "Save") {
-                // Handle user data saving in cloud
-                profileViewModel.user.name = viewModel.user.name
-                profileViewModel.user.phone = viewModel.user.phone
-                profileViewModel.profileImage = viewModel.profileImage
-                profileViewModel.savedIndex = viewModel.savedIndex
+                profileViewModel.updateProfile(editProfileViewModel: editProfileViewModel)
                 routes.navigateBack()
             }
         }
         .onAppear{
-            viewModel.user = profileViewModel.user
-            viewModel.profileImage = profileViewModel.profileImage
-            viewModel.savedIndex = profileViewModel.savedIndex
+            editProfileViewModel.populateData(profileViewModel: profileViewModel)
         }
-        .sheet(isPresented: Bindable(profileViewModel).toggleProfileImagePick){
-            ProfileImageSheet(editProfileViewModel: $viewModel)
-                .presentationDetents([.height(profileViewModel.contentHeight)])
+        .sheet(isPresented: Bindable(editProfileViewModel).toggleProfileImagePick){
+            ProfileImageSheet(editProfileViewModel: $editProfileViewModel)
+                .presentationDetents([.height(editProfileViewModel.contentHeight)])
                 .presentationDragIndicator(.visible)
         }
+        .padding()
         .navigationBarBackButtonHidden(true)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(.spacingMedium)
         .addBackgroundColor(.bgWhite) {
             focusedField = nil
         }

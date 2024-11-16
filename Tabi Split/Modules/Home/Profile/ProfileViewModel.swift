@@ -9,23 +9,16 @@ import SwiftUI
 
 @Observable
 final class ProfileViewModel{
-    var profileImage: UIImage = UIImage(imageLiteralResourceName: "Octopus")
-    var toggleProfileImagePick: Bool = false
-    var profileImageSettingsDetent = PresentationDetent.medium
-    var savedIndex: Int = 5
-    var images: [UIImage] = [UIImage(imageLiteralResourceName: "Wallet"), UIImage(imageLiteralResourceName: "Dragon"), UIImage(imageLiteralResourceName: "Owl"), UIImage(imageLiteralResourceName: "Octopus")]
-    var contentHeight : CGFloat = 0
-    var toggleProfileImageUpload: Bool = false
-    var user: UserData = UserData(name: "You", phone: "628123456789", image: .owl)
+    var user: UserData = UserData(name: "test", phone: "test")
+    var userPaymentMethods: [PaymentMethod] = []
 
-    var isLoading: Bool = false
-    let authService = AuthenticationService()
+    var isLogoutLoading: Bool = false
     
     func logout() async -> Bool {
-        isLoading = true
+        isLogoutLoading = true
         var isSuccess = false
         do {
-            try await authService.logout()
+            try await AuthenticationService().logout()
             print("Logout successful!")
             isSuccess = true
         } catch {
@@ -33,9 +26,17 @@ final class ProfileViewModel{
             isSuccess = false
         }
         
-        isLoading = false
+        isLogoutLoading = false
         return isSuccess
     }
-  
-    var userPaymentMethods: [PaymentMethod] = []
+    
+    func updateProfile (editProfileViewModel: EditProfileViewModel) {
+        print("update user")
+//        TEMPORARILY DISABLED: UPDATE PHONE NUMBER
+//        user.phone = editProfileViewModel.user.phone
+    }
+    
+    func isCurrentUser (_ userData: UserData) -> Bool {
+        return userData.phone == user.phone
+    }
 }
