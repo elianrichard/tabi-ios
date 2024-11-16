@@ -21,19 +21,21 @@ extension SwiftDataService {
     func saveCurrentUser (user: CurrentUserDefaults) {
         if let users = fetchAllUser() {
             if !users.contains(where: { $0.phone == user.userPhone }) {
-                var image: String? = user.userImage
-                if user.userImage == "" {
-                    image = nil
+                if let image = ProfileImageEnum(rawValue: user.userImage) {
+                    modelContext.insert(UserData(name: user.userName, phone: user.userPhone, image: image, imageUrl: nil))
+                } else {
+                    modelContext.insert(UserData(name: user.userName, phone: user.userPhone, image: nil, imageUrl: user.userImage))
                 }
-                let newUser = UserData(name: user.userName, phone: user.userPhone, image: ProfileImageEnum(rawValue: user.userImage), imageUrl: image)
-                modelContext.insert(newUser)
+                saveModelContext()
             }
         }
     }
     
     func getCurrentUser () -> UserData? {
-        if let users = fetchAllUser(), let currentUser = UserDefaultsService.shared.getCurrentUser() {
-            return users.first(where: { $0.phone == currentUser.userPhone })
+        if let users = fetchAllUser(),
+           let currentUser = UserDefaultsService.shared.getCurrentUser(),
+           let user = users.first(where: { $0.phone == currentUser.userPhone }) {
+            return user
         } else { return nil }
     }
     
@@ -49,5 +51,9 @@ extension SwiftDataService {
             }
             saveModelContext()
         }
+    }
+    
+    func deleteAllUser () {
+        deleteModelContext(type: UserData.self)
     }
 }

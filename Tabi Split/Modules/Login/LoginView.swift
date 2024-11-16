@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     @Environment(Routes.self) var routes
+    @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
     @State private var loginViewModel = LoginViewModel()
     
     @FocusState private var focusedField: FocusField?
@@ -48,9 +49,7 @@ struct LoginView: View {
             VStack (spacing: .spacingMedium) {
                 CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In") {
                     Task {
-                        let isSuccess = await loginViewModel.login()
-                        
-                        if isSuccess {
+                        if await loginViewModel.login() {
                             routes.navigate(to: .HomeView)
                         }
                     }

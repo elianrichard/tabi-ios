@@ -29,7 +29,6 @@ class LoginViewModel {
         do {
             let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
             isSuccess = true
-            print("Login successful!")
             let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: "userId")
             UserDefaultsService.shared.saveCurrentUser(user: user)
             SwiftDataService.shared.saveCurrentUser(user: user)

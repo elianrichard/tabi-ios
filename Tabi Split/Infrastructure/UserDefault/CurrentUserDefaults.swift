@@ -20,4 +20,8 @@ extension UserDefaultsService {
     func getCurrentUser () -> CurrentUserDefaults? {
         return getValue(forKey: .currentUserDetails, ofType: CurrentUserDefaults.self)
     }
+    
+    func deleteCurrentUser () {
+        deleteKeyValue(forKey: .currentUserDetails)
+    }
 }

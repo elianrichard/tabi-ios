@@ -35,4 +35,13 @@ class SwiftDataService {
             fatalError(error.localizedDescription)
         }
     }
+    
+    func deleteModelContext<T: PersistentModel>(type: T.Type) {
+        do {
+            try modelContext.delete(model: T.self)
+            saveModelContext()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
 }

@@ -9,17 +9,20 @@ import SwiftUI
 
 @Observable
 final class ProfileViewModel{
-    var user: UserData = UserData(name: "test", phone: "test")
+    var user: UserData = UserData(name: "unknown", phone: "unknown")
     var userPaymentMethods: [PaymentMethod] = []
 
     var isLogoutLoading: Bool = false
     
+    @MainActor
     func logout() async -> Bool {
         isLogoutLoading = true
         var isSuccess = false
         do {
-            try await AuthenticationService().logout()
-            print("Logout successful!")
+            try await AuthenticationService.shared.logout()
+            SwiftDataService.shared.deleteAllUser()
+            UserDefaultsService.shared.deleteCurrentUser()
+            user = UserData(name: "unknown", phone: "unknown")
             isSuccess = true
         } catch {
             print("Logout failed: \(error)")

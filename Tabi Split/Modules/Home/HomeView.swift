@@ -79,12 +79,6 @@ struct HomeView: View {
             if let currentUser = SwiftDataService.shared.getCurrentUser() {
                 profileViewModel.user = currentUser
             }
-            
-            if let users = SwiftDataService.shared.fetchAllUser() {
-                for user in users {
-                    print(user.name, user.phone, user.image, "\(String(describing: user.imageUrl))")
-                }
-            }
         }
     }
 }

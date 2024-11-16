@@ -44,4 +44,8 @@ class UserDefaultsService {
     func getBasicValue(forKey key: UserDefaultKeys) -> Any? {
         return defaults.object(forKey: key.rawValue)
     }
+    
+    func deleteKeyValue(forKey key: UserDefaultKeys) {
+        defaults.removeObject(forKey: key.rawValue)
+    }
 }
