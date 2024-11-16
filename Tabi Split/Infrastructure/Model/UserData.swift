@@ -14,15 +14,17 @@ class UserData {
     var name: String
     var phone: String
     var image: ProfileImageEnum.ID
+    var imageUrl: String?
     @Relationship(inverse: \EventData.participants) var events: [EventData]
     @Relationship(inverse: \Expense.participants) var expenses: [Expense]
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]
     @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]
     
-    init(name: String, phone: String, image: ProfileImageEnum? = nil, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = [], expenseShare: [ExpensePerson] = []) {
+    init(name: String, phone: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = [], expenseShare: [ExpensePerson] = []) {
         self.name = name
         self.phone = phone
-        self.image = (image ?? ProfileImageEnum.allCases.randomElement() ?? .owl).id
+        self.image = (image ?? .owl).id
+        self.imageUrl = imageUrl
         self.events = events
         self.expenses = expenses
         self.coveredExpenses = coveredExpenses

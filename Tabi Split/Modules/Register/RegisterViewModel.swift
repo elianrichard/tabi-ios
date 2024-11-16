@@ -39,8 +39,6 @@ class RegisterViewModel {
     
     var isLoading: Bool = false
     
-    let authService = AuthenticationService()
-    
     var isSignUpEnabled: Bool = true
     
     func validateName() {
@@ -105,11 +103,12 @@ class RegisterViewModel {
         var isSuccess = false
         isLoading = true
         do {
-            try await authService.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
+            try await AuthenticationService.shared.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
             print("Register successful!")
             isSuccess = true
         } catch {
             print("Register failed: \(error)")
+            passwordError = "\(error)"
             isSuccess = false
         }
         isLoading = false

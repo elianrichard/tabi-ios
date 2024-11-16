@@ -99,8 +99,11 @@ struct EventDetailView: View {
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
                         }
-                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
-                            print("OCR")
+//                        TEMPORARILY DISABLED: QUICK SCAN OCR
+                        if (false) {
+                            CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
+                                print("OCR")
+                            }
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)

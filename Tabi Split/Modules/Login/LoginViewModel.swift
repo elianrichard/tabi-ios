@@ -16,8 +16,8 @@ class LoginViewModel {
     var passwordError: String? = nil
     
     var isLoading: Bool = false
-    let authService = AuthenticationService()
     
+    @MainActor
     func login() async -> Bool {
         guard validateInput() else {
             print("Cannot register: form is invalid")
@@ -27,11 +27,15 @@ class LoginViewModel {
         var isSuccess = false
         isLoading = true
         do {
-            try await authService.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
+            let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
             isSuccess = true
             print("Login successful!")
+            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: "userId")
+            UserDefaultsService.shared.saveCurrentUser(user: user)
+            SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
             print("Login failed: \(error)")
+            passwordError = "\(error)"
             isSuccess = false
         }
         isLoading = false

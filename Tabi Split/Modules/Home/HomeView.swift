@@ -11,6 +11,7 @@ struct HomeView: View {
     @Environment(Routes.self) private var routes
     @State var homeViewModel = HomeViewModel()
     @Environment(EventViewModel.self) var eventViewModel: EventViewModel
+    @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
     
     var body: some View {
         ZStack {
@@ -71,8 +72,19 @@ struct HomeView: View {
         .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            let data = SwiftDataService.shared.fetchAllEvents()
-            homeViewModel.populateEvents(data: data ?? [])
+            if let data = SwiftDataService.shared.fetchAllEvents() {
+                homeViewModel.populateEvents(data: data)
+            }
+            
+            if let currentUser = SwiftDataService.shared.getCurrentUser() {
+                profileViewModel.user = currentUser
+            }
+            
+            if let users = SwiftDataService.shared.fetchAllUser() {
+                for user in users {
+                    print(user.name, user.phone, user.image, "\(String(describing: user.imageUrl))")
+                }
+            }
         }
     }
 }

@@ -19,30 +19,33 @@ struct HomeTopBar: View {
                     .onTapGesture {
                         routes.navigate(to: .Profile)
                     }
-                Text("Hi, " + profileViewModel.user.name + "!")
+                Text("Hi, " + profileViewModel.user.name.getFirstName() + "!")
                     .font(.tabiHeadline)
             }
-            Spacer()
-            Button {
-                routes.navigate(to: .InboxView)
-            } label: {
-                Icon(.notification)
-                    .overlay {
-                        if (homeViewModel.notificationCount > 0) {
-                            Text("\(homeViewModel.notificationCount)")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.5)
-                                .foregroundStyle(.textWhite)
-                                .font(.tabiBody)
-                                .padding(2)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .background(.buttonRed)
-                                .clipShape(Circle())
-                                .offset(x: 10, y: -10)
+//            TEMPORARILY DISABLED: NOTIFICATION
+            if (false) {
+                Spacer()
+                Button {
+                    routes.navigate(to: .InboxView)
+                } label: {
+                    Icon(.notification)
+                        .overlay {
+                            if (homeViewModel.notificationCount > 0) {
+                                Text("\(homeViewModel.notificationCount)")
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.5)
+                                    .foregroundStyle(.textWhite)
+                                    .font(.tabiBody)
+                                    .padding(2)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .background(.buttonRed)
+                                    .clipShape(Circle())
+                                    .offset(x: 10, y: -10)
+                            }
+                            
                         }
-                        
-                    }
-                    .padding(.trailing, homeViewModel.notificationCount > 0 ? 10 : 0)
+                        .padding(.trailing, homeViewModel.notificationCount > 0 ? 10 : 0)
+                }
             }
         }
     }

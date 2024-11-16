@@ -7,14 +7,16 @@
 
 import Foundation
 
-protocol AuthenticationServicing {
-    func register(name: String, phone: String, password: String) async throws
-    func login(phone: String, password: String) async throws
-    func logout() async throws
-    func refresh() async throws
-}
+//protocol AuthenticationServicing {
+//    func register(name: String, phone: String, password: String) async throws
+//    func login(phone: String, password: String) async throws
+//    func logout() async throws
+//    func refresh() async throws
+//}
 
-final class AuthenticationService: AuthenticationServicing {
+final class AuthenticationService {
+    static let shared = AuthenticationService()
+    
     private let apiClient: APIClient
     private let tokenManager: TokenManaging
     
@@ -29,12 +31,14 @@ final class AuthenticationService: AuthenticationServicing {
         print(response, "register response")
     }
     
-    func login(phone: String, password: String) async throws {
+    func login(phone: String, password: String) async throws -> LoginResponse {
         let loginRequest = LoginRequest(phone: phone, password: password)
         let response: LoginResponse = try await apiClient.post(endpoint: "/auth/login", body: loginRequest)
         
         try tokenManager.saveAccessToken(response.token)
         try tokenManager.saveRefreshToken(response.refresh_token)
+        
+        return response
     }
     
     

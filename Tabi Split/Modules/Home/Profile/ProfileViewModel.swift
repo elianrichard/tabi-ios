@@ -30,10 +30,16 @@ final class ProfileViewModel{
         return isSuccess
     }
     
+    @MainActor
     func updateProfile (editProfileViewModel: EditProfileViewModel) {
-        print("update user")
-//        TEMPORARILY DISABLED: UPDATE PHONE NUMBER
-//        user.phone = editProfileViewModel.user.phone
+        user.name = editProfileViewModel.nameText
+        //        TEMPORARILY DISABLED: UPDATE PHONE NUMBER
+        //        user.phone = editProfileViewModel.user.phone
+        if let image = editProfileViewModel.chosenImage {
+            user.image = image.id
+        }
+        SwiftDataService.shared.editCurrentUser(name: editProfileViewModel.nameText, phone: editProfileViewModel.phoneText, image: editProfileViewModel.chosenImage?.id)
+//        TO DO: UPDATE PROFILE TO BACKEND
     }
     
     func isCurrentUser (_ userData: UserData) -> Bool {

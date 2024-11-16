@@ -19,7 +19,7 @@ class SwiftDataService {
     private init() {
         do {
             self.modelContainer = try ModelContainer(
-                for: NoteData.self, EventData.self,
+                for: NoteData.self, EventData.self, UserData.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: false)
             )
             self.modelContext = modelContainer.mainContext
