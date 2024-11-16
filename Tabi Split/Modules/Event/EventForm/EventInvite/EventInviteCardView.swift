@@ -12,7 +12,6 @@ struct EventInviteCardView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
 
     var userData: UserData
-    var label: String
     
     @State var isSelected: Bool = false
     var isLast: Bool = false
@@ -24,7 +23,7 @@ struct EventInviteCardView: View {
                 HStack (spacing: .spacingSmall) {
                     UserAvatar(userData: userData)
                     VStack (alignment: .leading, spacing: .spacingXSmall) {
-                        Text("\(userData.name) (\(label))")
+                        Text("\(userData.name)")
                             .font(.tabiHeadline)
                         Text("\(userData.phone)")
                             .font(.tabiBody)

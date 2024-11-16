@@ -14,7 +14,7 @@ final class EventInviteViewModel {
         didSet {
             if (self.searchUserText != "") {
                 filteredContacts = self.allContacts.filter {
-                    let searchedText = "\($0.givenName) \($0.familyName)".lowercased()
+                    let searchedText = $0.name.lowercased()
                     return searchedText.contains(searchUserText.lowercased())
                 }
             } else {
@@ -22,16 +22,17 @@ final class EventInviteViewModel {
             }
         }
     }
-    var allContacts: [CNContact] = [] {
+    var allContacts: [UserData] = [] {
         didSet {
             filteredContacts = self.allContacts
         }
     }
-    var filteredContacts: [CNContact] = []
+    var filteredContacts: [UserData] = []
     var selectedContacts: [UserData] = []
     
-    func fetchContacts () -> Void {
+    func fillUpContacts() {
         let CNStore = CNContactStore()
+        var cnContacts: [CNContact] = []
         
         switch CNContactStore.authorizationStatus(for: .contacts) {
         case .authorized, .limited:
@@ -39,20 +40,16 @@ final class EventInviteViewModel {
                 let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
-                    allContacts.append(contact)
+                    cnContacts.append(contact)
                 })
             } catch {
                 print("Error on contact fetching \(error)")
             }
-//        case .restricted:
-//            print("restricted")
-//        case .denied:
-//            print("denied")
         case .notDetermined, .denied, .restricted:
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
                     print("contact granted")
-                    self.fetchContacts()
+                    self.fillUpContacts()
                 } else if let error = error {
                     print("Error requesting contact acces: \(error)")
                 }
@@ -62,10 +59,17 @@ final class EventInviteViewModel {
                 let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
-                    allContacts.append(contact)
+                    cnContacts.append(contact)
                 })
             } catch {
                 print("Error on contact fetching \(error)")
+            }
+        }
+//        TO DO: Fix Warning SwiftData.ModelContext: Unbinding from the main queue.
+        Task {
+            await SwiftDataService.shared.addContacts(contacts: cnContacts)
+            if let users = await SwiftDataService.shared.getAllUsers(excludeLoggedUser: true) {
+                self.allContacts = users.sorted(by: { $0.name < $1.name })
             }
         }
     }

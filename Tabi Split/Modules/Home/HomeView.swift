@@ -78,7 +78,7 @@ struct HomeView: View {
             
             profileViewModel.refreshUserData()
             
-            if let users = SwiftDataService.shared.fetchAllUser() {
+            if let users = SwiftDataService.shared.getAllUsers() {
                 for user in users {
                     print(user.name, user.phone)
                 }

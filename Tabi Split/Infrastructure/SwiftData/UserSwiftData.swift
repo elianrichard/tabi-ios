@@ -7,24 +7,29 @@
 
 import Foundation
 import SwiftData
+import Contacts
 
 extension SwiftDataService {
-    func fetchAllUser () -> [UserData]? {
+    func getAllUsers (excludeLoggedUser: Bool = false) -> [UserData]? {
         let fetchDescriptor = FetchDescriptor<UserData>()
         do {
-            return try modelContext.fetch(fetchDescriptor)
+            let users = try modelContext.fetch(fetchDescriptor)
+            if let currentUser = UserDefaultsService.shared.getCurrentUser(),
+               excludeLoggedUser {
+                return users.filter{ $0.phone != currentUser.userPhone }
+            } else { return users }
         } catch {
             fatalError(error.localizedDescription)
         }
     }
     
     func saveCurrentUser (user: CurrentUserDefaults) {
-        if let users = fetchAllUser() {
+        if let users = getAllUsers() {
             if !users.contains(where: { $0.phone == user.userPhone }) {
                 if let image = ProfileImageEnum(rawValue: user.userImage) {
                     modelContext.insert(UserData(name: user.userName, phone: user.userPhone, image: image, imageUrl: nil))
                 } else {
-                    modelContext.insert(UserData(name: user.userName, phone: user.userPhone, image: nil, imageUrl: user.userImage))
+                    modelContext.insert(UserData(name: user.userName, phone: user.userPhone, image: .owl, imageUrl: user.userImage))
                 }
                 saveModelContext()
             }
@@ -32,7 +37,7 @@ extension SwiftDataService {
     }
     
     func getCurrentUser () -> UserData? {
-        if let users = fetchAllUser(),
+        if let users = getAllUsers(),
            let currentUser = UserDefaultsService.shared.getCurrentUser(),
            let user = users.first(where: { $0.phone == currentUser.userPhone }) {
             return user
@@ -55,5 +60,18 @@ extension SwiftDataService {
     
     func deleteAllUser () {
         deleteModelContext(type: UserData.self)
+    }
+    
+    func addContacts (contacts: [CNContact]) {
+        if let users = getAllUsers() {
+            for contact in contacts {
+                for number in contact.phoneNumbers {
+                    if !users.contains(where: { $0.phone == number.value.stringValue.formattedAsPhoneNumber() }) {
+                        modelContext.insert(UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber()))
+                    }
+                }
+            }
+            saveModelContext()
+        }
     }
 }

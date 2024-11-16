@@ -16,12 +16,12 @@ struct EventNoParticipants : View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 340, height: 250)
-            Text("You’re the only participant here")
+            Text("Zzz, you’re the only one here... ")
                 .font(.tabiSubtitle)
             Button {
                 routes.navigate(to: .EventInviteView)
             } label: {
-                Text("+ Invite your friends")
+                Text("+ Add Participants")
                     .font(.tabiHeadline)
             }
         }
