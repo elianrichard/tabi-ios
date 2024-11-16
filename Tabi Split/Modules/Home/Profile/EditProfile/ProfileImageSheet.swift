@@ -14,12 +14,10 @@ struct ProfileImageSheet: View {
     @State var viewModel = ProfileImagePickViewModel()
     
     var body: some View {
-        VStack(){
-            SheetXButton(toggle: Bindable(profileViewModel).toggleProfileImagePick)
-            VStack(spacing: .spacingMedium){
+        CustomSheet (xToggleBinding: Bindable(profileViewModel).toggleProfileImagePick) {
+            VStack(alignment: .leading, spacing: .spacingMedium){
                 Text("Select Image")
                     .font(.tabiTitle)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 5), spacing: .spacingMedium){
                     ForEach(1...profileViewModel.images.count+1, id: \.self) { index in
                         if index == 1 {
@@ -32,14 +30,14 @@ struct ProfileImageSheet: View {
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 60, height: 60)
                                                 .clipShape(Circle())
-                                        }else{
+                                        } else {
                                             Image(uiImage: editProfileViewModel.profileImage)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 60, height: 60)
                                                 .clipShape(Circle())
                                         }
-                                    }else{
+                                    } else {
                                         Image(systemName: "photo")
                                             .resizable()
                                             .foregroundColor(.textGrey)
@@ -63,8 +61,7 @@ struct ProfileImageSheet: View {
                                         viewModel.chosenIndex = 1
                                     }
                                 }
-                        }
-                        else{
+                        } else {
                             Circle()
                                 .foregroundColor(.uiGray)
                                 .overlay(content: {
@@ -94,7 +91,7 @@ struct ProfileImageSheet: View {
                         if let image = viewModel.chosenImage {
                             editProfileViewModel.profileImage = image
                         }
-                    }else{
+                    } else {
                         editProfileViewModel.profileImage = profileViewModel.images[viewModel.chosenIndex-2]
                     }
                     profileViewModel.toggleProfileImagePick.toggle()
@@ -104,12 +101,9 @@ struct ProfileImageSheet: View {
         .onAppear{
             viewModel.chosenIndex = editProfileViewModel.savedIndex
         }
-        .sheet(isPresented: Bindable(profileViewModel).toggleProfileImageUpload){
+        .sheet(isPresented: Bindable(profileViewModel).toggleProfileImageUpload) {
             ImagePicker(selectedImage: $viewModel.chosenImage)
         }
-        .navigationBarBackButtonHidden(true)
-        .padding()
-        .padding([.top], 10)
         .background(
             GeometryReader { geometry in
                 Color.clear

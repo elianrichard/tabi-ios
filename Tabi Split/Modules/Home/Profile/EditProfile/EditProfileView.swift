@@ -62,6 +62,7 @@ struct EditProfileView: View {
         .sheet(isPresented: Bindable(profileViewModel).toggleProfileImagePick){
             ProfileImageSheet(editProfileViewModel: $viewModel)
                 .presentationDetents([.height(profileViewModel.contentHeight)])
+                .presentationDragIndicator(.visible)
         }
         .navigationBarBackButtonHidden(true)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
