@@ -33,6 +33,7 @@ struct Input: View {
     var isSecure: Bool = false
     @Binding var text: String
     var isError: Bool = false
+    var isDisabled: Bool = false
     var backgroundColor: Color = .bgWhite
     var cornerRadius: CGFloat = .radiusMedium
     
@@ -46,7 +47,7 @@ struct Input: View {
     
     var body: some View {
         HStack(spacing: .spacingRegular){
-            if type == .phone{
+            if type == .phone {
                 Text("+" + phoneCode)
                     .font(.tabiBody)
                     .foregroundColor(.buttonGrey)
@@ -61,11 +62,13 @@ struct Input: View {
                                     prompt: Text(placeholder).foregroundStyle(.textGrey))
                         .frame(height: 20)
                         .focused($focusedField, equals: focusCase)
+                        .disabled(isDisabled)
                     } else {
                         TextField("", text: $text,
                                   prompt: Text(placeholder).foregroundStyle(.textGrey))
                         .frame(height: 20)
                         .focused($focusedField, equals: focusCase)
+                        .disabled(isDisabled)
                     }
                     
                     Button {
@@ -81,13 +84,14 @@ struct Input: View {
                 .frame(height: 20)
                 .keyboardType(type.keyboard)
                 .focused($focusedField, equals: focusCase)
+                .disabled(isDisabled)
             }
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 16)
-        .background(backgroundColor)
+        .background(isDisabled ? .uiGray : backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .foregroundStyle(.black)
+        .foregroundStyle(isDisabled ? .textGrey : .black)
         .font(.tabiBody)
         .overlay {
             RoundedRectangle(cornerRadius: cornerRadius)

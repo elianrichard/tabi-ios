@@ -28,8 +28,6 @@ struct AddExpenseView: View {
                                    placeholder: "Expense Name",
                                    text: Bindable(eventExpenseViewModel).expenseName,
                                    errorMessage: viewModel.expenseNameError,
-                                   inputBackgroundColor: .bgWhite,
-                                   inputCornerRadius: 16,
                                    focusedField: $focusedField,
                                    focusCase: .field1
                     )
@@ -136,8 +134,6 @@ struct AddExpenseView: View {
                                            placeholder: "0",
                                            price: Bindable( eventExpenseViewModel).expenseTotalInput,
                                            errorMessage: viewModel.totalBillError,
-                                           inputBackgroundColor: .bgWhite,
-                                           inputCornerRadius: 16,
                                            focusedField: $focusedField,
                                            focusCase: .field2
                             )

@@ -24,16 +24,11 @@ struct EditProfileView: View {
                     .overlay {
                         VStack {
                             Circle()
+                                .stroke(.bgWhite, lineWidth: 4)
+                                .fill(.buttonBlue)
                                 .frame(width: 28, height: 28)
-                                .foregroundColor(.buttonDarkBlue)
-                                .background(
-                                    Circle()
-                                        .frame(width: 30, height: 30)
-                                        .foregroundColor(.bgWhite)
-                                )
                                 .overlay {
-                                    Image(systemName: "pencil")
-                                        .foregroundColor(.bgWhite)
+                                    Icon(systemName: "pencil", color: .bgWhite, size: 14)
                                 }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
@@ -43,8 +38,9 @@ struct EditProfileView: View {
                     }
                 
                 VStack(spacing: .spacingRegular){
-                    InputWithLabel(label: "Fullname", placeholder: "Fullname", text: $viewModel.user.name, inputBackgroundColor: .bgWhite, inputCornerRadius: 16, focusedField: $focusedField, focusCase: .field1)
-                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $viewModel.user.phone, inputBackgroundColor: .bgWhite, inputCornerRadius: 16, focusedField: $focusedField, focusCase: .field2)
+                    InputWithLabel(label: "Full Name", placeholder: "Full Name", text: $viewModel.user.name, focusedField: $focusedField, focusCase: .field1)
+//                    TEMPORARILY DISABLED: PHONE NUMBER EDIT
+                    InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $viewModel.user.phone, isDisabled: true, focusedField: $focusedField, focusCase: .field2)
                 }
             }
             
