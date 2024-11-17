@@ -97,7 +97,7 @@ final class EventExpenseViewModel {
                 let amount = (additionalCharge.amount) * totalSpentPerson / totalItemCosts
                 additional.append(AdditionalCharge(additionalChargeType: AdditionalChargeType(rawValue: additionalCharge.additionalChargeType) ?? .other, amount: amount.properRound() ))
             }
-            peopleItems.append(PersonItem(name: person.name, items: personItems, additional: additional))
+            peopleItems.append(PersonItem(user: person, items: personItems, additional: additional))
         }
     }
     func calculateEqualSplit() -> Float {
@@ -257,7 +257,7 @@ final class EventExpenseViewModel {
             }
         }
     }
-    func removeZeroShareAssignee(item: ExpenseItem){
+    func removeZeroShareAssignee(item: ExpenseItem) {
         if let item = items.first(where: { $0.id == item.id }){
             for person in item.assignees{
                 if person.share == 0{
@@ -272,8 +272,11 @@ final class EventExpenseViewModel {
             print("Error")
             return
         }
-        let expense = Expense(event: event, name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
-        SwiftDataService.shared.addExpenseToEvent(event, expense)
+        let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
+        event.expenses.append(expense)
+        expense.items = items
+        expense.additionalCharges = additionalCharges
+        SwiftDataService.shared.saveModelContext()
     }
     @MainActor
     func handleDeleteExpense(_ event: EventData) {
@@ -286,7 +289,7 @@ final class EventExpenseViewModel {
     func handleUpdateExpense (_ event: EventData) {
         if let expense = selectedExpense, let selectedCoverer = selectedCoverer, let selectedMethod = selectedMethod {
             guard let index = event.expenses.firstIndex(of: expense) else { return }
-            event.expenses[index] = Expense(event: event, name: expenseName, coverer: selectedCoverer, dateOfCreation: expense.dateOfCreation, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
+            event.expenses[index] = Expense(name: expenseName, coverer: selectedCoverer, dateOfCreation: expense.dateOfCreation, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
             SwiftDataService.shared.saveModelContext()
         }
     }

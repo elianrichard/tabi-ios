@@ -20,7 +20,7 @@ struct SettlementOptimizationView: View {
             VStack (spacing: .spacingMedium) {
                 VStack {
                     ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack {
+                        HStack {
                             ForEach (eventViewModel.participantsBalance) { data in
                                 OptimizationPersonCard(data: data)
                             }
@@ -54,10 +54,10 @@ struct SettlementOptimizationView: View {
                     }
                     .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
                     .padding(1)
-                    Spacer()
                 }
                 .padding([.bottom, .horizontal])
             }
+            Spacer()
         }
         .navigationBarBackButtonHidden(true)
     }

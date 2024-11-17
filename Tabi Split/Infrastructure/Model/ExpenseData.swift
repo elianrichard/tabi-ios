@@ -10,7 +10,7 @@ import SwiftUI
 
 @Model
 class Expense {
-    var event: EventData
+    var event: EventData?
     var name: String
     var coverer: UserData
     var dateOfCreation: Date
@@ -20,8 +20,8 @@ class Expense {
     @Relationship(deleteRule: .cascade, inverse: \ExpenseItem.expense) var items: [ExpenseItem]
     @Relationship(deleteRule: .cascade, inverse: \AdditionalCharge.expense) var additionalCharges: [AdditionalCharge]
     
-    init(event: EventData, name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
-        self.event = event
+    init(name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
+//        self.event = event
         self.name = name
         self.coverer = coverer
         self.dateOfCreation = dateOfCreation
@@ -75,7 +75,7 @@ class AdditionalCharge {
 
 struct PersonItem: Identifiable {
     var id: UUID = UUID()
-    var name: String
+    var user: UserData
     var items: [ExpenseItem]
     var additional: [AdditionalCharge]
 }

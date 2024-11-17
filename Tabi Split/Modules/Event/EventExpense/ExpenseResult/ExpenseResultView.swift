@@ -90,7 +90,7 @@ struct ExpenseResultView: View {
                     }
                 )
             }
-            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+//            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
 //            TEMPORARILY DISABLED: UPLOAD IMAGE RECEIPT
             if (false) {

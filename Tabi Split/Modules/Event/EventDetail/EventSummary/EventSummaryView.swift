@@ -89,7 +89,9 @@ struct EventSummaryView: View {
                 }
                 .onTapGesture {
                     if (eventViewModel.isEventCompleted) {
-                        routes.navigate(to: .EventSettlementView)
+//                        TEMPORARILY DISABLED: SETTLEMENT
+//                        routes.navigate(to: .EventSettlementView)
+                        routes.navigate(to: .SettlementOptimizationView)
                     } else {
                         print("Cannot do this action yet")
                     }

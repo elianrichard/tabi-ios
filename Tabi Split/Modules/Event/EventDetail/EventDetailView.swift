@@ -11,6 +11,7 @@ struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     
     @State private var isShowCompleteSheet = false
     @State private var isShowIncompleteSheet = false
@@ -118,7 +119,7 @@ struct EventDetailView: View {
             
         }
         .onAppear {
-            eventViewModel.calculateOptimization()
+            eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $isShowCompleteSheet) {

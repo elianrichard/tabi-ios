@@ -49,7 +49,7 @@ struct ShowAllParticipants: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         if !eventExpenseViewModel.selectedParticipants.contains(person){
-                                                                                    eventExpenseViewModel.selectedParticipants.append(person)
+                                            eventExpenseViewModel.selectedParticipants.append(person)
                                         } else {
                                             if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
                                                 eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)
