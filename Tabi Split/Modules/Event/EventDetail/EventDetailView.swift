@@ -191,11 +191,11 @@ struct EventDetailView: View {
         }
         .sheet(isPresented: $isShowDeleteSheet) {
             VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: 0) {
+                VStack (spacing: .spacingLarge) {
                     Image(.eventDelete)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 300)
+                        .frame(width: 200, height: 200)
                     VStack (spacing: .spacingSmall) {
                         Text("Do you want to delete this event?")
                             .font(.tabiSubtitle)

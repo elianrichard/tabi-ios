@@ -86,7 +86,7 @@ final class EventViewModel {
     }
     
     func calculateOptimization(currentUser: UserData) {
-        let debug = true // enable this to debug print
+        let debug = false // enable this to debug print
         
         var userSummaryData: [SummaryHistoryData] = []
         var userTotalSpendingTemp: Float = 0
