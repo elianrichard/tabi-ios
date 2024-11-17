@@ -14,6 +14,7 @@ struct EventInviteView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     
     @State private var isLinkCopied = false
     @State private var isShowQrSheet = false
@@ -71,7 +72,11 @@ struct EventInviteView: View {
                     ScrollView (showsIndicators: false) {
                         LazyVStack {
                             Divided {
-                                ForEach(eventInviteViewModel.filteredContacts) { contact in
+                                EventInviteCardView(userData: profileViewModel.user, isCurrentUser: true)
+                                ForEach(eventInviteViewModel.selectedContactsList.filter{ $0 != profileViewModel.user }) { contact in
+                                    EventInviteCardView(userData: contact, isSelected: true)
+                                }
+                                ForEach(eventInviteViewModel.unselectedContactsList) { contact in
                                     EventInviteCardView(userData: contact)
                                 }
                             }
@@ -88,11 +93,10 @@ struct EventInviteView: View {
         }
         .padding()
         .onAppear {
-            if (eventInviteViewModel.allContacts.count == 0) {
+            if eventInviteViewModel.allContacts.count == 0, let currentUser = SwiftDataService.shared.getCurrentUser() {
                 DispatchQueue.global(qos: .background).async {
-                    eventInviteViewModel.fillUpContacts()
+                    eventInviteViewModel.fillUpContacts(currentUser: currentUser)
                 }
-                eventInviteViewModel.fetchContacts()
             }
             if let selectedEvent = eventViewModel.selectedEvent {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants

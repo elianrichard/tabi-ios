@@ -10,29 +10,52 @@ import Contacts
 
 @Observable
 final class EventInviteViewModel {
-    var searchUserText: String = "" {
-        didSet {
-            if (self.searchUserText != "") {
-                filteredContacts = self.allContacts.filter {
-                    let searchedText = $0.name.lowercased()
-                    return searchedText.contains(searchUserText.lowercased())
-                }
-            } else {
-                filteredContacts = self.allContacts
+    var searchUserText: String = ""
+    var searchFilteredContacts: [UserData] {
+        if (searchUserText != "") {
+            return allContacts.filter {
+                let searchedText = $0.name.lowercased()
+                return searchedText.contains(searchUserText.lowercased())
             }
-        }
+        } else { return allContacts }
     }
-    var allContacts: [UserData] = [] {
-        didSet {
-            filteredContacts = self.allContacts
-        }
+    var searchFilteredSelectedContacts: [UserData] {
+        return searchFilteredContacts.filter{ selectedContacts.contains($0) }
     }
-    var filteredContacts: [UserData] = []
-    var selectedContacts: [UserData] = []
-    var cnContacts: [CNContact] = []
+    var searchFilteredUnselectedContacts: [UserData] {
+        return searchFilteredContacts.filter{ !selectedContacts.contains($0) }
+    }
     
-    func fillUpContacts() {
+    var allContacts: [UserData] = []
+    var selectedContacts: [UserData] = []
+    var unselectedContacts: [UserData] {
+        return allContacts.filter { !selectedContacts.contains($0) }
+    }
+    
+    var selectedContactsList: [UserData] {
+        let contacts: [UserData]
+        if searchUserText != "" { contacts = searchFilteredSelectedContacts }
+        else { contacts = selectedContacts }
+        return contacts.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
+    }
+    var unselectedContactsList: [UserData] {
+        let contacts: [UserData]
+        if searchUserText != "" { contacts = searchFilteredUnselectedContacts }
+        else { contacts = unselectedContacts }
+        return contacts.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
+    }
+    
+    func toggleSelectContact (user: UserData) {
+        if selectedContacts.contains(user) {
+            selectedContacts.remove(user)
+        } else {
+            selectedContacts.append(user)
+        }
+    }
+    
+    func fillUpContacts(currentUser: UserData) {
         let CNStore = CNContactStore()
+        var cnContacts: [CNContact] = []
         
         switch CNContactStore.authorizationStatus(for: .contacts) {
         case .authorized, .limited:
@@ -49,7 +72,7 @@ final class EventInviteViewModel {
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
                     print("contact granted")
-                    self.fillUpContacts()
+                    self.fillUpContacts(currentUser: currentUser)
                 } else if let error = error {
                     print("Error requesting contact acces: \(error)")
                 }
@@ -65,17 +88,14 @@ final class EventInviteViewModel {
                 print("Error on contact fetching \(error)")
             }
         }
-    }
-    
-    @MainActor
-    func fetchContacts() {
+        var allUsers: [UserData] = []
+        
         for contact in cnContacts {
             for number in contact.phoneNumbers {
-                SwiftDataService.shared.addContact(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber())
+                allUsers.append(UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber()))
             }
         }
-        if let users = SwiftDataService.shared.getAllUsers(excludeLoggedUser: true) {
-            allContacts = users.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
-        }
+        
+        allContacts = allUsers.filter{ $0.phone != currentUser.phone }
     }
 }

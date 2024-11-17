@@ -63,7 +63,7 @@ extension SwiftDataService {
     }
     
     func addContact (name: String, phone: String) {
-        if let users = getAllUsers() {
+        if let users = getAllUsers(excludeLoggedUser: true) {
             if !users.contains(where: { $0.phone == phone }) {
                 modelContext.insert(UserData(name: name, phone: phone))
                 saveModelContext()
