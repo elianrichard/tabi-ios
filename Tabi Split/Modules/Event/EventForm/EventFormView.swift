@@ -64,13 +64,7 @@ struct EventFormView: View {
                                             HStack(spacing: .spacingTight) {
                                                 Icon(systemName: "plus", color: .buttonBlue, size: 20)
                                                     .frame(width: 40, height: 40)
-                                                    .clipShape(Circle())
-                                                    .overlay {
-                                                        Circle()
-                                                            .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 5]))
-                                                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                                            .foregroundColor(.bgGreyOverlay)
-                                                    }
+                                                    .addDashedCircleBorder()
                                                 Text("Add")
                                                     .font(.tabiBody)
                                                     .foregroundColor(.buttonBlue)
@@ -79,7 +73,6 @@ struct EventFormView: View {
                                             .contentShape(Rectangle())
                                         }
                                         
-//                                        UserCard(user: profileViewModel.user)
                                         ForEach (participantsList.prefix(4)) { user in
                                             UserCard(user: user)
                                         }

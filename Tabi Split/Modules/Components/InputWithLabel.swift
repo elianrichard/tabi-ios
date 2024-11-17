@@ -10,6 +10,7 @@ import SwiftUI
 
 struct InputWithLabel: View {
     var label: String
+    var isOptional: Bool
     var placeholder: String
     var isSecure: Bool = false
     var isDisabled: Bool
@@ -23,8 +24,9 @@ struct InputWithLabel: View {
     var focusCase: FocusField
 
     // Initializer for text input only
-    init(label: String, placeholder: String, text: Binding<String>, errorMessage: String? = nil, isSecure: Bool = false, isDisabled: Bool = false, inputTypePicked: InputTypeEnum = .text, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
+    init(label: String, isOptional: Bool = false, placeholder: String, text: Binding<String>, errorMessage: String? = nil, isSecure: Bool = false, isDisabled: Bool = false, inputTypePicked: InputTypeEnum = .text, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
         self.label = label
+        self.isOptional = isOptional
         self.placeholder = placeholder
         self._text = text
         self._price = .constant(0)  // Default to nil
@@ -37,8 +39,9 @@ struct InputWithLabel: View {
     }
     
     // Initializer for price input only
-    init(label: String, placeholder: String, price: Binding<Float>, errorMessage: String? = nil, isDisabled: Bool = false, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
+    init(label: String, isOptional: Bool = false, placeholder: String, price: Binding<Float>, errorMessage: String? = nil, isDisabled: Bool = false, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
         self.label = label
+        self.isOptional = isOptional
         self.placeholder = placeholder
         self._text = .constant("")  // Default to empty string
         self._price = price
@@ -51,8 +54,15 @@ struct InputWithLabel: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8){
-            Text(label)
-                .font(.tabiBody)
+            HStack (spacing: .spacingXSmall) {
+                Text(label)
+                    .font(.tabiBody)
+                if isOptional {
+                    Text("(optional)")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
+                }
+            }
             switch inputTypePicked {
             case .text, .phone:
                 Input(placeholder: placeholder,

@@ -60,7 +60,7 @@ struct HomeView: View {
                         Icon(systemName: "plus", color: .textWhite, size: 24)
                             .frame(width: 64, height: 64)
                             .background(.buttonBlue)
-                            .clipShape(RoundedRectangle(cornerRadius: 50))
+                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
                     }
                 }
                 .frame(maxHeight: .infinity, alignment: .bottom)

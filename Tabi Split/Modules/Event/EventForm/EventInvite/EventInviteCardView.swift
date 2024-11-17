@@ -10,7 +10,7 @@ import Contacts
 
 struct EventInviteCardView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
-
+    
     var userData: UserData
     var isCurrentUser = false
     var isSelected: Bool = false
@@ -20,36 +20,26 @@ struct EventInviteCardView: View {
             Button {
                 eventInviteViewModel.toggleSelectContact(user: userData)
             } label: {
-                HStack {
-                    HStack (spacing: .spacingSmall) {
-                        UserAvatar(userData: userData)
-                        VStack (alignment: .leading, spacing: .spacingXSmall) {
-                            Text("\(userData.name)\(isCurrentUser ? " (You)" : "")")
-                                .font(.tabiHeadline)
-                                .foregroundStyle(.textBlack)
-                            Text("\(userData.phone)")
-                                .font(.tabiBody)
-                                .foregroundStyle(.textGrey)
-                        }
-                    }
-                    Spacer()
-                    Circle()
-                        .stroke(isCurrentUser ? .textGrey : (isSelected ? .buttonBlue : .textGrey), lineWidth: 1)
-                        .fill(.clear)
-                        .frame(width: 20)
-                        .overlay {
-                            if isSelected || isCurrentUser {
-                                Icon(systemName: "checkmark.circle.fill", color: isCurrentUser ? .textGrey : .buttonBlue, size: 20)
+                ZStack {
+                    UserCard(user: userData)
+                    HStack {
+                        Spacer()
+                        Circle()
+                            .stroke(isCurrentUser ? .textGrey : (isSelected ? .buttonBlue : .textGrey), lineWidth: 1)
+                            .fill(.clear)
+                            .frame(width: 20)
+                            .overlay {
+                                if isSelected || isCurrentUser {
+                                    Icon(systemName: "checkmark.circle.fill", color: isCurrentUser ? .textGrey : .buttonBlue, size: 20)
+                                }
                             }
-                        }
-                        .offset(x: -1)
-                        .transaction { transaction in
-                            transaction.animation = nil
-                        }
+                            .offset(x: -1)
+                    }
                 }
                 .padding(.vertical, 12)
-                .background(.clear)
-                .contentShape(Rectangle())
+                .transaction { transaction in
+                    transaction.animation = nil
+                }
             }
             .disabled(isCurrentUser)
         }

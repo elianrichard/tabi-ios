@@ -18,14 +18,14 @@ struct UserCard : View {
             VStack(alignment: .leading, spacing: .spacingXSmall) {
                 Text("\(user.name)\((isShowYouText && profileViewModel.isCurrentUser(user)) ? " (You)" : "")")
                     .font(.tabiHeadline)
-                Text(user.phone)
-                    .font(.tabiBody)
-                    .foregroundColor(.textGrey)
+                    .foregroundStyle(.textBlack)
+                if user.phone != "" {
+                    Text(user.phone)
+                        .font(.tabiBody)
+                        .foregroundColor(.textGrey)
+                }
             }
             Spacer()
-        }
-        .onAppear {
-            
         }
     }
 }

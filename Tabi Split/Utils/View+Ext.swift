@@ -32,4 +32,8 @@ extension View {
     func addBackgroundColor(_ color: Color, callback: (() -> Void)? = nil) -> some View {
         self.modifier(BackgroundModifier(color: color) { callback?() })
     }
+    
+    func addDashedCircleBorder() -> some View {
+        self.modifier(DashedCircleBorder())
+    }
 }
