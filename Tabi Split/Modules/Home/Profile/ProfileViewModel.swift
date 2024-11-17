@@ -22,6 +22,7 @@ final class ProfileViewModel{
         var isSuccess = false
         do {
             try await AuthenticationService.shared.logout()
+            SwiftDataService.shared.deleteAllEvents()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")

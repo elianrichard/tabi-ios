@@ -57,4 +57,8 @@ extension SwiftDataService {
             }
         }
     }
+    
+    func deleteAllEvents () {
+        deleteModelContext(type: EventData.self)
+    }
 }

@@ -17,8 +17,8 @@ class Expense {
     var price: Float
     var splitMethod: SplitMethod.ID
     var participants: [UserData]
-    var items: [ExpenseItem]
-    var additionalCharges: [AdditionalCharge]
+    @Relationship(deleteRule: .cascade, inverse: \ExpenseItem.expense) var items: [ExpenseItem]
+    @Relationship(deleteRule: .cascade, inverse: \AdditionalCharge.expense) var additionalCharges: [AdditionalCharge]
     
     init(event: EventData, name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
         self.event = event
@@ -38,7 +38,8 @@ class ExpenseItem {
     var itemName: String
     var itemPrice: Float
     var itemQuantity: Float
-    var assignees: [ExpensePerson]
+    @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.expenseItem) var assignees: [ExpensePerson]
+    var expense: Expense?
     
     init(itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
         self.itemName = itemName
@@ -52,6 +53,7 @@ class ExpenseItem {
 class ExpensePerson {
     var user: UserData
     var share: Float
+    var expenseItem: ExpenseItem?
     
     init(user: UserData, share: Float = 0) {
         self.user = user
@@ -63,6 +65,7 @@ class ExpensePerson {
 class AdditionalCharge {
     var additionalChargeType: AdditionalChargeType.ID
     var amount: Float
+    var expense: Expense?
     
     init(additionalChargeType: AdditionalChargeType, amount: Float) {
         self.additionalChargeType = additionalChargeType.id

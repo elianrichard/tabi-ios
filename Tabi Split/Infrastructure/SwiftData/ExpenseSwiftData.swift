@@ -17,4 +17,8 @@ extension SwiftDataService {
         }
         saveModelContext()
     }
+    
+    func deleteAllExpenses () {
+        deleteModelContext(type: Expense.self)
+    }
 }
