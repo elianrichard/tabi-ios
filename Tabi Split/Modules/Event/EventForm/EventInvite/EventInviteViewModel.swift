@@ -29,10 +29,10 @@ final class EventInviteViewModel {
     }
     var filteredContacts: [UserData] = []
     var selectedContacts: [UserData] = []
+    var cnContacts: [CNContact] = []
     
     func fillUpContacts() {
         let CNStore = CNContactStore()
-        var cnContacts: [CNContact] = []
         
         switch CNContactStore.authorizationStatus(for: .contacts) {
         case .authorized, .limited:
@@ -65,12 +65,17 @@ final class EventInviteViewModel {
                 print("Error on contact fetching \(error)")
             }
         }
-//        TO DO: Fix Warning SwiftData.ModelContext: Unbinding from the main queue.
-        Task {
-            await SwiftDataService.shared.addContacts(contacts: cnContacts)
-            if let users = await SwiftDataService.shared.getAllUsers(excludeLoggedUser: true) {
-                self.allContacts = users.sorted(by: { $0.name < $1.name })
+    }
+    
+    @MainActor
+    func fetchContacts() {
+        for contact in cnContacts {
+            for number in contact.phoneNumbers {
+                SwiftDataService.shared.addContact(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber())
             }
+        }
+        if let users = SwiftDataService.shared.getAllUsers(excludeLoggedUser: true) {
+            allContacts = users.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
         }
     }
 }

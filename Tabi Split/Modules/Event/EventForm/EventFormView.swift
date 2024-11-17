@@ -180,6 +180,10 @@ struct EventFormView: View {
             if let selectedEvent = eventViewModel.selectedEvent {
                 isEdit = true
                 eventInviteViewModel.selectedContacts = selectedEvent.participants
+            } else {
+                isEdit = false
+                eventInviteViewModel.searchUserText = ""
+                eventInviteViewModel.selectedContacts = []
             }
         }
         .padding()

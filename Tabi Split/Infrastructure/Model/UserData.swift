@@ -15,8 +15,8 @@ class UserData {
     var phone: String
     var image: ProfileImageEnum.ID
     var imageUrl: String?
-    @Relationship(deleteRule: .cascade, inverse: \EventData.participants) var events: [EventData]
-    @Relationship(deleteRule: .cascade, inverse: \Expense.participants) var expenses: [Expense]
+    @Relationship(deleteRule: .nullify, inverse: \EventData.participants) var events: [EventData]
+    @Relationship(deleteRule: .nullify, inverse: \Expense.participants) var expenses: [Expense]
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]
     @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]
     

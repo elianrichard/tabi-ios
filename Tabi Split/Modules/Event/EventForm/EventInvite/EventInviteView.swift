@@ -89,10 +89,10 @@ struct EventInviteView: View {
         .padding()
         .onAppear {
             if (eventInviteViewModel.allContacts.count == 0) {
-                print("Fetching contacts")
                 DispatchQueue.global(qos: .background).async {
                     eventInviteViewModel.fillUpContacts()
                 }
+                eventInviteViewModel.fetchContacts()
             }
             if let selectedEvent = eventViewModel.selectedEvent {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants

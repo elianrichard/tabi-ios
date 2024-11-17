@@ -62,16 +62,12 @@ extension SwiftDataService {
         deleteModelContext(type: UserData.self)
     }
     
-    func addContacts (contacts: [CNContact]) {
+    func addContact (name: String, phone: String) {
         if let users = getAllUsers() {
-            for contact in contacts {
-                for number in contact.phoneNumbers {
-                    if !users.contains(where: { $0.phone == number.value.stringValue.formattedAsPhoneNumber() }) {
-                        modelContext.insert(UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber()))
-                    }
-                }
+            if !users.contains(where: { $0.phone == phone }) {
+                modelContext.insert(UserData(name: name, phone: phone))
+                saveModelContext()
             }
-            saveModelContext()
         }
     }
 }

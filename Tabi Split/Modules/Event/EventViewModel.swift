@@ -17,6 +17,8 @@ final class EventViewModel {
                 eventName = event.eventName
                 eventIcon = EventIconEnum(rawValue: event.eventIcon) ?? .icon1
                 selectedSection = .expenses
+            } else {
+                eventName = ""
             }
         }
     }
@@ -31,7 +33,7 @@ final class EventViewModel {
     }
     var isNoParticipants: Bool {
         if let event = selectedEvent {
-            return event.participants.count == 1
+            return event.participants.count <= 1
         } else { return true }
     }
     
@@ -45,12 +47,18 @@ final class EventViewModel {
     
     @MainActor
     func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData) {
+        var participants = selectedContacts.map { $0 }
+        participants.append(currentUser)
+        
         if let selectedEvent {
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
-            selectedEvent.participants = selectedContacts
+            selectedEvent.participants = participants
         } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser] + selectedContacts))
+            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [])
+            SwiftDataService.shared.addEvent(newEvent)
+            newEvent.participants.append(contentsOf: participants)
+            SwiftDataService.shared.saveModelContext()
         }
     }
     
