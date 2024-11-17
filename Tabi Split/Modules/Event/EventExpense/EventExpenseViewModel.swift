@@ -155,15 +155,18 @@ final class EventExpenseViewModel {
     func stringToFloat(_ input: String) -> Float {
         // Replace commas used for thousand separators with an empty string
         let cleanedString = input.replacingOccurrences(of: "[.,]", with: "", options: .regularExpression)
+        let cleanedString2 = cleanedString.lowercased().replacingOccurrences(of: "[rp|rp.|rp. |rp .]", with: "", options: .regularExpression)
         
         // Convert the cleaned string to Float
-        return Float(cleanedString) ?? 0
+        return Float(cleanedString2) ?? 0
     }
     func performOCROnImage(_ image: UIImage) throws {
         var itemsAndPrice: [[String]] = []
         self.words.removeAll()
         var totalFound: Bool = false
         var subTotalFound: Bool = false
+        var serviceFound: Bool = false
+        var taxFound: Bool = false
         let taxKeywords: [String] = ["tax", "ppn", "pb10", "prest10", "pajak", "taxes", "pb1"]
         let serviceKeywords: [String] = ["service", "charge"]
         
@@ -195,20 +198,42 @@ final class EventExpenseViewModel {
             throw ocrError.textRecognizerError
         }
         
-        for word in words {
+        firstLoop: for word in words {
             if let topCandidate = word.topCandidates(1).first {
                 let recognizedText = topCandidate.string.replacingOccurrences(of: " ", with: "")
                 print(recognizedText)
-                let pattern = "^((Rp|rp|RP)?\\d{1,3})((,|.)\\d{3})*$"
+                let pattern = "^((Rp|rp|RP)?\\d{1,3})(((,|\\.)\\d{3})*((,|\\.)\\d{2})?)$"
                 let regex = try? NSRegularExpression(pattern: pattern)
                 let range = NSRange(location: 0, length: recognizedText.utf16.count)
                 if regex?.firstMatch(in: recognizedText, options: [], range: range) != nil {
-                    if word.boundingBox.minX > 0.6 {
-                        for word2 in words {
-                            if (((word2.boundingBox.midY) <= word.boundingBox.maxY) && ((word2.boundingBox.midY) >= (word.boundingBox.minY))){
-                                let recognizedText2 = word2.topCandidates(1).first?.string
-                                if recognizedText2 != recognizedText {
-                                    itemsAndPrice.append([recognizedText2 ?? "", normalizeString(recognizedText2 ?? ""), recognizedText])
+                    if word.boundingBox.maxX > 0.9 { // find the prices that is on the right (TBD: find a better solution than 0.9 because god knows it won't always be on the edge and there are other shits on the edge aswell)
+                        for (index, word2) in words.enumerated() {
+                            var currentIndex = index
+                            if (((word2.boundingBox.midY) <= word.boundingBox.maxY) && ((word2.boundingBox.midY) >= (word.boundingBox.minY))){ // find the closest item that is parallel in the same row
+                                if let recognizedText2 = word2.topCandidates(1).first?.string{
+                                    if recognizedText2 != recognizedText {
+                                        
+                                        let isItTax = taxKeywords.contains { additionalChargeKeywords in
+                                            normalizeString(recognizedText2).contains(additionalChargeKeywords)
+                                        }
+                                        let isItService = serviceKeywords.contains { serviceKeywords in
+                                            normalizeString(recognizedText2).contains(serviceKeywords)
+                                        }
+                                        
+                                        if normalizeString(recognizedText2).range(of: "[a-zA-Z0-9]*", options: .regularExpression) != nil && !isItTax && !isItService  && isValidNumberGreaterThanAlphabets(recognizedText2){ // if the item contains a symbol or number likely it isnt the item name
+                                            var recognizedText3 = words[currentIndex-1].topCandidates(1).first?.string
+                                            while normalizeString(recognizedText3 ?? "").range(of: "[a-zA-Z0-9]*", options: .regularExpression) != nil && isValidNumberGreaterThanAlphabets(recognizedText3 ?? "") {
+                                                currentIndex -= 1
+                                                recognizedText3 = words[currentIndex-1].topCandidates(1).first?.string
+                                            }// when the while loop ends recognized text 3 should be an item name
+                                            itemsAndPrice.append([recognizedText3 ?? "", normalizeString(recognizedText3 ?? ""), recognizedText])
+                                            continue firstLoop
+                                        }else{
+                                            let recognizedText2 = word2.topCandidates(1).first?.string
+                                            itemsAndPrice.append([recognizedText2 ?? "", normalizeString(recognizedText2 ?? ""), recognizedText])
+                                            continue firstLoop
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -224,8 +249,12 @@ final class EventExpenseViewModel {
                 item[1].contains(additionalChargeKeywords)
             }
             if isItTax {
-                if !item[1].contains("dasar") {
+                taxFound.toggle()
+                if !item[1].contains("dasar") || !item[1].contains("sebelum") || !item[1].contains("incl") {
                     additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: stringToFloat(item[2])))
+                    itemsAndPrice.remove(item)
+                    continue
+                }else{
                     itemsAndPrice.remove(item)
                     continue
                 }
@@ -235,19 +264,24 @@ final class EventExpenseViewModel {
                 item[1].contains(serviceKeywords)
             }
             if isItService {
+                serviceFound.toggle()
                 additionalCharges.append(AdditionalCharge(additionalChargeType: .service, amount: stringToFloat(item[2])))
                 itemsAndPrice.remove(item)
                 continue
             }
             
             if (item[1].contains("total") && item[1] != "subtotal"){
+                if (item[1].contains("food") || item[1].contains("beverage")){
+                    itemsAndPrice.remove(item)
+                    continue
+                }
                 totalFound.toggle()
                 self.totalSpending = stringToFloat(item[2])
                 itemsAndPrice.remove(item)
                 break
             }
             
-            if !subTotalFound{
+            if !subTotalFound && !serviceFound && !taxFound{
                 if (item[1].contains("subtotal")){
                     subTotalFound.toggle()
                     continue
@@ -265,6 +299,15 @@ final class EventExpenseViewModel {
                 }
             }
         }
+    }
+    func isValidNumberGreaterThanAlphabets(_ string: String) -> Bool {
+        let numbersRegex = try! NSRegularExpression(pattern: "\\d") // Match digits
+        let alphabetsRegex = try! NSRegularExpression(pattern: "[a-zA-Z]") // Match alphabets
+
+        let numbersCount = numbersRegex.numberOfMatches(in: string, range: NSRange(location: 0, length: string.utf16.count))
+        let alphabetsCount = alphabetsRegex.numberOfMatches(in: string, range: NSRange(location: 0, length: string.utf16.count))
+
+        return numbersCount >= alphabetsCount
     }
     @MainActor
     func finalizeExpense(_ event: EventData) {
