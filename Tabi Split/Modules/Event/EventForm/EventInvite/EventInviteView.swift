@@ -53,24 +53,10 @@ struct EventInviteView: View {
                         })
                     }
                 }
-                HStack (spacing: .spacingSmall) {
-                    Icon(systemName: "magnifyingglass", color: .textGrey, size: 16)
-                    TextField("",
-                              text: Bindable(eventInviteViewModel).searchUserText,
-                              prompt: Text("Search or Add New Participants").foregroundStyle(.textGrey))
-                        .font(.tabiBody)
-                }
-                .padding(.spacingTight)
-                .background(.uiWhite)
-                .clipShape(RoundedRectangle(cornerRadius: .infinity))
-                .overlay {
-                    RoundedRectangle(cornerRadius: .infinity)
-                        .fill(.clear)
-                        .strokeBorder(.uiGray, lineWidth: 1)
-                }
+                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search or Add New Participants")
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
-                        LazyVStack {
+                        LazyVStack (spacing: 0) {
                             Divided {
                                 EventInviteCardView(userData: profileViewModel.user, isCurrentUser: true)
                                 ForEach(eventInviteViewModel.selectedContactsList.filter{ $0 != profileViewModel.user }) { contact in

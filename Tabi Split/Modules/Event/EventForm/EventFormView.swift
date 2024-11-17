@@ -16,7 +16,8 @@ struct EventFormView: View {
     @State var isEdit: Bool = false
     @State var isShowEditIconSheet: Bool = false
     @State var toggleSeeAllParticipantsSheet: Bool = false
-
+    @State var participantsList: [UserData] = []
+    
     @FocusState private var focusedField: FocusField?
     
     var body : some View {
@@ -53,14 +54,14 @@ struct EventFormView: View {
                         InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName, focusedField: $focusedField, focusCase: .field1)
                         if (isEdit) {
                             VStack (alignment: .leading, spacing: .spacingTight) {
-                                Text("Participants (" + String((eventViewModel.selectedEvent?.participants ?? []).count) + ")")
+                                Text("Participants (\((eventViewModel.selectedEvent?.participants ?? []).count))")
                                     .font(.tabiBody)
                                 VStack (alignment: .leading, spacing: .spacingTight) {
-                                    Button {
-                                        routes.navigate(to: .EventInviteView)
-                                    } label: {
-                                        HStack(spacing: .spacingTight){
-                                            ZStack {
+                                    Divided {
+                                        Button {
+                                            routes.navigate(to: .EventInviteView)
+                                        } label: {
+                                            HStack(spacing: .spacingTight) {
                                                 Icon(systemName: "plus", color: .buttonBlue, size: 20)
                                                     .frame(width: 40, height: 40)
                                                     .clipShape(Circle())
@@ -70,48 +71,35 @@ struct EventFormView: View {
                                                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                                                             .foregroundColor(.bgGreyOverlay)
                                                     }
-                                            }
-                                            Text("Add")
-                                                .font(.tabiBody)
-                                                .foregroundColor(.buttonBlue)
-                                        }
-                                        .frame(maxHeight: .infinity, alignment: .leading)
-                                    }
-                                    
-                                    Divider()
-                                        .background(.buttonGrey)
-                                    
-                                    ForEach (eventViewModel.selectedEvent?.participants.firstFourElements ?? []) { user in
-                                        HStack{
-                                            UserAvatar(userData: user)
-                                            VStack(alignment: .leading){
-                                                Text(user.name)
-                                                    .font(.tabiHeadline)
-                                                Text(user.phone)
+                                                Text("Add")
                                                     .font(.tabiBody)
-                                                    .foregroundColor(.textGrey)
+                                                    .foregroundColor(.buttonBlue)
+                                                Spacer()
                                             }
+                                            .contentShape(Rectangle())
                                         }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        Divider()
-                                            .background(.buttonGrey)
-                                    }
-                                    
-                                    Button{
-                                        toggleSeeAllParticipantsSheet.toggle()
-                                    }label:{
-                                        HStack{
-                                            Text("See All")
-                                                .font(.tabiBody)
-                                                .foregroundColor(.buttonBlue)
-                                            Spacer()
-                                            Icon(systemName: "chevron.right", color: .buttonBlue, size: 18)
+                                        
+//                                        UserCard(user: profileViewModel.user)
+                                        ForEach (participantsList.prefix(4)) { user in
+                                            UserCard(user: user)
                                         }
-                                        .frame(height: 40)
+                                        
+                                        Button{
+                                            toggleSeeAllParticipantsSheet.toggle()
+                                        } label: {
+                                            HStack{
+                                                Text("See All")
+                                                    .font(.tabiBody)
+                                                    .foregroundColor(.buttonBlue)
+                                                Spacer()
+                                                Icon(systemName: "chevron.right", color: .buttonBlue, size: 16)
+                                            }
+                                            .padding(.vertical, .spacingSmall)
+                                            .contentShape(Rectangle())
+                                        }
                                     }
                                 }
-                                .padding(.horizontal, 18)
-                                .padding(.vertical, 12)
+                                .padding(.spacingTight)
                                 .frame(maxWidth: .infinity, alignment: .topLeading)
                                 .background(.bgWhite)
                                 .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
@@ -132,6 +120,25 @@ struct EventFormView: View {
                 routes.navigateBack()
             }
         }
+        .onAppear {
+            if let selectedEvent = eventViewModel.selectedEvent {
+                isEdit = true
+                eventInviteViewModel.selectedContacts = selectedEvent.participants
+                var participants = selectedEvent.participants.filter{ !profileViewModel.isCurrentUser($0) }
+                participants.sort { $0.name.lowercased() < $1.name.lowercased() }
+                participants.insert(profileViewModel.user, at: 0)
+                participantsList = participants
+            } else {
+                isEdit = false
+                eventInviteViewModel.searchUserText = ""
+                eventInviteViewModel.selectedContacts = []
+            }
+        }
+        .padding()
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
+        .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $isShowEditIconSheet) {
             VStack (spacing: 0) {
                 SheetXButton(toggle: $isShowEditIconSheet)
@@ -173,24 +180,10 @@ struct EventFormView: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $toggleSeeAllParticipantsSheet){
-            SeeAllParticipantSheet(isPresented: $toggleSeeAllParticipantsSheet)
+            SeeAllParticipantSheet(isPresented: $toggleSeeAllParticipantsSheet, participantsList: participantsList)
                 .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
-        .onAppear {
-            if let selectedEvent = eventViewModel.selectedEvent {
-                isEdit = true
-                eventInviteViewModel.selectedContacts = selectedEvent.participants
-            } else {
-                isEdit = false
-                eventInviteViewModel.searchUserText = ""
-                eventInviteViewModel.selectedContacts = []
-            }
-        }
-        .padding()
-        .addBackgroundColor(.bgWhite) {
-            focusedField = nil
-        }
-        .navigationBarBackButtonHidden(true)
     }
 }
 

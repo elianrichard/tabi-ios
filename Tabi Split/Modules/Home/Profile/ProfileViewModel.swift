@@ -80,6 +80,6 @@ final class ProfileViewModel{
     }
     
     func isCurrentUser (_ userData: UserData) -> Bool {
-        return userData.phone == user.phone
+        return userData == user || userData.phone == user.phone
     }
 }

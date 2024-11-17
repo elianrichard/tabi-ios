@@ -46,7 +46,7 @@ struct Input: View {
     var focusCase: FocusField
     
     var body: some View {
-        HStack(spacing: .spacingRegular){
+        HStack(spacing: .spacingRegular) {
             if type == .phone {
                 Text("+" + phoneCode)
                     .font(.tabiBody)

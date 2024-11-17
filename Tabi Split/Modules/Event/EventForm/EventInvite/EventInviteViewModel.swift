@@ -92,7 +92,12 @@ final class EventInviteViewModel {
         
         for contact in cnContacts {
             for number in contact.phoneNumbers {
-                allUsers.append(UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber()))
+                let phone = number.value.stringValue.formattedAsPhoneNumber()
+                if let selectedUser = selectedContacts.first(where: { $0.phone == phone }) {
+                    allUsers.append(selectedUser)
+                } else {
+                    allUsers.append(UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber()))
+                }
             }
         }
         
