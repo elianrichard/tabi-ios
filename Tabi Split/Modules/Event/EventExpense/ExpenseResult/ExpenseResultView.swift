@@ -92,10 +92,14 @@ struct ExpenseResultView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
-            if !eventExpenseViewModel.isEditView { CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
-                isShowReceiptSheet = true
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
+//            TEMPORARILY DISABLED: UPLOAD IMAGE RECEIPT
+            if (false) {
+                if !eventExpenseViewModel.isEditView {
+                    CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
+                        isShowReceiptSheet = true
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
             }
             
             Spacer()

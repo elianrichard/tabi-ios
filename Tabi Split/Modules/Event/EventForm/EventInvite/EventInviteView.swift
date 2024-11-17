@@ -98,7 +98,7 @@ struct EventInviteView: View {
                         }
                     }
                     
-                    CustomButton(text: "Add", isEnabled: eventInviteViewModel.selectedContacts.count > 0) {
+                    CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add", isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContactsList.count > 1) {
                         eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
                         eventInviteViewModel.searchUserText = ""
                         routes.navigateBack()

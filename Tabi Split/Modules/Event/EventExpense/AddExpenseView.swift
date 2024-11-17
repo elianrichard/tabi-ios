@@ -139,39 +139,42 @@ struct AddExpenseView: View {
                             )
                         }
                     } // Input nominal kalau equally
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 0){
-                            Text("Purchase Receipt ")
-                                .font(.tabiBody)
-                            Text("(optional)")
-                                .font(.tabiBody)
-                                .foregroundColor(.textGrey)
-                        }
-                        HStack(spacing: 0){
-                            CustomButton(text: eventExpenseViewModel.uploadedReceiptImage == nil ? "Upload Image" : "Uploaded Image", type: .tertiary, icon: eventExpenseViewModel.uploadedReceiptImage == nil ? "square.and.arrow.up" : "photo", iconSize: 20, customTextColor: .buttonBlue){
-                                viewModel.toggleReceiptSheet.toggle()
+//                    TEMPORARILY DISABLED: UPLOAD IMAGE + OCR
+                    if (false) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 0){
+                                Text("Purchase Receipt ")
+                                    .font(.tabiBody)
+                                Text("(optional)")
+                                    .font(.tabiBody)
+                                    .foregroundColor(.textGrey)
                             }
-                            .lineLimit(1)
-                            
-                            if eventExpenseViewModel.uploadedReceiptImage != nil{
-                                Button{
-                                    eventExpenseViewModel.uploadedReceiptImage = nil
-                                }label:{
-                                    Icon(systemName: "xmark", color: .textGrey, size: 10)
+                            HStack(spacing: 0){
+                                CustomButton(text: eventExpenseViewModel.uploadedReceiptImage == nil ? "Upload Image" : "Uploaded Image", type: .tertiary, icon: eventExpenseViewModel.uploadedReceiptImage == nil ? "square.and.arrow.up" : "photo", iconSize: 20, customTextColor: .buttonBlue){
+                                    viewModel.toggleReceiptSheet.toggle()
                                 }
-                                .padding(.trailing, .spacingRegular)
+                                .lineLimit(1)
+                                
+                                if eventExpenseViewModel.uploadedReceiptImage != nil{
+                                    Button{
+                                        eventExpenseViewModel.uploadedReceiptImage = nil
+                                    }label:{
+                                        Icon(systemName: "xmark", color: .textGrey, size: 10)
+                                    }
+                                    .padding(.trailing, .spacingRegular)
+                                }
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
+                            .font(.tabiHeadline)
+                            .overlay {
+                                RoundedRectangle(cornerRadius: .infinity)
+                                    .fill(.clear)
+                                    .stroke(.buttonBlue, lineWidth: 1.5)
+                                    .padding(1.5)
                             }
                         }
-                        .clipShape(RoundedRectangle(cornerRadius: .infinity))
-                        .font(.tabiHeadline)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: .infinity)
-                                .fill(.clear)
-                                .stroke(.buttonBlue, lineWidth: 1.5)
-                                .padding(1.5)
-                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             CustomButton(text: "Next") {

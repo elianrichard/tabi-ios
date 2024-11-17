@@ -10,6 +10,12 @@ import Contacts
 
 @Observable
 final class EventInviteViewModel {
+    var isLoadContactLoading: Bool {
+        return allContacts.count == 0 ||
+        CNContactStore.authorizationStatus(for: .contacts) == .denied ||
+        CNContactStore.authorizationStatus(for: .contacts) == .restricted
+    }
+    
     var searchUserText: String = ""
     var searchFilteredContacts: [UserData] {
         if (searchUserText != "") {
