@@ -19,6 +19,7 @@ struct OnboardingView: View {
     @State private var isNextPressed = false
     @State private var scrollPosition: Int?
     @State private var currentIndex = 0
+    @State private var isDragging = false
     @State private var isAutoScroll = false
     private let animationDuration: CGFloat = 0.5
     private let secondsPerSlide: CGFloat = 2.5
@@ -33,7 +34,19 @@ struct OnboardingView: View {
         OnboardingData(title: "Start Your Journey\nwith Tabi now!", description: ""),
     ]
     
+    
     var body: some View {
+        let dragGesture = DragGesture()
+            .onEnded { _ in
+                isDragging = false
+            }
+        let pressGesture = LongPressGesture(minimumDuration: 0)
+            .onEnded { _ in
+                isDragging = true
+                isAutoScroll = false
+            }
+        let combined = pressGesture.sequenced(before: dragGesture)
+        
         VStack {
             HStack {
                 Button {
@@ -77,14 +90,17 @@ struct OnboardingView: View {
                                 changeSlide()
                             }
                         })
-                    }}
+                    }
+                    .gesture(combined)
+                    
+                }
                 
                 HStack (spacing: .spacingXSmall) {
                     ForEach (Array(data.enumerated()), id:\.offset) { index in
                         Button {
-                            isAutoScroll = false
                             withAnimation {
                                 scrollPosition = index.offset
+                                isAutoScroll = false
                             }
                         } label: {
                             RoundedRectangle(cornerRadius: 10)
@@ -125,7 +141,7 @@ struct OnboardingView: View {
         .navigationBarBackButtonHidden(true)
     }
     private func changeSlide () {
-        guard let scrollPosition else { return }
+        guard let scrollPosition, !isDragging else { return }
         withAnimation (.linear(duration: animationDuration)) {
             if scrollPosition < data.count - 1 {
                 self.scrollPosition = scrollPosition + 1
