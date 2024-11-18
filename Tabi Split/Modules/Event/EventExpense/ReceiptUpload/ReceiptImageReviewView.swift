@@ -40,7 +40,11 @@ struct ReceiptImageReviewView: View {
                         }
                         
                         isUploaded.toggle()
-                        routes.navigateBack()
+                        if !eventExpenseViewModel.isQuickScanned{
+                            routes.navigateBack()
+                        }else{
+                            routes.navigate(to: .AddExpenseView)
+                        }
                     }
                 }
             }

@@ -23,6 +23,7 @@ struct ExpenseResultView: View {
                     ElipsisMenu {
                         Button {
                             eventExpenseViewModel.isEdit = true
+                            eventExpenseViewModel.isQuickScanned = false
                             routes.navigate(to: .AddExpenseView)
                         } label: {
                             Label("Edit Expense", systemImage: "pencil")

@@ -16,6 +16,9 @@ struct EventDetailView: View {
     @State private var isShowCompleteSheet = false
     @State private var isShowIncompleteSheet = false
     @State private var isShowDeleteSheet = false
+    @State private var isShowQuickScanSheet = false
+    @State private var sheetHeight: CGFloat = 0
+    @State private var hasPreviewed: Bool = false
     
     var body: some View {
         ZStack {
@@ -96,15 +99,14 @@ struct EventDetailView: View {
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .expenses) {
                     HStack(spacing: .spacingTight){
-                        CustomButton(text: "Add Expense", iconResource: .receiptCheckIcon, iconSize: 26) {
+                        CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
+                            eventExpenseViewModel.isQuickScanned = false
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
                         }
-//                        TEMPORARILY DISABLED: QUICK SCAN OCR
-                        if (false) {
-                            CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
-                                print("OCR")
-                            }
+                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
+                            eventExpenseViewModel.isQuickScanned = true
+                            isShowQuickScanSheet = true
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
@@ -119,6 +121,7 @@ struct EventDetailView: View {
             
         }
         .onAppear {
+            hasPreviewed = false
             eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
         }
         .navigationBarBackButtonHidden(true)
@@ -222,6 +225,16 @@ struct EventDetailView: View {
             .padding()
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowQuickScanSheet){
+            ReceiptUploadSheet(height: $sheetHeight, isPresented: $isShowQuickScanSheet)
+                .presentationDetents([.height(sheetHeight)])
+        }
+        .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
+            if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
+                hasPreviewed.toggle()
+                routes.navigate(to: .ReceiptUploadReview)
+            }
         }
     }
 }
