@@ -122,7 +122,7 @@ struct EventDetailView: View {
         }
         .onAppear {
             hasPreviewed = false
-            eventViewModel.calculateOptimization()
+            eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $isShowCompleteSheet) {
