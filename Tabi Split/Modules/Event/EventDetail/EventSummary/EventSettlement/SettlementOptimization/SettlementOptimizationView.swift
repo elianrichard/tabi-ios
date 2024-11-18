@@ -32,7 +32,7 @@ struct SettlementOptimizationView: View {
                     Text("Recapitulation")
                         .font(.tabiHeadline)
                     ScrollView (showsIndicators: false) {
-                        VStack (spacing: .spacingMedium) {
+                        LazyVStack (spacing: .spacingMedium) {
                             ForEach (eventViewModel.participantsBalance) { data in
                                 OptimizationRecapCard(recapData: data)
                             }
@@ -54,10 +54,10 @@ struct SettlementOptimizationView: View {
                     }
                     .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
                     .padding(1)
-                    Spacer()
                 }
                 .padding([.bottom, .horizontal])
             }
+            Spacer()
         }
         .navigationBarBackButtonHidden(true)
     }

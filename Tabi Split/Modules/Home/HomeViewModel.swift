@@ -19,21 +19,24 @@ final class HomeViewModel {
     var notificationCount: Int = 0
 
     func populateEvents (data: [EventData]) {
-        events = data
-        filteredEvents = data
+        let eventData = data.sorted(by: { $0.createdAt < $1.createdAt })
+        events = eventData
+        filteredEvents = eventData
         selectedFilter = .all
     }
     
     func filterEvents(by filter: HomeFilterEnum) {
+        var eventData: [EventData] = []
         switch filter {
         case .all:
-            filteredEvents = events
+            eventData = events
         case .youOwe:
-            filteredEvents = events.filter { $0.userEventBalance < 0 }
+            eventData = events.filter { $0.userEventBalance < 0 }
         case .owsYou:
-            filteredEvents = events.filter { $0.userEventBalance > 0 }
+            eventData = events.filter { $0.userEventBalance > 0 }
         case .settled:
-            filteredEvents = events.filter { $0.userEventBalance == 0 }
+            eventData = events.filter { $0.userEventBalance == 0 }
         }
+        filteredEvents = eventData.sorted(by: { $0.createdAt < $1.createdAt })
     }
 }

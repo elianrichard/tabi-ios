@@ -26,6 +26,8 @@ struct LoginResponse: Codable {
     let token: String
     let refresh_token: String
     let message: String
+    let full_name: String
+    let profile_image: String
 }
 
 struct RefreshRequest: Codable {

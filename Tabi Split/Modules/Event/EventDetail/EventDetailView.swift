@@ -11,6 +11,7 @@ struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     
     @State private var isShowCompleteSheet = false
     @State private var isShowIncompleteSheet = false
@@ -193,11 +194,11 @@ struct EventDetailView: View {
         }
         .sheet(isPresented: $isShowDeleteSheet) {
             VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: 0) {
+                VStack (spacing: .spacingLarge) {
                     Image(.eventDelete)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 300)
+                        .frame(width: 200, height: 200)
                     VStack (spacing: .spacingSmall) {
                         Text("Do you want to delete this event?")
                             .font(.tabiSubtitle)

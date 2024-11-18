@@ -21,7 +21,7 @@ struct EventSettlementView: View {
             TopNavigation(title: eventViewModel.userBalance.status == .credit ? "You Should Receive" : "You Should Pay")
             VStack (spacing: .spacingMedium) {
                 ScrollView (showsIndicators: false) {
-                    VStack (spacing: .spacingTight) {
+                    LazyVStack (spacing: .spacingTight) {
                         ForEach(eventViewModel.userSettlementList) { data in
                             SettlementCard(data: data, isShowUploadSheet: $isShowUploadSheet)
                         }

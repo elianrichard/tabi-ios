@@ -20,6 +20,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let uiImage = info[.editedImage] as? UIImage {
                 parent.selectedImage = uiImage
+                parent.callback?(uiImage)
             }
             parent.presentationMode.wrappedValue.dismiss()
         }
@@ -31,6 +32,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     
     @Environment(\.presentationMode) var presentationMode
     @Binding var selectedImage: UIImage?
+    var callback: ((UIImage) -> Void)?
     
     func makeCoordinator() -> Coordinator {
         return Coordinator(parent: self)

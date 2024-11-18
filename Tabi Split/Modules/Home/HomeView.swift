@@ -11,6 +11,7 @@ struct HomeView: View {
     @Environment(Routes.self) private var routes
     @State var homeViewModel = HomeViewModel()
     @Environment(EventViewModel.self) var eventViewModel: EventViewModel
+    @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
     
     var body: some View {
         ZStack {
@@ -21,7 +22,7 @@ struct HomeView: View {
                 Spacer(minLength: 30)
                 if (!homeViewModel.filteredEvents.isEmpty) {
                     ScrollView (showsIndicators: false) {
-                        VStack (spacing: 11) {
+                        LazyVStack (spacing: 11) {
                             ForEach(homeViewModel.filteredEvents) { event in
                                 EventCard(event: event)
                                     .contentShape(Rectangle())
@@ -59,7 +60,7 @@ struct HomeView: View {
                         Icon(systemName: "plus", color: .textWhite, size: 24)
                             .frame(width: 64, height: 64)
                             .background(.buttonBlue)
-                            .clipShape(RoundedRectangle(cornerRadius: 50))
+                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
                     }
                 }
                 .frame(maxHeight: .infinity, alignment: .bottom)
@@ -71,8 +72,11 @@ struct HomeView: View {
         .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            let data = SwiftDataService.shared.fetchAllEvents()
-            homeViewModel.populateEvents(data: data ?? [])
+            if let data = SwiftDataService.shared.fetchAllEvents() {
+                homeViewModel.populateEvents(data: data)
+            }
+            
+            profileViewModel.refreshUserData()
         }
     }
 }

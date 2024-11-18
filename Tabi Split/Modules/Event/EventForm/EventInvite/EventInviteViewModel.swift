@@ -10,28 +10,58 @@ import Contacts
 
 @Observable
 final class EventInviteViewModel {
-    var searchUserText: String = "" {
-        didSet {
-            if (self.searchUserText != "") {
-                filteredContacts = self.allContacts.filter {
-                    let searchedText = "\($0.givenName) \($0.familyName)".lowercased()
-                    return searchedText.contains(searchUserText.lowercased())
-                }
-            } else {
-                filteredContacts = self.allContacts
-            }
-        }
+    var isLoadContactLoading: Bool {
+        return allContacts.count == 0 ||
+        CNContactStore.authorizationStatus(for: .contacts) == .denied ||
+        CNContactStore.authorizationStatus(for: .contacts) == .restricted
     }
-    var allContacts: [CNContact] = [] {
-        didSet {
-            filteredContacts = self.allContacts
-        }
-    }
-    var filteredContacts: [CNContact] = []
-    var selectedContacts: [UserData] = []
     
-    func fetchContacts () -> Void {
+    var searchUserText: String = ""
+    var searchFilteredContacts: [UserData] {
+        if (searchUserText != "") {
+            return allContacts.filter {
+                let searchedText = $0.name.lowercased()
+                return searchedText.contains(searchUserText.lowercased())
+            }
+        } else { return allContacts }
+    }
+    var searchFilteredSelectedContacts: [UserData] {
+        return searchFilteredContacts.filter{ selectedContacts.contains($0) }
+    }
+    var searchFilteredUnselectedContacts: [UserData] {
+        return searchFilteredContacts.filter{ !selectedContacts.contains($0) }
+    }
+    
+    var allContacts: [UserData] = []
+    var selectedContacts: [UserData] = []
+    var unselectedContacts: [UserData] {
+        return allContacts.filter { !selectedContacts.contains($0) }
+    }
+    
+    var selectedContactsList: [UserData] {
+        let contacts: [UserData]
+        if searchUserText != "" { contacts = searchFilteredSelectedContacts }
+        else { contacts = selectedContacts }
+        return contacts.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
+    }
+    var unselectedContactsList: [UserData] {
+        let contacts: [UserData]
+        if searchUserText != "" { contacts = searchFilteredUnselectedContacts }
+        else { contacts = unselectedContacts }
+        return contacts.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
+    }
+    
+    func toggleSelectContact (user: UserData) {
+        if selectedContacts.contains(user) {
+            selectedContacts.remove(user)
+        } else {
+            selectedContacts.append(user)
+        }
+    }
+    
+    func fillUpContacts(currentUser: UserData) {
         let CNStore = CNContactStore()
+        var cnContacts: [CNContact] = []
         
         switch CNContactStore.authorizationStatus(for: .contacts) {
         case .authorized, .limited:
@@ -39,20 +69,16 @@ final class EventInviteViewModel {
                 let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
-                    allContacts.append(contact)
+                    cnContacts.append(contact)
                 })
             } catch {
                 print("Error on contact fetching \(error)")
             }
-//        case .restricted:
-//            print("restricted")
-//        case .denied:
-//            print("denied")
         case .notDetermined, .denied, .restricted:
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
                     print("contact granted")
-                    self.fetchContacts()
+                    self.fillUpContacts(currentUser: currentUser)
                 } else if let error = error {
                     print("Error requesting contact acces: \(error)")
                 }
@@ -62,11 +88,27 @@ final class EventInviteViewModel {
                 let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
-                    allContacts.append(contact)
+                    cnContacts.append(contact)
                 })
             } catch {
                 print("Error on contact fetching \(error)")
             }
         }
+        var allUsers: [UserData] = []
+        
+        for user in selectedContacts {
+            allUsers.append(user)
+        }
+        
+        for contact in cnContacts {
+            for number in contact.phoneNumbers {
+                let phone = number.value.stringValue.formattedAsPhoneNumber()
+                if !allUsers.contains(where: { $0.phone == phone }){
+                    allUsers.append(UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber()))
+                }
+            }
+        }
+        
+        allContacts = allUsers.filter{ $0.phone != currentUser.phone }
     }
 }

@@ -16,8 +16,7 @@ struct EventSummaryView: View {
         ScrollView (showsIndicators: false) {
             VStack (spacing: .spacingRegular) {
                 if (!eventViewModel.isEventCompleted) {
-                    DialogBox(icon: "exclamationmark.triangle.fill",
-                              iconColor: .buttonBlue,
+                    DialogBox(image: .dialogIcon, iconSize: 36,
                               text: "You can only settle after you set the event to complete",
                               backgroundColor: .bgBlueElevated)
                 }
@@ -89,7 +88,9 @@ struct EventSummaryView: View {
                 }
                 .onTapGesture {
                     if (eventViewModel.isEventCompleted) {
-                        routes.navigate(to: .EventSettlementView)
+//                        TEMPORARILY DISABLED: SETTLEMENT
+//                        routes.navigate(to: .EventSettlementView)
+                        routes.navigate(to: .SettlementOptimizationView)
                     } else {
                         print("Cannot do this action yet")
                     }

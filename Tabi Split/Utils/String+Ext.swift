@@ -59,6 +59,16 @@ extension String {
         // Step 2: Trim whitespace and check if the number needs the country code
         var formattedNumber = self.trimmingCharacters(in: .whitespacesAndNewlines)
         
+        // remove + sign in front of the phone
+        if (formattedNumber.hasPrefix("+")) {
+            formattedNumber.remove(at: formattedNumber.startIndex)
+        }
+        
+        formattedNumber = formattedNumber.replacingOccurrences(of: "-", with: "")
+        formattedNumber = formattedNumber.replacingOccurrences(of: "(", with: "")
+        formattedNumber = formattedNumber.replacingOccurrences(of: ")", with: "")
+        formattedNumber = formattedNumber.replacingOccurrences(of: " ", with: "")
+        
         if formattedNumber.hasPrefix(dialingCode) {
             // Already starts with the country code, so return as is
             return formattedNumber

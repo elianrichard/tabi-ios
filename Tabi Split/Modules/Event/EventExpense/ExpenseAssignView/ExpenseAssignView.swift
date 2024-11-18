@@ -33,7 +33,7 @@ struct ExpenseAssignView: View {
                         .padding([.bottom], 12)
                         .font(.tabiHeadline)
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(alignment: .center){
+                        LazyHStack (alignment: .center){
                             ForEach(eventExpenseViewModel.selectedParticipants) { person in
                                 VStack(alignment: .center){
 //                                    Circle()
@@ -111,7 +111,6 @@ struct ExpenseAssignView: View {
                                 HStack (spacing: 5) {
                                     HStack (spacing: -10){
                                         ForEach(item.assignees) { asignee in
-//                                            Circle()
                                             UserAvatar(userData: asignee.user, size: 32)
                                         }
                                     }

@@ -17,17 +17,19 @@ struct AddExpenseView: View {
     @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
     @State var hasPreviewed: Bool = false
     
+    @FocusState private var focusedField: FocusField?
+    
     var body: some View {
         VStack (spacing: .spacingRegular) {
             TopNavigation(title: "Add New Expenses")
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 20){
+                VStack(spacing: 20) {
                     InputWithLabel(label: "Expense Name",
                                    placeholder: "Expense Name",
                                    text: Bindable(eventExpenseViewModel).expenseName,
                                    errorMessage: viewModel.expenseNameError,
-                                   inputBackgroundColor: .bgWhite,
-                                   inputCornerRadius: 16
+                                   focusedField: $focusedField,
+                                   focusCase: .field1
                     )
                     DropDownInput(
                         label: "Paid by",
@@ -132,8 +134,9 @@ struct AddExpenseView: View {
                                            placeholder: "0",
                                            price: Bindable( eventExpenseViewModel).expenseTotalInput,
                                            errorMessage: viewModel.totalBillError,
-                                           inputBackgroundColor: .bgWhite,
-                                           inputCornerRadius: 16)
+                                           focusedField: $focusedField,
+                                           focusCase: .field2
+                            )
                         }
                     } // Input nominal kalau equally
                     if !eventExpenseViewModel.isQuickScanned {
@@ -283,10 +286,13 @@ struct AddExpenseView: View {
             }
         }
         .padding()
-        .background(.bgWhite)
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
         .navigationBarBackButtonHidden(true)
     }
 }
+
 
 #Preview {
     AddExpenseView()
