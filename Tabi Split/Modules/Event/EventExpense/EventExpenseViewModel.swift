@@ -21,6 +21,7 @@ final class EventExpenseViewModel {
     var isEditView: Bool {
         return selectedExpense == nil || isEdit
     }
+    var isQuickScanned = false
     
     var expenseName: String = ""
     var expenseTotalInput: Float = 0

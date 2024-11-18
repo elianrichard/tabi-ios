@@ -20,7 +20,7 @@ struct ReceiptUploadSheet: View {
         VStack(spacing: 0){
             SheetXButton(toggle: $isPresented)
             VStack(spacing: .spacingMedium){
-                Text("Upload Image")
+                Text(!eventExpenseViewModel.isQuickScanned ? "Upload Image" : "Quick Scan with OCR")
                     .font(.tabiTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 HStack(spacing: .spacingTight){
