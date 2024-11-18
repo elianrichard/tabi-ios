@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "EventEmptyExpense.png",
+      "filename" : "noExpense.png",
       "idiom" : "universal",
       "scale" : "1x"
     },

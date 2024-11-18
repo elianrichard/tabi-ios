@@ -14,6 +14,7 @@ struct TabiApp: App {
         let schema = Schema([
             NoteData.self,
             EventData.self,
+            UserData.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

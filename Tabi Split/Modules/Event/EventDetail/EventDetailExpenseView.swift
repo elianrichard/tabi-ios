@@ -11,7 +11,7 @@ struct EventDetailExpenseView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     var body: some View {
         ScrollView (showsIndicators: false) {
-            VStack {
+            LazyVStack {
                 if let event = eventViewModel.selectedEvent {
                     ForEach(event.expenses.sorted(by: { $0.dateOfCreation > $1.dateOfCreation })) { expense in
                         EventDetailExpenseCard(expense: expense)

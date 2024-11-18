@@ -16,8 +16,10 @@ struct BankDetailFormSheet: View {
     @State var accountName: String = ""
     @State var isEditing: Bool = false
     
+    @FocusState private var focusedField: FocusField?
+    
     var body: some View {
-        NavigationView{
+        NavigationView {
             VStack{
                 SheetXButton(toggle: $viewModel.toggleDetailBankSheet)
                 VStack(alignment: .leading, spacing: .spacingMedium){
@@ -66,8 +68,10 @@ struct BankDetailFormSheet: View {
                         }
                     }
                     VStack{
-                        InputWithLabel(label: "Account number", placeholder: "Your account number", text: $accountNumber)
-                        InputWithLabel(label: "Account owner's name", placeholder: "Your account name", text: $accountName)
+                        InputWithLabel(label: "Account number", placeholder: "Your account number", text: $accountNumber,
+                                       focusedField: $focusedField, focusCase: .field1)
+                        InputWithLabel(label: "Account owner's name", placeholder: "Your account name", text: $accountName,
+                                       focusedField: $focusedField, focusCase: .field2)
                     }
                     .onAppear{
                         if isEditing {
@@ -113,6 +117,9 @@ struct BankDetailFormSheet: View {
             .padding([.top], 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .navigationBarBackButtonHidden(true)
+            .addBackgroundColor(.bgWhite) {
+                focusedField = nil
+            }
         }
     }
 }

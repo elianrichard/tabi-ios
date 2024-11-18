@@ -17,6 +17,8 @@ final class EventViewModel {
                 eventName = event.eventName
                 eventIcon = EventIconEnum(rawValue: event.eventIcon) ?? .icon1
                 selectedSection = .expenses
+            } else {
+                eventName = ""
             }
         }
     }
@@ -31,26 +33,34 @@ final class EventViewModel {
     }
     var isNoParticipants: Bool {
         if let event = selectedEvent {
-            return event.participants.count == 1
+            return event.participants.count <= 1
         } else { return true }
     }
     
     var participantsBalance: [PersonBalanceData] = []
     var userTransactionHistory: [SummaryHistoryData] = []
     var userBalance: PersonBalanceData {
-        return participantsBalance.first(where: { $0.user.name == "You" }) ?? PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone"))
+        if let currentUser = UserDefaultsService.shared.getCurrentUser() {
+            return participantsBalance.first(where: { $0.user.phone == currentUser.userPhone }) ?? PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone"))
+        } else { return PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone")) }
     }
     var userTotalSpending: Float = 0
     var userSettlementList: [SummarySettlementData] = []
     
     @MainActor
     func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData) {
+        var participants = selectedContacts.map { $0 }
+        participants.append(currentUser)
+        
         if let selectedEvent {
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
-            selectedEvent.participants = selectedContacts
+            selectedEvent.participants = participants
         } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser] + selectedContacts))
+            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [])
+            SwiftDataService.shared.addEvent(newEvent)
+            newEvent.participants.append(contentsOf: participants)
+            SwiftDataService.shared.saveModelContext()
         }
     }
     
@@ -75,7 +85,7 @@ final class EventViewModel {
         }
     }
     
-    func calculateOptimization() {
+    func calculateOptimization(currentUser: UserData) {
         let debug = false // enable this to debug print
         
         var userSummaryData: [SummaryHistoryData] = []
@@ -91,7 +101,7 @@ final class EventViewModel {
             guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
             personPaid.lent += expense.price
             
-            if expense.coverer.name == "You" {
+            if expense.coverer == currentUser {
                 userBalanceTemp += expense.price
             }
             
@@ -101,12 +111,12 @@ final class EventViewModel {
                         guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
                         let amountDebt = Float(assignee.share * item.itemPrice).rounded(toDecimalPlaces: 1).properRound()
                         if debug { print("Participants: " + assignee.user.name, "debt: ", amountDebt) }
-                        if (expense.coverer.name == "You" && personBuy.user.name == "You") {
+                        if (expense.coverer == currentUser && personBuy.user == currentUser) {
                             personPaid.lent -= amountDebt
                         } else {
                             personBuy.debt += amountDebt
                         }
-                        if (assignee.user.name == "You") {
+                        if (assignee.user == currentUser) {
                             userTotalSpendingTemp += amountDebt
                             userBalanceTemp -= amountDebt
                         }
@@ -116,12 +126,12 @@ final class EventViewModel {
                 let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
                 for person in expense.participants {
                     guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
-                    if (expense.coverer.name == "You" && personBuy.user.name == "You") {
+                    if (expense.coverer == currentUser && personBuy.user == currentUser) {
                         personPaid.lent -= amountDebt
                     } else {
                         personBuy.debt += amountDebt
                     }
-                    if (person.name == "You") {
+                    if (person == currentUser) {
                         userTotalSpendingTemp += amountDebt
                         userBalanceTemp -= amountDebt
                     }
@@ -173,7 +183,7 @@ final class EventViewModel {
                 userSettlementList.append(SummarySettlementData(targetUser: settlement.userPaid, amount: settlement.amount, status: .NeedPayment))
             }
         } else if userBalance.status == .credit {
-            let relatedPersonBalance = participantsBalance.filter { $0.settlement.contains(where: { $0.userPaid.name == "You" }) }
+            let relatedPersonBalance = participantsBalance.filter { $0.settlement.contains(where: { $0.userPaid == currentUser }) }
             for balance in relatedPersonBalance {
                 for settlement in balance.settlement {
                     userSettlementList.append(SummarySettlementData(targetUser: balance.user, amount: settlement.amount, status: .WaitingPayment))

@@ -20,8 +20,8 @@ struct QuantityChangeView: View {
                 .fontWeight(.bold)
             Text("Quantity: " + String(item.itemQuantity.formatted(.number)))
                 .padding(.bottom, 24)
-            ScrollView(){
-                VStack{
+            ScrollView {
+                LazyVStack {
                     ForEach(Array(item.assignees.enumerated()), id: \.offset) { (index, assignee) in
                         HStack(alignment: .center){
                             UserAvatar(userData: assignee.user, size: 40)

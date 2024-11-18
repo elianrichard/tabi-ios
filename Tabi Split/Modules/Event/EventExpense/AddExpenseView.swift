@@ -17,17 +17,19 @@ struct AddExpenseView: View {
     @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
     @State var hasPreviewed: Bool = false
     
+    @FocusState private var focusedField: FocusField?
+    
     var body: some View {
         VStack (spacing: .spacingRegular) {
             TopNavigation(title: "Add New Expenses")
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 20){
+                VStack(spacing: 20) {
                     InputWithLabel(label: "Expense Name",
                                    placeholder: "Expense Name",
                                    text: Bindable(eventExpenseViewModel).expenseName,
                                    errorMessage: viewModel.expenseNameError,
-                                   inputBackgroundColor: .bgWhite,
-                                   inputCornerRadius: 16
+                                   focusedField: $focusedField,
+                                   focusCase: .field1
                     )
                     DropDownInput(
                         label: "Paid by",
@@ -132,11 +134,12 @@ struct AddExpenseView: View {
                                            placeholder: "0",
                                            price: Bindable( eventExpenseViewModel).expenseTotalInput,
                                            errorMessage: viewModel.totalBillError,
-                                           inputBackgroundColor: .bgWhite,
-                                           inputCornerRadius: 16)
+                                           focusedField: $focusedField,
+                                           focusCase: .field2
+                            )
                         }
                     } // Input nominal kalau equally
-                    VStack(alignment: .leading, spacing: 8){
+                    VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 0){
                             Text("Purchase Receipt ")
                                 .font(.tabiBody)
@@ -171,7 +174,6 @@ struct AddExpenseView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            
             CustomButton(text: "Next") {
                 viewModel.validateInput()
                 if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
@@ -182,7 +184,7 @@ struct AddExpenseView: View {
                 }
             }
         }
-        .onAppear{
+        .onAppear {
             hasPreviewed = false
             viewModel = AddExpenseViewModel(eventExpenseViewModel: eventExpenseViewModel)
             if eventExpenseViewModel.selectedParticipants == [] {
@@ -207,10 +209,13 @@ struct AddExpenseView: View {
             }
         }
         .padding()
-        .background(.bgWhite)
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
         .navigationBarBackButtonHidden(true)
     }
 }
+
 
 #Preview {
     AddExpenseView()

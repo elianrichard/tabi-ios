@@ -16,7 +16,7 @@ struct EventSummaryDetailView: View {
             TopNavigation(title: "Your Transaction History")
                 .padding(.horizontal)
             ScrollView {
-                VStack {
+                LazyVStack {
                     Divided {
                         ForEach(eventViewModel.userTransactionHistory) { data in
                             EventSummaryHistoryCard(data: data)

@@ -9,33 +9,78 @@ import SwiftUI
 
 @Observable
 final class ProfileViewModel{
-    var profileImage: UIImage = UIImage(imageLiteralResourceName: "Octopus")
-    var toggleProfileImagePick: Bool = false
-    var profileImageSettingsDetent = PresentationDetent.medium
-    var savedIndex: Int = 5
-    var images: [UIImage] = [UIImage(imageLiteralResourceName: "Wallet"), UIImage(imageLiteralResourceName: "Dragon"), UIImage(imageLiteralResourceName: "Owl"), UIImage(imageLiteralResourceName: "Octopus")]
-    var contentHeight : CGFloat = 0
-    var toggleProfileImageUpload: Bool = false
-    var user: UserData = UserData(name: "You", phone: "628123456789", image: .owl)
+    var user: UserData = UserData(name: "unknown", phone: "unknown")
+    var userPaymentMethods: [PaymentMethod] = []
 
-    var isLoading: Bool = false
-    let authService = AuthenticationService()
+    var isLogoutLoading: Bool = false
+    var isUpdateProfileLoading: Bool = false
+    var isRefreshProfileLoading: Bool = false
     
+    @MainActor
     func logout() async -> Bool {
-        isLoading = true
+        isLogoutLoading = true
         var isSuccess = false
         do {
-            try await authService.logout()
-            print("Logout successful!")
+            try await AuthenticationService.shared.logout()
+            SwiftDataService.shared.deleteAllEvents()
+            SwiftDataService.shared.deleteAllUser()
+            UserDefaultsService.shared.deleteCurrentUser()
+            user = UserData(name: "unknown", phone: "unknown")
             isSuccess = true
         } catch {
             print("Logout failed: \(error)")
             isSuccess = false
         }
         
-        isLoading = false
+        isLogoutLoading = false
         return isSuccess
     }
-  
-    var userPaymentMethods: [PaymentMethod] = []
+    
+    @MainActor
+    func updateProfile (editProfileViewModel: EditProfileViewModel) async -> Bool {
+        var isSuccess = false
+        isUpdateProfileLoading = true
+        guard let chosenImage = editProfileViewModel.chosenImage else { return isSuccess }
+        do {
+            let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userPhone: editProfileViewModel.phoneText, userImage: chosenImage.rawValue, userId: "userId")
+            let _ = try await ProfileService.shared.editProfile(user: updatedUser)
+            UserDefaultsService.shared.saveCurrentUser(user: updatedUser)
+            user.name = editProfileViewModel.nameText
+            user.phone = editProfileViewModel.phoneText
+            if let image = editProfileViewModel.chosenImage {
+                user.image = image.id
+            }
+            SwiftDataService.shared.saveModelContext()
+            isSuccess = true
+        } catch {
+            print("Update profile failed: \(error)")
+            isSuccess = false
+        }
+        isUpdateProfileLoading = false
+        return isSuccess
+    }
+    
+    @MainActor
+    func refreshUserData () {
+        if let currentUser = SwiftDataService.shared.getCurrentUser() {
+            user = currentUser
+        }
+        
+        Task {
+            isRefreshProfileLoading = true
+            do {
+                let freshUser = try await ProfileService.shared.getCurrentProfile()
+                user.name = freshUser.userName
+                user.phone = freshUser.userPhone
+                user.image = freshUser.userImage
+            } catch {
+                print("Update profile failed: \(error)")
+            }
+            isRefreshProfileLoading = false
+        }
+    }
+    
+    func isCurrentUser (_ userData: UserData) -> Bool {
+        return userData == user || userData.phone == user.phone
+    }
 }

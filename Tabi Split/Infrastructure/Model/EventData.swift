@@ -15,15 +15,17 @@ class EventData {
     var eventIcon: EventIconEnum.ID
     var userEventBalance: Float
     var participants: [UserData]
-    var expenses: [Expense]
+    @Relationship(deleteRule: .cascade, inverse: \Expense.event) var expenses: [Expense]
+    var createdAt: Date
     
-    init(eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = []) {
+    init(eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date = Date()) {
         self.eventName = eventName
         self.completionDate = completionDate
         self.eventIcon = eventIcon.id
         self.userEventBalance = userEventBalance
         self.participants = participants
         self.expenses = expenses
+        self.createdAt = createdAt
     }
 }
 

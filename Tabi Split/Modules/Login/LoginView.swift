@@ -9,13 +9,17 @@ import SwiftUI
 
 struct LoginView: View {
     @Environment(Routes.self) var routes
+    @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
     @State private var loginViewModel = LoginViewModel()
+    
+    @FocusState private var focusedField: FocusField?
     
     var body: some View {
         VStack (alignment: .leading, spacing: .spacingLarge) {
             Text("Hey There,\nYou're Back!")
                 .font(.tabiLargeTitle)
                 .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
             
             VStack (alignment: .trailing, spacing: 8) {
                 VStack(alignment: .leading, spacing: .spacingMedium) {
@@ -23,11 +27,15 @@ struct LoginView: View {
                                    placeholder: "Enter your phone number",
                                    text: $loginViewModel.phoneNumber,
                                    errorMessage: loginViewModel.phoneNumberError,
-                                   inputTypePicked: .phone)
+                                   inputTypePicked: .phone,
+                                   focusedField: $focusedField,
+                                   focusCase: .field1)
                     InputWithLabel(label: "Password",
                                    placeholder: "Enter your password",
                                    text: $loginViewModel.password,
-                                   errorMessage: loginViewModel.passwordError, isSecure: true)
+                                   errorMessage: loginViewModel.passwordError, isSecure: true,
+                                   focusedField: $focusedField,
+                                   focusCase: .field2)
                 }
                 Button {
                     print("forgot password")
@@ -41,18 +49,18 @@ struct LoginView: View {
             VStack (spacing: .spacingMedium) {
                 CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In") {
                     Task {
-                        let isSuccess = await loginViewModel.login()
-                        
-                        if isSuccess {
+                        if await loginViewModel.login() {
                             routes.navigate(to: .HomeView)
                         }
                     }
                 }
-                
-                DividerWithText()
-                
-                CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
-                    print("Login with Apple")
+//                TEMPORARILY DISABLED: LOGIN WITH APPLE ID
+                if (false) {
+                    DividerWithText()
+                    
+                    CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                        print("Login with Apple")
+                    }
                 }
                 
                 HStack (spacing: 3) {
@@ -68,9 +76,11 @@ struct LoginView: View {
                 }
             }
         }
-        .fixedSize(horizontal: false, vertical: true)
         .padding()
         .navigationBarBackButtonHidden(true)
+        .addBackgroundColor(.bgWhite) {
+            focusedField = nil
+        }
     }
 }
 

@@ -9,7 +9,24 @@ import Foundation
 import SwiftUI
 
 @Observable
-final class ProfileImagePickViewModel{
-    var chosenIndex: Int = 5
-    var chosenImage: UIImage?
+final class ProfileImagePickViewModel {
+    var chosenImage: ProfileImageEnum?
+    var uploadedImage: UIImage?
+    var isSelectUpload: Bool = false {
+        didSet {
+            if isSelectUpload {
+                chosenImage = nil
+            }
+        }
+    }
+    
+    func populateData (editProfileViewModel: EditProfileViewModel) {
+        if let image = editProfileViewModel.chosenImage {
+            chosenImage = image
+        }
+        if let upload = editProfileViewModel.uploadedImage {
+            uploadedImage = upload
+            isSelectUpload = true
+        }
+    }
 }

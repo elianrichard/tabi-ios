@@ -22,7 +22,7 @@ struct ShowAllParticipants: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 ScrollView{
                     VStack{
-                        VStack(spacing: .spacingTight){
+                        LazyVStack (spacing: .spacingTight){
                             Divided{
                                 ForEach (eventViewModel.selectedEvent?.participants ?? []) { person in
                                     HStack{
@@ -49,7 +49,7 @@ struct ShowAllParticipants: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         if !eventExpenseViewModel.selectedParticipants.contains(person){
-                                                                                    eventExpenseViewModel.selectedParticipants.append(person)
+                                            eventExpenseViewModel.selectedParticipants.append(person)
                                         } else {
                                             if let removeIndex = eventExpenseViewModel.selectedParticipants.firstIndex(of: person) {
                                                 eventExpenseViewModel.selectedParticipants.remove(at: removeIndex)

@@ -19,39 +19,42 @@ struct ProfileView: View {
                 HStack{
                     HStack(alignment: .center, spacing: .spacingTight){
                         UserAvatar(userData: profileViewModel.user)
-                        VStack(alignment: .leading){
+                        VStack(alignment: .leading, spacing: .spacingXSmall){
                             Text(profileViewModel.user.name)
                                 .font(.tabiSubtitle)
                             Text(profileViewModel.user.phone)
                                 .font(.tabiBody)
+                                .foregroundStyle(.textGrey)
                         }
                         Spacer()
-                        Button{
+                        Icon(systemName: "pencil", color: .textBlack, size: 16) {
                             routes.navigate(to: .EditProfile)
-                        }label: {
-                            Image(systemName: "pencil")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 16)
                         }
-                        .accentColor(.textBlack)
                     }
                 }
                 
-                VStack(spacing: .spacingTight){
-                    HStack(spacing: .spacingTight){
-                        Icon(.creditCard, size: 20)
-                        Text("Payment methods")
-                            .font(.tabiHeadline)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .frame(width: 24, height: 24)
+                
+                VStack(alignment: .leading, spacing: .spacingTight){
+//                    TEMPORARILY DISABLED: PAYMENT METHOD
+                    if (false) {
+                        Text("Settings")
+                            .font(.tabiBody)
+                        Button {
+                            routes.navigate(to: .PaymentMethods)
+                        } label: {
+                            HStack(spacing: .spacingTight){
+                                Icon(systemName: "wallet.bifold")
+                                Text("Payment methods")
+                                    .font(.tabiHeadline)
+                                    .foregroundStyle(.textBlack)
+                                Spacer()
+                                Icon(systemName: "chevron.right", size: 16)
+                            }
+                            .padding(.vertical, .spacingSmall)
+                            .contentShape(Rectangle())
+                        }
+                        Divider()
                     }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        routes.navigate(to: .PaymentMethods)
-                    }
-                    Divider()
                     Button {
                         Task {
                             let isSuccess = await profileViewModel.logout()
@@ -62,17 +65,15 @@ struct ProfileView: View {
                         }
                     } label: {
                         HStack(spacing: .spacingTight){
-                            Icon(.logout, size: 20)
+                            Icon(.logout, color: .buttonRed, size: 20)
                             Text("Log Out")
                                 .font(.tabiHeadline)
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.buttonRed)
                             Spacer()
-                            Image(systemName: "chevron.right")
-                                .frame(width: 24, height: 24)
-                                .foregroundStyle(.black)
                         }
+                        .padding(.vertical, .spacingSmall)
+                        .contentShape(Rectangle())
                     }
-                    Divider()
                 }
             }
         }

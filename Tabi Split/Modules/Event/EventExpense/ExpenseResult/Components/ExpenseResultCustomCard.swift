@@ -14,8 +14,8 @@ struct ExpenseResultCustomCard: View {
     var body: some View {
         VStack (spacing: .spacingTight) {
             HStack {
-                UserAvatar(userData: UserData(name: person.name, phone: "Phone"))
-                Text("\(person.name.getFirstName())'s")
+                UserAvatar(userData: person.user)
+                Text("\(person.user.name.getFirstName())'s")
                     .font(.tabiHeadline)
                 Spacer()
                 Text("Rp\(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")

@@ -11,6 +11,7 @@ struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     
     @State private var isShowCompleteSheet = false
     @State private var isShowIncompleteSheet = false
@@ -95,12 +96,15 @@ struct EventDetailView: View {
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .expenses) {
                     HStack(spacing: .spacingTight){
-                        CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
+                        CustomButton(text: "Add Expense", iconResource: .receiptCheckIcon, iconSize: 26) {
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
                         }
-                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
-                            print("OCR")
+//                        TEMPORARILY DISABLED: QUICK SCAN OCR
+                        if (false) {
+                            CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
+                                print("OCR")
+                            }
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
@@ -115,7 +119,7 @@ struct EventDetailView: View {
             
         }
         .onAppear {
-            eventViewModel.calculateOptimization()
+            eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $isShowCompleteSheet) {
@@ -187,11 +191,11 @@ struct EventDetailView: View {
         }
         .sheet(isPresented: $isShowDeleteSheet) {
             VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: 0) {
+                VStack (spacing: .spacingLarge) {
                     Image(.eventDelete)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 300)
+                        .frame(width: 200, height: 200)
                     VStack (spacing: .spacingSmall) {
                         Text("Do you want to delete this event?")
                             .font(.tabiSubtitle)
