@@ -38,3 +38,7 @@ struct RefreshResponse: Codable {
     let token: String
     let message: String
 }
+
+struct DeleteResponse: Codable {
+    let message: String
+}

@@ -13,8 +13,10 @@ final class ProfileViewModel{
     var userPaymentMethods: [PaymentMethod] = []
 
     var isLogoutLoading: Bool = false
+    var isDeleteLoading: Bool = false
     var isUpdateProfileLoading: Bool = false
     var isRefreshProfileLoading: Bool = false
+    
     var isGuest: Bool {
         return user.phone == "Guest"
     }
@@ -81,6 +83,28 @@ final class ProfileViewModel{
             }
             isRefreshProfileLoading = false
         }
+    }
+    
+    @MainActor
+    func deleteUser () async -> Bool {
+        isDeleteLoading = true
+        var isSuccess = false
+        do {
+            try await AuthenticationService.shared.logout()
+//            TODO: DELETE USER THROUGH ENDPOINT
+//            try await ProfileService.shared.deleteUser()
+            SwiftDataService.shared.deleteAllEvents()
+            SwiftDataService.shared.deleteAllUser()
+            UserDefaultsService.shared.deleteCurrentUser()
+            user = UserData(name: "unknown", phone: "unknown")
+            isSuccess = true
+        } catch {
+            print("User delete failed: \(error)")
+            isSuccess = false
+        }
+        
+        isDeleteLoading = false
+        return isSuccess
     }
     
     func isCurrentUser (_ userData: UserData) -> Bool {
