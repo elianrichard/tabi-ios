@@ -136,53 +136,129 @@ struct AddExpenseView: View {
                                            inputCornerRadius: 16)
                         }
                     } // Input nominal kalau equally
-                    VStack(alignment: .leading, spacing: 8){
-                        HStack(spacing: 0){
-                            Text("Purchase Receipt ")
-                                .font(.tabiBody)
-                            Text("(optional)")
-                                .font(.tabiBody)
-                                .foregroundColor(.textGrey)
-                        }
-                        HStack(spacing: 0){
-                            CustomButton(text: eventExpenseViewModel.uploadedReceiptImage == nil ? "Upload Image" : "Uploaded Image", type: .tertiary, icon: eventExpenseViewModel.uploadedReceiptImage == nil ? "square.and.arrow.up" : "photo", iconSize: 20, customTextColor: .buttonBlue){
-                                viewModel.toggleReceiptSheet.toggle()
+                    if !eventExpenseViewModel.isQuickScanned {
+                        VStack(alignment: .leading, spacing: 8){
+                            HStack(spacing: 0){
+                                Text("Purchase Receipt ")
+                                    .font(.tabiBody)
+                                Text("(optional)")
+                                    .font(.tabiBody)
+                                    .foregroundColor(.textGrey)
                             }
-                            .lineLimit(1)
-                            
-                            if eventExpenseViewModel.uploadedReceiptImage != nil{
-                                Button{
-                                    eventExpenseViewModel.uploadedReceiptImage = nil
-                                }label:{
-                                    Icon(systemName: "xmark", color: .textGrey, size: 10)
+                            HStack(spacing: 0){
+                                CustomButton(text: eventExpenseViewModel.uploadedReceiptImage == nil ? "Upload Image" : "Uploaded Image", type: .tertiary, icon: eventExpenseViewModel.uploadedReceiptImage == nil ? "square.and.arrow.up" : "photo", iconSize: 20, customTextColor: .buttonBlue){
+                                    viewModel.toggleReceiptSheet.toggle()
                                 }
-                                .padding(.trailing, .spacingRegular)
+                                .lineLimit(1)
+                                
+                                if eventExpenseViewModel.uploadedReceiptImage != nil{
+                                    Button{
+                                        eventExpenseViewModel.uploadedReceiptImage = nil
+                                    }label:{
+                                        Icon(systemName: "xmark", color: .textGrey, size: 10)
+                                    }
+                                    .padding(.trailing, .spacingRegular)
+                                }
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
+                            .font(.tabiHeadline)
+                            .overlay {
+                                RoundedRectangle(cornerRadius: .infinity)
+                                    .fill(.clear)
+                                    .stroke(.buttonBlue, lineWidth: 1.5)
+                                    .padding(1.5)
                             }
                         }
-                        .clipShape(RoundedRectangle(cornerRadius: .infinity))
-                        .font(.tabiHeadline)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: .infinity)
-                                .fill(.clear)
-                                .stroke(.buttonBlue, lineWidth: 1.5)
-                                .padding(1.5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    } else if eventExpenseViewModel.selectedMethod == .custom {
+                        VStack (alignment: .leading, spacing: 16) {
+                            Text("Items")
+                                .font(.tabiHeadline)
+                            ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
+                                AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)
+                            }
+                            
+                            HStack{
+                                CustomButton(text: "+ Add Item", type: .secondary) {
+                                    eventExpenseViewModel.createNewExpenseItem()
+                                }
+                                .frame(width: 120)
+                            }
+                            .frame(maxWidth: .infinity)
+                            
+                            Divider()
+                                .padding(.horizontal, 16)
+                            
+                            VStack (alignment: .leading, spacing: 16) {
+                                HStack(spacing: 0){
+                                    Text("Additional Charge ")
+                                        .font(.tabiBody)
+                                    Text("(optional)")
+                                        .font(.tabiBody)
+                                        .foregroundColor(.textGrey)
+                                }
+                                VStack(alignment: .leading){
+                                    ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
+                                        AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
+                                    }
+                                }
+                                CustomButton(text: "+ Add more", type: .tertiary, vPadding: 0){
+                                    eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
+                                }
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             
-            CustomButton(text: "Next") {
-                viewModel.validateInput()
-                if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
-                    routes.navigate(to: .ExpenseAddItemsView)
-                } else if (eventExpenseViewModel.selectedMethod == .equally && viewModel.isValid) {
-                    eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
-                    routes.navigate(to: .ExpenseResultView)
+            if !eventExpenseViewModel.isQuickScanned || eventExpenseViewModel.selectedMethod == .equally {
+                CustomButton(text: "Next") {
+                    viewModel.validateInput()
+                    if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
+                        routes.navigate(to: .ExpenseAddItemsView)
+                    } else if (eventExpenseViewModel.selectedMethod == .equally && viewModel.isValid) {
+                        eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
+                        routes.navigate(to: .ExpenseResultView)
+                    }
                 }
+            }else{
+                ZStack{
+                    HStack(alignment: .top){
+                        Text("Total")
+                            .font(.tabiBody)
+                        Spacer()
+                        Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
+                            .font(.tabiHeadline)
+                    }
+                    .padding(16)
+                    .background{
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(.bgBlueElevated)
+                            .stroke(.buttonBlueSelected, lineWidth: 1)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 90)
+                            .offset(CGSize(width: 0, height: 15))
+                            .zIndex(1)
+                    }
+                    .offset(CGSize(width: 0, height: -50))
+                        .zIndex(1)
+                    CustomButton(text: "Next", isEnabled: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0, customBackgroundColor: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0 ? .buttonBlue : .buttonGrey) {
+                        viewModel.validateInput()
+                        if viewModel.isValid{
+                            routes.navigate(to: .ExpenseAssignView)
+                        }
+                    }
+                    .zIndex(2)
+                }
+                .padding([.top], 60)
             }
         }
         .onAppear{
+            if eventExpenseViewModel.isQuickScanned && eventExpenseViewModel.selectedMethod == nil{
+                eventExpenseViewModel.selectedMethod = .custom
+            }
             hasPreviewed = false
             viewModel = AddExpenseViewModel(eventExpenseViewModel: eventExpenseViewModel)
             if eventExpenseViewModel.selectedParticipants == [] {

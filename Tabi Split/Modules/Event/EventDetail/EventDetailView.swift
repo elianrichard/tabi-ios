@@ -15,6 +15,9 @@ struct EventDetailView: View {
     @State private var isShowCompleteSheet = false
     @State private var isShowIncompleteSheet = false
     @State private var isShowDeleteSheet = false
+    @State private var isShowQuickScanSheet = false
+    @State private var sheetHeight: CGFloat = 0
+    @State private var hasPreviewed: Bool = false
     
     var body: some View {
         ZStack {
@@ -96,11 +99,13 @@ struct EventDetailView: View {
                 } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .expenses) {
                     HStack(spacing: .spacingTight){
                         CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
+                            eventExpenseViewModel.isQuickScanned = false
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
                         }
                         CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
-                            print("OCR")
+                            eventExpenseViewModel.isQuickScanned = true
+                            isShowQuickScanSheet = true
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
@@ -115,6 +120,7 @@ struct EventDetailView: View {
             
         }
         .onAppear {
+            hasPreviewed = false
             eventViewModel.calculateOptimization()
         }
         .navigationBarBackButtonHidden(true)
@@ -218,6 +224,16 @@ struct EventDetailView: View {
             .padding()
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowQuickScanSheet){
+            ReceiptUploadSheet(height: $sheetHeight, isPresented: $isShowQuickScanSheet)
+                .presentationDetents([.height(sheetHeight)])
+        }
+        .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
+            if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
+                hasPreviewed.toggle()
+                routes.navigate(to: .ReceiptUploadReview)
+            }
         }
     }
 }
