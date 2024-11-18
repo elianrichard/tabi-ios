@@ -25,6 +25,7 @@ struct OptimizationRecapCard: View {
                 }
                 Spacer()
                 Text("Rp\(settlement.amount.formatPrice())")
+                    .font(.tabiBody)
                     .padding(.horizontal, .spacingTight)
                     .padding(.vertical, .spacingXSmall)
                     .background(getHighlightColor(userDebt: recapData.user, userLent: settlement.userPaid))

@@ -50,7 +50,7 @@ struct OnboardingView: View {
         VStack {
             HStack {
                 Button {
-                    print("navigate to input name")
+                    routes.navigate(to: .GuestLoginView)
                 } label: {
                     Text("Enter as Guest")
                         .font(.tabiBody)
@@ -140,6 +140,7 @@ struct OnboardingView: View {
         .padding(.vertical)
         .navigationBarBackButtonHidden(true)
     }
+    
     private func changeSlide () {
         guard let scrollPosition, !isDragging else { return }
         withAnimation (.linear(duration: animationDuration)) {
