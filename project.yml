@@ -37,7 +37,7 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations:
           ["UIInterfaceOrientationPortrait"]
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
-        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.travel"
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.finance"
         INFOPLIST_KEY_CFBundleDisplayName: "Tabi"
         ENABLE_TESTABILITY: YES
         SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
@@ -46,6 +46,7 @@ targets:
         SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
         INFOPLIST_KEY_UIRequiresFullScreen: YES
         INFOPLIST_KEY_UIStatusBarHidden: YES
+        TARGETED_DEVICE_FAMILY: 1
       configs:
         Debug:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
