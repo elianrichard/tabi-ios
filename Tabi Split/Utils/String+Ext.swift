@@ -42,6 +42,14 @@ extension String {
         return String(self.split(separator: " ").first ?? "")
     }
     
+    func getLastName() -> String {
+        if self.split(separator: " ").count >= 2 {
+            return String(self.split(separator: " ").last ?? "")
+        }else{
+            return ""
+        }
+    }
+    
     func validatePhoneNumber () -> String? {
         let phoneNumberLengthRegex = /^[0-9]{10,13}$/
         if !self.contains(phoneNumberLengthRegex) {

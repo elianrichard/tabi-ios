@@ -86,6 +86,15 @@ enum SplitMethod: String, Identifiable {
     
     var id: String { rawValue }
     
+    var splitName: String {
+        switch self {
+        case .equally:
+            "Equally"
+        case .custom:
+            "Custom"
+        }
+    }
+    
     var splitDescription: String {
         switch self {
         case .equally:

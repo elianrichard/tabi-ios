@@ -19,6 +19,7 @@ struct EventDetailView: View {
     @State private var isShowQuickScanSheet = false
     @State private var sheetHeight: CGFloat = 0
     @State private var hasPreviewed: Bool = false
+    @State private var toggleSeeAllParticipantsSheet: Bool = false
     
     var body: some View {
         ZStack {
@@ -53,7 +54,7 @@ struct EventDetailView: View {
             
             VStack (spacing: 0) {
                 EventBanner()
-                EventParticipantsList()
+                EventParticipantsList(toggleSeeAllParticipants: $toggleSeeAllParticipantsSheet)
                 VStack {
                     if eventViewModel.isNoParticipants {
                         EventNoParticipants()
@@ -230,6 +231,11 @@ struct EventDetailView: View {
             ReceiptUploadSheet(height: $sheetHeight, isPresented: $isShowQuickScanSheet)
                 .presentationDetents([.height(sheetHeight)])
         }
+        .sheet(isPresented: $toggleSeeAllParticipantsSheet){
+            SeeAllParticipantSheet(isPresented: $toggleSeeAllParticipantsSheet, participantsList: eventViewModel.selectedEvent?.participants ?? [])
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
             if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
                 hasPreviewed.toggle()
@@ -244,4 +250,5 @@ struct EventDetailView: View {
         .environment(EventViewModel())
         .environment(Routes())
         .environment(EventExpenseViewModel())
+        .environment(ProfileViewModel())
 }

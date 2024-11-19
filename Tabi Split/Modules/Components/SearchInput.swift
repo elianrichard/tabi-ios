@@ -15,6 +15,12 @@ struct SearchInput: View {
         HStack (spacing: .spacingSmall) {
             Icon(systemName: "magnifyingglass", color: .textGrey, size: 16)
             TextField("", text: $text, prompt: Text("\(placeholder)").foregroundStyle(.textGrey))
+            Spacer()
+            Button{
+                text = ""
+            }label:{
+                Icon(systemName: "x.circle.fill", color: .textGrey, size: 16)
+            }
         }
         .padding(.spacingTight)
         .background(.uiWhite)
