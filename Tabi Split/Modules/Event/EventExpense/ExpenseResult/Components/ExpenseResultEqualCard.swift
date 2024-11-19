@@ -10,7 +10,6 @@ import SwiftUI
 struct ExpenseResultEqualCard: View {
     @Environment(ProfileViewModel.self) private var profileViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @Environment(ProfileViewModel.self) private var profileViewModel
     var person: UserData
     
     var body: some View {
@@ -19,7 +18,7 @@ struct ExpenseResultEqualCard: View {
             HStack(spacing: 0){
                 Text("\(person.name.getFirstName())'s")
                     .font(.tabiHeadline)
-                if profileViewModel.user == person {
+                if profileViewModel.isCurrentUser(person) {
                     Text(" (Yours)")
                         .font(.tabiBody)
                         .foregroundColor(.textGrey)

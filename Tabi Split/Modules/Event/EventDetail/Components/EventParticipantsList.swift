@@ -10,7 +10,7 @@ import SwiftUI
 struct EventParticipantsList: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(Routes.self) private var routes
-    @Binding var toggleSeeAllParticipants: Bool
+    @Binding var sheetViewModel:SheetViewModel<EventSheets>
     
     var body: some View {
         HStack (spacing: 4) {
@@ -31,7 +31,7 @@ struct EventParticipantsList: View {
                 }
                 if selectedEvent.participants.count > 4 {
                     Button {
-                        toggleSeeAllParticipants.toggle()
+                        sheetViewModel.setSheet(.toggleSeeAll)
                     } label: {
                         ZStack {
                             Circle()
