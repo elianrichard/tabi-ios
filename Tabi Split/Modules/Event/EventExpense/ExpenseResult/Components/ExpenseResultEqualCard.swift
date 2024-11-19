@@ -8,14 +8,22 @@
 import SwiftUI
 
 struct ExpenseResultEqualCard: View {
+    @Environment(ProfileViewModel.self) private var profileViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     var person: UserData
     
     var body: some View {
         HStack {
             UserAvatar(userData: person)
-            Text("\(person.name.getFirstName())'s")
-                .font(.tabiHeadline)
+            HStack {
+                Text("\(person.name.getFirstName())'s")
+                    .font(.tabiHeadline)
+                if profileViewModel.isCurrentUser(person) {
+                    Text("(Yours)")
+                        .font(.tabiHeadline)
+                        .foregroundStyle(.textGrey)
+                }
+            }
             Spacer()
             Text("Rp\(eventExpenseViewModel.calculateEqualSplit().formatPrice())")
                 .font(.tabiHeadline)

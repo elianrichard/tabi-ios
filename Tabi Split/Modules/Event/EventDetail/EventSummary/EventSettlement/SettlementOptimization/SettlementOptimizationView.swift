@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SettlementOptimizationView: View {
+    @Environment(ProfileViewModel.self) private var profileViewModel
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     
@@ -21,7 +22,10 @@ struct SettlementOptimizationView: View {
                 VStack {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            ForEach (eventViewModel.participantsBalance) { data in
+                            if let currentUserData = eventViewModel.participantsBalance.first(where: { profileViewModel.isCurrentUser($0.user) }){
+                                OptimizationPersonCard(data: currentUserData)
+                            }
+                            ForEach (eventViewModel.participantsBalance.filter{ !profileViewModel.isCurrentUser($0.user) }) { data in
                                 OptimizationPersonCard(data: data)
                             }
                         }
