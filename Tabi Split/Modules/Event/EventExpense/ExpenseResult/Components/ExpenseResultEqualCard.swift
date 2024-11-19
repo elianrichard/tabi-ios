@@ -15,13 +15,13 @@ struct ExpenseResultEqualCard: View {
     var body: some View {
         HStack {
             UserAvatar(userData: person)
-            HStack {
+            HStack(spacing: 0){
                 Text("\(person.name.getFirstName())'s")
                     .font(.tabiHeadline)
                 if profileViewModel.isCurrentUser(person) {
-                    Text("(Yours)")
-                        .font(.tabiHeadline)
-                        .foregroundStyle(.textGrey)
+                    Text(" (Yours)")
+                        .font(.tabiBody)
+                        .foregroundColor(.textGrey)
                 }
             }
             Spacer()

@@ -11,6 +11,8 @@ import SwiftUI
 struct ShowAllParticipants: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
+
     @Binding var isPresented: Bool
     
     var body: some View {
@@ -28,8 +30,15 @@ struct ShowAllParticipants: View {
                                     HStack{
                                         UserAvatar(userData: person)
                                         VStack(alignment: .leading){
-                                            Text(person.name)
-                                                .font(.tabiHeadline)
+                                            HStack(spacing: 0){
+                                                Text("\(person.name.getFirstName())'s")
+                                                    .font(.tabiHeadline)
+                                                if profileViewModel.user == person {
+                                                    Text(" (You)")
+                                                        .font(.tabiBody)
+                                                        .foregroundColor(.textGrey)
+                                                }
+                                            }
                                             Text(person.phone)
                                                 .font(.tabiBody)
                                                 .foregroundColor(.textGrey)

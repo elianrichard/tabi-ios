@@ -16,13 +16,13 @@ struct ExpenseResultCustomCard: View {
         VStack (spacing: .spacingTight) {
             HStack {
                 UserAvatar(userData: person.user)
-                HStack {
+                HStack(spacing: 0){
                     Text("\(person.user.name.getFirstName())'s")
                         .font(.tabiHeadline)
                     if profileViewModel.isCurrentUser(person.user) {
-                        Text("(Yours)")
-                            .font(.tabiHeadline)
-                            .foregroundStyle(.textGrey)
+                        Text(" (Yours)")
+                            .font(.tabiBody)
+                            .foregroundColor(.textGrey)
                     }
                 }
                 Spacer()

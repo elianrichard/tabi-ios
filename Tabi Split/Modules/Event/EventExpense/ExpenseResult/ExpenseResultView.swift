@@ -154,4 +154,5 @@ struct ExpenseResultView: View {
         .environment(Routes())
         .environment(EventViewModel())
         .environment(EventExpenseViewModel())
+        .environment(ProfileViewModel())
 }

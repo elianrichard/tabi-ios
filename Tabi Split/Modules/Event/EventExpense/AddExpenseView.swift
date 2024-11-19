@@ -27,14 +27,15 @@ struct AddExpenseView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
                     InputWithLabel(label: "Expense Name",
-                                   placeholder: "Expense Name",
+                                   placeholder: "Enter expense name",
                                    text: Bindable(eventExpenseViewModel).expenseName,
                                    errorMessage: viewModel.expenseNameError,
                                    focusedField: $focusedField,
                                    focusCase: .field1
                     )
                     DropDownInput(
-                        label: "Paid by",
+                        label: "Paid By",
+                        placeholder: "Choose who paid",
                         items: eventViewModel.selectedEvent?.participants ?? [],
                         keyPath: \UserData.name,
                         backgroundColor: .bgWhite,
@@ -122,9 +123,9 @@ struct AddExpenseView: View {
                     } // Participants
                     DropDownInput(
                         label: "Split Bill Method",
-                        placeholder: "Split by",
+                        placeholder: "Choose split bill method",
                         items: SplitMethod.allCases,
-                        keyPath: \.splitDescription,
+                        keyPath: \.splitName,
                         backgroundColor: .bgWhite,
                         cornerRadius: 16,
                         selectedItem: Bindable(eventExpenseViewModel).selectedMethod,
@@ -207,7 +208,7 @@ struct AddExpenseView: View {
                                         AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
                                     }
                                 }
-                                CustomButton(text: "+ Add more", type: .tertiary, vPadding: 0){
+                                CustomButton(text: "+ Add More", type: .tertiary, vPadding: 0){
                                     eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
                                 }
                                 .frame(maxWidth: .infinity, alignment: .center)

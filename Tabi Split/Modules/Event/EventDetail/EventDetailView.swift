@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum EventSheets {
-    case complete, incomplete, delete, quickScan
+    case complete, incomplete, delete, quickScan, toggleSeeAll
 }
 
 struct EventDetailView: View {
@@ -17,7 +17,7 @@ struct EventDetailView: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
     
-    @State private var sheetViewModel = SheetViewModel<EventSheets>()
+    @State var sheetViewModel = SheetViewModel<EventSheets>()
     @State private var hasPreviewed: Bool = false
     
     var body: some View {
@@ -53,7 +53,7 @@ struct EventDetailView: View {
             
             VStack (spacing: 0) {
                 EventBanner()
-                EventParticipantsList()
+                EventParticipantsList(sheetViewModel: $sheetViewModel)
                 VStack {
                     if eventViewModel.isNoParticipants {
                         EventNoParticipants()
@@ -230,6 +230,11 @@ struct EventDetailView: View {
             ReceiptUploadSheet(height: $sheetViewModel.sheetHeight, isPresented: sheetViewModel.getIsPresentedBinding(.quickScan))
                 .presentationDetents([.height(sheetViewModel.sheetHeight)])
         }
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.toggleSeeAll)){
+            SeeAllParticipantSheet(isPresented: sheetViewModel.getIsPresentedBinding(.toggleSeeAll), participantsList: eventViewModel.selectedEvent?.participants ?? [])
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
             if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
                 hasPreviewed.toggle()
@@ -244,4 +249,5 @@ struct EventDetailView: View {
         .environment(EventViewModel())
         .environment(Routes())
         .environment(EventExpenseViewModel())
+        .environment(ProfileViewModel())
 }

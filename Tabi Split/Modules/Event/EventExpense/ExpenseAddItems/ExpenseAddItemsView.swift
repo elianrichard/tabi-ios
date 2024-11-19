@@ -58,7 +58,7 @@ struct ExpenseAddItemsView: View {
                                 AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
                             }
                         }
-                        CustomButton(text: "+ Add more", type: .tertiary, vPadding: 0){
+                        CustomButton(text: "+ Add More", type: .tertiary, vPadding: 0){
                             eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
                         }
                         .frame(maxWidth: .infinity, alignment: .center)

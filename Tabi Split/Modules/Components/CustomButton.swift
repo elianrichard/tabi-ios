@@ -36,7 +36,7 @@ enum ButtonType {
                 return .textGrey
             }
         case .tertiary:
-            return .buttonBlue
+            return .textBlue
         }
     }
 }

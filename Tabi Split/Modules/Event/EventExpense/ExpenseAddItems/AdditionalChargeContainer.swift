@@ -55,7 +55,7 @@ struct AdditionalChargeContainer: View {
                 }
                 .frame(width: geometry.size.width * 0.4)
                 HStack{
-                    TextField("Amount (Rp)", text: $price)
+                    TextField("Enter amount", text: $price)
                         .keyboardType(.numberPad)
                         .onChange(of: price) {
                             price = price.formatPrice(isShowSign: false)
