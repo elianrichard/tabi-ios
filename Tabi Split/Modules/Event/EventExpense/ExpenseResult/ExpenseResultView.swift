@@ -19,7 +19,7 @@ struct ExpenseResultView: View {
     var body: some View {
         VStack (alignment: .leading) {
             TopNavigation(title: "Expense Result", RightToolbar: {
-                if !eventExpenseViewModel.isEditView {
+                if !eventExpenseViewModel.isEditView && !eventViewModel.isEventCompleted {
                     ElipsisMenu {
                         Button {
                             eventExpenseViewModel.isEdit = true

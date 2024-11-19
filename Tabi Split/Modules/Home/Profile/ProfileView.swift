@@ -17,15 +17,8 @@ struct ProfileView: View {
             TopNavigation(title: "Profile")
             VStack(spacing: .spacingLarge){
                 HStack{
-                    HStack(alignment: .center, spacing: .spacingTight){
-                        UserAvatar(userData: profileViewModel.user)
-                        VStack(alignment: .leading, spacing: .spacingXSmall){
-                            Text(profileViewModel.isGuest ? "You entered as a Guest" : profileViewModel.user.name)
-                                .font(.tabiSubtitle)
-                            Text(profileViewModel.user.phone)
-                                .font(.tabiBody)
-                                .foregroundStyle(.textGrey)
-                        }
+                    HStack(alignment: .center, spacing: .spacingTight) {
+                        UserCard(user: profileViewModel.user, isShowGuestPhoneText: true)
                         Spacer()
                         if !profileViewModel.isGuest {
                             Icon(systemName: "pencil", color: .textBlack, size: 16) {

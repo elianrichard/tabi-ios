@@ -43,14 +43,27 @@ struct AdditionalChargeContainer: View {
                         }
                         .accentColor(.textBlack)
                     }
+                    .onChange(of: item.additionalChargeType) {
+                        price = price.formatPrice(isShowSign: false)
+                        if (item.additionalChargeType == AdditionalChargeType.discount.id) {
+                            item.amount = abs(Float(price.removeDots()) ?? 0) * -1
+                        } else {
+                            item.amount = abs(Float(price.removeDots()) ?? 0)
+                        }
+                        eventExpenseViewModel.calculateTotal()
+                    }
                 }
                 .frame(width: geometry.size.width * 0.4)
                 HStack{
                     TextField("Amount (Rp)", text: $price)
                         .keyboardType(.numberPad)
                         .onChange(of: price) {
-                            price = price.formatPrice()
-                            item.amount = Float(price.removeDots()) ?? 0
+                            price = price.formatPrice(isShowSign: false)
+                            if (item.additionalChargeType == AdditionalChargeType.discount.id) {
+                                item.amount = abs(Float(price.removeDots()) ?? 0) * -1
+                            } else {
+                                item.amount = abs(Float(price.removeDots()) ?? 0)
+                            }
                             eventExpenseViewModel.calculateTotal()
                         }
                         .font(.tabiBody)

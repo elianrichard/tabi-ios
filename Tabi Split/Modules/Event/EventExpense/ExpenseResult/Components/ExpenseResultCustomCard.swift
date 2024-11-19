@@ -29,7 +29,7 @@ struct ExpenseResultCustomCard: View {
                     HStack(alignment: .top, spacing: .spacingRegular){
                         Text(item.itemName)
                             .font(.tabiHeadline)
-                        Text("\(String(item.itemQuantity.rounded(toDecimalPlaces: 1)))x")
+                        Text("\(String(item.itemQuantity.rounded(toDecimalPlaces: 2)))x")
                             .font(.tabiBody)
                         Spacer()
                         Text("Rp\((Float(item.itemQuantity) * item.itemPrice).formatPrice())")
