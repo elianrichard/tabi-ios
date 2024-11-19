@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ExpenseResultEqualCard: View {
+    @Environment(ProfileViewModel.self) private var profileViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
     var person: UserData

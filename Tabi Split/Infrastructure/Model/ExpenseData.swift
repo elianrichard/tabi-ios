@@ -33,6 +33,7 @@ class Expense {
     }
 }
 
+// List of expense item, e.g. Chicken, Rice, etc.
 @Model
 class ExpenseItem {
     var itemName: String
@@ -73,6 +74,7 @@ class AdditionalCharge {
     }
 }
 
+// This is only used in Expense Result View
 struct PersonItem: Identifiable {
     var id: UUID = UUID()
     var user: UserData

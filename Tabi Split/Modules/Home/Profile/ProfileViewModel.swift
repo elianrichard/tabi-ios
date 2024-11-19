@@ -13,8 +13,13 @@ final class ProfileViewModel{
     var userPaymentMethods: [PaymentMethod] = []
 
     var isLogoutLoading: Bool = false
+    var isDeleteLoading: Bool = false
     var isUpdateProfileLoading: Bool = false
     var isRefreshProfileLoading: Bool = false
+    
+    var isGuest: Bool {
+        return user.phone == "Guest"
+    }
     
     @MainActor
     func logout() async -> Bool {
@@ -65,7 +70,7 @@ final class ProfileViewModel{
         if let currentUser = SwiftDataService.shared.getCurrentUser() {
             user = currentUser
         }
-        
+        if isGuest { return }
         Task {
             isRefreshProfileLoading = true
             do {
@@ -74,10 +79,32 @@ final class ProfileViewModel{
                 user.phone = freshUser.userPhone
                 user.image = freshUser.userImage
             } catch {
-                print("Update profile failed: \(error)")
+                print("Refresh profile failed: \(error)")
             }
             isRefreshProfileLoading = false
         }
+    }
+    
+    @MainActor
+    func deleteUser () async -> Bool {
+        isDeleteLoading = true
+        var isSuccess = false
+        do {
+            //            TODO: DELETE USER THROUGH ENDPOINT
+            //            try await ProfileService.shared.deleteUser()
+            try await AuthenticationService.shared.logout()
+            SwiftDataService.shared.deleteAllEvents()
+            SwiftDataService.shared.deleteAllUser()
+            UserDefaultsService.shared.deleteCurrentUser()
+            user = UserData(name: "unknown", phone: "unknown")
+            isSuccess = true
+        } catch {
+            print("User delete failed: \(error)")
+            isSuccess = false
+        }
+        
+        isDeleteLoading = false
+        return isSuccess
     }
     
     func isCurrentUser (_ userData: UserData) -> Bool {

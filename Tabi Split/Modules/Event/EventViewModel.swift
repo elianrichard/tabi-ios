@@ -40,8 +40,9 @@ final class EventViewModel {
     var participantsBalance: [PersonBalanceData] = []
     var userTransactionHistory: [SummaryHistoryData] = []
     var userBalance: PersonBalanceData {
-        if let currentUser = UserDefaultsService.shared.getCurrentUser() {
-            return participantsBalance.first(where: { $0.user.phone == currentUser.userPhone }) ?? PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone"))
+        if let currentUser = UserDefaultsService.shared.getCurrentUser(),
+           let personBalance = participantsBalance.first(where: { $0.user.phone == currentUser.userPhone }) {
+            return personBalance
         } else { return PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone")) }
     }
     var userTotalSpending: Float = 0
@@ -106,11 +107,17 @@ final class EventViewModel {
             }
             
             if (expense.splitMethod == SplitMethod.custom.id) {
+                let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
+                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
                 for item in expense.items {
+                    let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
                     for assignee in item.assignees {
                         guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
-                        let amountDebt = Float(assignee.share * item.itemPrice).rounded(toDecimalPlaces: 1).properRound()
-                        if debug { print("Participants: " + assignee.user.name, "debt: ", amountDebt) }
+                        let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
+                        let amountSpent = personQuantity * item.itemPrice
+                        let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
+                        let amountDebt = Float(amountSpent + amountAdditional).properRound()
+                        if debug { print("Participants: " + assignee.user.name, "\(item.itemName) Spent: ", amountSpent, "Additional: ", amountAdditional, "debt: ", amountDebt) }
                         if (expense.coverer == currentUser && personBuy.user == currentUser) {
                             personPaid.lent -= amountDebt
                         } else {

@@ -20,12 +20,20 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack (path: $routes.navPath) {
-            VStack {
-                if isAuthenticated {
+            ZStack {
+                if !UserDefaultsService.shared.getOnboardingStatus() {
+                    OnboardingView()
+                        .onAppear {
+                            UserDefaultsService.shared.setOnboardingStatus(true)
+                        }
+                } else if isAuthenticated {
                     HomeView()
                 } else {
                     LoginView()
                 }
+                
+                SplashView()
+                    .ignoresSafeArea()
             }
             .navigationDestination(for: Routes.Destination.self) { destination in
                 switch destination {
@@ -49,6 +57,9 @@ struct ContentView: View {
                     
                 case .LoginView:
                     LoginView()
+                    
+                case .GuestLoginView:
+                    GuestLoginView()
                     
                 case .RegisterView:
                     RegisterView()
@@ -114,12 +125,14 @@ struct ContentView: View {
     }
     
     private func checkAuthentication() {
+        let isAccessTokenAvailable: Bool
         do {
             let accessToken = try KeychainService.shared.getAccessToken()
-            isAuthenticated = !accessToken.isEmpty
+            isAccessTokenAvailable = !accessToken.isEmpty
         } catch {
-            isAuthenticated = false
+            isAccessTokenAvailable = false
         }
+        isAuthenticated = (isAccessTokenAvailable || SwiftDataService.shared.getCurrentUser() != nil)
     }
 }
 

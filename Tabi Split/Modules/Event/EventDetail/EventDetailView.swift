@@ -7,15 +7,18 @@
 
 import SwiftUI
 
+enum EventSheets {
+    case complete, incomplete, delete, quickScan
+}
+
 struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
     
-    @State private var isShowCompleteSheet = false
-    @State private var isShowIncompleteSheet = false
-    @State private var isShowDeleteSheet = false
+    @State private var sheetViewModel = SheetViewModel<EventSheets>()
+    @State private var hasPreviewed: Bool = false
     @State private var isShowQuickScanSheet = false
     @State private var sheetHeight: CGFloat = 0
     @State private var hasPreviewed: Bool = false
@@ -32,19 +35,19 @@ struct EventDetailView: View {
                     }
                     if !eventViewModel.isEventCompleted {
                         Button {
-                            isShowCompleteSheet = true
+                            sheetViewModel.setSheet(.complete)
                         } label: {
                             Label("Mark as Completed", systemImage: "flag")
                         }
                     } else {
                         Button {
-                            isShowIncompleteSheet = true
+                            sheetViewModel.setSheet(.incomplete)
                         } label: {
                             Label("Mark as Incomplete", systemImage: "flag.slash")
                         }
                     }
                     Button (role: .destructive) {
-                        isShowDeleteSheet = true
+                        sheetViewModel.setSheet(.delete)
                     } label: {
                         Label("Delete Event", systemImage: "trash")
                     }
@@ -107,7 +110,7 @@ struct EventDetailView: View {
                         }
                         CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
                             eventExpenseViewModel.isQuickScanned = true
-                            isShowQuickScanSheet = true
+                            sheetViewModel.setSheet(.quickScan)
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
@@ -126,7 +129,7 @@ struct EventDetailView: View {
             eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
         }
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: $isShowCompleteSheet) {
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.complete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
                     Image(.eventComplete)
@@ -145,11 +148,11 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        isShowCompleteSheet = false
+                        sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Complete") {
-                        isShowCompleteSheet = false
                         eventViewModel.completeEvent()
+                        sheetViewModel.clearSheet()
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -159,7 +162,7 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $isShowIncompleteSheet) {
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.incomplete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
                     Image(.eventComplete)
@@ -179,11 +182,11 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        isShowIncompleteSheet = false
+                        sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Yes") {
-                        isShowIncompleteSheet = false
                         eventViewModel.incompleteEvent()
+                        sheetViewModel.clearSheet()
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -193,7 +196,7 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $isShowDeleteSheet) {
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.delete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: .spacingLarge) {
                     Image(.eventDelete)
@@ -212,10 +215,10 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        isShowDeleteSheet = false
+                        sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
-                        isShowDeleteSheet = false
+                        sheetViewModel.clearSheet()
                         eventViewModel.handleDeleteEvent()
                         routes.navigateBack()
                     }
@@ -235,6 +238,16 @@ struct EventDetailView: View {
             SeeAllParticipantSheet(isPresented: $toggleSeeAllParticipantsSheet, participantsList: eventViewModel.selectedEvent?.participants ?? [])
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
+        }
+        .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
+            if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
+                hasPreviewed.toggle()
+                routes.navigate(to: .ReceiptUploadReview)
+            }
+        }
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.quickScan)){
+            ReceiptUploadSheet(height: $sheetViewModel.sheetHeight, isPresented: sheetViewModel.getIsPresentedBinding(.quickScan))
+                .presentationDetents([.height(sheetViewModel.sheetHeight)])
         }
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
             if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
