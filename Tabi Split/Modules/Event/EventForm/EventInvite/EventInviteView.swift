@@ -109,9 +109,11 @@ struct EventInviteView: View {
         .padding()
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            if eventInviteViewModel.allContacts.count == 0, let currentUser = SwiftDataService.shared.getCurrentUser() {
+            if eventInviteViewModel.allContacts.count == 0,
+               let currentUser = SwiftDataService.shared.getCurrentUser(),
+               let allUsers = SwiftDataService.shared.getAllUsers(excludeLoggedUser: true) {
                 DispatchQueue.global(qos: .background).async {
-                    eventInviteViewModel.fillUpContacts(currentUser: currentUser)
+                    eventInviteViewModel.fillUpContacts(currentUser: currentUser, registeredUsers: allUsers)
                 }
             }
             if let selectedEvent = eventViewModel.selectedEvent {

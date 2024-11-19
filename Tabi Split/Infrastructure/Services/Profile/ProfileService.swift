@@ -28,4 +28,8 @@ final class ProfileService {
         let freshUser = response.users[0]
         return CurrentUserDefaults(userName: freshUser.name, userPhone: freshUser.phone, userImage: freshUser.avatar_url, userId: freshUser.user_id)
     }
+    
+    func deleteUser() async throws {
+        let _: DeleteResponse = try await apiClient.delete(endpoint: "/user/delete")
+    }
 }

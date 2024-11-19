@@ -332,8 +332,12 @@ final class EventExpenseViewModel {
     @MainActor
     func handleUpdateExpense (_ event: EventData) {
         if let expense = selectedExpense, let selectedCoverer = selectedCoverer, let selectedMethod = selectedMethod {
-            guard let index = event.expenses.firstIndex(of: expense) else { return }
-            event.expenses[index] = Expense(name: expenseName, coverer: selectedCoverer, dateOfCreation: expense.dateOfCreation, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants, items: items, additionalCharges: additionalCharges)
+            expense.coverer = selectedCoverer
+            expense.price = totalSpending
+            expense.splitMethod = selectedMethod.id
+            expense.items = items
+            expense.additionalCharges = additionalCharges
+            expense.participants = selectedParticipants
             SwiftDataService.shared.saveModelContext()
         }
     }

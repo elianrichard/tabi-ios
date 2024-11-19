@@ -11,6 +11,7 @@ struct UserCard : View {
     @Environment(ProfileViewModel.self) private var profileViewModel
     var user: UserData
     var isShowYouText: Bool = true
+    var isShowGuestPhoneText: Bool = false
     
     var body: some View {
         HStack (spacing: .spacingTight) {
@@ -20,7 +21,7 @@ struct UserCard : View {
                     .font(.tabiHeadline)
                     .foregroundStyle(.textBlack)
                 if user.phone != "" {
-                    Text(user.phone)
+                    Text((isShowGuestPhoneText && profileViewModel.isGuest) ? "You entered as a Guest" : user.phone)
                         .font(.tabiBody)
                         .foregroundColor(.textGrey)
                 }

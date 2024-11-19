@@ -12,7 +12,7 @@ struct OptimizationPersonCard: View {
     var body: some View {
         VStack (alignment: .leading, spacing: .spacingRegular) {
             HStack (spacing: .spacingTight) {
-                UserAvatar(userData: data.user, namePosition: .right)
+                UserAvatar(userData: data.user, namePosition: .right, isShowCurrentUserText: true)
                 Spacer()
             }
             HStack (spacing: .spacingMedium) {

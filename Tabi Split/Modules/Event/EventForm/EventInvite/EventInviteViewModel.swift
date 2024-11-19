@@ -59,7 +59,7 @@ final class EventInviteViewModel {
         }
     }
     
-    func fillUpContacts(currentUser: UserData) {
+    func fillUpContacts(currentUser: UserData, registeredUsers: [UserData]) {
         let CNStore = CNContactStore()
         var cnContacts: [CNContact] = []
         
@@ -78,7 +78,7 @@ final class EventInviteViewModel {
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
                     print("contact granted")
-                    self.fillUpContacts(currentUser: currentUser)
+                    self.fillUpContacts(currentUser: currentUser, registeredUsers: registeredUsers)
                 } else if let error = error {
                     print("Error requesting contact acces: \(error)")
                 }
@@ -96,8 +96,15 @@ final class EventInviteViewModel {
         }
         var allUsers: [UserData] = []
         
-        for user in selectedContacts {
+        for user in registeredUsers {
             allUsers.append(user)
+        }
+        
+        for user in selectedContacts {
+            let phone = user.phone.formattedAsPhoneNumber()
+            if !allUsers.contains(where: { $0.phone == phone }){
+                allUsers.append(user)
+            }
         }
         
         for contact in cnContacts {

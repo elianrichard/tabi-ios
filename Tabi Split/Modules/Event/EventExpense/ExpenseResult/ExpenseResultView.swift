@@ -11,6 +11,7 @@ import SwiftUI
 struct ExpenseResultView: View {
     @Environment(Routes.self) var routes
     @Environment(EventExpenseViewModel.self) var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) var profileViewModel
     @Environment(EventViewModel.self) var eventViewModel
     
     @State private var contentSize: CGSize = .zero
@@ -19,7 +20,7 @@ struct ExpenseResultView: View {
     var body: some View {
         VStack (alignment: .leading) {
             TopNavigation(title: "Expense Result", RightToolbar: {
-                if !eventExpenseViewModel.isEditView {
+                if !eventExpenseViewModel.isEditView && !eventViewModel.isEventCompleted {
                     ElipsisMenu {
                         Button {
                             eventExpenseViewModel.isEdit = true
@@ -74,11 +75,15 @@ struct ExpenseResultView: View {
             ScrollView(showsIndicators: false) {
                 VStack (spacing: .spacingTight) {
                     if eventExpenseViewModel.selectedMethod == .equally {
-                        ForEach(eventExpenseViewModel.selectedParticipants){ person in
+                        ExpenseResultEqualCard(person: profileViewModel.user)
+                        ForEach(eventExpenseViewModel.selectedParticipants.filter { !profileViewModel.isCurrentUser($0) }) { person in
                             ExpenseResultEqualCard(person: person)
                         }
                     } else if eventExpenseViewModel.selectedMethod == .custom {
-                        ForEach(eventExpenseViewModel.peopleItems) { person in
+                        if let currentPersonItem = eventExpenseViewModel.peopleItems.first(where: { profileViewModel.isCurrentUser($0.user) }) {
+                            ExpenseResultCustomCard(person: currentPersonItem)
+                        }
+                        ForEach(eventExpenseViewModel.peopleItems.filter { !profileViewModel.isCurrentUser($0.user) }) { person in
                             ExpenseResultCustomCard(person: person)
                         }
                     }
