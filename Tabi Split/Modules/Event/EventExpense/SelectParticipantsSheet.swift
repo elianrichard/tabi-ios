@@ -15,6 +15,15 @@ struct SelectParticipantsSheet: View {
 
     @Binding var isPresented: Bool
     
+    var participants: [UserData] {
+        var value: [UserData] = []
+        if let selectedEvent = eventViewModel.selectedEvent {
+            value.append(contentsOf: selectedEvent.participants.filter { !profileViewModel.isCurrentUser($0) }.sorted(by: { $0.name < $1.name }))
+        }
+        value.insert(profileViewModel.user, at: 0)
+        return value
+    }
+    
     var body: some View {
         VStack{
             SheetXButton(toggle: $isPresented)
@@ -26,7 +35,7 @@ struct SelectParticipantsSheet: View {
                     VStack{
                         LazyVStack (spacing: .spacingTight){
                             Divided{
-                                ForEach (eventViewModel.selectedEvent?.participants ?? []) { person in
+                                ForEach (participants) { person in
                                     HStack{
                                         UserCard(user: person, isShowYouText: true)
                                         Spacer()

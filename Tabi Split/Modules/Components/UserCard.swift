@@ -29,7 +29,7 @@ struct UserCard : View {
                     }
                 }
                 if (isShowPhoneText && user.phone != "") {
-                    if profileViewModel.isGuest && !profileViewModel.isCurrentUser(user) {
+                    if !(profileViewModel.isGuest && profileViewModel.isCurrentUser(user)) {
                         Text(user.phone)
                             .font(.tabiBody)
                             .foregroundColor(.textGrey)

@@ -21,7 +21,7 @@ struct AddExpenseView: View {
     
     var body: some View {
         VStack (spacing: .spacingRegular) {
-            TopNavigation(title: "Add New Expenses", additionalBackFunction: {
+            TopNavigation(title: eventExpenseViewModel.isEdit ? "Edit Expense" : "Add New Expenses", additionalBackFunction: {
                 eventExpenseViewModel.isEdit = false
             })
             ScrollView(showsIndicators: false) {

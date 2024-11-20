@@ -16,7 +16,6 @@ struct SeeAllParticipantSheet: View {
     @State var nameToBeSearched: String = ""
     var participantsList: [UserData] = []
     
-    
     var body: some View {
         CustomSheet (xToggleBinding: $isPresented) {
             VStack(spacing: .spacingMedium) {
@@ -30,11 +29,12 @@ struct SeeAllParticipantSheet: View {
                             if nameToBeSearched.isEmpty || profileViewModel.user.name.lowercased().contains(nameToBeSearched.lowercased()) {
                                 UserCard(user: profileViewModel.user, isShowYouText: true)
                             }
-                            ForEach (participantsList.filter {
-                                (nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())) && !profileViewModel.isCurrentUser($0)
-                            }) { user in
-                                UserCard(user: user)
-                            }
+                            ForEach (
+                                participantsList.filter {
+                                    (nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())) && !profileViewModel.isCurrentUser($0)
+                                }.sorted(by: { $0.name < $1.name }) ) { user in
+                                    UserCard(user: user)
+                                }
                         }
                     }
                 }
