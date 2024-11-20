@@ -31,7 +31,7 @@ struct EventParticipantsList: View {
                 }
                 if selectedEvent.participants.count > 4 {
                     Button {
-                        sheetViewModel.setSheet(.toggleSeeAll)
+                        sheetViewModel.setSheet(.allParticipants)
                     } label: {
                         ZStack {
                             Circle()
