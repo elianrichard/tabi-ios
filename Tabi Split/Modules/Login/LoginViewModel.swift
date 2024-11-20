@@ -34,7 +34,7 @@ class LoginViewModel {
             SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
             print("Login failed: \(error)")
-            passwordError = "\(error)"
+            passwordError = "Account credential is invalid"
             isSuccess = false
         }
         isLoading = false
