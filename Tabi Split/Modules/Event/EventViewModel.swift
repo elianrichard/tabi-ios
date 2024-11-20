@@ -49,19 +49,31 @@ final class EventViewModel {
     var userSettlementList: [SummarySettlementData] = []
     
     @MainActor
-    func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData) {
+    func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) {
         var participants = selectedContacts.map { $0 }
         participants.append(currentUser)
         
-        if let selectedEvent {
-            selectedEvent.eventName = eventName
-            selectedEvent.eventIcon = eventIcon.id
-            selectedEvent.participants = participants
-        } else {
+        func createEventSwiftData (selectedEvent: EventData) {
+                selectedEvent.eventName = eventName
+                selectedEvent.eventIcon = eventIcon.id
+                selectedEvent.participants = participants
+        }
+        
+        func editEventSwiftData () {
             let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [])
             SwiftDataService.shared.addEvent(newEvent)
             newEvent.participants.append(contentsOf: participants)
             SwiftDataService.shared.saveModelContext()
+        }
+        
+        if let selectedEvent {
+            if !isGuest {
+                
+            } else {
+                createEventSwiftData(selectedEvent: selectedEvent)
+            }
+        } else {
+            editEventSwiftData()
         }
     }
     
