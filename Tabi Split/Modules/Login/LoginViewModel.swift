@@ -34,11 +34,19 @@ class LoginViewModel {
             SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
             print("Login failed: \(error)")
-            passwordError = "\(error)"
+            passwordError = "Account credential is invalid"
             isSuccess = false
         }
         isLoading = false
         return isSuccess
+    }
+    
+    @MainActor
+    func guestLogin() -> Bool {
+        let user = CurrentUserDefaults(userName: "Guest", userPhone: "Guest", userImage: "owl", userId: "")
+        UserDefaultsService.shared.saveCurrentUser(user: user)
+        SwiftDataService.shared.saveCurrentUser(user: user)
+        return true
     }
     
     func validateInput () -> Bool {

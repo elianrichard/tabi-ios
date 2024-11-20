@@ -90,8 +90,7 @@ final class ProfileViewModel{
         isDeleteLoading = true
         var isSuccess = false
         do {
-            //            TODO: DELETE USER THROUGH ENDPOINT
-            //            try await ProfileService.shared.deleteUser()
+            try await ProfileService.shared.deleteUser()
             try await AuthenticationService.shared.logout()
             SwiftDataService.shared.deleteAllEvents()
             SwiftDataService.shared.deleteAllUser()

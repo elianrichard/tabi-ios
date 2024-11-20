@@ -127,7 +127,9 @@ struct EventInviteView: View {
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     VStack (spacing: .spacingRegular) {
-                        DialogBox(image: .dialogIcon, iconSize: 36, text: "Enter the phone number to be connected to their account.", isClosable: false)
+                        if !profileViewModel.isGuest {
+                            DialogBox(image: .dialogIcon, iconSize: 36, text: "Enter the phone number to be connected to their account.", isClosable: false)
+                        }
                         VStack (alignment: .center, spacing: .spacingRegular) {
                             InputWithLabel(label: "Name", placeholder: "Enter participant name", text: $customName, errorMessage: customNameError, focusedField: $focusedField, focusCase: .field1)
                             InputWithLabel(label: "Phone Number", isOptional: true, placeholder: "Enter phone number", text: $customPhone, errorMessage: customPhoneError, inputTypePicked: .phone, focusedField: $focusedField, focusCase: .field2)

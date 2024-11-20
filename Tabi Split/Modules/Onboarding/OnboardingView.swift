@@ -48,19 +48,6 @@ struct OnboardingView: View {
         let combined = pressGesture.sequenced(before: dragGesture)
         
         VStack {
-            HStack {
-                Button {
-                    routes.navigate(to: .GuestLoginView)
-                } label: {
-                    Text("Enter as Guest")
-                        .font(.tabiBody)
-                        .foregroundStyle(.textGrey)
-                }
-                .opacity(isNextPressed ? 1 : 0)
-                .disabled(!isNextPressed)
-                Spacer()
-            }
-            .padding(.horizontal)
             Spacer()
             VStack (spacing: .spacingXLarge) {
                 if !isNextPressed {

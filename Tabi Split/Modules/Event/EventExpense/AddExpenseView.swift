@@ -21,7 +21,7 @@ struct AddExpenseView: View {
     
     var body: some View {
         VStack (spacing: .spacingRegular) {
-            TopNavigation(title: "Add New Expenses", additionalBackFunction: {
+            TopNavigation(title: eventExpenseViewModel.isEdit ? "Edit Expense" : "Add New Expenses", additionalBackFunction: {
                 eventExpenseViewModel.isEdit = false
             })
             ScrollView(showsIndicators: false) {
@@ -272,7 +272,7 @@ struct AddExpenseView: View {
             }
         }
         .sheet(isPresented: Bindable(viewModel).toggleSeeAll) {
-            ShowAllParticipants(isPresented: Bindable(viewModel).toggleSeeAll)
+            SelectParticipantsSheet(isPresented: Bindable(viewModel).toggleSeeAll)
                 .presentationDetents(
                     [.medium, .large],
                     selection: Bindable(viewModel).settingsDetent

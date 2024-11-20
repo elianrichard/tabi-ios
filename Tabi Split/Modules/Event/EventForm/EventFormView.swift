@@ -74,7 +74,7 @@ struct EventFormView: View {
                                         }
                                         
                                         ForEach (participantsList.prefix(4)) { user in
-                                            UserCard(user: user)
+                                            UserCard(user: user, isShowYouText: true)
                                         }
                                         
                                         Button{

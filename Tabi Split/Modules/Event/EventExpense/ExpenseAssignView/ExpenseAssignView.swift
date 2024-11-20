@@ -110,11 +110,11 @@ struct ExpenseAssignView: View {
                                 if (expenseAssignViewModel.selectedAsignee != nil) {
                                     VStack{
                                         Circle()
-                                            .stroke(item.assignees.filter({$0.user == expenseAssignViewModel.selectedAsignee}).count == 0 ? .buttonBlue : .textGrey, lineWidth: 1)
-                                            .fill(item.assignees.filter({$0.user == expenseAssignViewModel.selectedAsignee}).count == 0 ? .buttonBlue : .clear)
+                                            .stroke(item.assignees.contains(where: { $0.user == expenseAssignViewModel.selectedAsignee }) ? .buttonBlue : .textGrey, lineWidth: 1)
+                                            .fill(item.assignees.contains(where: { $0.user == expenseAssignViewModel.selectedAsignee }) ? .buttonBlue : .clear)
                                             .frame(width: 20)
                                             .overlay {
-                                                if item.assignees.filter({$0.user == expenseAssignViewModel.selectedAsignee}).count == 0 {
+                                                if item.assignees.contains(where: { $0.user == expenseAssignViewModel.selectedAsignee }) {
                                                     Icon(systemName: "checkmark", color: .textWhite, size: 10)
                                                 }
                                             }
