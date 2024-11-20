@@ -10,7 +10,6 @@ import SwiftData
 
 extension SwiftDataService {
     func addEvent (_ event: EventData) {
-        print(event.participants)
         modelContext.insert(event)
         saveModelContext()
     }

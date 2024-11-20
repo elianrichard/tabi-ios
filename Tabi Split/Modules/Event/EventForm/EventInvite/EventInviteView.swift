@@ -99,7 +99,6 @@ struct EventInviteView: View {
                     }
                     
                     CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add", isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContactsList.count > 1) {
-                        eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
                         eventInviteViewModel.searchUserText = ""
                         routes.navigateBack()
                     }
@@ -126,15 +125,7 @@ struct EventInviteView: View {
                     Text("Add Participant Details")
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    VStack (spacing: .spacingRegular) {
-                        if !profileViewModel.isGuest {
-                            DialogBox(image: .dialogIcon, iconSize: 36, text: "Enter the phone number to be connected to their account.", isClosable: false)
-                        }
-                        VStack (alignment: .center, spacing: .spacingRegular) {
-                            InputWithLabel(label: "Name", placeholder: "Enter participant name", text: $customName, errorMessage: customNameError, focusedField: $focusedField, focusCase: .field1)
-                            InputWithLabel(label: "Phone Number", isOptional: true, placeholder: "Enter phone number", text: $customPhone, errorMessage: customPhoneError, inputTypePicked: .phone, focusedField: $focusedField, focusCase: .field2)
-                        }
-                    }
+                    InputWithLabel(label: "Name", placeholder: "Enter participant name", text: $customName, errorMessage: customNameError, focusedField: $focusedField, focusCase: .field1)
                 }
                 Spacer()
                 CustomButton (text: "Save") {
@@ -144,11 +135,6 @@ struct EventInviteView: View {
                         customNameError = "Name cannot be empty"
                         return
                     } else { customNameError = nil }
-                    
-                    if eventInviteViewModel.allContacts.contains(where: { $0.phone == phone }) || phone == profileViewModel.user.phone {
-                        customPhoneError = "Phone number already registered"
-                        return
-                    } else { customPhoneError = nil }
                     
                     let newUser = UserData(name: customName, phone: customPhone != "" ? phone : "")
                     eventInviteViewModel.allContacts.append(newUser)

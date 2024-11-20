@@ -97,12 +97,14 @@ final class EventInviteViewModel {
         var allUsers: [UserData] = []
         
         for user in registeredUsers {
-            allUsers.append(user)
+            if user.phone != "" {
+                allUsers.append(user)                
+            }
         }
         
         for user in selectedContacts {
             let phone = user.phone.formattedAsPhoneNumber()
-            if !allUsers.contains(where: { $0.phone == phone }){
+            if !allUsers.contains(where: { $0.phone == phone }) {
                 allUsers.append(user)
             }
         }

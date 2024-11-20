@@ -107,10 +107,13 @@ struct EventFormView: View {
                 }
             }
             
-            CustomButton(text: isEdit ? "Save" : "Create",
-                         isEnabled: eventViewModel.eventName != "") {
-                eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user)
-                routes.navigateBack()
+            CustomButton(text: eventViewModel.isApiCallLoading ? "Loading..." : (isEdit ? "Save" : "Create"),
+                         isEnabled: !eventViewModel.isApiCallLoading && eventViewModel.eventName != "") {
+                Task {
+                    if await eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
+                        routes.navigateBack()
+                    }
+                }
             }
         }
         .onAppear {

@@ -6,12 +6,13 @@
 //
 
 final class EventService {
-    static let shared = ProfileService()
+    static let shared = EventService()
     
     private let apiClient: APIClient = APIService.shared
     private let tokenManager: TokenManaging = KeychainService.shared
     
-//    func createEvent(request: CreateEventRequest) {
-//        gu
-//    }
+    func createEvent(name: String) async throws {
+        let request: CreateEventRequest = CreateEventRequest(name: name)
+        let _ : CreateEventResponse = try await apiClient.post(endpoint: "/event", body: request)
+    }
 }

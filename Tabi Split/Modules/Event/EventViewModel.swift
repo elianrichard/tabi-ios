@@ -48,33 +48,48 @@ final class EventViewModel {
     var userTotalSpending: Float = 0
     var userSettlementList: [SummarySettlementData] = []
     
+    var isApiCallLoading = false
+    
     @MainActor
-    func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) {
-        var participants = selectedContacts.map { $0 }
-        participants.append(currentUser)
-        
-        func createEventSwiftData (selectedEvent: EventData) {
+    func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) async -> Bool {
+        func editEventSwiftData (selectedEvent: EventData) {
                 selectedEvent.eventName = eventName
                 selectedEvent.eventIcon = eventIcon.id
-                selectedEvent.participants = participants
+                selectedEvent.participants = selectedContacts
         }
         
-        func editEventSwiftData () {
-            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [])
+        func createEventSwiftData () {
+            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser])
             SwiftDataService.shared.addEvent(newEvent)
-            newEvent.participants.append(contentsOf: participants)
-            SwiftDataService.shared.saveModelContext()
         }
         
         if let selectedEvent {
             if !isGuest {
-                
+                isApiCallLoading = true
+                isApiCallLoading = false
+                print("call edit event")
+                editEventSwiftData(selectedEvent: selectedEvent)
             } else {
-                createEventSwiftData(selectedEvent: selectedEvent)
+                editEventSwiftData(selectedEvent: selectedEvent)
             }
         } else {
-            editEventSwiftData()
+            if !isGuest {
+                isApiCallLoading = true
+                do {
+                    try await EventService.shared.createEvent(name: eventName)
+                    createEventSwiftData()
+                } catch {
+                    isApiCallLoading = false
+                    print("Create event failed: \(error)")
+                    return false
+                }
+            } else {
+                createEventSwiftData()
+            }
         }
+        
+        isApiCallLoading = false
+        return true
     }
     
     @MainActor
