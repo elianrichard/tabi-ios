@@ -16,10 +16,10 @@ struct SearchInput: View {
             Icon(systemName: "magnifyingglass", color: .textGrey, size: 16)
             TextField("", text: $text, prompt: Text("\(placeholder)").foregroundStyle(.textGrey))
             Spacer()
-            Button{
-                text = ""
-            }label:{
-                Icon(systemName: "x.circle.fill", color: .textGrey, size: 16)
+            if text != "" {
+                Icon(systemName: "x.circle.fill", color: .textGrey, size: 16) {
+                    text = ""
+                }
             }
         }
         .padding(.spacingTight)

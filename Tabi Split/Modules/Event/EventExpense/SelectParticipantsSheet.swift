@@ -1,5 +1,5 @@
 //
-//  ShowAllParticipantsGrid.swift
+//  SelectParticipantsSheet.swift
 //  Tabi Split
 //
 //  Created by Dharmawan Ruslan on 23/10/24.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct ShowAllParticipants: View {
+struct SelectParticipantsSheet: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
@@ -28,21 +28,7 @@ struct ShowAllParticipants: View {
                             Divided{
                                 ForEach (eventViewModel.selectedEvent?.participants ?? []) { person in
                                     HStack{
-                                        UserAvatar(userData: person)
-                                        VStack(alignment: .leading){
-                                            HStack(spacing: 0){
-                                                Text("\(person.name.getFirstName())'s")
-                                                    .font(.tabiHeadline)
-                                                if profileViewModel.user == person {
-                                                    Text(" (You)")
-                                                        .font(.tabiBody)
-                                                        .foregroundColor(.textGrey)
-                                                }
-                                            }
-                                            Text(person.phone)
-                                                .font(.tabiBody)
-                                                .foregroundColor(.textGrey)
-                                        }
+                                        UserCard(user: person, isShowYouText: true)
                                         Spacer()
                                         Circle()
                                             .stroke(eventExpenseViewModel.selectedParticipants.contains(person) ? .buttonBlue : .textGrey, lineWidth: 1)
@@ -83,7 +69,7 @@ struct ShowAllParticipants: View {
 }
 
 #Preview {
-    ShowAllParticipants(isPresented: .constant(false))
+    SelectParticipantsSheet(isPresented: .constant(false))
         .environment(EventViewModel())
         .environment(EventExpenseViewModel())
 }

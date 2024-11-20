@@ -10,9 +10,12 @@ import SwiftUI
 
 struct SeeAllParticipantSheet: View {
     @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
+    
     @Binding var isPresented: Bool
     @State var nameToBeSearched: String = ""
     var participantsList: [UserData] = []
+    
     
     var body: some View {
         CustomSheet (xToggleBinding: $isPresented) {
@@ -24,8 +27,11 @@ struct SeeAllParticipantSheet: View {
                 ScrollView{
                     LazyVStack (spacing: .spacingTight){
                         Divided{
+                            if nameToBeSearched.isEmpty || profileViewModel.user.name.lowercased().contains(nameToBeSearched.lowercased()) {
+                                UserCard(user: profileViewModel.user, isShowYouText: true)
+                            }
                             ForEach (participantsList.filter {
-                                nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())
+                                (nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())) && !profileViewModel.isCurrentUser($0)
                             }) { user in
                                 UserCard(user: user)
                             }

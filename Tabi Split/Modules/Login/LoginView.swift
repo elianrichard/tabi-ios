@@ -19,7 +19,9 @@ struct LoginView: View {
             VStack {
                 if SwiftDataService.shared.getCurrentUser() == nil {
                     Button {
-                        routes.navigate(to: .GuestLoginView)
+                        if loginViewModel.guestLogin() {
+                            routes.navigate(to: .HomeView)
+                        }
                     } label: {
                         Text("Enter as Guest")
                             .font(.tabiBody)

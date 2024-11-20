@@ -41,6 +41,14 @@ class LoginViewModel {
         return isSuccess
     }
     
+    @MainActor
+    func guestLogin() -> Bool {
+        let user = CurrentUserDefaults(userName: "Guest", userPhone: "Guest", userImage: "owl", userId: "")
+        UserDefaultsService.shared.saveCurrentUser(user: user)
+        SwiftDataService.shared.saveCurrentUser(user: user)
+        return true
+    }
+    
     func validateInput () -> Bool {
         var isValid = true
         phoneNumberError = nil

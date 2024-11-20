@@ -272,7 +272,7 @@ struct AddExpenseView: View {
             }
         }
         .sheet(isPresented: Bindable(viewModel).toggleSeeAll) {
-            ShowAllParticipants(isPresented: Bindable(viewModel).toggleSeeAll)
+            SelectParticipantsSheet(isPresented: Bindable(viewModel).toggleSeeAll)
                 .presentationDetents(
                     [.medium, .large],
                     selection: Bindable(viewModel).settingsDetent
