@@ -72,11 +72,8 @@ struct HomeView: View {
         .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            if let data = SwiftDataService.shared.fetchAllEvents() {
-                homeViewModel.populateEvents(data: data)
-            }
-            
             profileViewModel.refreshUserData()
+            homeViewModel.refreshEventData(isGuest: profileViewModel.isGuest)
         }
     }
 }

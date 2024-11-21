@@ -45,7 +45,10 @@ final class ProfileViewModel{
     func updateProfile (editProfileViewModel: EditProfileViewModel) async -> Bool {
         var isSuccess = false
         isUpdateProfileLoading = true
-        guard let chosenImage = editProfileViewModel.chosenImage else { return isSuccess }
+        guard let chosenImage = editProfileViewModel.chosenImage else {
+            isUpdateProfileLoading = false
+            return isSuccess
+        }
         do {
             let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userPhone: editProfileViewModel.phoneText, userImage: chosenImage.rawValue, userId: "userId")
             let _ = try await ProfileService.shared.editProfile(user: updatedUser)

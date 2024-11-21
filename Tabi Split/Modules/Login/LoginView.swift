@@ -27,7 +27,9 @@ struct LoginView: View {
                             .font(.tabiBody)
                             .foregroundStyle(.textGrey)
                             .opacity(focusedField != nil ? 0 : 1)
+                            .padding(14)
                     }
+                    .padding(-14)
                 } else {
                     Icon(systemName: "arrow.left", size: 16) {
                         routes.navigateBack()

@@ -10,6 +10,7 @@ import SwiftUI
 
 @Model
 class EventData {
+    var eventId: String?
     var eventName: String
     var completionDate: Date?
     var eventIcon: EventIconEnum.ID
@@ -18,7 +19,8 @@ class EventData {
     @Relationship(deleteRule: .cascade, inverse: \Expense.event) var expenses: [Expense]
     var createdAt: Date
     
-    init(eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date = Date()) {
+    init(eventId: String? = nil, eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date = Date()) {
+        self.eventId = eventId
         self.eventName = eventName
         self.completionDate = completionDate
         self.eventIcon = eventIcon.id

@@ -20,13 +20,7 @@ struct EventInviteView: View {
     @State private var isShowQrSheet = false
     @State private var isShowCustomParticipantSheet = false
     
-    @State private var customName = ""
-    @State private var customPhone = ""
-    
-    @State private var customNameError: String? = nil
-    @State private var customPhoneError: String? = nil
-    
-    @FocusState private var focusedField: FocusField?
+    @State private var sheetHeight: CGFloat = 0
     
     var body: some View {
         VStack (spacing: 0) {
@@ -34,7 +28,7 @@ struct EventInviteView: View {
                 eventInviteViewModel.searchUserText = ""
             })
             VStack(spacing: .spacingMedium){
-                //                TEMPORARILY DISABLED: INVITE BY LINK AND QR CODE
+//                TEMPORARILY DISABLED: INVITE BY LINK AND QR CODE
                 if (false) {
                     HStack (spacing: .spacingMedium) {
                         EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
@@ -78,7 +72,6 @@ struct EventInviteView: View {
                                 }
                                 if (eventInviteViewModel.searchUserText != "") {
                                     Button {
-                                        customName = eventInviteViewModel.searchUserText
                                         isShowCustomParticipantSheet = true
                                     } label: {
                                         HStack (spacing: .spacingTight) {
@@ -98,7 +91,8 @@ struct EventInviteView: View {
                         }
                     }
                     
-                    CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add", isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContactsList.count > 1) {
+                    CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add",
+                                 isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContactsList.count > 1) {
                         eventInviteViewModel.searchUserText = ""
                         routes.navigateBack()
                     }
@@ -121,30 +115,40 @@ struct EventInviteView: View {
         }
         .sheet(isPresented: $isShowCustomParticipantSheet) {
             CustomSheet(xToggleBinding: $isShowCustomParticipantSheet) {
-                VStack (alignment: .center, spacing: .spacingMedium) {
-                    Text("Add Participant Details")
-                        .font(.tabiTitle)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    InputWithLabel(label: "Name", placeholder: "Enter participant name", text: $customName, errorMessage: customNameError, focusedField: $focusedField, focusCase: .field1)
-                }
-                Spacer()
-                CustomButton (text: "Save") {
-                    let phone = customPhone.formattedAsPhoneNumber()
-                    
-                    if customName == "" {
-                        customNameError = "Name cannot be empty"
-                        return
-                    } else { customNameError = nil }
-                    
-                    let newUser = UserData(name: customName, phone: customPhone != "" ? phone : "")
-                    eventInviteViewModel.allContacts.append(newUser)
-                    eventInviteViewModel.selectedContacts.append(newUser)
-                    eventInviteViewModel.searchUserText = ""
-                    isShowCustomParticipantSheet = false
+                VStack (spacing: .spacingLarge) {
+                    VStack (spacing: .spacingMedium) {
+                        Image(.eventUnregistered)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 200)
+                        VStack (spacing: .spacingSmall) {
+                            Text("Add an unregistered participant?")
+                                .font(.tabiSubtitle)
+                                .multilineTextAlignment(.center)
+                            Text("You can replace **'\(eventInviteViewModel.searchUserText)'** with their real account later.")
+                                .font(.tabiBody)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    CustomButton (text: "Add") {
+                        let newUser = UserData(name: eventInviteViewModel.searchUserText, phone: "")
+                        eventInviteViewModel.allContacts.append(newUser)
+                        eventInviteViewModel.selectedContacts.append(newUser)
+                        eventInviteViewModel.searchUserText = ""
+                        isShowCustomParticipantSheet = false
+                    }
                 }
             }
-            .presentationDetents([.large])
+            .presentationDetents([.height(sheetHeight)])
             .presentationDragIndicator(.visible)
+            .background (
+                GeometryReader { geometry in
+                    Color.clear.onAppear {
+                        sheetHeight = geometry.size.height
+                    }
+                }
+            )
         }
         .sheet(isPresented: $isShowQrSheet) {
             CustomSheet (xToggleBinding: $isShowQrSheet) {

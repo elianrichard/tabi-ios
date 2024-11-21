@@ -15,6 +15,7 @@ struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
     
     @State var sheetViewModel = SheetViewModel<EventSheets>()
@@ -123,6 +124,7 @@ struct EventDetailView: View {
         .onAppear {
             hasPreviewed = false
             eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
+            eventInviteViewModel.selectedContacts = eventViewModel.selectedEvent?.participants ?? []
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.complete)) {

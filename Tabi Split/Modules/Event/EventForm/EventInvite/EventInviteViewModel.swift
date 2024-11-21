@@ -10,11 +10,7 @@ import Contacts
 
 @Observable
 final class EventInviteViewModel {
-    var isLoadContactLoading: Bool {
-        return allContacts.count == 0 ||
-        CNContactStore.authorizationStatus(for: .contacts) == .denied ||
-        CNContactStore.authorizationStatus(for: .contacts) == .restricted
-    }
+    var isLoadContactLoading: Bool = true
     
     var searchUserText: String = ""
     var searchFilteredContacts: [UserData] {
@@ -74,6 +70,7 @@ final class EventInviteViewModel {
             } catch {
                 print("Error on contact fetching \(error)")
             }
+            isLoadContactLoading = false
         case .notDetermined, .denied, .restricted:
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
@@ -81,6 +78,7 @@ final class EventInviteViewModel {
                     self.fillUpContacts(currentUser: currentUser, registeredUsers: registeredUsers)
                 } else if let error = error {
                     print("Error requesting contact acces: \(error)")
+                    self.isLoadContactLoading = false
                 }
             }
         default:
@@ -93,6 +91,7 @@ final class EventInviteViewModel {
             } catch {
                 print("Error on contact fetching \(error)")
             }
+            isLoadContactLoading = false
         }
         var allUsers: [UserData] = []
         

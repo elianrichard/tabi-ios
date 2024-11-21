@@ -13,6 +13,9 @@ packages:
   WeScan:
     url: https://github.com/WeTransfer/WeScan.git
     minorVersion: 3.0.0
+  JWTDecode:
+    url: https://github.com/auth0/JWTDecode.swift.git
+    minorVersion: 3.2.0
 targets:
   Tabi Split:
     type: application
@@ -55,6 +58,7 @@ targets:
     dependencies:
       - package: Lottie
       - package: WeScan
+      - package: JWTDecode
   Tabi Split Tests:
     type: bundle.unit-test
     platform: iOS

@@ -9,9 +9,7 @@ import Foundation
 
 final class ProfileService {
     static let shared = ProfileService()
-    
     private let apiClient: APIClient = APIService.shared
-    private let tokenManager: TokenManaging = KeychainService.shared
     
     func editProfile(user: CurrentUserDefaults) async throws -> EditProfileResponse {
         let request = EditProfileRequest(name: user.userName, phone: user.userPhone, avatar_url: user.userImage)
@@ -31,5 +29,12 @@ final class ProfileService {
     
     func deleteUser() async throws {
         let _: DeleteResponse = try await apiClient.delete(endpoint: "/user/delete")
+    }
+    
+    func checkUsers(phoneNumbers: [String]) async throws -> CheckUsersResponse {
+        let request: CheckUsersRequest = CheckUsersRequest(phones: phoneNumbers)
+        let response: CheckUsersResponse = try await apiClient.post(endpoint: "/user/check", body: request)
+        
+        return response
     }
 }

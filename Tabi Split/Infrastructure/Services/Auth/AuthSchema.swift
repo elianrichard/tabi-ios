@@ -11,6 +11,8 @@ struct RegisterRequest: Codable {
     let name: String
     let phone: String
     let password: String
+//    TODO: Set image for register
+//    let image: String
 }
 
 struct RegisterResponse: Codable {

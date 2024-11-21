@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import JWTDecode
 
 @Observable
 class LoginViewModel {
@@ -29,7 +30,12 @@ class LoginViewModel {
         do {
             let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
             isSuccess = true
-            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: "userId")
+            let jwt = try decode(jwt: response.token)
+            guard let userId = jwt["userId"].string else {
+                passwordError = "User ID not found in Token"
+                return false
+            }
+            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: userId)
             UserDefaultsService.shared.saveCurrentUser(user: user)
             SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
