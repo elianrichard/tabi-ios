@@ -11,7 +11,7 @@ import SwiftUI
 
 @Model
 class UserData {
-    var userId: String?
+    var userId: String = ""
     var name: String
     var phone: String
     var image: ProfileImageEnum.ID
@@ -21,7 +21,7 @@ class UserData {
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]? = []
     @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]? = []
     
-    init(userId: String? = nil ,name: String, phone: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
+    init(userId: String = "" ,name: String, phone: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
         self.userId = userId
         self.name = name
         self.phone = phone

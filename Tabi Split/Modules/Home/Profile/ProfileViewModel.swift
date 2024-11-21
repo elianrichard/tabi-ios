@@ -12,10 +12,7 @@ final class ProfileViewModel{
     var user: UserData = UserData(name: "unknown", phone: "unknown")
     var userPaymentMethods: [PaymentMethod] = []
 
-    var isLogoutLoading: Bool = false
-    var isDeleteLoading: Bool = false
-    var isUpdateProfileLoading: Bool = false
-    var isRefreshProfileLoading: Bool = false
+    var isApiCallLoading: Bool = false
     
     var isGuest: Bool {
         return user.phone == "Guest"
@@ -23,35 +20,37 @@ final class ProfileViewModel{
     
     @MainActor
     func logout() async -> Bool {
-        isLogoutLoading = true
-        var isSuccess = false
         do {
-            try await AuthenticationService.shared.logout()
+            if !isGuest {
+                isApiCallLoading = true
+                try await AuthenticationService.shared.logout()
+            }
             SwiftDataService.shared.deleteAllEvents()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")
-            isSuccess = true
         } catch {
             print("Logout failed: \(error)")
-            isSuccess = false
+            isApiCallLoading = false
+            return false
         }
         
-        isLogoutLoading = false
-        return isSuccess
+        isApiCallLoading = false
+        return true
     }
     
     @MainActor
     func updateProfile (editProfileViewModel: EditProfileViewModel) async -> Bool {
-        var isSuccess = false
-        isUpdateProfileLoading = true
         guard let chosenImage = editProfileViewModel.chosenImage else {
-            isUpdateProfileLoading = false
-            return isSuccess
+            isApiCallLoading = false
+            return false
         }
         do {
+            isApiCallLoading = true
             let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userPhone: editProfileViewModel.phoneText, userImage: chosenImage.rawValue, userId: "userId")
-            let _ = try await ProfileService.shared.editProfile(user: updatedUser)
+            if !isGuest {
+                let _ = try await ProfileService.shared.editProfile(user: updatedUser)
+            }
             UserDefaultsService.shared.saveCurrentUser(user: updatedUser)
             user.name = editProfileViewModel.nameText
             user.phone = editProfileViewModel.phoneText
@@ -59,13 +58,13 @@ final class ProfileViewModel{
                 user.image = image.id
             }
             SwiftDataService.shared.saveModelContext()
-            isSuccess = true
         } catch {
             print("Update profile failed: \(error)")
-            isSuccess = false
+            isApiCallLoading = false
+            return false
         }
-        isUpdateProfileLoading = false
-        return isSuccess
+        isApiCallLoading = false
+        return true
     }
     
     @MainActor
@@ -75,38 +74,36 @@ final class ProfileViewModel{
         }
         if isGuest { return }
         Task {
-            isRefreshProfileLoading = true
             do {
+                isApiCallLoading = true
                 let freshUser = try await ProfileService.shared.getCurrentProfile()
-                user.name = freshUser.userName
-                user.phone = freshUser.userPhone
-                user.image = freshUser.userImage
+                user.update(fromUserBase: freshUser)
             } catch {
                 print("Refresh profile failed: \(error)")
             }
-            isRefreshProfileLoading = false
+            isApiCallLoading = false
         }
     }
     
     @MainActor
     func deleteUser () async -> Bool {
-        isDeleteLoading = true
-        var isSuccess = false
         do {
-            try await ProfileService.shared.deleteUser()
-            try await AuthenticationService.shared.logout()
+            if !isGuest {
+                isApiCallLoading = true
+                try await ProfileService.shared.deleteUser()
+                try await AuthenticationService.shared.logout()
+            }
             SwiftDataService.shared.deleteAllEvents()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")
-            isSuccess = true
         } catch {
             print("User delete failed: \(error)")
-            isSuccess = false
+            return false
         }
         
-        isDeleteLoading = false
-        return isSuccess
+        isApiCallLoading = false
+        return true
     }
     
     func isCurrentUser (_ userData: UserData) -> Bool {

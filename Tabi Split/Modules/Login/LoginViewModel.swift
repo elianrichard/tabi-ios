@@ -25,11 +25,9 @@ class LoginViewModel {
             return false
         }
         
-        var isSuccess = false
         isLoading = true
         do {
             let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
-            isSuccess = true
             let jwt = try decode(jwt: response.token)
             guard let userId = jwt["userId"].string else {
                 passwordError = "User ID not found in Token"
@@ -41,10 +39,11 @@ class LoginViewModel {
         } catch {
             print("Login failed: \(error)")
             passwordError = "Account credential is invalid"
-            isSuccess = false
+            isLoading = false
+            return false
         }
         isLoading = false
-        return isSuccess
+        return true
     }
     
     @MainActor

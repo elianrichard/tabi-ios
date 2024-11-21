@@ -109,17 +109,16 @@ class RegisterViewModel {
             print("Cannot register: form is invalid")
             return false
         }
-        var isSuccess = false
         isLoading = true
         do {
             let _ = try await AuthenticationService.shared.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
-            isSuccess = true
         } catch {
             print("Register failed: \(error)")
             passwordError = "\(error)"
-            isSuccess = false
+            isLoading = false
+            return false
         }
         isLoading = false
-        return isSuccess
+        return true
     }
 }

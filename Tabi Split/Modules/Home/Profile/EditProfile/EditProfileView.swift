@@ -54,7 +54,7 @@ struct EditProfileView: View {
             }
             
             Spacer()
-            CustomButton(text: profileViewModel.isUpdateProfileLoading ? "Loading..." : "Save") {
+            CustomButton(text: profileViewModel.isApiCallLoading ? "Loading..." : "Save") {
                 Task {
                     if await profileViewModel.updateProfile(editProfileViewModel: editProfileViewModel) {
                         routes.navigateBack()
@@ -91,7 +91,7 @@ struct EditProfileView: View {
                     CustomButton(text: "Cancel", type: .secondary) {
                         isShowDeleteSheet = false
                     }
-                    CustomButton(text: profileViewModel.isDeleteLoading ? "Loading..." : "Delete", customBackgroundColor: .buttonRed) {
+                    CustomButton(text: profileViewModel.isApiCallLoading ? "Loading..." : "Delete", customBackgroundColor: .buttonRed) {
                         Task {
                             if await profileViewModel.deleteUser() {
                                 isShowDeleteSheet = false

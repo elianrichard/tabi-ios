@@ -77,7 +77,6 @@ struct LoginView: View {
                                     routes.navigate(to: .HomeView)
                                 }
                             } else {
-//                                TO DO: HANDLE GUEST LOGIN
                                 if await profileViewModel.logout() {
                                     if await loginViewModel.login() {
                                         routes.navigate(to: .HomeView)

@@ -18,13 +18,12 @@ final class ProfileService {
         return response
     }
     
-    func getCurrentProfile () async throws -> CurrentUserDefaults {
+    func getCurrentProfile () async throws -> UserBase {
         guard let user = UserDefaultsService.shared.getCurrentUser() else { throw ProfileAPIError.userNotFound }
         let request: GetProfileRequest = GetProfileRequest(phones: [user.userPhone])
         let response: GetProfileResponse = try await apiClient.post(endpoint: "/user/check", body: request)
         
-        let freshUser = response.users[0]
-        return CurrentUserDefaults(userName: freshUser.name, userPhone: freshUser.phone, userImage: freshUser.avatar_url, userId: freshUser.user_id)
+        return response.users[0]
     }
     
     func deleteUser() async throws {

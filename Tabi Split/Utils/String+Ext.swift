@@ -59,6 +59,12 @@ extension String {
         return nil
     }
     
+    func convertIsoToDate () -> Date? {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return isoFormatter.date(from: self)    
+    }
+    
     func formattedAsPhoneNumber() -> String {
         // Step 1: Detect the country code for the current region
         let countryCode = Locale.current.region?.identifier ?? "ID" // Default to "ID" for Indonesia

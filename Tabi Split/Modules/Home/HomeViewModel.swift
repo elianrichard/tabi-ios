@@ -56,23 +56,24 @@ final class HomeViewModel {
                                 }
                             }
                         }
-                        //                    TODO: Remove this temporary fix for duplication bug on get event list
+                        // TODO: Remove this temporary fix for duplication bug on get event list
                         if !isGuest {
                             participants = Array(
                                 Dictionary(grouping: participants, by: { $0.userId }).values.map { $0.first! }
                             )
                         }
-                        //                    TODO: Add Created add for event from DB
-                        let newEvent = EventData(eventId: event.id, eventName: event.name, eventIcon: image, participants: participants)
+                        
+                        let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.date ?? "").convertIsoToDate(), eventIcon: image, participants: participants, creatorId: event.creator_id)
                         SwiftDataService.shared.addEvent(newEvent)
                     }
                 } catch {
                     print("Fetch event failed: \(error)")
                 }
             }
+            
             if let data = SwiftDataService.shared.fetchAllEvents() {
                 let sortedData = data.sorted(by: { $0.createdAt < $1.createdAt })
-                //                TODO: Remove this temporary fix for duplication bug on get event list
+                // TODO: Remove this temporary fix for duplication bug on get event list
                 var eventData: [EventData] = sortedData
                 if !isGuest {
                     eventData = Array(
@@ -83,6 +84,7 @@ final class HomeViewModel {
                 filteredEvents = eventData
                 selectedFilter = .all
             }
+            
             isLoading = false
         }
     }

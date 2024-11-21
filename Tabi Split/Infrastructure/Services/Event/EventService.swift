@@ -25,4 +25,14 @@ final class EventService {
         let request: EditEventRequest = EditEventRequest(name: event.eventName, participants: event.participants.compactMap{ $0.userId })
         let _ : EditEventResponse = try await apiClient.patch(endpoint: "/event/\(eventId)", body: request)
     }
+    
+    func completeEvent(event: EventData) async throws {
+        guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
+        let _ : CompleteEventResponse = try await apiClient.post(endpoint: "/event/complete/\(eventId)", body: Empty())
+    }
+    
+    func deleteEvent(event: EventData) async throws {
+        guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
+        let _ : DeleteEventResponse = try await apiClient.delete(endpoint: "/event/\(eventId)")
+    }
 }

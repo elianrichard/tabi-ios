@@ -24,33 +24,34 @@ struct EventDetailView: View {
     var body: some View {
         ZStack {
             TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
-                ElipsisMenu (color: .textWhite) {
-                    Button {
-                        routes.navigate(to: .EventFormView)
-                    } label: {
-                        Label("Edit Event", systemImage: "pencil")
-                    }
-                    if !eventViewModel.isEventCompleted {
+                if eventViewModel.isUserCreator {
+                    ElipsisMenu (color: .textWhite) {
                         Button {
-                            sheetViewModel.setSheet(.complete)
+                            routes.navigate(to: .EventFormView)
                         } label: {
-                            Label("Mark as Completed", systemImage: "flag")
+                            Label("Edit Event", systemImage: "pencil")
                         }
-                    } else {
-                        Button {
-                            sheetViewModel.setSheet(.incomplete)
+                        if !eventViewModel.isEventCompleted {
+                            Button {
+                                sheetViewModel.setSheet(.complete)
+                            } label: {
+                                Label("Mark as Completed", systemImage: "flag")
+                            }
+                        } else {
+                            Button {
+                                sheetViewModel.setSheet(.incomplete)
+                            } label: {
+                                Label("Mark as Incomplete", systemImage: "flag.slash")
+                            }
+                        }
+                        Button (role: .destructive) {
+                            sheetViewModel.setSheet(.delete)
                         } label: {
-                            Label("Mark as Incomplete", systemImage: "flag.slash")
+                            Label("Delete Event", systemImage: "trash")
                         }
-                    }
-                    Button (role: .destructive) {
-                        sheetViewModel.setSheet(.delete)
-                    } label: {
-                        Label("Delete Event", systemImage: "trash")
                     }
                 }
             })
-            .padding(.bottom, 36)
             
             VStack (spacing: 0) {
                 EventBanner()
@@ -149,8 +150,11 @@ struct EventDetailView: View {
                         sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Complete") {
-                        eventViewModel.completeEvent()
-                        sheetViewModel.clearSheet()
+                        Task {
+                            if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -216,9 +220,12 @@ struct EventDetailView: View {
                         sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
-                        sheetViewModel.clearSheet()
-                        eventViewModel.handleDeleteEvent()
-                        routes.navigateBack()
+                        Task {
+                            if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                                routes.navigateBack()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
