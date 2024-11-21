@@ -27,6 +27,7 @@ struct EventDetailView: View {
                 if eventViewModel.isUserCreator {
                     ElipsisMenu (color: .textWhite) {
                         Button {
+                            eventViewModel.isDirectInvite = false
                             routes.navigate(to: .EventFormView)
                         } label: {
                             Label("Edit Event", systemImage: "pencil")

@@ -41,6 +41,7 @@ final class EventViewModel {
             return user.userId == selectedEvent.creatorId
         } else { return false }
     }
+    var isDirectInvite: Bool = false
     
     var participantsBalance: [PersonBalanceData] = []
     var userTransactionHistory: [SummaryHistoryData] = []

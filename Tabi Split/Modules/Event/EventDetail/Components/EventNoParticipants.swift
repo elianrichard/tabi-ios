@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EventNoParticipants : View {
     @Environment(Routes.self) var routes
+    @Environment(EventViewModel.self) var eventViewModel
     
     var body: some View {
         VStack (alignment: .center, spacing: 36) {
@@ -19,6 +20,7 @@ struct EventNoParticipants : View {
             Text("Zzz, you’re the only one here... ")
                 .font(.tabiSubtitle)
             Button {
+                eventViewModel.isDirectInvite = true
                 routes.navigate(to: .EventInviteView)
             } label: {
                 Text("+ Add Participants")

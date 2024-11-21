@@ -28,7 +28,7 @@ struct EventInviteView: View {
                 eventInviteViewModel.searchUserText = ""
             })
             VStack(spacing: .spacingMedium){
-//                TEMPORARILY DISABLED: INVITE BY LINK AND QR CODE
+                //                TEMPORARILY DISABLED: INVITE BY LINK AND QR CODE
                 if (false) {
                     HStack (spacing: .spacingMedium) {
                         EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
@@ -94,7 +94,17 @@ struct EventInviteView: View {
                     CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add",
                                  isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContactsList.count > 1) {
                         eventInviteViewModel.searchUserText = ""
-                        routes.navigateBack()
+                        if (eventViewModel.isDirectInvite) {
+                            Task {
+                                if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts,
+                                                                        currentUser: profileViewModel.user,
+                                                                        isGuest: profileViewModel.isGuest) {
+                                    routes.navigateBack()
+                                }
+                            }
+                        } else {
+                            routes.navigateBack()
+                        }
                     }
                 }
             }
