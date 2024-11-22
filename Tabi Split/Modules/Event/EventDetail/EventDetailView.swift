@@ -9,7 +9,7 @@ import SwiftUI
 import Lottie
 
 enum EventSheets {
-    case complete, incomplete, delete, quickScan, toggleSeeAll
+    case complete, incomplete, delete, quickScan, allParticipants
 }
 
 struct EventDetailView: View {
@@ -234,13 +234,13 @@ struct EventDetailView: View {
             ReceiptUploadSheet(height: $sheetViewModel.sheetHeight, isPresented: sheetViewModel.getIsPresentedBinding(.quickScan))
                 .presentationDetents([.height(sheetViewModel.sheetHeight)])
         }
-        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.toggleSeeAll)){
-            SeeAllParticipantSheet(isPresented: sheetViewModel.getIsPresentedBinding(.toggleSeeAll), participantsList: eventViewModel.selectedEvent?.participants ?? [])
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.allParticipants)){
+            SeeAllParticipantSheet(isPresented: sheetViewModel.getIsPresentedBinding(.allParticipants), participantsList: eventViewModel.selectedEvent?.participants ?? [])
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
-            if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
+            if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil {
                 hasPreviewed.toggle()
                 routes.navigate(to: .ReceiptUploadReview)
             }

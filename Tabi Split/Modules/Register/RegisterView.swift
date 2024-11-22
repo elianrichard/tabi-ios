@@ -50,7 +50,8 @@ struct RegisterView: View {
                 VStack (spacing: .spacingTight) {
                     VStack (spacing: .spacingMedium) {
                         CustomButton(text: registerViewModel.isLoading ? "Loading..." : "Sign Up",
-                                     isEnabled: registerViewModel.isSignUpEnabled) {
+                                     isEnabled: registerViewModel.isSignUpEnabled,
+                                     animation: .default) {
                             Task {
                                 if await registerViewModel.register() {
                                     routes.navigate(to: .LoginView)

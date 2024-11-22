@@ -19,11 +19,14 @@ struct LoginView: View {
             VStack {
                 if SwiftDataService.shared.getCurrentUser() == nil {
                     Button {
-                        routes.navigate(to: .GuestLoginView)
+                        if loginViewModel.guestLogin() {
+                            routes.navigate(to: .HomeView)
+                        }
                     } label: {
                         Text("Enter as Guest")
                             .font(.tabiBody)
                             .foregroundStyle(.textGrey)
+                            .opacity(focusedField != nil ? 0 : 1)
                     }
                 } else {
                     Icon(systemName: "arrow.left", size: 16) {
@@ -65,7 +68,7 @@ struct LoginView: View {
                 }
                 
                 VStack (spacing: .spacingMedium) {
-                    CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In") {
+                    CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In", animation: .default) {
                         Task {
                             if SwiftDataService.shared.getCurrentUser() == nil {
                                 if await loginViewModel.login() {

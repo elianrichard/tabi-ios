@@ -10,20 +10,30 @@ import SwiftUI
 struct UserCard : View {
     @Environment(ProfileViewModel.self) private var profileViewModel
     var user: UserData
-    var isShowYouText: Bool = true
-    var isShowGuestPhoneText: Bool = false
+    var isShowYouText: Bool = false
+    var currentUserYouText: String = "(You)"
+    var isShowPhoneText: Bool = true
     
     var body: some View {
         HStack (spacing: .spacingTight) {
             UserAvatar(userData: user)
             VStack(alignment: .leading, spacing: .spacingXSmall) {
-                Text("\(user.name)\((isShowYouText && profileViewModel.isCurrentUser(user)) ? " (You)" : "")")
-                    .font(.tabiHeadline)
-                    .foregroundStyle(.textBlack)
-                if user.phone != "" {
-                    Text((isShowGuestPhoneText && profileViewModel.isGuest) ? "You entered as a Guest" : user.phone)
-                        .font(.tabiBody)
-                        .foregroundColor(.textGrey)
+                HStack {
+                    Text("\(user.name)")
+                        .font(.tabiHeadline)
+                        .foregroundStyle(.textBlack)
+                    if isShowYouText && profileViewModel.isCurrentUser(user) {
+                        Text(currentUserYouText)
+                            .font(.tabiHeadline)
+                            .foregroundStyle(.textGrey)
+                    }
+                }
+                if (isShowPhoneText && user.phone != "") {
+                    if !(profileViewModel.isGuest && profileViewModel.isCurrentUser(user)) {
+                        Text(user.phone)
+                            .font(.tabiBody)
+                            .foregroundColor(.textGrey)
+                    }
                 }
             }
             Spacer()

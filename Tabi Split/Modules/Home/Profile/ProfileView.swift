@@ -18,7 +18,7 @@ struct ProfileView: View {
             VStack(spacing: .spacingLarge){
                 HStack{
                     HStack(alignment: .center, spacing: .spacingTight) {
-                        UserCard(user: profileViewModel.user, isShowGuestPhoneText: true)
+                        UserCard(user: profileViewModel.user)
                         Spacer()
                         if !profileViewModel.isGuest {
                             Icon(systemName: "pencil", color: .textBlack, size: 16) {
@@ -41,6 +41,7 @@ struct ProfileView: View {
                             routes.navigate(to: .LoginView)
                         }
                     }
+                    .frame(maxHeight: .infinity)
                 }
                 
                 if !profileViewModel.isGuest {
