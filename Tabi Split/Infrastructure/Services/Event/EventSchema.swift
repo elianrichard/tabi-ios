@@ -47,6 +47,7 @@ struct GetEventsResponse: Codable {
 struct EditEventRequest: Codable {
     let name: String
     let participants: [String]
+    let event_image: String
 }
 
 struct EditEventResponse: Codable {

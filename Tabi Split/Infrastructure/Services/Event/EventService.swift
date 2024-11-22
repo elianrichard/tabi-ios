@@ -22,7 +22,7 @@ final class EventService {
     
     func updateEvent(event: EventData) async throws {
         guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
-        let request: EditEventRequest = EditEventRequest(name: event.eventName, participants: event.participants.compactMap{ $0.userId })
+        let request: EditEventRequest = EditEventRequest(name: event.eventName, participants: event.participants.compactMap{ $0.userId }, event_image: event.eventIcon)
         let _ : EditEventResponse = try await apiClient.patch(endpoint: "/event/\(eventId)", body: request)
     }
     

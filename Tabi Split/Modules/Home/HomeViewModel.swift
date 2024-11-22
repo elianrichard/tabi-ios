@@ -41,6 +41,7 @@ final class HomeViewModel {
                 do {
                     isLoading = true
                     let data = try await EventService.shared.getAllEvents()
+                    // TODO: Migrate instead of delete, do this after expense CRUD is done
                     SwiftDataService.shared.deleteAllEvents()
                     for event in data.events {
                         let image = EventIconEnum(rawValue: event.avatar_url) ?? .icon1
