@@ -207,7 +207,7 @@ final class EventExpenseViewModel {
                 let regex = try? NSRegularExpression(pattern: pattern)
                 let range = NSRange(location: 0, length: recognizedText.utf16.count)
                 if regex?.firstMatch(in: recognizedText, options: [], range: range) != nil {
-                    if word.boundingBox.maxX > 0.9 { // find the prices that is on the right (TBD: find a better solution than 0.9 because god knows it won't always be on the edge and there are other shits on the edge aswell)
+                    if word.boundingBox.maxX > 0.7 { // find the prices that is on the right (TBD: find a better solution than 0.7)
                         for (index, word2) in words.enumerated() {
                             var currentIndex = index
                             if (((word2.boundingBox.midY) <= word.boundingBox.maxY) && ((word2.boundingBox.midY) >= (word.boundingBox.minY))){ // find the closest item that is parallel in the same row

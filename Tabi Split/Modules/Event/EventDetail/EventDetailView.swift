@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 enum EventSheets {
     case complete, incomplete, delete, quickScan, toggleSeeAll
@@ -128,10 +129,11 @@ struct EventDetailView: View {
         .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.complete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
-                    Image(.eventComplete)
+                    LottieView(animation: .named("CompletedEvent"))
+                        .looping()
                         .resizable()
-                        .scaledToFit()
                         .frame(width: 200, height: 200)
+                        .scaledToFit()
                     VStack (spacing: .spacingSmall) {
                         Text("Mark this event as completed?")
                             .font(.tabiSubtitle)
@@ -161,11 +163,12 @@ struct EventDetailView: View {
         .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.incomplete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
-                    Image(.eventComplete)
+                    LottieView(animation: .named("CompletedEvent"))
+                        .looping()
                         .resizable()
-                        .scaledToFit()
-                        .saturation(0)
                         .frame(width: 200, height: 200)
+                        .saturation(0)
+                        .scaledToFit()
                     VStack (spacing: .spacingSmall) {
                         Text("Mark this event as incomplete?")
                             .font(.tabiSubtitle)
@@ -195,10 +198,11 @@ struct EventDetailView: View {
         .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.delete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: .spacingLarge) {
-                    Image(.eventDelete)
+                    LottieView(animation: .named("DeleteEvent"))
+                        .looping()
                         .resizable()
-                        .scaledToFit()
                         .frame(width: 200, height: 200)
+                        .scaledToFit()
                     VStack (spacing: .spacingSmall) {
                         Text("Do you want to delete this event?")
                             .font(.tabiSubtitle)
