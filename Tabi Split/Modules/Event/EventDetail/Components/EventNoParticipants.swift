@@ -6,16 +6,18 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct EventNoParticipants : View {
     @Environment(Routes.self) var routes
     
     var body: some View {
         VStack (alignment: .center, spacing: 36) {
-            Image(.eventOneParticipant)
+            LottieView(animation: .named("EventAlone"))
+                .looping()
                 .resizable()
-                .scaledToFit()
                 .frame(width: 340, height: 250)
+                .scaledToFit()
             Text("Zzz, you’re the only one here... ")
                 .font(.tabiSubtitle)
             Button {

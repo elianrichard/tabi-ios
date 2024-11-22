@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct EventNoExpenses: View {
     var body: some View {
         VStack (alignment: .center, spacing: 36) {
-            Image(.eventEmptyExpense)
+            LottieView(animation: .named("NoExpense"))
+                .looping()
                 .resizable()
+                .frame(width: 200, height: 200)
                 .scaledToFit()
-                .frame(width: 200)
             Text("We don't have any\nexpenses yet...")
                 .multilineTextAlignment(.center)
                 .font(.tabiSubtitle)
