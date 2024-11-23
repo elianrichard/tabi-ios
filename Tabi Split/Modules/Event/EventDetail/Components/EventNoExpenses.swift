@@ -11,7 +11,7 @@ import Lottie
 struct EventNoExpenses: View {
     var body: some View {
         VStack (alignment: .center, spacing: 36) {
-            LottieView(animation: .named("NoExpense"))
+            LottieView(animation: .named("NoExpenses"))
                 .looping()
                 .resizable()
                 .frame(width: 200, height: 200)

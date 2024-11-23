@@ -60,10 +60,7 @@ struct SettlementUploadView: View {
         .padding()
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $receiptUploadViewModel.toggleScannerSheet) {
-            DocumentScannerView { image in
-                receiptUploadViewModel.receiptImageFromGallery = nil
-                receiptUploadViewModel.receiptImage = image
-            }
+            CameraView(capturedImage: $receiptUploadViewModel.receiptImage, toggleClose: Bindable(receiptUploadViewModel).toggleScannerSheet)
         }
         .sheet(isPresented: $isShowUploadSheet) {
             UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.toggleScannerSheet, user: eventSettlementViewModel.user) {
