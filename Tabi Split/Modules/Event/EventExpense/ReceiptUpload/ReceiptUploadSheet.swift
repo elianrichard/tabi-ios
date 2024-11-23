@@ -70,22 +70,22 @@ struct ReceiptUploadSheet: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .onChange(of: receiptUploadViewModel.receiptImageProcessed){
-                    eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImageProcessed ?? UIImage()
-                    isPresented.toggle()
-                }
-                
             }
         }
         .frame(maxWidth: .infinity, alignment: .top)
         .navigationBarBackButtonHidden(true)
         .padding()
         .padding([.top], 10)
-        .sheet(isPresented: Bindable(receiptUploadViewModel).toggleScannerSheet) {
-            DocumentScannerView { image in
-                receiptUploadViewModel.receiptImageFromGallery = nil
-                receiptUploadViewModel.receiptImageProcessed = image
-            }
+        .fullScreenCover(isPresented: Bindable(receiptUploadViewModel).toggleScannerSheet) {
+            CameraView(capturedImage: $receiptUploadViewModel.receiptImage, toggleClose: Bindable(receiptUploadViewModel).toggleScannerSheet)
+                .onChange(of: receiptUploadViewModel.receiptImage) {
+                    receiptUploadViewModel.straightenDocument(in: receiptUploadViewModel.receiptImage ?? UIImage()) { image in
+                        receiptUploadViewModel.receiptImageProcessed = image
+                        receiptUploadViewModel.isLoading = false
+                    }
+                }
+                .background(.black)
+                .background(ignoresSafeAreaEdges: .all)
         }
         .background(
             GeometryReader { geometry in
@@ -96,6 +96,10 @@ struct ReceiptUploadSheet: View {
             }
         )
         .background(.bgWhite)
+        .onChange(of: receiptUploadViewModel.receiptImageProcessed){
+            eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImageProcessed ?? UIImage()
+            isPresented.toggle()
+        }
     }
 }
 
