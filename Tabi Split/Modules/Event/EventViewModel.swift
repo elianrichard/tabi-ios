@@ -72,12 +72,11 @@ final class EventViewModel {
                      }
                  }
                 
-                // TODO: Create dummy from unregistered users from event update
-                 let unregisteredUsers: [String] = selectedContacts.filter { contact in
+                 let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
                      return !registeredUsers.contains(where: { user in user.phone == contact.phone })
-                 }.map { $0.name }
+                 }
                 
-                try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyParticipants: unregisteredUsers)
+                try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
             }
             
             selectedEvent.eventName = eventName

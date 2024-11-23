@@ -31,6 +31,62 @@ class EventData {
         self.createdAt = createdAt ?? Date()
         self.creatorId = creatorId
     }
+    
+    func calculateUserEventBalance (currentUser: UserData) {
+        var participantsBalance: [PersonBalanceData] = []
+        let event = self
+        participantsBalance = event.participants.map { PersonBalanceData(user: $0) }
+        
+        for expense in event.expenses {
+            var userBalanceTemp: Float = 0
+            guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
+            personPaid.lent += expense.price
+            
+            if expense.coverer == currentUser {
+                userBalanceTemp += expense.price
+            }
+            
+            if (expense.splitMethod == SplitMethod.custom.id) {
+                let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
+                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
+                for item in expense.items {
+                    let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
+                    for assignee in item.assignees {
+                        guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
+                        let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
+                        let amountSpent = personQuantity * item.itemPrice
+                        let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
+                        let amountDebt = Float(amountSpent + amountAdditional).properRound()
+                        if (expense.coverer == currentUser && personBuy.user == currentUser) {
+                            personPaid.lent -= amountDebt
+                        } else {
+                            personBuy.debt += amountDebt
+                        }
+                        if (assignee.user == currentUser) {
+                            userBalanceTemp -= amountDebt
+                        }
+                    }
+                }
+            } else if (expense.splitMethod == SplitMethod.equally.id) {
+                let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
+                for person in expense.participants {
+                    guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
+                    if (expense.coverer == currentUser && personBuy.user == currentUser) {
+                        personPaid.lent -= amountDebt
+                    } else {
+                        personBuy.debt += amountDebt
+                    }
+                    if (person == currentUser) {
+                        userBalanceTemp -= amountDebt
+                    }
+                }
+            }
+        }
+        
+        if let userBalanceData = participantsBalance.first(where: {$0.user == currentUser}) {
+            self.userEventBalance = userBalanceData.balance
+        }
+    }
 }
 
 enum EventIconEnum: String, Identifiable {

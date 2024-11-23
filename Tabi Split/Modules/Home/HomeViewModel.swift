@@ -35,7 +35,7 @@ final class HomeViewModel {
     }
     
     @MainActor
-    func refreshEventData (isGuest: Bool) {
+    func refreshEventData (currentUser: UserData, isGuest: Bool) {
         Task {
             if !isGuest {
                 do {
@@ -60,6 +60,41 @@ final class HomeViewModel {
                         
                         let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.completion_date ?? "").convertIsoToDate(), eventIcon: image, participants: participants, createdAt: event.created_at.convertIsoToDate(), creatorId: event.creator_id)
                         SwiftDataService.shared.addEvent(newEvent)
+                        
+                        guard let eventExpenses = event.expenses else { continue }
+                        
+                        for expense in eventExpenses {
+                            guard let coverer = SwiftDataService.shared.getUserByUserId(expense.coverer_id),
+                                  let method = SplitMethod(rawValue: expense.split_method) else { continue }
+                            var participants: [UserData] = []
+                            for item in expense.items {
+                                for assignee in item.assignees {
+                                    if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
+                                        participants.append(user)
+                                    }
+                                }
+                            }
+                            let newExpense = Expense(name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants)
+                            newEvent.expenses.append(newExpense)
+                            if let additionalCharges = expense.additional_charges {
+                                for additionalCharge in additionalCharges {
+                                    newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
+                                }
+                            }
+                            
+                            for item in expense.items {
+                                var itemAssignees: [ExpensePerson] = []
+                                for assignee in item.assignees {
+                                    if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
+                                        itemAssignees.append(ExpensePerson(user: user, share: assignee.share))
+                                    }
+                                }
+                                let expenseItem = ExpenseItem(itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
+                                newExpense.items.append(expenseItem)
+                            }
+                            newEvent.calculateUserEventBalance(currentUser: currentUser)
+                        }
+                        SwiftDataService.shared.saveModelContext()
                     }
                 } catch {
                     print("Fetch event failed: \(error)")

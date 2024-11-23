@@ -73,7 +73,7 @@ struct HomeView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             profileViewModel.refreshUserData()
-            homeViewModel.refreshEventData(isGuest: profileViewModel.isGuest)
+            homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest)
         }
     }
 }

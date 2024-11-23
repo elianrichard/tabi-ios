@@ -20,11 +20,10 @@ class Expense {
     @Relationship(deleteRule: .cascade, inverse: \ExpenseItem.expense) var items: [ExpenseItem]
     @Relationship(deleteRule: .cascade, inverse: \AdditionalCharge.expense) var additionalCharges: [AdditionalCharge]
     
-    init(name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
-//        self.event = event
+    init(name: String, coverer: UserData, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
         self.name = name
         self.coverer = coverer
-        self.dateOfCreation = dateOfCreation
+        self.dateOfCreation = dateOfCreation ?? Date()
         self.price = price
         self.splitMethod = splitMethod.id
         self.participants = participants
@@ -71,6 +70,11 @@ class AdditionalCharge {
     init(additionalChargeType: AdditionalChargeType, amount: Float) {
         self.additionalChargeType = additionalChargeType.id
         self.amount = amount
+    }
+    
+    init(additionalChargeBase: ExpenseEventAdditionalChargeBase) {
+        self.additionalChargeType = additionalChargeBase.name
+        self.amount = additionalChargeBase.amount
     }
 }
 

@@ -44,6 +44,12 @@ extension SwiftDataService {
         } else { return nil }
     }
     
+    func getUserByUserId (_ id: String) -> UserData? {
+        if let users = getAllUsers() {
+            return users.first(where: { $0.userId == id })
+        } else { return nil }
+    }
+    
     func editCurrentUser (name: String, phone: String, image: ProfileImageEnum.ID? = nil, imageUrl: String? = nil) {
         if let user = getCurrentUser() {
             user.name = name

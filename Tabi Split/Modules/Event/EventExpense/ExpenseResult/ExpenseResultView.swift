@@ -115,10 +115,15 @@ struct ExpenseResultView: View {
                     if eventExpenseViewModel.isEdit {
                         eventExpenseViewModel.handleUpdateExpense(event)
                         eventExpenseViewModel.isEdit = false
+                        routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                     } else {
-                        eventExpenseViewModel.finalizeExpense(event)
+                        Task {
+                            if await eventExpenseViewModel.finalizeExpense(event, isGuest: profileViewModel.isGuest) {
+                                routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                                return
+                            }
+                        }
                     }
-                    routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                 }
             }
         }

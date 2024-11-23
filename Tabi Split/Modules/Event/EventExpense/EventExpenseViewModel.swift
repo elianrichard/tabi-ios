@@ -12,6 +12,7 @@ import Vision
 
 @Observable
 final class EventExpenseViewModel {
+    var isApiCallLoading = false
     var selectedExpense: Expense? = nil {
         didSet {
             populateViewModel()
@@ -304,24 +305,43 @@ final class EventExpenseViewModel {
     func isValidNumberGreaterThanAlphabets(_ string: String) -> Bool {
         let numbersRegex = try! NSRegularExpression(pattern: "\\d") // Match digits
         let alphabetsRegex = try! NSRegularExpression(pattern: "[a-zA-Z]") // Match alphabets
-
+        
         let numbersCount = numbersRegex.numberOfMatches(in: string, range: NSRange(location: 0, length: string.utf16.count))
         let alphabetsCount = alphabetsRegex.numberOfMatches(in: string, range: NSRange(location: 0, length: string.utf16.count))
-
+        
         return numbersCount >= alphabetsCount
     }
     @MainActor
-    func finalizeExpense(_ event: EventData) {
+    func finalizeExpense(_ event: EventData, isGuest: Bool) async -> Bool {
         guard let selectedCoverer, let selectedMethod else {
             print("Error")
-            return
+            return false
         }
-        let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
-        event.expenses.append(expense)
-        expense.items = items
-        expense.additionalCharges = additionalCharges
-        SwiftDataService.shared.saveModelContext()
+        do {
+            let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
+            event.expenses.append(expense)
+            if (selectedMethod == .equally) {
+                expense.items = [
+                    ExpenseItem(itemName: expenseName, itemPrice: totalSpending, itemQuantity: 1, assignees: selectedParticipants.map{ ExpensePerson(user: $0, share: 1) })
+                ]
+            } else {
+                expense.items = items
+                expense.additionalCharges = additionalCharges
+            }
+            SwiftDataService.shared.saveModelContext()
+            if !isGuest {
+                isApiCallLoading = true
+                try await ExpenseService.shared.createExpense(event: event, expense: expense)
+            }
+        } catch {
+            print("Create expense failed: \(error)")
+            isApiCallLoading = false
+            return false
+        }
+        isApiCallLoading = false
+        return true
     }
+    
     @MainActor
     func handleDeleteExpense(_ event: EventData) {
         if let expense = selectedExpense {

@@ -35,7 +35,7 @@ struct EventBase: Codable {
     let creator_id: String
     let created_at: String
     let participants: [UserBase]
-//    let expenses: 
+    let expenses: [ExpenseEventBase]?
 }
 
 struct GetEventsResponse: Codable {
@@ -47,7 +47,7 @@ struct EditEventRequest: Codable {
     let name: String
     let participants: [String]
     let event_image: String
-    let dummy_participant: [String]
+    let dummy_names: [String]
 }
 
 struct EditEventResponse: Codable {
