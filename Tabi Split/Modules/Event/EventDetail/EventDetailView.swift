@@ -191,8 +191,11 @@ struct EventDetailView: View {
                         sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Yes") {
-                        eventViewModel.incompleteEvent()
-                        sheetViewModel.clearSheet()
+                        Task {
+                            if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)

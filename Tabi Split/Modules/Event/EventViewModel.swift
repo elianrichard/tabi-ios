@@ -19,6 +19,7 @@ final class EventViewModel {
                 selectedSection = .expenses
             } else {
                 eventName = ""
+                eventIcon = .icon1
             }
         }
     }
@@ -65,17 +66,22 @@ final class EventViewModel {
                 let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
                  let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
                      if let image = ProfileImageEnum(rawValue: user.avatar_url) {
-                         UserData(userId: user.user_id, name: user.name, phone: user.phone, image: image, imageUrl: "" )
+                         UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: image, imageUrl: "" )
                      } else {
-                         UserData(userId: user.user_id, name: user.name, phone: user.phone, image: .owl, imageUrl: user.avatar_url )
+                         UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: .owl, imageUrl: user.avatar_url )
                      }
                  }
                 
                 // TODO: Create dummy from unregistered users from event update
-                // let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
-                //     return !registeredUsers.contains(where: { user in user.phone == contact.phone })
-                // }
-                try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId))
+                 let unregisteredUsers: [String] = selectedContacts.filter { contact in
+                     return !registeredUsers.contains(where: { user in user.phone == contact.phone })
+                 }.map { $0.name }
+                
+                for user in unregisteredUsers {
+                    print("\(user)")
+                }
+                
+                try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyParticipants: unregisteredUsers)
             }
             
             selectedEvent.eventName = eventName
@@ -146,10 +152,21 @@ final class EventViewModel {
     }
     
     @MainActor
-    func incompleteEvent() {
-        if let selectedEvent {
+    func incompleteEvent(isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            if !isGuest {
+                isApiCallLoading = true
+                try await EventService.shared.incompleteEvent(event: selectedEvent)
+            }
             SwiftDataService.shared.incompleteEvent(selectedEvent)
+        } catch {
+            print("Event incomplete fail: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
     }
     
     func calculateOptimization(currentUser: UserData) {

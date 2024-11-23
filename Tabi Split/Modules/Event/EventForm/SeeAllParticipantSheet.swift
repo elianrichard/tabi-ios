@@ -33,7 +33,7 @@ struct SeeAllParticipantSheet: View {
                                 participantsList.filter {
                                     (nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())) && !profileViewModel.isCurrentUser($0)
                                 }.sorted(by: { $0.name < $1.name }) ) { user in
-                                    UserCard(user: user)
+                                    UserCard(user: user, isShowOwnerText: user.userId == eventViewModel.selectedEvent?.creatorId)
                                 }
                         }
                     }

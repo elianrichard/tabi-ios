@@ -48,7 +48,7 @@ struct CheckUsersResponse: Codable {
 
 struct UserBase: Codable {
     let user_id: String
-    let phone: String
+    let phone: String?
     let name: String
     let avatar_url: String
 }

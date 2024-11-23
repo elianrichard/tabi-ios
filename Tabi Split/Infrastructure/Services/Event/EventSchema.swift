@@ -29,13 +29,13 @@ struct CreateEventResponse: Codable {
 
 struct EventBase: Codable {
     let id: String
-    let date: String?
+    let completion_date: String?
     let name: String
     let avatar_url: String
     let creator_id: String
-//    TODO: Created At Response for Event
-//    let created_at: String
+    let created_at: String
     let participants: [UserBase]
+//    let expenses: 
 }
 
 struct GetEventsResponse: Codable {
@@ -47,15 +47,20 @@ struct EditEventRequest: Codable {
     let name: String
     let participants: [String]
     let event_image: String
+    let dummy_participant: [String]
 }
 
 struct EditEventResponse: Codable {
     let message: String
 }
 
+struct CompleteEventRequest: Codable {
+    let is_completed: Bool
+}
+
 struct CompleteEventResponse: Codable {
     let message: String
-    let completed_at: String
+    let completion_date: String?
 }
 
 struct DeleteEventResponse: Codable {

@@ -11,7 +11,7 @@ struct UserCard : View {
     @Environment(ProfileViewModel.self) private var profileViewModel
     var user: UserData
     var isShowYouText: Bool = false
-    var currentUserYouText: String = "(You)"
+    var isShowOwnerText: Bool = false
     var isShowPhoneText: Bool = true
     
     var body: some View {
@@ -22,8 +22,12 @@ struct UserCard : View {
                     Text("\(user.name)")
                         .font(.tabiHeadline)
                         .foregroundStyle(.textBlack)
-                    if isShowYouText && profileViewModel.isCurrentUser(user) {
-                        Text(currentUserYouText)
+                    if isShowOwnerText {
+                        Text("(Owner)")
+                            .font(.tabiHeadline)
+                            .foregroundStyle(.textGrey)
+                    } else if isShowYouText && profileViewModel.isCurrentUser(user) {
+                        Text("(You)")
                             .font(.tabiHeadline)
                             .foregroundStyle(.textGrey)
                     }

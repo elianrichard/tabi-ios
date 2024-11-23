@@ -20,7 +20,7 @@ class EventData {
     var createdAt: Date
     var creatorId: String = ""
     
-    init(eventId: String? = nil, eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date = Date(), creatorId: String) {
+    init(eventId: String? = nil, eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date? = nil, creatorId: String) {
         self.eventId = eventId
         self.eventName = eventName
         self.completionDate = completionDate
@@ -28,7 +28,7 @@ class EventData {
         self.userEventBalance = userEventBalance
         self.participants = participants
         self.expenses = expenses
-        self.createdAt = createdAt
+        self.createdAt = createdAt ?? Date()
         self.creatorId = creatorId
     }
 }

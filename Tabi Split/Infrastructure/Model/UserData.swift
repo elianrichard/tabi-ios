@@ -21,9 +21,9 @@ class UserData {
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]? = []
     @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]? = []
     
-    init(userId: String = "" ,name: String, phone: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
+    init(userId: String = "", name: String, phone: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
         self.userId = userId
-        self.name = name
+        self.name = name != "" ? name : "Deleted User"
         self.phone = phone
         self.image = (image ?? ProfileImageEnum.allCases.randomElement() ?? .owl).id
         self.imageUrl = imageUrl
@@ -31,8 +31,8 @@ class UserData {
     
     init(userBase: UserBase) {
         self.userId = userBase.user_id
-        self.name = userBase.name
-        self.phone = userBase.phone
+        self.name = userBase.name != "" ? userBase.name : "Deleted User"
+        self.phone = userBase.phone ?? ""
         if let image = ProfileImageEnum(rawValue: userBase.avatar_url) {
             self.image = image.id
             self.imageUrl = ""

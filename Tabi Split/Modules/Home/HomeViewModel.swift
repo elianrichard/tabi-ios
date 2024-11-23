@@ -31,7 +31,7 @@ final class HomeViewModel {
         case .settled:
             eventData = events.filter { $0.userEventBalance == 0 }
         }
-        filteredEvents = eventData.sorted(by: { $0.createdAt < $1.createdAt })
+        filteredEvents = eventData
     }
     
     @MainActor
@@ -58,13 +58,13 @@ final class HomeViewModel {
                             }
                         }
                         // TODO: Remove this temporary fix for duplication bug on get event list
-                        if !isGuest {
-                            participants = Array(
-                                Dictionary(grouping: participants, by: { $0.userId }).values.map { $0.first! }
-                            )
-                        }
+//                        if !isGuest {
+//                            participants = Array(
+//                                Dictionary(grouping: participants, by: { $0.userId }).values.map { $0.first! }
+//                            )
+//                        }
                         
-                        let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.date ?? "").convertIsoToDate(), eventIcon: image, participants: participants, creatorId: event.creator_id)
+                        let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.completion_date ?? "").convertIsoToDate(), eventIcon: image, participants: participants, createdAt: event.created_at.convertIsoToDate(), creatorId: event.creator_id)
                         SwiftDataService.shared.addEvent(newEvent)
                     }
                 } catch {
@@ -73,14 +73,15 @@ final class HomeViewModel {
             }
             
             if let data = SwiftDataService.shared.fetchAllEvents() {
-                let sortedData = data.sorted(by: { $0.createdAt < $1.createdAt })
+                let eventData = data.sorted(by: { $0.createdAt > $1.createdAt })
                 // TODO: Remove this temporary fix for duplication bug on get event list
-                var eventData: [EventData] = sortedData
-                if !isGuest {
-                    eventData = Array(
-                        Dictionary(grouping: sortedData, by: { $0.eventId }).values.map { $0.first! }
-                    )
-                }
+//                var eventData: [EventData] = sortedData
+//                if !isGuest {
+//                    eventData = Array(
+//                        Dictionary(grouping: sortedData, by: { $0.eventId }).values.map { $0.first! }
+//                    )
+//                }
+
                 events = eventData
                 filteredEvents = eventData
                 selectedFilter = .all

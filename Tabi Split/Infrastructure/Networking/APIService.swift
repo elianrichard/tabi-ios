@@ -136,6 +136,7 @@ final class APIService: APIClient {
             
             return try JSONDecoder().decode(Response.self, from: data)
         } catch {
+            print(error)
             throw (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
         }
     }
