@@ -30,9 +30,10 @@ struct ExpenseResultView: View {
                             Label("Edit Expense", systemImage: "pencil")
                         }
                         Button (role: .destructive) {
-                            if let event = eventViewModel.selectedEvent {
-                                eventExpenseViewModel.handleDeleteExpense(event)
-                                routes.navigateBack()
+                            Task {
+                                if await eventExpenseViewModel.handleDeleteExpense(event: eventViewModel.selectedEvent, isGuest: profileViewModel.isGuest){
+                                    routes.navigateBack()
+                                }
                             }
                         } label: {
                             Label("Delete Expense", systemImage: "trash")
@@ -96,9 +97,9 @@ struct ExpenseResultView: View {
                     }
                 )
             }
-//            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+            //            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
-//            TEMPORARILY DISABLED: UPLOAD IMAGE RECEIPT
+            //            TEMPORARILY DISABLED: UPLOAD IMAGE RECEIPT
             if (false) {
                 if !eventExpenseViewModel.isEditView {
                     CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
@@ -112,12 +113,13 @@ struct ExpenseResultView: View {
             
             if let event = eventViewModel.selectedEvent, eventExpenseViewModel.isEditView {
                 CustomButton(text: "Save Expense") {
-                    if eventExpenseViewModel.isEdit {
-                        eventExpenseViewModel.handleUpdateExpense(event)
-                        eventExpenseViewModel.isEdit = false
-                        routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
-                    } else {
-                        Task {
+                    Task {
+                        if eventExpenseViewModel.isEdit {
+                            if await eventExpenseViewModel.handleUpdateExpense(event: event, isGuest: profileViewModel.isGuest) {
+                                eventExpenseViewModel.isEdit = false
+                                routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                            }
+                        } else {
                             if await eventExpenseViewModel.finalizeExpense(event, isGuest: profileViewModel.isGuest) {
                                 routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                                 return

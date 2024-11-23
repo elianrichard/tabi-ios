@@ -74,7 +74,7 @@ final class HomeViewModel {
                                     }
                                 }
                             }
-                            let newExpense = Expense(name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants)
+                            let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants)
                             newEvent.expenses.append(newExpense)
                             if let additionalCharges = expense.additional_charges {
                                 for additionalCharge in additionalCharges {
@@ -89,7 +89,7 @@ final class HomeViewModel {
                                         itemAssignees.append(ExpensePerson(user: user, share: assignee.share))
                                     }
                                 }
-                                let expenseItem = ExpenseItem(itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
+                                let expenseItem = ExpenseItem(itemId: item.id, itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
                                 newExpense.items.append(expenseItem)
                             }
                             newEvent.calculateUserEventBalance(currentUser: currentUser)

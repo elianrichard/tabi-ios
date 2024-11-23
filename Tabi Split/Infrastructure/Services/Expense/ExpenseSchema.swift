@@ -5,6 +5,19 @@
 //  Created by Elian Richard on 23/11/24.
 //
 
+import Foundation
+
+enum ExpenseAPIError: LocalizedError {
+    case expenseIdNotFound
+    
+    var errorDescription: String? {
+        switch self {
+        case .expenseIdNotFound:
+            return "Expense ID not found"
+        }
+    }
+}
+
 struct CreateExpenseRequest: Codable {
     let name: String
     let coverer_id: String
@@ -85,6 +98,7 @@ struct ExpenseItemAssigneeBase: Codable {
 
 struct CreateExpenseResponse: Codable {
     let message: String
+    let expense_id: String
 }
 
 
@@ -108,8 +122,50 @@ struct ExpenseEventAdditionalChargeBase: Codable {
 }
 
 struct ExpenseEventItemBase: Codable {
+    let id: String
     let name: String
     let price: Float
     let quantity: Float
     let assignees: [ExpenseItemAssigneeBase]
+}
+
+struct DeleteExpenseResponse: Codable {
+    let message: String
+}
+
+struct UpdateExpenseRequest: Codable {
+    let name: String
+    let coverer_id: String
+    let split_method: String
+    let receipt_url: String
+    let items: [ExpenseItemBase]
+    let additional_charges: [ExpenseAdditionalChargeBase]
+    let deleted_item_ids: [String]
+    let deleted_charges_ids: [String]
+    
+    init(name: String, coverer_id: String, split_method: String, receipt_url: String, items: [ExpenseItemBase], additional_charges: [ExpenseAdditionalChargeBase], deleted_item_ids: [String], deleted_charges_ids: [String]) {
+        self.name = name
+        self.coverer_id = coverer_id
+        self.split_method = split_method
+        self.receipt_url = receipt_url
+        self.items = items
+        self.additional_charges = additional_charges
+        self.deleted_item_ids = deleted_item_ids
+        self.deleted_charges_ids = deleted_charges_ids
+    }
+    
+    init(expense: Expense) {
+        self.name = expense.name
+        self.coverer_id = expense.coverer.userId
+        self.split_method = expense.splitMethod
+        self.receipt_url = ""
+        self.items = expense.items.map { ExpenseItemBase(expenseItem: $0) }
+        self.additional_charges = expense.additionalCharges.map { ExpenseAdditionalChargeBase(expenseAdditionalCharge: $0) }
+        self.deleted_item_ids = expense.items.compactMap { $0.itemId }
+        self.deleted_charges_ids = expense.additionalCharges.compactMap { $0.additionalChargeId }
+    }
+}
+
+struct UpdateExpenseResponse: Codable {
+    let message: String
 }
