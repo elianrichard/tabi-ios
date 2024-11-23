@@ -95,8 +95,6 @@ class RegisterViewModel {
         validatePassword()
         validateConfirmPassword()
         
-        print(nameError, phoneNumberError, passwordError, confirmPasswordError)
-        
         return (
             nameError == nil &&
             phoneNumberError == nil &&
