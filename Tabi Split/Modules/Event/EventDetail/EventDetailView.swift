@@ -204,12 +204,11 @@ struct EventDetailView: View {
         }
         .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.delete)) {
             VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: .spacingLarge) {
+                VStack (spacing: 0) {
                     LottieView(animation: .named("DeleteEvent"))
                         .looping()
-                        .resizable()
-                        .frame(width: 200, height: 200)
-                        .scaledToFit()
+                        .scaleEffect(1.4)
+                        .frame(width: 300, height: 200)
                     VStack (spacing: .spacingSmall) {
                         Text("Do you want to delete this event?")
                             .font(.tabiSubtitle)

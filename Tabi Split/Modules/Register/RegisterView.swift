@@ -54,7 +54,7 @@ struct RegisterView: View {
                                      animation: .default) {
                             Task {
                                 if await registerViewModel.register() {
-                                    routes.navigate(to: .LoginView)
+                                    routes.navigate(to: .HomeView)
                                 }
                             }
                         }

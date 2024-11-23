@@ -20,8 +20,7 @@ enum EventAPIError: LocalizedError {
 
 struct CreateEventRequest: Codable {
     let name: String
-//    TODO: Set image for event
-//    let image: String
+    let event_image: String
 }
 
 struct CreateEventResponse: Codable {

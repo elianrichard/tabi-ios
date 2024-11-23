@@ -10,6 +10,7 @@ import JWTDecode
 
 @Observable
 class LoginViewModel {
+    static var shared = LoginViewModel()
     var phoneNumber: String = ""
     var password: String = ""
     
@@ -19,7 +20,7 @@ class LoginViewModel {
     var isLoading: Bool = false
     
     @MainActor
-    func login() async -> Bool {
+    func login(phoneInput: String? = nil, passwordInput: String? = nil) async -> Bool {
         guard validateInput() else {
             print("Cannot register: form is invalid")
             return false
