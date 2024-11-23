@@ -10,9 +10,6 @@ packages:
   Lottie:
     url: https://github.com/airbnb/lottie-spm.git
     minorVersion: 4.5.0
-  WeScan:
-    url: https://github.com/WeTransfer/WeScan.git
-    minorVersion: 3.0.0
   JWTDecode:
     url: https://github.com/auth0/JWTDecode.swift.git
     minorVersion: 3.2.0
@@ -57,7 +54,6 @@ targets:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     dependencies:
       - package: Lottie
-      - package: WeScan
       - package: JWTDecode
   Tabi Split Tests:
     type: bundle.unit-test
