@@ -57,12 +57,6 @@ final class HomeViewModel {
                                 }
                             }
                         }
-                        // TODO: Remove this temporary fix for duplication bug on get event list
-//                        if !isGuest {
-//                            participants = Array(
-//                                Dictionary(grouping: participants, by: { $0.userId }).values.map { $0.first! }
-//                            )
-//                        }
                         
                         let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.completion_date ?? "").convertIsoToDate(), eventIcon: image, participants: participants, createdAt: event.created_at.convertIsoToDate(), creatorId: event.creator_id)
                         SwiftDataService.shared.addEvent(newEvent)
@@ -74,14 +68,6 @@ final class HomeViewModel {
             
             if let data = SwiftDataService.shared.fetchAllEvents() {
                 let eventData = data.sorted(by: { $0.createdAt > $1.createdAt })
-                // TODO: Remove this temporary fix for duplication bug on get event list
-//                var eventData: [EventData] = sortedData
-//                if !isGuest {
-//                    eventData = Array(
-//                        Dictionary(grouping: sortedData, by: { $0.eventId }).values.map { $0.first! }
-//                    )
-//                }
-
                 events = eventData
                 filteredEvents = eventData
                 selectedFilter = .all

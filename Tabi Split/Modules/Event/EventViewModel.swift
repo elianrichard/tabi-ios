@@ -77,10 +77,6 @@ final class EventViewModel {
                      return !registeredUsers.contains(where: { user in user.phone == contact.phone })
                  }.map { $0.name }
                 
-                for user in unregisteredUsers {
-                    print("\(user)")
-                }
-                
                 try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyParticipants: unregisteredUsers)
             }
             
