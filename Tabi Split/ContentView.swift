@@ -152,7 +152,7 @@ struct ContentView: View {
             return
         }
         
-        guard let eventId = components.queryItems?.first(where: { $0.name == "eventId" })?.value else {
+        guard let eventId = components.queryItems?.first(where: { $0.name == "event-id" })?.value else {
             print("eventId not found")
             return
         }
