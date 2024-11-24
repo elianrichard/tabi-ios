@@ -22,7 +22,7 @@ struct UserCard : View {
                     Text("\(user.name)")
                         .font(.tabiHeadline)
                         .foregroundStyle(.textBlack)
-                    if isShowOwnerText {
+                    if isShowOwnerText && !profileViewModel.isGuest {
                         Text("(Owner)")
                             .font(.tabiHeadline)
                             .foregroundStyle(.textGrey)

@@ -20,6 +20,7 @@ struct LoginView: View {
                 if SwiftDataService.shared.getCurrentUser() == nil {
                     Button {
                         if loginViewModel.guestLogin() {
+                            profileViewModel.user = UserData(name: "Guest", phone: "Guest")
                             routes.navigate(to: .HomeView)
                         }
                     } label: {

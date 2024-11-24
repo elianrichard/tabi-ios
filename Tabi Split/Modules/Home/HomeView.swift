@@ -73,7 +73,13 @@ struct HomeView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             profileViewModel.refreshUserData()
-            homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest)
+            Task {
+                if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
+                    if !profileViewModel.isGuest {
+                        SwiftDataService.shared.deleteUsersWithNoId()
+                    }
+                }
+            }
         }
     }
 }

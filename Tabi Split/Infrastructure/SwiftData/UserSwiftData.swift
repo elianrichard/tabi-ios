@@ -23,6 +23,16 @@ extension SwiftDataService {
         }
     }
     
+    func deleteUsersWithNoId () {
+        if let users = getAllUsers() {
+            for user in users {
+                if user.userId == "" {
+                    modelContext.delete(user)
+                }
+            }
+        }
+    }
+    
     func saveCurrentUser (user: CurrentUserDefaults) {
         if let users = getAllUsers() {
             if !users.contains(where: { $0.phone == user.userPhone }) {
