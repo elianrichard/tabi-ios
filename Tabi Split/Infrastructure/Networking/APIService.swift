@@ -46,7 +46,6 @@ final class APIService: APIClient {
             let encoder = JSONEncoder()
             request.httpBody = try encoder.encode(body)
         }
-        
         return try await requestWithRetry(endpoint: endpoint, request: request)
     }
     
