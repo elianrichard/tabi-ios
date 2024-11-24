@@ -84,6 +84,16 @@ final class HomeViewModel {
                         items.append(newItem)
                     }
                     let newExpense = Expense(name: expense.name, coverer: swapUser(oldUser: expense.coverer, users: allUsers), price: expense.price, splitMethod: SplitMethod(rawValue: expense.splitMethod) ?? .equally, items: items, additionalCharges: expense.additionalCharges)
+                    for participant in newExpense.participants {
+                        print(participant.name, participant.phone, participant.userId)
+                    }
+                    
+                    for item in newExpense.items {
+                        print(item.itemName)
+                        for assignee in item.assignees {
+                            print(assignee.user.name, assignee.user.phone, assignee.user.userId)
+                        }
+                    }
                     let _ = try await ExpenseService.shared.createExpense(event: newEvent, expense: newExpense)
                 }
             }
