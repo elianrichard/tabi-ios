@@ -61,6 +61,7 @@ final class EventInviteViewModel {
         
         switch CNContactStore.authorizationStatus(for: .contacts) {
         case .authorized, .limited:
+            isLoadContactLoading = true
             do {
                 let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
@@ -75,6 +76,7 @@ final class EventInviteViewModel {
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
                     print("contact granted")
+                    self.isLoadContactLoading = true
                     self.fillUpContacts(currentUser: currentUser, registeredUsers: registeredUsers)
                 } else if let error = error {
                     print("Error requesting contact acces: \(error)")

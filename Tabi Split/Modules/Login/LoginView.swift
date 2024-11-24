@@ -72,8 +72,10 @@ struct LoginView: View {
                 VStack (spacing: .spacingMedium) {
                     CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In", animation: .default) {
                         Task {
-                            if await loginViewModel.login() {
-                                routes.navigate(to: .HomeView)
+                            if await profileViewModel.logout(){
+                                if await loginViewModel.login() {
+                                    routes.navigate(to: .HomeView)
+                                }
                             }
                         }
                     }

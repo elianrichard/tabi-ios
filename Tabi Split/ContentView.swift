@@ -28,6 +28,7 @@ struct ContentView: View {
                         }
                 } else if isAuthenticated {
                     HomeView()
+//                    EmptyView()
                 } else {
                     LoginView()
                 }

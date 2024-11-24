@@ -106,7 +106,6 @@ class RegisterViewModel {
     @MainActor
     func register() async -> Bool {
         isSubmitted = true
-        print(isFormValid())
         guard isFormValid() else {
             isSignUpEnabled = false
             print("Cannot register: form is invalid")
