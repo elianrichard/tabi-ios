@@ -26,6 +26,5 @@ final class ExpenseService {
         guard let expenseId = expense.expenseId else { throw ExpenseAPIError.expenseIdNotFound }
         let request: UpdateExpenseRequest = UpdateExpenseRequest(expense: expense)
         let _ : UpdateExpenseResponse = try await apiClient.patch(endpoint: "/expense/\(expenseId)", body: request)
-        
     }
 }

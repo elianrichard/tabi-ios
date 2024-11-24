@@ -64,17 +64,17 @@ final class EventViewModel {
             if !isGuest {
                 isApiCallLoading = true
                 let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
-                 let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
-                     if let image = ProfileImageEnum(rawValue: user.avatar_url) {
-                         UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: image, imageUrl: "" )
-                     } else {
-                         UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: .owl, imageUrl: user.avatar_url )
-                     }
-                 }
+                let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
+                    if let image = ProfileImageEnum(rawValue: user.avatar_url) {
+                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: image, imageUrl: "" )
+                    } else {
+                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: .owl, imageUrl: user.avatar_url )
+                    }
+                }
                 
-                 let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
-                     return !registeredUsers.contains(where: { user in user.phone == contact.phone })
-                 }
+                let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
+                    return !registeredUsers.contains(where: { user in user.phone == contact.phone })
+                }
                 
                 try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
             }
@@ -97,7 +97,7 @@ final class EventViewModel {
         do {
             if !isGuest {
                 isApiCallLoading = true
-                try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
+                let _ = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
             }
             let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId)
             SwiftDataService.shared.addEvent(newEvent)

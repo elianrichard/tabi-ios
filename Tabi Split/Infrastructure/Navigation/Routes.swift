@@ -19,7 +19,6 @@ import SwiftUI
              ExpenseAssignView,
              ExpenseResultView,
              EventFormView,
-             GuestLoginView,
              LoginView,
              RegisterView,
              EventDetailView,

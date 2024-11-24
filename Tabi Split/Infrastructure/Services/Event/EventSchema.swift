@@ -25,6 +25,7 @@ struct CreateEventRequest: Codable {
 
 struct CreateEventResponse: Codable {
     let message: String
+    let event_id: String
 }
 
 struct EventBase: Codable {
@@ -52,6 +53,12 @@ struct EditEventRequest: Codable {
 
 struct EditEventResponse: Codable {
     let message: String
+    let dummy_user_info: [DummyInfoBase]
+}
+
+struct DummyInfoBase: Codable {
+    let dummy_user_id: String
+    let dummy_name: String
 }
 
 struct CompleteEventRequest: Codable {

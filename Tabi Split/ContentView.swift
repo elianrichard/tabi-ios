@@ -58,9 +58,6 @@ struct ContentView: View {
                 case .LoginView:
                     LoginView()
                     
-                case .GuestLoginView:
-                    GuestLoginView()
-                    
                 case .RegisterView:
                     RegisterView()
                     

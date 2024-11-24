@@ -9,9 +9,11 @@ final class EventService {
     static let shared = EventService()
     private let apiClient: APIClient = APIService.shared
     
-    func createEvent(name: String, image: String) async throws {
+    func createEvent(name: String, image: String) async throws -> CreateEventResponse {
         let request: CreateEventRequest = CreateEventRequest(name: name, event_image: image)
-        let _ : CreateEventResponse = try await apiClient.post(endpoint: "/event", body: request)
+        let response : CreateEventResponse = try await apiClient.post(endpoint: "/event", body: request)
+        
+        return response
     }
     
     func getAllEvents() async throws -> GetEventsResponse {
@@ -20,10 +22,11 @@ final class EventService {
         return response
     }
     
-    func updateEvent(event: EventData, dummyNames: [String] = []) async throws {
+    func updateEvent(event: EventData, dummyNames: [String] = []) async throws -> EditEventResponse {
         guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
         let request: EditEventRequest = EditEventRequest(name: event.eventName, participants: event.participants.compactMap{ $0.userId }, event_image: event.eventIcon, dummy_names: dummyNames)
-        let _ : EditEventResponse = try await apiClient.patch(endpoint: "/event/\(eventId)", body: request)
+        let response : EditEventResponse = try await apiClient.patch(endpoint: "/event/\(eventId)", body: request)
+        return response
     }
     
     func completeEvent(event: EventData) async throws {

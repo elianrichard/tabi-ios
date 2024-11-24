@@ -72,16 +72,8 @@ struct LoginView: View {
                 VStack (spacing: .spacingMedium) {
                     CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In", animation: .default) {
                         Task {
-                            if SwiftDataService.shared.getCurrentUser() == nil {
-                                if await loginViewModel.login() {
-                                    routes.navigate(to: .HomeView)
-                                }
-                            } else {
-                                if await profileViewModel.logout() {
-                                    if await loginViewModel.login() {
-                                        routes.navigate(to: .HomeView)
-                                    }
-                                }
+                            if await loginViewModel.login() {
+                                routes.navigate(to: .HomeView)
                             }
                         }
                     }
@@ -89,7 +81,7 @@ struct LoginView: View {
                     if (false) {
                         DividerWithText()
                         
-                        CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                        CustomButton(text: "Sign In With Apple ID", icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
                             print("Login with Apple")
                         }
                     }
