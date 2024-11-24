@@ -36,6 +36,9 @@ final class HomeViewModel {
     
     func handleMigration (currentUser: UserData, events: [EventData]) async {
         func swapUser (oldUser: UserData, users: [UserData]) -> UserData {
+            if oldUser.name == "Guest" && oldUser.phone == "" {
+                return currentUser
+            }
             if oldUser.phone != "" {
                 return users.first(where: { $0.phone == oldUser.phone }) ?? oldUser
             } else {
@@ -83,17 +86,9 @@ final class HomeViewModel {
                             print(assignee.user.name, assignee.user.phone, "item expense original")
                         }
                         for assignee in item.assignees {
-                            if (assignee.user.name != "Guest" && assignee.user.phone != "") {
-                                if let expensePersonUser = allUsers.first(where: { $0.phone == assignee.user.phone } ) {
-                                    let expensePerson = ExpensePerson(user: expensePersonUser, share: assignee.share)
-                                    print(expensePerson.user.name, expensePerson.user.phone, expensePerson.user.userId, assignee.user.name, assignee.user.phone, assignee.user.userId,  "expense person")
-                                    newItem.assignees.append(expensePerson)
-                                }
-                            } else {
-                                let expensePerson = ExpensePerson(user: currentUser, share: assignee.share)
-                                print(expensePerson.user.name, expensePerson.user.phone, expensePerson.user.userId, assignee.user.name, assignee.user.phone, assignee.user.userId,  "expense person")
-                                newItem.assignees.append(expensePerson)
-                            }
+                            let expensePerson = ExpensePerson(user: swapUser(oldUser: assignee.user, users: allUsers), share: assignee.share)
+                            print(expensePerson.user.name, expensePerson.user.phone, expensePerson.user.userId, assignee.user.name, assignee.user.phone, assignee.user.userId,  "expense person")
+                            newItem.assignees.append(expensePerson)
                         }
                         items.append(newItem)
                     }
@@ -184,7 +179,7 @@ final class HomeViewModel {
         if !isGuest {
             do {
                 isLoading = true
-                var data = try await EventService.shared.getAllEvents()
+                let data = try await EventService.shared.getAllEvents()
                 // TODO: MIGRATIE GUEST USER
 //                if let events = SwiftDataService.shared.fetchAllEvents() {
 //                    if events.count != 0 && data.events.count == 0 {
