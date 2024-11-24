@@ -8,7 +8,7 @@
 import SwiftUI
 import Contacts
 import UniformTypeIdentifiers
-
+import CoreImage.CIFilterBuiltins
 
 struct EventInviteView: View {
     @Environment(Routes.self) private var routes
@@ -22,14 +22,15 @@ struct EventInviteView: View {
     
     @State private var sheetHeight: CGFloat = 0
     
+    private var deeplinkHost = "tabi-web.vercel.app"
+    
     var body: some View {
         VStack (spacing: 0) {
             TopNavigation(title: "Add Participants", additionalBackFunction: {
                 eventInviteViewModel.searchUserText = ""
             })
             VStack(spacing: .spacingMedium){
-                //                TEMPORARILY DISABLED: INVITE BY LINK AND QR CODE
-                if (false) {
+                if !profileViewModel.isGuest {
                     HStack (spacing: .spacingMedium) {
                         EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
                                                    icon: isLinkCopied ? .checkIcon : .linkIcon,
@@ -43,10 +44,10 @@ struct EventInviteView: View {
                                         isLinkCopied = false
                                     }
                                 }
-                                UIPasteboard.general.setValue("https://tabieventinvitelink.com", forPasteboardType: UTType.plainText.identifier)
+                                UIPasteboard.general.setValue("https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")", forPasteboardType: UTType.plainText.identifier)
                             }
                         })
-                        ShareLink(item: URL(filePath: "https://tabieventinvitelink.com")!) {
+                        ShareLink(item: URL(filePath: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")")) {
                             EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                         }
                         EventInviteShareButtonView(text: "QR Code",
@@ -165,12 +166,12 @@ struct EventInviteView: View {
                     Text("Show QR Code")
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    VStack (alignment: .center, spacing: .spacingSmall) {
-                        Image(.sampleBarcodeQr)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 200, height: 200)
-                            .background(.red)
+                    VStack (alignment: .center, spacing: .spacingMedium) {
+                        Image(uiImage: generateQRCode(from: "tabisplit://join-event?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")"))
+                                .resizable()
+                                .interpolation(.none)
+                                .scaledToFit()
+                                .frame(width: 200, height: 200)
                         Text("Let your friends scan it to participate in your event")
                             .font(.tabiHeadline)
                             .multilineTextAlignment(.center)
@@ -182,6 +183,24 @@ struct EventInviteView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
+    }
+    
+    private func generateQRCode(from string: String) -> UIImage {
+        let context = CIContext()
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(string.utf8)
+        
+        
+        if let outputImage = filter.outputImage {
+            let transform = CGAffineTransform(scaleX: 1, y: 1) // Adjust scaling factor as needed
+            let scaledImage = outputImage.transformed(by: transform)
+  
+            if let cgImage = context.createCGImage(outputImage, from: scaledImage.extent) {
+                return UIImage(cgImage: cgImage)
+            }
+        }
+
+        return UIImage(systemName: "xmark.circle") ?? UIImage()
     }
     
 }

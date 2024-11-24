@@ -73,3 +73,7 @@ struct CompleteEventResponse: Codable {
 struct DeleteEventResponse: Codable {
     let message: String
 }
+
+struct JoinEventResponse: Codable {
+    let message: String
+}

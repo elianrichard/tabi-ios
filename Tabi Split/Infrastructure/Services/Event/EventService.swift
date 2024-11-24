@@ -45,4 +45,8 @@ final class EventService {
         guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
         let _ : DeleteEventResponse = try await apiClient.delete(endpoint: "/event/\(eventId)")
     }
+    
+    func joinEvent(eventId: String) async throws {
+        let _ : JoinEventResponse = try await apiClient.post(endpoint: "/event/join/\(eventId)", body: Empty())
+    }
 }
