@@ -36,7 +36,7 @@ struct SettlementOptimizationView: View {
                     Text("Recapitulation")
                         .font(.tabiHeadline)
                     ScrollView (showsIndicators: false) {
-                        LazyVStack (spacing: .spacingMedium) {
+                        VStack (spacing: .spacingMedium) {
                             ForEach (eventViewModel.participantsBalance) { data in
                                 OptimizationRecapCard(recapData: data)
                             }
@@ -52,6 +52,7 @@ struct SettlementOptimizationView: View {
                     }
                     .padding(.horizontal, .spacingRegular)
                     .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+//                    .frame(height: contentSize.height)
                     .overlay {
                         RoundedRectangle(cornerRadius: .radiusLarge)
                             .strokeBorder(.uiGray, lineWidth: 1)

@@ -115,6 +115,27 @@ enum EventIconEnum: String, Identifiable {
         }
     }
     
+    var bannerResource: ImageResource {
+        switch self {
+        case .icon1:
+                .eventBanner1
+        case .icon2:
+                .eventBanner2
+        case .icon3:
+                .eventBanner3
+        case .icon4:
+                .eventBanner1
+        case .icon5:
+                .eventBanner1
+        case .icon6:
+                .eventBanner2
+        case .icon7:
+                .eventBanner3
+        case .icon8:
+                .eventBanner2
+        }
+    }
+    
     static var allCases: [EventIconEnum] {
         [.icon1, .icon2, .icon3, .icon4, .icon5, .icon6, .icon7, .icon8]
     }

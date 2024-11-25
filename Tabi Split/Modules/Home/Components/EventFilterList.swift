@@ -14,13 +14,18 @@ struct EventFilterList: View {
         VStack (alignment: .leading, spacing: 15) {
             Text("Events")
                 .font(.tabiLargeTitle)
+                .padding(.horizontal)
             ScrollView (.horizontal, showsIndicators: false) {
                 HStack (spacing: 10) {
-                    ForEach(HomeFilterEnum.allCases) { item in
+                    ForEach(Array(HomeFilterEnum.allCases.enumerated()), id: \.offset) { index, item in
                         Button {
                             homeViewModel.selectedFilter = item
                         } label: {
-                            Nugget(text: item.displayName, isSelected: item == homeViewModel.selectedFilter)
+                            VStack {
+                                Nugget(text: item.displayName, isSelected: item == homeViewModel.selectedFilter)
+                            }
+                            .padding(.leading, index == 0 ? 14 : 0)
+                            .padding(.trailing, index == HomeFilterEnum.allCases.count - 1 ? 14 : 0)
                         }
                     }
                 }

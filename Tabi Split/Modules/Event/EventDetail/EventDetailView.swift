@@ -56,7 +56,7 @@ struct EventDetailView: View {
             })
             
             VStack (spacing: 0) {
-                EventBanner()
+                EventBanner(resource: EventIconEnum(rawValue: eventViewModel.selectedEvent?.eventIcon ?? "")?.bannerResource ?? .eventBanner1)
                 EventParticipantsList(sheetViewModel: $sheetViewModel)
                 VStack {
                     if eventViewModel.isNoParticipants {

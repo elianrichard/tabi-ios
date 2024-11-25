@@ -17,6 +17,7 @@ struct HomeView: View {
         ZStack {
             VStack (alignment: .leading, spacing: 0) {
                 HomeTopBar(homeViewModel: homeViewModel)
+                    .padding(.horizontal)
                 Spacer(minLength: .spacingMedium)
                 EventFilterList(homeViewModel: homeViewModel)
                 Spacer(minLength: 30)
@@ -32,13 +33,14 @@ struct HomeView: View {
                                     }
                             }
                         }
+                        .padding(.horizontal)
                         .padding(.bottom, 90)
                     }
                 } else {
                     EventEmptyList()
                 }
             }
-            .padding()
+            .padding(.top)
             
             if homeViewModel.filteredEvents.count != 0 {
                 VStack {
