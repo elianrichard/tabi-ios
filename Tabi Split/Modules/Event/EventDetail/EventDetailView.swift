@@ -108,7 +108,8 @@ struct EventDetailView: View {
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
                         }
-                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
+                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {                            
+                            eventExpenseViewModel.resetViewModel()
                             eventExpenseViewModel.isQuickScanned = true
                             sheetViewModel.setSheet(.quickScan)
                         }
