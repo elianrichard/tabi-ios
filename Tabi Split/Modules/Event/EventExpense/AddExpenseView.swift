@@ -23,6 +23,9 @@ struct AddExpenseView: View {
         VStack (spacing: .spacingRegular) {
             TopNavigation(title: eventExpenseViewModel.isEdit ? "Edit Expense" : "Add New Expenses", additionalBackFunction: {
                 eventExpenseViewModel.isEdit = false
+                if !eventExpenseViewModel.isQuickScanned {                
+                    eventExpenseViewModel.uploadedReceiptImage = nil
+                }
             })
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
@@ -180,8 +183,12 @@ struct AddExpenseView: View {
                         VStack (alignment: .leading, spacing: 16) {
                             Text("Items")
                                 .font(.tabiHeadline)
-                            ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
-                                AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)
+                            LazyVStack(alignment: .leading){
+                                ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
+                                    if index < eventExpenseViewModel.items.count {
+                                        AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)
+                                    }
+                                }
                             }
                             
                             HStack{
@@ -203,9 +210,11 @@ struct AddExpenseView: View {
                                         .font(.tabiBody)
                                         .foregroundColor(.textGrey)
                                 }
-                                VStack(alignment: .leading){
+                                LazyVStack(alignment: .leading){
                                     ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
-                                        AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
+                                        if index < eventExpenseViewModel.additionalCharges.count {
+                                            AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
+                                        }
                                     }
                                 }
                                 CustomButton(text: "+ Add More", type: .tertiary, vPadding: 0){

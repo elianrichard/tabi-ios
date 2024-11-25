@@ -107,6 +107,7 @@ final class EventExpenseViewModel {
     func resetViewModel() {
         selectedExpense = nil
         isEdit = false
+        isQuickScanned = false
         expenseName = ""
         expenseTotalInput = 0
         selectedParticipants = []
