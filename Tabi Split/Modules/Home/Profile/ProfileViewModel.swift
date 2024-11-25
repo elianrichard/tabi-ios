@@ -26,6 +26,7 @@ final class ProfileViewModel{
                 try await AuthenticationService.shared.logout()
             }
             SwiftDataService.shared.deleteAllEvents()
+            SwiftDataService.shared.deleteAllExpenses()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")

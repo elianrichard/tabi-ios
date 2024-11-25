@@ -16,7 +16,7 @@ class EventData {
     var eventIcon: EventIconEnum.ID
     var userEventBalance: Float
     var participants: [UserData]
-    @Relationship(deleteRule: .cascade, inverse: \Expense.event) var expenses: [Expense]
+    @Relationship(deleteRule: .nullify, inverse: \Expense.event) var expenses: [Expense]
     var createdAt: Date
     var creatorId: String = ""
     

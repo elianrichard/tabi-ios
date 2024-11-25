@@ -41,7 +41,7 @@ class ExpenseItem {
     var itemName: String
     var itemPrice: Float
     var itemQuantity: Float
-    @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.expenseItem) var assignees: [ExpensePerson]
+    @Relationship(deleteRule: .nullify, inverse: \ExpensePerson.expenseItem) var assignees: [ExpensePerson]
     var expense: Expense?
     
     init(itemId: String? = nil, itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
