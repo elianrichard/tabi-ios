@@ -10,10 +10,17 @@ import SwiftData
 import Contacts
 
 extension SwiftDataService {
-    func getAllUsers (excludeLoggedUser: Bool = false) -> [UserData]? {
+    func getAllUsers (excludeLoggedUser: Bool = false, isUnique: Bool = false) -> [UserData]? {
         let fetchDescriptor = FetchDescriptor<UserData>()
         do {
-            let users = try modelContext.fetch(fetchDescriptor)
+            var users = try modelContext.fetch(fetchDescriptor)
+            if isUnique {
+                users = users.reduce(into: [UserData]()) { result, user in
+                    if !result.contains(where: { $0.userId == user.userId }) {
+                        result.append(user)
+                    }
+                }
+            }
             if let currentUser = UserDefaultsService.shared.getCurrentUser(),
                excludeLoggedUser {
                 return users.filter{ $0.phone != currentUser.userPhone }

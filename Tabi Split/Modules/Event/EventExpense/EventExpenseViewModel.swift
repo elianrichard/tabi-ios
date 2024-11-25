@@ -324,14 +324,8 @@ final class EventExpenseViewModel {
             if (selectedMethod == .equally) {
                 let assignees = selectedParticipants.map{ ExpensePerson(user: $0, share: 1) }
                 let expenseItem = ExpenseItem(itemName: expenseName, itemPrice: totalSpending, itemQuantity: 1, assignees: [])
-                // TODO: FIX THIS UNUSUAL BEHAVIOUR
-                let uniqueAsignees = assignees.reduce(into: [ExpensePerson]()) { result, item in
-                    if !result.contains(where: { $0.user.userId == item.user.userId }) {
-                        result.append(item)
-                    }
-                }
                 expense.items.append(expenseItem)
-                expenseItem.assignees.append(contentsOf: uniqueAsignees)
+                expenseItem.assignees.append(contentsOf: assignees)
             } else {
                 expense.items = items
                 expense.additionalCharges = additionalCharges

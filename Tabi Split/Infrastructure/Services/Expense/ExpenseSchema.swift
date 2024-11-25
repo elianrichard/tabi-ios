@@ -110,7 +110,7 @@ struct ExpenseEventBase: Codable {
     let split_method: String
     let receipt_url: String
     let created_at: String
-    let additional_charges: [ExpenseEventAdditionalChargeBase]?
+    let additional_charges: [ExpenseEventAdditionalChargeBase]
     let items: [ExpenseEventItemBase]
     
 }

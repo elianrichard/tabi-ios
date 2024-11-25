@@ -36,7 +36,7 @@ struct EventBase: Codable {
     let creator_id: String
     let created_at: String
     let participants: [UserBase]
-    let expenses: [ExpenseEventBase]?
+    let expenses: [ExpenseEventBase]
 }
 
 struct GetEventsResponse: Codable {

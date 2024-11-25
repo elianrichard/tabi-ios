@@ -77,18 +77,20 @@ struct EventFormView: View {
                                             UserCard(user: user, isShowYouText: true)
                                         }
                                         
-                                        Button{
-                                            toggleSeeAllParticipantsSheet.toggle()
-                                        } label: {
-                                            HStack{
-                                                Text("See All")
-                                                    .font(.tabiBody)
-                                                    .foregroundColor(.buttonBlue)
-                                                Spacer()
-                                                Icon(systemName: "chevron.right", color: .buttonBlue, size: 16)
+                                        if participantsList.count > 4 {
+                                            Button{
+                                                toggleSeeAllParticipantsSheet.toggle()
+                                            } label: {
+                                                HStack{
+                                                    Text("See All")
+                                                        .font(.tabiBody)
+                                                        .foregroundColor(.buttonBlue)
+                                                    Spacer()
+                                                    Icon(systemName: "chevron.right", color: .buttonBlue, size: 16)
+                                                }
+                                                .padding(.vertical, .spacingSmall)
+                                                .contentShape(Rectangle())
                                             }
-                                            .padding(.vertical, .spacingSmall)
-                                            .contentShape(Rectangle())
                                         }
                                     }
                                 }

@@ -93,7 +93,7 @@ struct EventInviteView: View {
                     }
                     
                     CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add",
-                                 isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContactsList.count > 1) {
+                                 isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContacts.count > 1) {
                         eventInviteViewModel.searchUserText = ""
                         if (eventViewModel.isDirectInvite) {
                             Task {
@@ -114,7 +114,7 @@ struct EventInviteView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             if let currentUser = SwiftDataService.shared.getCurrentUser(),
-               let allUsers = SwiftDataService.shared.getAllUsers(excludeLoggedUser: true) {
+               let allUsers = SwiftDataService.shared.getAllUsers(excludeLoggedUser: true, isUnique: true) {
                 DispatchQueue.global(qos: .background).async {
                     eventInviteViewModel.fillUpContacts(currentUser: currentUser, registeredUsers: allUsers)
                 }
@@ -167,7 +167,7 @@ struct EventInviteView: View {
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     VStack (alignment: .center, spacing: .spacingMedium) {
-                        Image(uiImage: generateQRCode(from: "tabisplit://join-event?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")"))
+                        Image(uiImage: generateQRCode(from: "tabisplit://join-event?event-id=\(eventViewModel.selectedEvent?.eventId ?? "")"))
                                 .resizable()
                                 .interpolation(.none)
                                 .scaledToFit()

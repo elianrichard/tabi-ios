@@ -137,7 +137,7 @@ final class HomeViewModel {
             let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.completion_date ?? "").convertIsoToDate(), eventIcon: image, participants: participants, createdAt: event.created_at.convertIsoToDate(), creatorId: event.creator_id)
             SwiftDataService.shared.addEvent(newEvent)
             
-            guard let eventExpenses = event.expenses else { continue }
+            let eventExpenses = event.expenses
             
             for expense in eventExpenses {
                 guard let coverer = SwiftDataService.shared.getUserByUserId(expense.coverer_id),
@@ -152,10 +152,8 @@ final class HomeViewModel {
                 }
                 let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants)
                 newEvent.expenses.append(newExpense)
-                if let additionalCharges = expense.additional_charges {
-                    for additionalCharge in additionalCharges {
-                        newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
-                    }
+                for additionalCharge in expense.additional_charges {
+                    newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
                 }
                 
                 for item in expense.items {
@@ -181,18 +179,18 @@ final class HomeViewModel {
                 isLoading = true
                 let data = try await EventService.shared.getAllEvents()
                 // TODO: MIGRATIE GUEST USER
-//                if let events = SwiftDataService.shared.fetchAllEvents() {
-//                    if events.count != 0 && data.events.count == 0 {
-//                        do {
-//                            print("Migration Starts")
-//                            await handleMigration(currentUser: currentUser, events: events)
-//                            data = try await EventService.shared.getAllEvents()
-//                        } catch {
-//                            print("Migration failed: \(error)")
-//                            return false
-//                        }
-//                    }
-//                }
+                //                if let events = SwiftDataService.shared.fetchAllEvents() {
+                //                    if events.count != 0 && data.events.count == 0 {
+                //                        do {
+                //                            print("Migration Starts")
+                //                            await handleMigration(currentUser: currentUser, events: events)
+                //                            data = try await EventService.shared.getAllEvents()
+                //                        } catch {
+                //                            print("Migration failed: \(error)")
+                //                            return false
+                //                        }
+                //                    }
+                //                }
                 SwiftDataService.shared.deleteAllEvents()
                 for event in data.events {
                     let image = EventIconEnum(rawValue: event.avatar_url) ?? .icon1
@@ -214,7 +212,7 @@ final class HomeViewModel {
                     newEvent.participants.append(contentsOf: participants)
                     
                     SwiftDataService.shared.saveModelContext()
-                    guard let eventExpenses = event.expenses else { continue }
+                    let eventExpenses = event.expenses
                     
                     for expense in eventExpenses {
                         guard let coverer = SwiftDataService.shared.getUserByUserId(expense.coverer_id),
@@ -231,10 +229,8 @@ final class HomeViewModel {
                         newEvent.expenses.append( Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants) )
                         
                         if let newExpense = newEvent.expenses.first(where: { $0.expenseId == expense.id }) {
-                            if let additionalCharges = expense.additional_charges {
-                                for additionalCharge in additionalCharges {
-                                    newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
-                                }
+                            for additionalCharge in expense.additional_charges {
+                                newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
                             }
                             
                             for item in expense.items {

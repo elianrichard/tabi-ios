@@ -36,7 +36,7 @@ struct AddExpenseView: View {
                     DropDownInput(
                         label: "Paid By",
                         placeholder: "Choose who paid",
-                        items: eventViewModel.selectedEvent?.participants ?? [],
+                        items: eventViewModel.selectedEvent?.participants.sorted(by: { $0.name < $1.name }) ?? [],
                         keyPath: \UserData.name,
                         backgroundColor: .bgWhite,
                         cornerRadius: 16,
@@ -135,7 +135,7 @@ struct AddExpenseView: View {
                         VStack(alignment: .leading){
                             InputWithLabel(label: "Total Bill",
                                            placeholder: "0",
-                                           price: Bindable( eventExpenseViewModel).expenseTotalInput,
+                                           price: Bindable(eventExpenseViewModel).expenseTotalInput,
                                            errorMessage: viewModel.totalBillError,
                                            focusedField: $focusedField,
                                            focusCase: .field2

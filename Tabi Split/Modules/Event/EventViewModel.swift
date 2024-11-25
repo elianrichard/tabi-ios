@@ -61,6 +61,7 @@ final class EventViewModel {
     func handleEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) async -> Bool {
         guard let selectedEvent else { return false }
         do {
+            var participants: [UserData] = selectedContacts
             if !isGuest {
                 isApiCallLoading = true
                 let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
@@ -72,16 +73,24 @@ final class EventViewModel {
                     }
                 }
                 
-                let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
+                var unregisteredUsers: [UserData] = selectedContacts.filter { contact in
                     return !registeredUsers.contains(where: { user in user.phone == contact.phone })
                 }
                 
-                let _ = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
+                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
+                var registeredDummyUsers: [UserData] = []
+                for dummyInfo in response.dummy_user_info {
+                    if let user = unregisteredUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                        user.userId = dummyInfo.dummy_user_id
+                        registeredDummyUsers.append(user)
+                        unregisteredUsers.remove(user)
+                    }
+                }
+                participants = registeredUsers + registeredDummyUsers
             }
-            
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
-            selectedEvent.participants = selectedContacts
+            selectedEvent.participants = participants
             SwiftDataService.shared.saveModelContext()
         } catch {
             print("Edit Event failed: \(error)")
