@@ -320,8 +320,9 @@ final class EventExpenseViewModel {
         }
         
         do {
-            let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
+            let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: [])
             event.expenses.append(expense)
+            expense.participants.append(contentsOf: selectedParticipants)
             if (selectedMethod == .equally) {
                 let assignees = selectedParticipants.map{ ExpensePerson(user: $0, share: 1) }
                 let expenseItem = ExpenseItem(itemName: expenseName, itemPrice: totalSpending, itemQuantity: 1, assignees: [])

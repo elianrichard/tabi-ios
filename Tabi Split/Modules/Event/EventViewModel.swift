@@ -109,8 +109,10 @@ final class EventViewModel {
                 isApiCallLoading = true
                 let _ = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
             }
-            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId)
+            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [], creatorId: currentUser.userId)
             SwiftDataService.shared.addEvent(newEvent)
+            newEvent.participants.append(currentUser)
+            SwiftDataService.shared.saveModelContext()
         } catch {
             print("Create event failed: \(error)")
             isApiCallLoading = false
