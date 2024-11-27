@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import JWTDecode
 
 @Observable
 class LoginViewModel {
+    static var shared = LoginViewModel()
     var phoneNumber: String = ""
     var password: String = ""
     
@@ -16,26 +18,41 @@ class LoginViewModel {
     var passwordError: String? = nil
     
     var isLoading: Bool = false
-    let authService = AuthenticationService()
     
-    func login() async -> Bool {
+    @MainActor
+    func login(phoneInput: String? = nil, passwordInput: String? = nil) async -> Bool {
         guard validateInput() else {
             print("Cannot register: form is invalid")
             return false
         }
         
-        var isSuccess = false
         isLoading = true
         do {
-            try await authService.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
-            isSuccess = true
-            print("Login successful!")
+            let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
+            let jwt = try decode(jwt: response.token)
+            guard let userId = jwt["userId"].string else {
+                passwordError = "User ID not found in Token"
+                return false
+            }
+            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: userId)
+            UserDefaultsService.shared.saveCurrentUser(user: user)
+            SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
             print("Login failed: \(error)")
-            isSuccess = false
+            passwordError = "Account credential is invalid"
+            isLoading = false
+            return false
         }
         isLoading = false
-        return isSuccess
+        return true
+    }
+    
+    @MainActor
+    func guestLogin() -> Bool {
+        let user = CurrentUserDefaults(userName: "Guest", userPhone: "Guest", userImage: "owl", userId: "")
+        UserDefaultsService.shared.saveCurrentUser(user: user)
+        SwiftDataService.shared.saveCurrentUser(user: user)
+        return true
     }
     
     func validateInput () -> Bool {

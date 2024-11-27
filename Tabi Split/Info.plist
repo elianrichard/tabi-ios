@@ -2,6 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>CFBundleURLIconFile</key>
+			<string>AppIcon</string>
+			<key>CFBundleURLName</key>
+			<string>com.sora.TabiSplit</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tabisplit</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Figtree-Bold.ttf</string>
@@ -10,7 +25,7 @@
 		<string>Figtree-SemiBold.ttf</string>
 	</array>
 	<key>NSContactsUsageDescription</key>
-	<string>We would like to access your contacts to see all available users for you to add in a event</string>
+	<string>Tabi would like to access your contacts so you can invite others to the event. Tabi do not save any given contact information to our server.</string>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 	<key>NSCameraUsageDescription</key>

@@ -17,6 +17,9 @@ final class EventViewModel {
                 eventName = event.eventName
                 eventIcon = EventIconEnum(rawValue: event.eventIcon) ?? .icon1
                 selectedSection = .expenses
+            } else {
+                eventName = ""
+                eventIcon = .icon1
             }
         }
     }
@@ -31,51 +34,149 @@ final class EventViewModel {
     }
     var isNoParticipants: Bool {
         if let event = selectedEvent {
-            return event.participants.count == 1
+            return event.participants.count <= 1
         } else { return true }
     }
+    var isUserCreator: Bool {
+        if let user = UserDefaultsService.shared.getCurrentUser(), let selectedEvent {
+            return user.userId == selectedEvent.creatorId
+        } else { return false }
+    }
+    var isDirectInvite: Bool = false
     
     var participantsBalance: [PersonBalanceData] = []
     var userTransactionHistory: [SummaryHistoryData] = []
     var userBalance: PersonBalanceData {
-        return participantsBalance.first(where: { $0.user.name == "You" }) ?? PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone"))
+        if let currentUser = UserDefaultsService.shared.getCurrentUser(),
+           let personBalance = participantsBalance.first(where: { $0.user.phone == currentUser.userPhone }) {
+            return personBalance
+        } else { return PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone")) }
     }
     var userTotalSpending: Float = 0
     var userSettlementList: [SummarySettlementData] = []
     
+    var isApiCallLoading = false
+    
     @MainActor
-    func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData) {
-        if let selectedEvent {
+    func handleEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            var participants: [UserData] = selectedContacts
+            if !isGuest {
+                isApiCallLoading = true
+                let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
+                let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
+                    if let image = ProfileImageEnum(rawValue: user.avatar_url) {
+                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: image, imageUrl: "" )
+                    } else {
+                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: .owl, imageUrl: user.avatar_url )
+                    }
+                }
+                
+                var unregisteredUsers: [UserData] = selectedContacts.filter { contact in
+                    return !registeredUsers.contains(where: { user in user.phone == contact.phone })
+                }
+                
+                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
+                var registeredDummyUsers: [UserData] = []
+                for dummyInfo in response.dummy_user_info {
+                    if let user = unregisteredUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                        user.userId = dummyInfo.dummy_user_id
+                        registeredDummyUsers.append(user)
+                        unregisteredUsers.remove(user)
+                    }
+                }
+                participants = registeredUsers + registeredDummyUsers
+            }
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
-            selectedEvent.participants = selectedContacts
-        } else {
-            SwiftDataService.shared.addEvent(EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser] + selectedContacts))
+            selectedEvent.participants = participants
+            SwiftDataService.shared.saveModelContext()
+        } catch {
+            print("Edit Event failed: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
+        
     }
     
     @MainActor
-    func handleDeleteEvent () {
-        if let selectedEvent {
+    func handleCreateEvent (currentUser: UserData, isGuest: Bool) async -> Bool {
+        do {
+            if !isGuest {
+                isApiCallLoading = true
+                let _ = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
+            }
+            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [], creatorId: currentUser.userId)
+            SwiftDataService.shared.addEvent(newEvent)
+            newEvent.participants.append(currentUser)
+            SwiftDataService.shared.saveModelContext()
+        } catch {
+            print("Create event failed: \(error)")
+            isApiCallLoading = false
+            return false
+        }
+        isApiCallLoading = false
+        return true
+    }
+    
+    @MainActor
+    func handleDeleteEvent (isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            isApiCallLoading = true
+            if !isGuest {
+                try await EventService.shared.deleteEvent(event: selectedEvent)
+            }
             SwiftDataService.shared.deleteEvent(selectedEvent)
+        } catch {
+            print("Delete event failed: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
     }
     
     @MainActor
-    func completeEvent() {
-        if let selectedEvent {
+    func completeEvent(isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            if !isGuest {
+                isApiCallLoading = true
+                try await EventService.shared.completeEvent(event: selectedEvent)
+            }
             SwiftDataService.shared.completeEvent(selectedEvent)
+        } catch {
+            print("Event completion fail: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
     }
     
     @MainActor
-    func incompleteEvent() {
-        if let selectedEvent {
+    func incompleteEvent(isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            if !isGuest {
+                isApiCallLoading = true
+                try await EventService.shared.incompleteEvent(event: selectedEvent)
+            }
             SwiftDataService.shared.incompleteEvent(selectedEvent)
+        } catch {
+            print("Event incomplete fail: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
     }
     
-    func calculateOptimization() {
+    func calculateOptimization(currentUser: UserData) {
         let debug = false // enable this to debug print
         
         var userSummaryData: [SummaryHistoryData] = []
@@ -91,22 +192,28 @@ final class EventViewModel {
             guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
             personPaid.lent += expense.price
             
-            if expense.coverer.name == "You" {
+            if expense.coverer == currentUser {
                 userBalanceTemp += expense.price
             }
             
             if (expense.splitMethod == SplitMethod.custom.id) {
+                let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
+                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
                 for item in expense.items {
+                    let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
                     for assignee in item.assignees {
                         guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
-                        let amountDebt = Float(assignee.share * item.itemPrice).rounded(toDecimalPlaces: 1).properRound()
-                        if debug { print("Participants: " + assignee.user.name, "debt: ", amountDebt) }
-                        if (expense.coverer.name == "You" && personBuy.user.name == "You") {
+                        let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
+                        let amountSpent = personQuantity * item.itemPrice
+                        let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
+                        let amountDebt = Float(amountSpent + amountAdditional).properRound()
+                        if debug { print("Participants: " + assignee.user.name, "\(item.itemName) Spent: ", amountSpent, "Additional: ", amountAdditional, "debt: ", amountDebt) }
+                        if (expense.coverer == currentUser && personBuy.user == currentUser) {
                             personPaid.lent -= amountDebt
                         } else {
                             personBuy.debt += amountDebt
                         }
-                        if (assignee.user.name == "You") {
+                        if (assignee.user == currentUser) {
                             userTotalSpendingTemp += amountDebt
                             userBalanceTemp -= amountDebt
                         }
@@ -116,19 +223,19 @@ final class EventViewModel {
                 let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
                 for person in expense.participants {
                     guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
-                    if (expense.coverer.name == "You" && personBuy.user.name == "You") {
+                    if (expense.coverer == currentUser && personBuy.user == currentUser) {
                         personPaid.lent -= amountDebt
                     } else {
                         personBuy.debt += amountDebt
                     }
-                    if (person.name == "You") {
+                    if (person == currentUser) {
                         userTotalSpendingTemp += amountDebt
                         userBalanceTemp -= amountDebt
                     }
                 }
             }
             
-//            record the specific user balance history data
+            //            record the specific user balance history data
             if (userBalanceTemp != 0) {
                 userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalanceTemp))
             }
@@ -166,14 +273,14 @@ final class EventViewModel {
             }
         }
         
-//        Fill up user's settlement list
+        //        Fill up user's settlement list
         userSettlementList = []
         if userBalance.status == .debt {
             for settlement in userBalance.settlement {
                 userSettlementList.append(SummarySettlementData(targetUser: settlement.userPaid, amount: settlement.amount, status: .NeedPayment))
             }
         } else if userBalance.status == .credit {
-            let relatedPersonBalance = participantsBalance.filter { $0.settlement.contains(where: { $0.userPaid.name == "You" }) }
+            let relatedPersonBalance = participantsBalance.filter { $0.settlement.contains(where: { $0.userPaid == currentUser }) }
             for balance in relatedPersonBalance {
                 for settlement in balance.settlement {
                     userSettlementList.append(SummarySettlementData(targetUser: balance.user, amount: settlement.amount, status: .WaitingPayment))

@@ -10,28 +10,29 @@ import SwiftUI
 struct EventParticipantsList: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(Routes.self) private var routes
+    @Binding var sheetViewModel:SheetViewModel<EventSheets>
     
     var body: some View {
-        HStack (spacing: 4) {
-            if let selectedEvent = eventViewModel.selectedEvent {
-                ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
-                    if index < 4 {
-                        Circle()
-                            .fill(.bgWhite)
-                            .overlay {
-                                Image(ProfileImageEnum(rawValue: person.image)?.resource ?? .owl)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .clipShape(Circle())
-                                    .padding(2)
-                            }
-                            .frame(width: 40, height: 40)
+        Button {
+            sheetViewModel.setSheet(.allParticipants)
+        } label: {
+            HStack (spacing: 4) {
+                if let selectedEvent = eventViewModel.selectedEvent {
+                    ForEach (Array(selectedEvent.participants.enumerated()), id: \.offset) { index, person in
+                        if index < 4 {
+                            Circle()
+                                .fill(.bgWhite)
+                                .overlay {
+                                    Image(ProfileImageEnum(rawValue: person.image)?.resource ?? .owl)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .clipShape(Circle())
+                                        .padding(2)
+                                }
+                                .frame(width: 40, height: 40)
+                        }
                     }
-                }
-                if selectedEvent.participants.count > 4 {
-                    Button {
-                        routes.navigate(to: .EventInviteView)
-                    } label: {
+                    if selectedEvent.participants.count > 4 {
                         ZStack {
                             Circle()
                                 .fill(.bgWhite)

@@ -27,6 +27,7 @@ struct QuantityCounter: View {
                 }
                 .disabled(quantity == (letZero ? 0 : 1) ? true : false)
             Text(quantity.formatted(.number))
+                .font(.tabiBody)
                 .frame(width: 40, alignment: .center)
                 .foregroundColor(.black)
                 .lineLimit(1)

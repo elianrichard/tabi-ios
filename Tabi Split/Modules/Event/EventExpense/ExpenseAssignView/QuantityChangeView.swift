@@ -10,24 +10,33 @@ import SwiftUI
 
 struct QuantityChangeView: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     @Binding var item: ExpenseItem
     @Binding var close: Bool
     
     var body: some View {
         VStack(alignment: .leading){
             Text(item.itemName)
-                .font(.title)
+                .font(.tabiTitle)
                 .fontWeight(.bold)
             Text("Quantity: " + String(item.itemQuantity.formatted(.number)))
+                .font(.tabiBody)
                 .padding(.bottom, 24)
-            ScrollView(){
-                VStack{
+            ScrollView {
+                LazyVStack {
                     ForEach(Array(item.assignees.enumerated()), id: \.offset) { (index, assignee) in
                         HStack(alignment: .center){
-                            Circle()
-                                .frame(width: 40, height: 40)
+                            UserAvatar(userData: assignee.user, size: 40)
                                 .padding([.trailing], 12)
-                            Text(assignee.user.name)
+                            HStack(spacing: 0){
+                                Text(assignee.user.name)
+                                    .font(.tabiHeadline)
+                                if profileViewModel.user == assignee.user {
+                                    Text(" (You)")
+                                        .font(.tabiBody)
+                                        .foregroundColor(.textGrey)
+                                }
+                            }
                             Spacer()
                             HStack{
                                 QuantityCounter(quantity: Bindable(assignee).share, letZero: true)

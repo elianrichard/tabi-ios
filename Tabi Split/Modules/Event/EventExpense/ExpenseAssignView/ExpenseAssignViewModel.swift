@@ -16,12 +16,15 @@ class ExpenseAssignViewModel {
     var settingsDetent = PresentationDetent.medium
     
     func assignExpenseItem(item: ExpenseItem) {
-        let isAssigned = item.assignees.filter { $0.user == selectedAsignee }.count > 0
+        let isAssigned = item.assignees.contains (where: { $0.user == selectedAsignee })
         if let user = selectedAsignee {
             if !isAssigned {
                 item.assignees.append(ExpensePerson(user: user, share: 1))
             } else {
                 item.assignees.removeAll(where: { $0.user == user })
+                for assignee in item.assignees {
+                    print(assignee.user.name)
+                }
             }
         }
     }

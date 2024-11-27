@@ -42,13 +42,27 @@ extension String {
         return String(self.split(separator: " ").first ?? "")
     }
     
+    func getLastName() -> String {
+        if self.split(separator: " ").count >= 2 {
+            return String(self.split(separator: " ").last ?? "")
+        }else{
+            return ""
+        }
+    }
+    
     func validatePhoneNumber () -> String? {
-        let phoneNumberLengthRegex = /^[0-9]{10,13}$/
+        let phoneNumberLengthRegex = /^[0-9]{9,13}$/
         if !self.contains(phoneNumberLengthRegex) {
-            return "Phone number should contain 10-13 digits"
+            return "Phone number should contain 9-13 digits"
         }
         
         return nil
+    }
+    
+    func convertIsoToDate () -> Date? {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return isoFormatter.date(from: self)    
     }
     
     func formattedAsPhoneNumber() -> String {
@@ -58,6 +72,16 @@ extension String {
         
         // Step 2: Trim whitespace and check if the number needs the country code
         var formattedNumber = self.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // remove + sign in front of the phone
+        if (formattedNumber.hasPrefix("+")) {
+            formattedNumber.remove(at: formattedNumber.startIndex)
+        }
+        
+        formattedNumber = formattedNumber.replacingOccurrences(of: "-", with: "")
+        formattedNumber = formattedNumber.replacingOccurrences(of: "(", with: "")
+        formattedNumber = formattedNumber.replacingOccurrences(of: ")", with: "")
+        formattedNumber = formattedNumber.replacingOccurrences(of: " ", with: "")
         
         if formattedNumber.hasPrefix(dialingCode) {
             // Already starts with the country code, so return as is

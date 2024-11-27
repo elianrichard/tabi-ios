@@ -11,22 +11,47 @@ import SwiftUI
 
 @Model
 class UserData {
+    var userId: String = ""
     var name: String
     var phone: String
     var image: ProfileImageEnum.ID
-    @Relationship(inverse: \EventData.participants) var events: [EventData]
-    @Relationship(inverse: \Expense.participants) var expenses: [Expense]
-    @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]
-    @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]
+    var imageUrl: String?
+    @Relationship(deleteRule: .nullify, inverse: \EventData.participants) var events: [EventData]? = []
+    @Relationship(deleteRule: .nullify, inverse: \Expense.participants) var expenses: [Expense]? = []
+    @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]? = []
+    @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]? = []
     
-    init(name: String, phone: String, image: ProfileImageEnum? = nil, events: [EventData] = [], expenses: [Expense] = [], coveredExpenses: [Expense] = [], expenseShare: [ExpensePerson] = []) {
-        self.name = name
+    init(userId: String = "", name: String, phone: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
+        self.userId = userId
+        self.name = name != "" ? name : "Deleted User"
         self.phone = phone
         self.image = (image ?? ProfileImageEnum.allCases.randomElement() ?? .owl).id
-        self.events = events
-        self.expenses = expenses
-        self.coveredExpenses = coveredExpenses
-        self.expenseShare = expenseShare
+        self.imageUrl = imageUrl
+    }
+    
+    init(userBase: UserBase) {
+        self.userId = userBase.user_id
+        self.name = userBase.name != "" ? userBase.name : "Deleted User"
+        self.phone = userBase.phone ?? ""
+        if let image = ProfileImageEnum(rawValue: userBase.avatar_url) {
+            self.image = image.id
+            self.imageUrl = ""
+        } else {
+            self.image = ProfileImageEnum.owl.id
+            self.imageUrl = userBase.avatar_url
+        }
+    }
+    
+    func update(from user: UserData) {
+        self.userId = user.userId
+        self.name = user.name
+        self.phone = user.phone
+        self.image = user.image
+        self.imageUrl = user.imageUrl
+    }
+    
+    func update(fromUserBase user: UserBase) {
+        self.update(from: UserData(userBase: user))
     }
 }
 

@@ -59,14 +59,11 @@ struct SettlementUploadView: View {
         }
         .padding()
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: Bindable(receiptUploadViewModel).isShowingScanner) {
-            DocumentScannerView { image in
-                receiptUploadViewModel.receiptImageFromGallery = nil
-                receiptUploadViewModel.receiptImage = image
-            }
+        .sheet(isPresented: $receiptUploadViewModel.toggleScannerSheet) {
+            CameraView(capturedImage: $receiptUploadViewModel.receiptImage, toggleClose: Bindable(receiptUploadViewModel).toggleScannerSheet)
         }
         .sheet(isPresented: $isShowUploadSheet) {
-            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.isShowingScanner, user: eventSettlementViewModel.user) {
+            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.toggleScannerSheet, user: eventSettlementViewModel.user) {
                 Task {
                     if receiptUploadViewModel.receiptImageFromGallery != nil {
                         await receiptUploadViewModel.getImage()

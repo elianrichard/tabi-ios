@@ -21,12 +21,12 @@ struct EventSettlementView: View {
             TopNavigation(title: eventViewModel.userBalance.status == .credit ? "You Should Receive" : "You Should Pay")
             VStack (spacing: .spacingMedium) {
                 ScrollView (showsIndicators: false) {
-                    VStack (spacing: .spacingTight) {
+                    LazyVStack (spacing: .spacingTight) {
                         ForEach(eventViewModel.userSettlementList) { data in
                             SettlementCard(data: data, isShowUploadSheet: $isShowUploadSheet)
                         }
                     }
-                    .overlay(
+                    .background(
                         GeometryReader { geo in
                             Color.clear.onAppear {
                                 contentSize = geo.size
@@ -48,7 +48,7 @@ struct EventSettlementView: View {
         }
         .padding()
         .sheet(isPresented: $isShowUploadSheet) {
-            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.isShowingScanner, user: eventSettlementViewModel.user) {
+            UploadSheet(receiptImage: $receiptUploadViewModel.receiptImageFromGallery, isShowSheet: $isShowUploadSheet, isShowScanner: $receiptUploadViewModel.toggleScannerSheet, user: eventSettlementViewModel.user) {
                 Task {
                     if receiptUploadViewModel.receiptImageFromGallery != nil {
                         await receiptUploadViewModel.getImage()

@@ -1,6 +1,6 @@
 name: Tabi Split
 settings:
-  MARKETING_VERSION: "1.0"
+  MARKETING_VERSION: "1.1.3"
   CURRENT_PROJECT_VERSION: 1
   base:
     GENERATE_INFOPLIST_FILE: YES
@@ -10,9 +10,9 @@ packages:
   Lottie:
     url: https://github.com/airbnb/lottie-spm.git
     minorVersion: 4.5.0
-  WeScan:
-    url: https://github.com/WeTransfer/WeScan.git
-    minorVersion: 3.0.0
+  JWTDecode:
+    url: https://github.com/auth0/JWTDecode.swift.git
+    minorVersion: 3.2.0
 targets:
   Tabi Split:
     type: application
@@ -28,7 +28,7 @@ targets:
       INFOPLIST_FILE: Tabi Split/Info.plist
       base:
         GENERATE_INFOPLIST_FILE: YES
-        MARKETING_VERSION: "1.0"
+        MARKETING_VERSION: "1.1.3"
         CURRENT_PROJECT_VERSION: 1
         DEVELOPMENT_ASSET_PATHS: '"Tabi Split/Resources/Preview Content"'
         ENABLE_USER_SCRIPT_SANDBOXING: YES
@@ -37,7 +37,7 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations:
           ["UIInterfaceOrientationPortrait"]
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
-        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.travel"
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.finance"
         INFOPLIST_KEY_CFBundleDisplayName: "Tabi"
         ENABLE_TESTABILITY: YES
         SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
@@ -46,6 +46,7 @@ targets:
         SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
         INFOPLIST_KEY_UIRequiresFullScreen: YES
         INFOPLIST_KEY_UIStatusBarHidden: YES
+        TARGETED_DEVICE_FAMILY: 1
       configs:
         Debug:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
@@ -53,7 +54,7 @@ targets:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     dependencies:
       - package: Lottie
-      - package: WeScan
+      - package: JWTDecode
   Tabi Split Tests:
     type: bundle.unit-test
     platform: iOS

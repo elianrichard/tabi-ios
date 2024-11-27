@@ -11,52 +11,69 @@ import SwiftUI
 struct ExpenseAssignView: View {
     @State var expenseAssignViewModel = ExpenseAssignViewModel()
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     @Environment(Routes.self) private var routes
+    
+    @State var searchQuery: String = ""
     
     var body: some View {
         VStack(alignment: .leading) {
             TopNavigation(title: "Assign Items")
-            VStack (alignment: .leading, spacing: 10) {
+            VStack (alignment: .leading, spacing: .spacingTight) {
                 Text(eventExpenseViewModel.expenseName)
                     .font(.tabiTitle)
                 HStack {
-                    Image(systemName: "cylinder.split.1x2")
-                        .font(.tabiBody)
-                    Text("Custom Splitted")
+                    Icon(eventExpenseViewModel.selectedMethod?.icon)
+                    Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "")
                         .font(.tabiBody)
                 }
-                .padding([.bottom], 24)
             }
+            .padding([.bottom], 24)
             ScrollView(showsIndicators: false){
                 VStack(spacing: 0){
                     Text("Participants")
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding([.bottom], 12)
                         .font(.tabiHeadline)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(alignment: .center){
-                            ForEach(eventExpenseViewModel.selectedParticipants) { person in
-                                VStack(alignment: .center){
-                                    Circle()
-                                        .frame(width: 40, height: 40)
-                                        .padding(5)
-                                        .background{
-                                            Circle()
-                                                .frame(width: 50, height: 50)
-                                                .foregroundColor(.buttonGreen)
-                                                .opacity(expenseAssignViewModel.selectedAsignee != person ? 0 : 1)
-                                            Circle()
-                                                .frame(width: 45, height: 45)
-                                                .foregroundColor(.bgWhite)
-                                                .opacity(expenseAssignViewModel.selectedAsignee != person ? 0 : 1)
+                    VStack(alignment: .leading, spacing: .spacingTight){
+                        SearchInput(text: $searchQuery, placeholder: "Search")
+                            .frame(maxWidth: .infinity)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack (alignment: .center){
+                                LazyHGrid(rows: Array(repeating: .init(.flexible()), count: 2), alignment: .top, spacing: .spacingRegular) {
+                                    ForEach(eventExpenseViewModel.selectedParticipants.filter {
+                                        searchQuery.isEmpty || $0.name.lowercased().contains(searchQuery.lowercased())
+                                    }) { person in
+                                        HStack(alignment: .center){
+                                            UserAvatar(userData: person)
+                                                .padding(5)
+                                                .background{
+                                                    Circle()
+                                                        .frame(width: 50, height: 50)
+                                                        .foregroundColor(.buttonBlue)
+                                                        .opacity(expenseAssignViewModel.selectedAsignee != person ? 0 : 1)
+                                                    Circle()
+                                                        .frame(width: 45, height: 45)
+                                                        .foregroundColor(.bgWhite)
+                                                        .opacity(expenseAssignViewModel.selectedAsignee != person ? 0 : 1)
+                                                }
+                                            HStack(spacing: 0){
+                                                Text(person.name.getFirstName() + " " + person.name.getLastName())
+                                                    .font(.tabiBody)
+                                                    .fontWeight(expenseAssignViewModel.selectedAsignee == person ? .bold : .regular)
+                                                    .lineLimit(1)
+                                                if profileViewModel.user == person {
+                                                    Text(" (You)")
+                                                        .font(.tabiBody)
+                                                        .foregroundColor(.textGrey)
+                                                }
+                                            }
                                         }
-                                    Text(person.name.getFirstName())
-                                        .font(.tabiBody)
-                                        .fontWeight(expenseAssignViewModel.selectedAsignee == person ? .bold : .regular)
-                                        .lineLimit(1)
-                                }
-                                .onTapGesture {
-                                    expenseAssignViewModel.toggleAsignee(user: person)
+                                        .frame(width: 196, alignment: .leading)
+                                        .onTapGesture {
+                                            expenseAssignViewModel.toggleAsignee(user: person)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -92,14 +109,18 @@ struct ExpenseAssignView: View {
                                     .fontWeight(.bold)
                                 if (expenseAssignViewModel.selectedAsignee != nil) {
                                     VStack{
-                                        if item.assignees.filter({$0.user == expenseAssignViewModel.selectedAsignee}).count == 0 {
-                                            Image(systemName: "circle")
-                                                .padding([.leading], 50)
-                                        } else{
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .padding([.leading], 50)
-                                        }
+                                        Circle()
+                                            .stroke(item.assignees.contains(where: { $0.user == expenseAssignViewModel.selectedAsignee }) ? .buttonBlue : .textGrey, lineWidth: 1)
+                                            .fill(item.assignees.contains(where: { $0.user == expenseAssignViewModel.selectedAsignee }) ? .buttonBlue : .clear)
+                                            .frame(width: 20)
+                                            .overlay {
+                                                if item.assignees.contains(where: { $0.user == expenseAssignViewModel.selectedAsignee }) {
+                                                    Icon(systemName: "checkmark", color: .textWhite, size: 10)
+                                                }
+                                            }
+                                            .offset(x: -1)
                                     }
+                                    .padding([.leading], 50)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         expenseAssignViewModel.assignExpenseItem(item: item)
@@ -111,8 +132,7 @@ struct ExpenseAssignView: View {
                                 HStack (spacing: 5) {
                                     HStack (spacing: -10){
                                         ForEach(item.assignees) { asignee in
-                                            Circle()
-                                                .frame(width: 20, height: 32)
+                                            UserAvatar(userData: asignee.user, size: 32)
                                         }
                                     }
                                     Image(systemName: "chevron.right")

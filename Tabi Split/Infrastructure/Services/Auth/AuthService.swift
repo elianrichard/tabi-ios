@@ -7,34 +7,28 @@
 
 import Foundation
 
-protocol AuthenticationServicing {
-    func register(name: String, phone: String, password: String) async throws
-    func login(phone: String, password: String) async throws
-    func logout() async throws
-    func refresh() async throws
-}
-
-final class AuthenticationService: AuthenticationServicing {
-    private let apiClient: APIClient
-    private let tokenManager: TokenManaging
+final class AuthenticationService {
+    static let shared = AuthenticationService()
     
-    init(apiClient: APIClient = APIService.shared, tokenManager: TokenManaging = KeychainService.shared) {
-        self.apiClient = apiClient
-        self.tokenManager = tokenManager
-    }
+    private let apiClient: APIClient = APIService.shared
+    private let tokenManager: TokenManaging = KeychainService.shared
     
-    func register(name: String, phone: String, password: String) async throws {
-        let registerRequest = RegisterRequest(name: name, phone: phone, password: password)
+    func register(name: String, phone: String, password: String) async throws -> RegisterResponse {
+        let image = (ProfileImageEnum.allCases.randomElement() ?? .owl).id
+        let registerRequest = RegisterRequest(name: name, phone: phone, password: password, avatar_url: image)
         let response: RegisterResponse = try await apiClient.post(endpoint: "/auth/register", body: registerRequest)
-        print(response, "register response")
+        
+        return response
     }
     
-    func login(phone: String, password: String) async throws {
+    func login(phone: String, password: String) async throws -> LoginResponse {
         let loginRequest = LoginRequest(phone: phone, password: password)
         let response: LoginResponse = try await apiClient.post(endpoint: "/auth/login", body: loginRequest)
         
         try tokenManager.saveAccessToken(response.token)
         try tokenManager.saveRefreshToken(response.refresh_token)
+        
+        return response
     }
     
     

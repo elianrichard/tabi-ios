@@ -10,60 +10,36 @@ import SwiftUI
 
 struct SeeAllParticipantSheet: View {
     @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
+    
     @Binding var isPresented: Bool
     @State var nameToBeSearched: String = ""
+    var participantsList: [UserData] = []
     
     var body: some View {
-        VStack{
-            SheetXButton(toggle: $isPresented)
-            VStack(spacing: .spacingMedium){
+        CustomSheet (xToggleBinding: $isPresented) {
+            VStack(spacing: .spacingMedium) {
                 Text("All Participants")
                     .font(.tabiTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                HStack{
-                    Icon(systemName: "magnifyingglass", color: .textGrey, size: 18)
-                    TextField("", text: $nameToBeSearched, prompt: Text("Search").foregroundStyle(.textGrey))
-                }
-                .padding(.vertical, 16)
-                .padding(.horizontal, 16)
-                .background(.uiWhite)
-                .clipShape(RoundedRectangle(cornerRadius: .infinity))
-                .foregroundStyle(.black)
-                .font(.tabiBody)
-                .overlay {
-                    RoundedRectangle(cornerRadius: .infinity)
-                        .fill(.clear)
-                        .stroke(.bgGreyOverlay, lineWidth: 0.5)
-                        .padding(0.5)
-                }
+                SearchInput(text: $nameToBeSearched, placeholder: "Search")
                 ScrollView{
-                    VStack{
-                        VStack(spacing: .spacingTight){
-                            Divided{
-                                ForEach (eventViewModel.selectedEvent?.participants.filter {
-                                    nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())
-                                } ?? []) { user in
-                                    HStack{
-                                        UserAvatar(userData: user)
-                                        VStack(alignment: .leading){
-                                            Text(user.name)
-                                                .font(.tabiHeadline)
-                                            Text(user.phone)
-                                                .font(.tabiBody)
-                                                .foregroundColor(.textGrey)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                }
+                    LazyVStack (spacing: .spacingTight){
+                        Divided{
+                            if nameToBeSearched.isEmpty || profileViewModel.user.name.lowercased().contains(nameToBeSearched.lowercased()) {
+                                UserCard(user: profileViewModel.user, isShowYouText: true)
                             }
+                            ForEach (
+                                participantsList.filter {
+                                    (nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())) && !profileViewModel.isCurrentUser($0)
+                                }.sorted(by: { $0.name < $1.name }) ) { user in
+                                    UserCard(user: user, isShowOwnerText: user.userId == eventViewModel.selectedEvent?.creatorId)
+                                }
                         }
                     }
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)
-        .padding()
-        .padding([.top], 10)
     }
 }
 

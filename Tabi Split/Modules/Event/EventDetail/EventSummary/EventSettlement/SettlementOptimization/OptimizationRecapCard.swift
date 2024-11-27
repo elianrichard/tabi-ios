@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct OptimizationRecapCard: View {
+    @Environment(ProfileViewModel.self) private var profileViewModel
     var isLast: Bool = false
     var recapData: PersonBalanceData
     
@@ -24,6 +25,7 @@ struct OptimizationRecapCard: View {
                 }
                 Spacer()
                 Text("Rp\(settlement.amount.formatPrice())")
+                    .font(.tabiBody)
                     .padding(.horizontal, .spacingTight)
                     .padding(.vertical, .spacingXSmall)
                     .background(getHighlightColor(userDebt: recapData.user, userLent: settlement.userPaid))
@@ -33,16 +35,16 @@ struct OptimizationRecapCard: View {
     }
     
     private func getHighlightColor (userDebt: UserData, userLent: UserData) -> Color {
-        if (userLent.name == "You"){
+        if (profileViewModel.isCurrentUser(userLent)) {
             return .highlightGreen
-        } else if (userDebt.name == "You") {
+        } else if (profileViewModel.isCurrentUser(userDebt)) {
             return .highlightRed
         }
         return .clear
     }
     
     private func isTextBold (user: UserData) -> Font {
-        if user.name == "You" {
+        if profileViewModel.isCurrentUser(user) {
             return .tabiBodyBold
         } else { return .tabiBody }
     }

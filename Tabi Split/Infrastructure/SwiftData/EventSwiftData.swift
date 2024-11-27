@@ -58,10 +58,6 @@ extension SwiftDataService {
     }
     
     func deleteAllEvents () {
-        do {
-            try modelContext.delete(model: EventData.self)
-        } catch {
-            fatalError(error.localizedDescription)
-        }
+        deleteModelContext(type: EventData.self)
     }
 }

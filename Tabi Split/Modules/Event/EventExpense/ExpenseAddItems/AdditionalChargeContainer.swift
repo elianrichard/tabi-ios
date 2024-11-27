@@ -43,14 +43,27 @@ struct AdditionalChargeContainer: View {
                         }
                         .accentColor(.textBlack)
                     }
+                    .onChange(of: item.additionalChargeType) {
+                        price = price.formatPrice(isShowSign: false)
+                        if (item.additionalChargeType == AdditionalChargeType.discount.id) {
+                            item.amount = abs(Float(price.removeDots()) ?? 0) * -1
+                        } else {
+                            item.amount = abs(Float(price.removeDots()) ?? 0)
+                        }
+                        eventExpenseViewModel.calculateTotal()
+                    }
                 }
                 .frame(width: geometry.size.width * 0.4)
                 HStack{
-                    TextField("Amount (Rp)", text: $price)
+                    TextField("Enter amount", text: $price)
                         .keyboardType(.numberPad)
                         .onChange(of: price) {
-                            price = price.formatPrice()
-                            item.amount = Float(price.removeDots()) ?? 0
+                            price = price.formatPrice(isShowSign: false)
+                            if (item.additionalChargeType == AdditionalChargeType.discount.id) {
+                                item.amount = abs(Float(price.removeDots()) ?? 0) * -1
+                            } else {
+                                item.amount = abs(Float(price.removeDots()) ?? 0)
+                            }
                             eventExpenseViewModel.calculateTotal()
                         }
                         .font(.tabiBody)
@@ -72,11 +85,12 @@ struct AdditionalChargeContainer: View {
                         .padding(0.5)
                 }
                 
-                Image(systemName: "trash")
-                    .onTapGesture {
-                        eventExpenseViewModel.deleteAdditionalCharge(item: item)
-                        eventExpenseViewModel.calculateTotal()
-                    }
+                Button{
+                    eventExpenseViewModel.deleteAdditionalCharge(item: item)
+                    eventExpenseViewModel.calculateTotal()
+                }label:{
+                    Icon(systemName: "trash", color: .buttonRed, size: 18)
+                }
             }
         }
         .frame(height: 50)

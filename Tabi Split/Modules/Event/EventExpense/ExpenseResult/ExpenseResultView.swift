@@ -11,6 +11,7 @@ import SwiftUI
 struct ExpenseResultView: View {
     @Environment(Routes.self) var routes
     @Environment(EventExpenseViewModel.self) var eventExpenseViewModel
+    @Environment(ProfileViewModel.self) var profileViewModel
     @Environment(EventViewModel.self) var eventViewModel
     
     @State private var contentSize: CGSize = .zero
@@ -19,18 +20,20 @@ struct ExpenseResultView: View {
     var body: some View {
         VStack (alignment: .leading) {
             TopNavigation(title: "Expense Result", RightToolbar: {
-                if !eventExpenseViewModel.isEditView {
+                if !eventExpenseViewModel.isEditView && !eventViewModel.isEventCompleted {
                     ElipsisMenu {
                         Button {
                             eventExpenseViewModel.isEdit = true
+                            eventExpenseViewModel.isQuickScanned = false
                             routes.navigate(to: .AddExpenseView)
                         } label: {
                             Label("Edit Expense", systemImage: "pencil")
                         }
                         Button (role: .destructive) {
-                            if let event = eventViewModel.selectedEvent {
-                                eventExpenseViewModel.handleDeleteExpense(event)
-                                routes.navigateBack()
+                            Task {
+                                if await eventExpenseViewModel.handleDeleteExpense(event: eventViewModel.selectedEvent, isGuest: profileViewModel.isGuest){
+                                    routes.navigateBack()
+                                }
                             }
                         } label: {
                             Label("Delete Expense", systemImage: "trash")
@@ -73,11 +76,15 @@ struct ExpenseResultView: View {
             ScrollView(showsIndicators: false) {
                 VStack (spacing: .spacingTight) {
                     if eventExpenseViewModel.selectedMethod == .equally {
-                        ForEach(eventExpenseViewModel.selectedParticipants){ person in
+                        ExpenseResultEqualCard(person: profileViewModel.user)
+                        ForEach(eventExpenseViewModel.selectedParticipants.filter { !profileViewModel.isCurrentUser($0) }) { person in
                             ExpenseResultEqualCard(person: person)
                         }
                     } else if eventExpenseViewModel.selectedMethod == .custom {
-                        ForEach(eventExpenseViewModel.peopleItems) { person in
+                        if let currentPersonItem = eventExpenseViewModel.peopleItems.first(where: { profileViewModel.isCurrentUser($0.user) }) {
+                            ExpenseResultCustomCard(person: currentPersonItem)
+                        }
+                        ForEach(eventExpenseViewModel.peopleItems.filter { !profileViewModel.isCurrentUser($0.user) }) { person in
                             ExpenseResultCustomCard(person: person)
                         }
                     }
@@ -90,25 +97,35 @@ struct ExpenseResultView: View {
                     }
                 )
             }
-            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
+            //            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
-            if !eventExpenseViewModel.isEditView { CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
-                isShowReceiptSheet = true
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
+            //            TEMPORARILY DISABLED: UPLOAD IMAGE RECEIPT
+            if (false) {
+                if !eventExpenseViewModel.isEditView {
+                    CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
+                        isShowReceiptSheet = true
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
             }
             
             Spacer()
             
             if let event = eventViewModel.selectedEvent, eventExpenseViewModel.isEditView {
                 CustomButton(text: "Save Expense") {
-                    if eventExpenseViewModel.isEdit {
-                        eventExpenseViewModel.handleUpdateExpense(event)
-                        eventExpenseViewModel.isEdit = false
-                    } else {
-                        eventExpenseViewModel.finalizeExpense(event)
+                    Task {
+                        if eventExpenseViewModel.isEdit {
+                            if await eventExpenseViewModel.handleUpdateExpense(event: event, isGuest: profileViewModel.isGuest) {
+                                eventExpenseViewModel.isEdit = false
+                                routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                            }
+                        } else {
+                            if await eventExpenseViewModel.finalizeExpense(event, isGuest: profileViewModel.isGuest) {
+                                routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                                return
+                            }
+                        }
                     }
-                    routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
                 }
             }
         }
@@ -144,4 +161,5 @@ struct ExpenseResultView: View {
         .environment(Routes())
         .environment(EventViewModel())
         .environment(EventExpenseViewModel())
+        .environment(ProfileViewModel())
 }

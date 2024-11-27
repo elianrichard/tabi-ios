@@ -16,17 +16,16 @@ struct ExpenseAddItemsView: View {
     var body: some View {
         VStack (alignment: .leading){
             TopNavigation(title: "Add Items")
-            VStack (alignment: .leading, spacing: 10) {
+            VStack (alignment: .leading, spacing: .spacingTight) {
                 Text(eventExpenseViewModel.expenseName)
                     .font(.tabiTitle)
                 HStack {
-                    Image(systemName: "cylinder.split.1x2")
-                        .font(.tabiBody)
-                    Text("Custom Splitted")
+                    Icon(eventExpenseViewModel.selectedMethod?.icon)
+                    Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "")
                         .font(.tabiBody)
                 }
-                .padding([.bottom], 24)
             }
+            .padding([.bottom], 24)
             ScrollView (showsIndicators: false) {
                 VStack (alignment: .leading, spacing: 16) {
                     Text("Items")
@@ -47,46 +46,52 @@ struct ExpenseAddItemsView: View {
                         .padding(.horizontal, 16)
                     
                     VStack (alignment: .leading, spacing: 16) {
-                        Text("Additional Charge (optional)")
-                            .font(.tabiHeadline)
-                        VStack(alignment: .leading){
-                            Text("Amount")
+                        HStack(spacing: 0){
+                            Text("Additional Charge ")
                                 .font(.tabiBody)
+                            Text("(optional)")
+                                .font(.tabiBody)
+                                .foregroundColor(.textGrey)
+                        }
+                        VStack(alignment: .leading){
                             ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
                                 AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
                             }
                         }
-                        CustomButton(text: "+ Add more", type: .tertiary){
+                        CustomButton(text: "+ Add More", type: .tertiary, vPadding: 0){
                             eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
                         }
+                        .frame(maxWidth: .infinity, alignment: .center)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             ZStack{
                 HStack(alignment: .top){
-                    Text("Total Amount")
+                    Text("Total")
                         .font(.tabiBody)
                     Spacer()
                     Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
-                        .font(.tabiBody)
+                        .font(.tabiHeadline)
                 }
                 .padding(16)
-                .background(
+                .background{
                     RoundedRectangle(cornerRadius: 16)
+                        .fill(.bgBlueElevated)
+                        .stroke(.buttonBlueSelected, lineWidth: 1)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 75)
-                        .foregroundColor(.uiGray)
-                        .offset(CGSize(width: 0, height: 12))
-                )
-                .offset(CGSize(width: 0, height: -40))
+                        .frame(height: 90)
+                        .offset(CGSize(width: 0, height: 15))
+                        .zIndex(1)
+                }
+                .offset(CGSize(width: 0, height: -50))
                     .zIndex(1)
                 CustomButton(text: "Next", isEnabled: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0, customBackgroundColor: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0 ? .buttonBlue : .buttonGrey) {
                     routes.navigate(to: .ExpenseAssignView)
                 }
                 .zIndex(2)
             }
-            .padding([.top], 36)
+            .padding([.top], 60)
         }
         .padding()
         .background(.bgWhite)

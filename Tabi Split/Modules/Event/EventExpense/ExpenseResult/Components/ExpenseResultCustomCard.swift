@@ -8,15 +8,23 @@
 import SwiftUI
 
 struct ExpenseResultCustomCard: View {
+    @Environment(ProfileViewModel.self) private var profileViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     var person: PersonItem
     
     var body: some View {
         VStack (spacing: .spacingTight) {
             HStack {
-                UserAvatar(userData: UserData(name: person.name, phone: "Phone"))
-                Text("\(person.name.getFirstName())'s")
-                    .font(.tabiHeadline)
+                UserAvatar(userData: person.user)
+                HStack(spacing: 0){
+                    Text("\(person.user.name.getFirstName())'s")
+                        .font(.tabiHeadline)
+                    if profileViewModel.isCurrentUser(person.user) {
+                        Text(" (Yours)")
+                            .font(.tabiBody)
+                            .foregroundColor(.textGrey)
+                    }
+                }
                 Spacer()
                 Text("Rp\(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")
                     .font(.tabiHeadline)
@@ -29,7 +37,7 @@ struct ExpenseResultCustomCard: View {
                     HStack(alignment: .top, spacing: .spacingRegular){
                         Text(item.itemName)
                             .font(.tabiHeadline)
-                        Text("\(String(item.itemQuantity.rounded(toDecimalPlaces: 1)))x")
+                        Text("\(String(item.itemQuantity.rounded(toDecimalPlaces: 2)))x")
                             .font(.tabiBody)
                         Spacer()
                         Text("Rp\((Float(item.itemQuantity) * item.itemPrice).formatPrice())")

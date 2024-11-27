@@ -56,7 +56,7 @@ struct EventDetailExpenseCard : View {
 
 #Preview {
     EventDetailExpenseCard(expense:
-                            Expense(event: EventData(eventName: "Testing"),name: "Kain Tenun Jepara", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
+                            Expense(name: "Kain Tenun Jepara", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
     .environment(Routes())
     .environment(EventExpenseViewModel())
 }

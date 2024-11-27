@@ -17,6 +17,7 @@ protocol APIClient {
     func get<Response: Codable>(endpoint: String) async throws -> Response
     func post<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
     func put<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
+    func patch<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
     func delete<Response: Codable>(endpoint: String) async throws -> Response
 }
 
@@ -24,13 +25,12 @@ final class APIService: APIClient {
     static let shared = APIService()
     
     private let config: APIConfig
-    private let tokenManager: TokenManaging
+    private let tokenManager: TokenManaging = KeychainService.shared
     private var isRefreshing = false
     private var refreshQueue: [(String) -> Void] = []
     
-    init(config: APIConfig = .default, tokenManager: TokenManaging = KeychainService.shared) {
+    init(config: APIConfig = .default) {
         self.config = config
-        self.tokenManager = tokenManager
     }
     
     func request<Response: Codable>(
@@ -47,6 +47,7 @@ final class APIService: APIClient {
             request.httpBody = try encoder.encode(body)
         }
         
+        print("\(method) \(endpoint): \(body)")
         return try await requestWithRetry(endpoint: endpoint, request: request)
     }
     
@@ -66,6 +67,13 @@ final class APIService: APIClient {
         body: Request
     ) async throws -> Response {
         return try await request(endpoint: endpoint, method: "PUT", body: body)
+    }
+    
+    func patch<Request: Encodable, Response: Codable>(
+        endpoint: String,
+        body: Request
+    ) async throws -> Response {
+        return try await request(endpoint: endpoint, method: "PATCH", body: body)
     }
     
     func delete<Response: Codable>(endpoint: String) async throws -> Response {
@@ -126,9 +134,12 @@ final class APIService: APIClient {
                 }
                 throw APIError.requestFailed(message: errorMessage ?? "Unknown error")
             }
+            let result = try JSONDecoder().decode(Response.self, from: data)
+//            print("\(result)")
             
-            return try JSONDecoder().decode(Response.self, from: data)
+            return result
         } catch {
+            print(error)
             throw (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
         }
     }

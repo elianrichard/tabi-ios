@@ -6,50 +6,58 @@
 //
 
 import SwiftUI
+import Lottie
+
+enum EventSheets {
+    case complete, incomplete, delete, quickScan, allParticipants
+}
 
 struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
+    @Environment(ProfileViewModel.self) private var profileViewModel
     
-    @State private var isShowCompleteSheet = false
-    @State private var isShowIncompleteSheet = false
-    @State private var isShowDeleteSheet = false
+    @State var sheetViewModel = SheetViewModel<EventSheets>()
+    @State private var hasPreviewed: Bool = false
     
     var body: some View {
         ZStack {
             TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
-                ElipsisMenu (color: .textWhite) {
-                    Button {
-                        routes.navigate(to: .EventFormView)
-                    } label: {
-                        Label("Edit Event", systemImage: "pencil")
-                    }
-                    if !eventViewModel.isEventCompleted {
+                if eventViewModel.isUserCreator {
+                    ElipsisMenu (color: .textWhite) {
                         Button {
-                            isShowCompleteSheet = true
+                            eventViewModel.isDirectInvite = false
+                            routes.navigate(to: .EventFormView)
                         } label: {
-                            Label("Mark as Completed", systemImage: "flag")
+                            Label("Edit Event", systemImage: "pencil")
                         }
-                    } else {
-                        Button {
-                            isShowIncompleteSheet = true
+                        if !eventViewModel.isEventCompleted {
+                            Button {
+                                sheetViewModel.setSheet(.complete)
+                            } label: {
+                                Label("Mark as Completed", systemImage: "flag")
+                            }
+                        } else {
+                            Button {
+                                sheetViewModel.setSheet(.incomplete)
+                            } label: {
+                                Label("Mark as Incomplete", systemImage: "flag.slash")
+                            }
+                        }
+                        Button (role: .destructive) {
+                            sheetViewModel.setSheet(.delete)
                         } label: {
-                            Label("Mark as Incomplete", systemImage: "flag.slash")
+                            Label("Delete Event", systemImage: "trash")
                         }
-                    }
-                    Button (role: .destructive) {
-                        isShowDeleteSheet = true
-                    } label: {
-                        Label("Delete Event", systemImage: "trash")
                     }
                 }
             })
-            .padding(.bottom, 36)
             
             VStack (spacing: 0) {
-                EventBanner()
-                EventParticipantsList()
+                EventBanner(resource: EventIconEnum(rawValue: eventViewModel.selectedEvent?.eventIcon ?? "")?.bannerResource ?? .eventBanner1)
+                EventParticipantsList(sheetViewModel: $sheetViewModel)
                 VStack {
                     if eventViewModel.isNoParticipants {
                         EventNoParticipants()
@@ -95,12 +103,15 @@ struct EventDetailView: View {
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .expenses) {
                     HStack(spacing: .spacingTight){
-                        CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
+                        CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26, vPadding: 14) {
+                            eventExpenseViewModel.isQuickScanned = false
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
                         }
-                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {
-                            print("OCR")
+                        CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {                            
+                            eventExpenseViewModel.resetViewModel()
+                            eventExpenseViewModel.isQuickScanned = true
+                            sheetViewModel.setSheet(.quickScan)
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
@@ -115,16 +126,19 @@ struct EventDetailView: View {
             
         }
         .onAppear {
-            eventViewModel.calculateOptimization()
+            hasPreviewed = false
+            eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
+            eventInviteViewModel.selectedContacts = eventViewModel.selectedEvent?.participants ?? []
         }
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: $isShowCompleteSheet) {
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.complete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
-                    Image(.eventComplete)
+                    LottieView(animation: .named("CompletedEvent"))
+                        .looping()
                         .resizable()
-                        .scaledToFit()
                         .frame(width: 200, height: 200)
+                        .scaledToFit()
                     VStack (spacing: .spacingSmall) {
                         Text("Mark this event as completed?")
                             .font(.tabiSubtitle)
@@ -137,11 +151,14 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        isShowCompleteSheet = false
+                        sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Complete") {
-                        isShowCompleteSheet = false
-                        eventViewModel.completeEvent()
+                        Task {
+                            if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -151,14 +168,15 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $isShowIncompleteSheet) {
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.incomplete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
-                    Image(.eventComplete)
+                    LottieView(animation: .named("CompletedEvent"))
+                        .looping()
                         .resizable()
-                        .scaledToFit()
-                        .saturation(0)
                         .frame(width: 200, height: 200)
+                        .saturation(0)
+                        .scaledToFit()
                     VStack (spacing: .spacingSmall) {
                         Text("Mark this event as incomplete?")
                             .font(.tabiSubtitle)
@@ -171,11 +189,14 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        isShowIncompleteSheet = false
+                        sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Yes") {
-                        isShowIncompleteSheet = false
-                        eventViewModel.incompleteEvent()
+                        Task {
+                            if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -185,13 +206,13 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $isShowDeleteSheet) {
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.delete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
-                    Image(.eventDelete)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 300)
+                    LottieView(animation: .named("DeleteEvent"))
+                        .looping()
+                        .scaleEffect(1.4)
+                        .frame(width: 300, height: 200)
                     VStack (spacing: .spacingSmall) {
                         Text("Do you want to delete this event?")
                             .font(.tabiSubtitle)
@@ -204,12 +225,15 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        isShowDeleteSheet = false
+                        sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
-                        isShowDeleteSheet = false
-                        eventViewModel.handleDeleteEvent()
-                        routes.navigateBack()
+                        Task {
+                            if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                                routes.navigateBack()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -219,6 +243,21 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.quickScan)){
+            ReceiptUploadSheet(height: $sheetViewModel.sheetHeight, isPresented: sheetViewModel.getIsPresentedBinding(.quickScan))
+                .presentationDetents([.height(sheetViewModel.sheetHeight)])
+        }
+        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.allParticipants)){
+            SeeAllParticipantSheet(isPresented: sheetViewModel.getIsPresentedBinding(.allParticipants), participantsList: eventViewModel.selectedEvent?.participants ?? [])
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+        .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
+            if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil {
+                hasPreviewed.toggle()
+                routes.navigate(to: .ReceiptUploadReview)
+            }
+        }
     }
 }
 
@@ -227,4 +266,5 @@ struct EventDetailView: View {
         .environment(EventViewModel())
         .environment(Routes())
         .environment(EventExpenseViewModel())
+        .environment(ProfileViewModel())
 }

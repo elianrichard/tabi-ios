@@ -10,21 +10,22 @@ import SwiftUI
 
 @Model
 class Expense {
-    var event: EventData
+    var expenseId: String?
+    var event: EventData?
     var name: String
     var coverer: UserData
     var dateOfCreation: Date
     var price: Float
     var splitMethod: SplitMethod.ID
     var participants: [UserData]
-    var items: [ExpenseItem]
-    var additionalCharges: [AdditionalCharge]
+    @Relationship(deleteRule: .cascade, inverse: \ExpenseItem.expense) var items: [ExpenseItem]
+    @Relationship(deleteRule: .cascade, inverse: \AdditionalCharge.expense) var additionalCharges: [AdditionalCharge]
     
-    init(event: EventData, name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
-        self.event = event
+    init(expenseId: String? = nil, name: String, coverer: UserData, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
+        self.expenseId = expenseId
         self.name = name
         self.coverer = coverer
-        self.dateOfCreation = dateOfCreation
+        self.dateOfCreation = dateOfCreation ?? Date()
         self.price = price
         self.splitMethod = splitMethod.id
         self.participants = participants
@@ -33,14 +34,18 @@ class Expense {
     }
 }
 
+// List of expense item, e.g. Chicken, Rice, etc.
 @Model
 class ExpenseItem {
+    var itemId: String?
     var itemName: String
     var itemPrice: Float
     var itemQuantity: Float
-    var assignees: [ExpensePerson]
+    @Relationship(deleteRule: .nullify, inverse: \ExpensePerson.expenseItem) var assignees: [ExpensePerson]
+    var expense: Expense?
     
-    init(itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
+    init(itemId: String? = nil, itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
+        self.itemId = itemId
         self.itemName = itemName
         self.itemPrice = itemPrice
         self.itemQuantity = itemQuantity
@@ -52,6 +57,7 @@ class ExpenseItem {
 class ExpensePerson {
     var user: UserData
     var share: Float
+    var expenseItem: ExpenseItem?
     
     init(user: UserData, share: Float = 0) {
         self.user = user
@@ -61,18 +67,28 @@ class ExpensePerson {
 
 @Model
 class AdditionalCharge {
+    var additionalChargeId: String?
     var additionalChargeType: AdditionalChargeType.ID
     var amount: Float
+    var expense: Expense?
     
-    init(additionalChargeType: AdditionalChargeType, amount: Float) {
+    init(additionalChargeId: String? = nil, additionalChargeType: AdditionalChargeType, amount: Float) {
+        self.additionalChargeId = additionalChargeId
         self.additionalChargeType = additionalChargeType.id
         self.amount = amount
     }
+    
+    init(additionalChargeBase: ExpenseEventAdditionalChargeBase) {
+        self.additionalChargeId = additionalChargeBase.id
+        self.additionalChargeType = additionalChargeBase.name
+        self.amount = additionalChargeBase.amount
+    }
 }
 
+// This is only used in Expense Result View
 struct PersonItem: Identifiable {
     var id: UUID = UUID()
-    var name: String
+    var user: UserData
     var items: [ExpenseItem]
     var additional: [AdditionalCharge]
 }
@@ -82,6 +98,15 @@ enum SplitMethod: String, Identifiable {
     case custom = "custom"
     
     var id: String { rawValue }
+    
+    var splitName: String {
+        switch self {
+        case .equally:
+            "Equally"
+        case .custom:
+            "Custom"
+        }
+    }
     
     var splitDescription: String {
         switch self {

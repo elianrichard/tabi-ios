@@ -21,19 +21,19 @@ struct AddItemContainer: View {
                 HStack{
                     Text("Item " + String(index + 1))
                     Spacer()
-                    Image(systemName: "trash")
-                        .onTapGesture {
-                            eventExpenseViewModel.deleteItem(item: item)
-                            eventExpenseViewModel.calculateTotal()
-                        }
+                    Button{
+                        eventExpenseViewModel.deleteItem(item: item)
+                        eventExpenseViewModel.calculateTotal()
+                    }label:{
+                        Icon(systemName: "trash", color: .buttonRed, size: 18)
+                    }
                 }
                 .font(.tabiBody)
-                Divider()
                 HStack(){
                     Text("Name")
                         .foregroundColor(.textGrey)
                         .frame(width: 45)
-                    TextField("Item Name", text: Bindable(item).itemName)
+                    TextField("Enter item name", text: Bindable(item).itemName)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
                         .background(.bgWhite)
@@ -50,7 +50,7 @@ struct AddItemContainer: View {
                         Text("Price")
                             .foregroundColor(.textGrey)
                             .frame(width: 45)
-                        TextField("10.000", text: $price)
+                        TextField("Enter item Price", text: $price)
                             .keyboardType(.numberPad)
                             .onChange(of: price) {
                                 price = price.formatPrice()

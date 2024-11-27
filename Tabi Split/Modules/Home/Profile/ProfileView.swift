@@ -17,62 +17,75 @@ struct ProfileView: View {
             TopNavigation(title: "Profile")
             VStack(spacing: .spacingLarge){
                 HStack{
-                    HStack(alignment: .center, spacing: .spacingTight){
-                        UserAvatar(userData: profileViewModel.user)
-                        VStack(alignment: .leading){
-                            Text(profileViewModel.user.name)
-                                .font(.tabiSubtitle)
-                            Text(profileViewModel.user.phone)
-                                .font(.tabiBody)
-                        }
+                    HStack(alignment: .center, spacing: .spacingTight) {
+                        UserCard(user: profileViewModel.user)
                         Spacer()
-                        Button{
-                            routes.navigate(to: .EditProfile)
-                        }label: {
-                            Image(systemName: "pencil")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 16)
+                        if !profileViewModel.isGuest {
+                            Icon(systemName: "pencil", color: .textBlack, size: 16) {
+                                routes.navigate(to: .EditProfile)
+                            }
                         }
-                        .accentColor(.textBlack)
                     }
                 }
                 
-                VStack(spacing: .spacingTight){
-                    HStack(spacing: .spacingTight){
-                        Icon(.creditCard, size: 20)
-                        Text("Payment methods")
-                            .font(.tabiHeadline)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .frame(width: 24, height: 24)
+                if profileViewModel.isGuest {
+                    VStack (spacing: .spacingLarge) {
+                        Image(.initialOnboarding)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 300)
+                        Text("Let’s register to keep all your events and expenses saved!")
+                            .font(.tabiSubtitle)
+                            .multilineTextAlignment(.center)
+                        CustomButton(text: "Sign In", type: .tertiary, iconResource: .logout) {
+                            routes.navigate(to: .LoginView)
+                        }
                     }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        routes.navigate(to: .PaymentMethods)
-                    }
-                    Divider()
-                    Button {
-                        Task {
-                            let isSuccess = await profileViewModel.logout()
-                            
-                            if isSuccess {
-                                routes.navigate(to: .LoginView)
+                    .frame(maxHeight: .infinity)
+                }
+                
+                if !profileViewModel.isGuest {
+                    VStack(alignment: .leading, spacing: .spacingTight) {
+                        //                    TEMPORARILY DISABLED: PAYMENT METHOD
+                        if (false) {
+                            Text("Settings")
+                                .font(.tabiBody)
+                            Button {
+                                routes.navigate(to: .PaymentMethods)
+                            } label: {
+                                HStack(spacing: .spacingTight){
+                                    Icon(systemName: "wallet.bifold")
+                                    Text("Payment methods")
+                                        .font(.tabiHeadline)
+                                        .foregroundStyle(.textBlack)
+                                    Spacer()
+                                    Icon(systemName: "chevron.right", size: 16)
+                                }
+                                .padding(.vertical, .spacingSmall)
+                                .contentShape(Rectangle())
                             }
+                            Divider()
                         }
-                    } label: {
-                        HStack(spacing: .spacingTight){
-                            Icon(.logout, size: 20)
-                            Text("Log Out")
-                                .font(.tabiHeadline)
-                                .foregroundStyle(.black)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .frame(width: 24, height: 24)
-                                .foregroundStyle(.black)
+                        Button {
+                            Task {
+                                let isSuccess = await profileViewModel.logout()
+                                
+                                if isSuccess {
+                                    routes.navigate(to: .LoginView)
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: .spacingTight){
+                                Icon(.logout, color: .buttonRed, size: 20)
+                                Text("Log Out")
+                                    .font(.tabiHeadline)
+                                    .foregroundStyle(.buttonRed)
+                                Spacer()
+                            }
+                            .padding(.vertical, .spacingSmall)
+                            .contentShape(Rectangle())
                         }
                     }
-                    Divider()
                 }
             }
         }

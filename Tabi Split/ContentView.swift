@@ -20,12 +20,20 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack (path: $routes.navPath) {
-            VStack {
-                if isAuthenticated {
+            ZStack {
+                if !UserDefaultsService.shared.getOnboardingStatus() {
+                    OnboardingView()
+                        .onAppear {
+                            UserDefaultsService.shared.setOnboardingStatus(true)
+                        }
+                } else if isAuthenticated {
                     HomeView()
                 } else {
                     LoginView()
                 }
+                
+                SplashView()
+                    .ignoresSafeArea()
             }
             .navigationDestination(for: Routes.Destination.self) { destination in
                 switch destination {
@@ -86,17 +94,17 @@ struct ContentView: View {
                 case .SettlementUploadView:
                     SettlementUploadView()
                     
-                case .ReceiptUploadView:
-                    ReceiptUploadView()
-                    
                 case .Profile:
                     ProfileView()
                     
                 case .EditProfile:
                     EditProfileView()
-                
+                    
                 case .PaymentMethods:
                     PaymentMethodView()
+                    
+                case .ReceiptUploadReview:
+                    ReceiptImageReviewView()
                 }
                 
             }
@@ -111,14 +119,57 @@ struct ContentView: View {
         .onAppear {
             checkAuthentication()
         }
+        .onOpenURL { incomingURL in
+            print("App was opened via URL: \(incomingURL)")
+            handleIncomingURL(incomingURL)
+        }
     }
     
     private func checkAuthentication() {
+        let isAccessTokenAvailable: Bool
         do {
             let accessToken = try KeychainService.shared.getAccessToken()
-            isAuthenticated = !accessToken.isEmpty
+            isAccessTokenAvailable = !accessToken.isEmpty
         } catch {
-            isAuthenticated = false
+            isAccessTokenAvailable = false
+        }
+        isAuthenticated = (isAccessTokenAvailable || SwiftDataService.shared.getCurrentUser() != nil)
+    }
+    
+    
+    private func handleIncomingURL(_ url: URL) {
+        guard url.scheme == "tabisplit" else {
+            return
+        }
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            print("Invalid URL")
+            return
+        }
+        
+        guard let action = components.host, action == "join-event" else {
+            print("Unknown URL action!")
+            return
+        }
+        
+        guard let eventId = components.queryItems?.first(where: { $0.name == "event-id" })?.value else {
+            print("eventId not found")
+            return
+        }
+        
+        if let events = SwiftDataService.shared.fetchAllEvents(), events.contains(where: { $0.eventId == eventId }) {
+            print("Event already joined")
+            return
+        }
+        
+        Task {
+            if !profileViewModel.isGuest {
+                do {
+                    try await EventService.shared.joinEvent(eventId: eventId)
+                } catch {
+                    print("Join event failed: \(error)")
+                }
+            }
+            routes.navigate(to: .HomeView)
         }
     }
 }

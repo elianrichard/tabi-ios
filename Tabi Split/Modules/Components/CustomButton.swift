@@ -36,7 +36,7 @@ enum ButtonType {
                 return .textGrey
             }
         case .tertiary:
-            return .buttonBlue
+            return .textBlue
         }
     }
 }
@@ -52,6 +52,7 @@ struct CustomButton: View {
     var customTextColor: Color?
     var vPadding: CGFloat?
     var hPadding: CGFloat?
+    var animation: Animation?
     var callback: (() -> Void)?
     
     var body : some View {
@@ -59,11 +60,11 @@ struct CustomButton: View {
             Button {
                 callback()
             } label: {
-                ButtonView(text: text, type: type, isEnabled: isEnabled, icon: icon, iconResource: iconResource, iconSize: iconSize, customBackgroundColor: customBackgroundColor, customTextColor: customTextColor, vPadding: vPadding, hPadding: hPadding)
+                ButtonView(text: text, type: type, isEnabled: isEnabled, icon: icon, iconResource: iconResource, iconSize: iconSize, customBackgroundColor: customBackgroundColor, customTextColor: customTextColor, vPadding: vPadding, hPadding: hPadding, animation: animation)
             }
             .disabled(!isEnabled)
         } else {
-            ButtonView(text: text, type: type, isEnabled: isEnabled, icon: icon, iconResource: iconResource, iconSize: iconSize, customBackgroundColor: customBackgroundColor, customTextColor: customTextColor, vPadding: vPadding, hPadding: hPadding)
+            ButtonView(text: text, type: type, isEnabled: isEnabled, icon: icon, iconResource: iconResource, iconSize: iconSize, customBackgroundColor: customBackgroundColor, customTextColor: customTextColor, vPadding: vPadding, hPadding: hPadding, animation: animation)
         }
     }
 }
@@ -79,6 +80,7 @@ struct ButtonView: View {
     var customTextColor: Color?
     var vPadding: CGFloat?
     var hPadding: CGFloat?
+    var animation: Animation?
     
     var body: some View {
         HStack (spacing: 8) {
@@ -89,6 +91,9 @@ struct ButtonView: View {
             }
             Text("\(text)")
                 .foregroundStyle(customTextColor != nil ? customTextColor ?? .primary : type.textColor(isEnabled))
+                .transaction { transaction in
+                    transaction.animation = nil
+                }
         }
         .padding(.vertical, vPadding ?? .spacingRegular)
         .padding(.horizontal, hPadding)
@@ -105,7 +110,11 @@ struct ButtonView: View {
         }
         .padding(type == .secondary ? 1 : 0)
         .transaction { transaction in
-            transaction.animation = nil
+            if let animation {
+                transaction.animation = animation
+            } else {
+                transaction.animation = nil
+            }
         }
     }
 }
