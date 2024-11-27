@@ -26,7 +26,7 @@ struct EventSettlementView: View {
                             SettlementCard(data: data, isShowUploadSheet: $isShowUploadSheet)
                         }
                     }
-                    .overlay(
+                    .background(
                         GeometryReader { geo in
                             Color.clear.onAppear {
                                 contentSize = geo.size

@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct EventBanner: View {
+    var resource: ImageResource
+    
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(.black.opacity(0.5))
                 .overlay{
                     ZStack {
-                        Image(.sampleEventBanner)
+                        Image(resource)
                             .resizable()
                             .scaledToFill()
                         Color(.black)

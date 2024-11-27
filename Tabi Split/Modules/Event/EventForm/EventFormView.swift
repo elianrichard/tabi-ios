@@ -54,7 +54,7 @@ struct EventFormView: View {
                         InputWithLabel(label: "Event Name", placeholder: "Event name", text: Bindable(eventViewModel).eventName, focusedField: $focusedField, focusCase: .field1)
                         if (isEdit) {
                             VStack (alignment: .leading, spacing: .spacingTight) {
-                                Text("Participants (\((eventViewModel.selectedEvent?.participants ?? []).count))")
+                                Text("Participants (\((eventInviteViewModel.selectedContacts).count))")
                                     .font(.tabiBody)
                                 VStack (alignment: .leading, spacing: .spacingTight) {
                                     Divided {
@@ -77,18 +77,20 @@ struct EventFormView: View {
                                             UserCard(user: user, isShowYouText: true)
                                         }
                                         
-                                        Button{
-                                            toggleSeeAllParticipantsSheet.toggle()
-                                        } label: {
-                                            HStack{
-                                                Text("See All")
-                                                    .font(.tabiBody)
-                                                    .foregroundColor(.buttonBlue)
-                                                Spacer()
-                                                Icon(systemName: "chevron.right", color: .buttonBlue, size: 16)
+                                        if participantsList.count > 4 {
+                                            Button{
+                                                toggleSeeAllParticipantsSheet.toggle()
+                                            } label: {
+                                                HStack{
+                                                    Text("See All")
+                                                        .font(.tabiBody)
+                                                        .foregroundColor(.buttonBlue)
+                                                    Spacer()
+                                                    Icon(systemName: "chevron.right", color: .buttonBlue, size: 16)
+                                                }
+                                                .padding(.vertical, .spacingSmall)
+                                                .contentShape(Rectangle())
                                             }
-                                            .padding(.vertical, .spacingSmall)
-                                            .contentShape(Rectangle())
                                         }
                                     }
                                 }
@@ -107,17 +109,25 @@ struct EventFormView: View {
                 }
             }
             
-            CustomButton(text: isEdit ? "Save" : "Create",
-                         isEnabled: eventViewModel.eventName != "") {
-                eventViewModel.handleCreateEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user)
-                routes.navigateBack()
+            CustomButton(text: eventViewModel.isApiCallLoading ? "Loading..." : (isEdit ? "Save" : "Create"),
+                         isEnabled: !eventViewModel.isApiCallLoading && eventViewModel.eventName != "") {
+                Task {
+                    if isEdit {
+                        if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
+                            routes.navigateBack()
+                        }
+                    } else {
+                        if await eventViewModel.handleCreateEvent(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
+                            routes.navigateBack()
+                        }
+                    }
+                }
             }
         }
         .onAppear {
-            if let selectedEvent = eventViewModel.selectedEvent {
+            if eventViewModel.selectedEvent != nil {
                 isEdit = true
-                eventInviteViewModel.selectedContacts = selectedEvent.participants
-                var participants = selectedEvent.participants.filter{ !profileViewModel.isCurrentUser($0) }
+                var participants = eventInviteViewModel.selectedContacts.filter{ !profileViewModel.isCurrentUser($0) }
                 participants.sort { $0.name.lowercased() < $1.name.lowercased() }
                 participants.insert(profileViewModel.user, at: 0)
                 participantsList = participants

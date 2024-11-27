@@ -8,7 +8,7 @@
 import SwiftUI
 import Contacts
 import UniformTypeIdentifiers
-
+import CoreImage.CIFilterBuiltins
 
 struct EventInviteView: View {
     @Environment(Routes.self) private var routes
@@ -20,13 +20,9 @@ struct EventInviteView: View {
     @State private var isShowQrSheet = false
     @State private var isShowCustomParticipantSheet = false
     
-    @State private var customName = ""
-    @State private var customPhone = ""
+    @State private var sheetHeight: CGFloat = 0
     
-    @State private var customNameError: String? = nil
-    @State private var customPhoneError: String? = nil
-    
-    @FocusState private var focusedField: FocusField?
+    private var deeplinkHost = "tabi-web.vercel.app"
     
     var body: some View {
         VStack (spacing: 0) {
@@ -34,8 +30,7 @@ struct EventInviteView: View {
                 eventInviteViewModel.searchUserText = ""
             })
             VStack(spacing: .spacingMedium){
-                //                TEMPORARILY DISABLED: INVITE BY LINK AND QR CODE
-                if (false) {
+                if !profileViewModel.isGuest {
                     HStack (spacing: .spacingMedium) {
                         EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
                                                    icon: isLinkCopied ? .checkIcon : .linkIcon,
@@ -49,10 +44,10 @@ struct EventInviteView: View {
                                         isLinkCopied = false
                                     }
                                 }
-                                UIPasteboard.general.setValue("https://tabieventinvitelink.com", forPasteboardType: UTType.plainText.identifier)
+                                UIPasteboard.general.setValue("https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")", forPasteboardType: UTType.plainText.identifier)
                             }
                         })
-                        ShareLink(item: URL(filePath: "https://tabieventinvitelink.com")!) {
+                        ShareLink(item: URL(filePath: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")")) {
                             EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                         }
                         EventInviteShareButtonView(text: "QR Code",
@@ -78,7 +73,6 @@ struct EventInviteView: View {
                                 }
                                 if (eventInviteViewModel.searchUserText != "") {
                                     Button {
-                                        customName = eventInviteViewModel.searchUserText
                                         isShowCustomParticipantSheet = true
                                     } label: {
                                         HStack (spacing: .spacingTight) {
@@ -98,10 +92,20 @@ struct EventInviteView: View {
                         }
                     }
                     
-                    CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add", isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContactsList.count > 1) {
-                        eventViewModel.selectedEvent?.participants = eventInviteViewModel.selectedContacts
+                    CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add",
+                                 isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContacts.count > 1) {
                         eventInviteViewModel.searchUserText = ""
-                        routes.navigateBack()
+                        if (eventViewModel.isDirectInvite) {
+                            Task {
+                                if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts,
+                                                                        currentUser: profileViewModel.user,
+                                                                        isGuest: profileViewModel.isGuest) {
+                                    routes.navigateBack()
+                                }
+                            }
+                        } else {
+                            routes.navigateBack()
+                        }
                     }
                 }
             }
@@ -109,9 +113,8 @@ struct EventInviteView: View {
         .padding()
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            if eventInviteViewModel.allContacts.count == 0,
-               let currentUser = SwiftDataService.shared.getCurrentUser(),
-               let allUsers = SwiftDataService.shared.getAllUsers(excludeLoggedUser: true) {
+            if let currentUser = SwiftDataService.shared.getCurrentUser(),
+               let allUsers = SwiftDataService.shared.getAllUsers(excludeLoggedUser: true, isUnique: true) {
                 DispatchQueue.global(qos: .background).async {
                     eventInviteViewModel.fillUpContacts(currentUser: currentUser, registeredUsers: allUsers)
                 }
@@ -122,43 +125,40 @@ struct EventInviteView: View {
         }
         .sheet(isPresented: $isShowCustomParticipantSheet) {
             CustomSheet(xToggleBinding: $isShowCustomParticipantSheet) {
-                VStack (alignment: .center, spacing: .spacingMedium) {
-                    Text("Add Participant Details")
-                        .font(.tabiTitle)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    VStack (spacing: .spacingRegular) {
-                        if !profileViewModel.isGuest {
-                            DialogBox(image: .dialogIcon, iconSize: 36, text: "Enter the phone number to be connected to their account.", isClosable: false)
-                        }
-                        VStack (alignment: .center, spacing: .spacingRegular) {
-                            InputWithLabel(label: "Name", placeholder: "Enter participant name", text: $customName, errorMessage: customNameError, focusedField: $focusedField, focusCase: .field1)
-                            InputWithLabel(label: "Phone Number", isOptional: true, placeholder: "Enter phone number", text: $customPhone, errorMessage: customPhoneError, inputTypePicked: .phone, focusedField: $focusedField, focusCase: .field2)
+                VStack (spacing: .spacingLarge) {
+                    VStack (spacing: .spacingMedium) {
+                        Image(.eventUnregistered)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 200)
+                        VStack (spacing: .spacingSmall) {
+                            Text("Add an unregistered participant?")
+                                .font(.tabiSubtitle)
+                                .multilineTextAlignment(.center)
+                            Text("You can replace **'\(eventInviteViewModel.searchUserText)'** with their real account later.")
+                                .font(.tabiBody)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
-                }
-                Spacer()
-                CustomButton (text: "Save") {
-                    let phone = customPhone.formattedAsPhoneNumber()
-                    
-                    if customName == "" {
-                        customNameError = "Name cannot be empty"
-                        return
-                    } else { customNameError = nil }
-                    
-                    if eventInviteViewModel.allContacts.contains(where: { $0.phone == phone }) || phone == profileViewModel.user.phone {
-                        customPhoneError = "Phone number already registered"
-                        return
-                    } else { customPhoneError = nil }
-                    
-                    let newUser = UserData(name: customName, phone: customPhone != "" ? phone : "")
-                    eventInviteViewModel.allContacts.append(newUser)
-                    eventInviteViewModel.selectedContacts.append(newUser)
-                    eventInviteViewModel.searchUserText = ""
-                    isShowCustomParticipantSheet = false
+                    CustomButton (text: "Add") {
+                        let newUser = UserData(name: eventInviteViewModel.searchUserText, phone: "")
+                        eventInviteViewModel.allContacts.append(newUser)
+                        eventInviteViewModel.selectedContacts.append(newUser)
+                        eventInviteViewModel.searchUserText = ""
+                        isShowCustomParticipantSheet = false
+                    }
                 }
             }
-            .presentationDetents([.large])
+            .presentationDetents([.height(sheetHeight)])
             .presentationDragIndicator(.visible)
+            .background (
+                GeometryReader { geometry in
+                    Color.clear.onAppear {
+                        sheetHeight = geometry.size.height
+                    }
+                }
+            )
         }
         .sheet(isPresented: $isShowQrSheet) {
             CustomSheet (xToggleBinding: $isShowQrSheet) {
@@ -166,12 +166,12 @@ struct EventInviteView: View {
                     Text("Show QR Code")
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    VStack (alignment: .center, spacing: .spacingSmall) {
-                        Image(.sampleBarcodeQr)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 200, height: 200)
-                            .background(.red)
+                    VStack (alignment: .center, spacing: .spacingMedium) {
+                        Image(uiImage: generateQRCode(from: "tabisplit://join-event?event-id=\(eventViewModel.selectedEvent?.eventId ?? "")"))
+                                .resizable()
+                                .interpolation(.none)
+                                .scaledToFit()
+                                .frame(width: 200, height: 200)
                         Text("Let your friends scan it to participate in your event")
                             .font(.tabiHeadline)
                             .multilineTextAlignment(.center)
@@ -183,6 +183,24 @@ struct EventInviteView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
+    }
+    
+    private func generateQRCode(from string: String) -> UIImage {
+        let context = CIContext()
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(string.utf8)
+        
+        
+        if let outputImage = filter.outputImage {
+            let transform = CGAffineTransform(scaleX: 1, y: 1) // Adjust scaling factor as needed
+            let scaledImage = outputImage.transformed(by: transform)
+  
+            if let cgImage = context.createCGImage(outputImage, from: scaledImage.extent) {
+                return UIImage(cgImage: cgImage)
+            }
+        }
+
+        return UIImage(systemName: "xmark.circle") ?? UIImage()
     }
     
 }

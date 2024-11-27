@@ -17,94 +17,105 @@ struct LoginView: View {
     var body: some View {
         ZStack {
             VStack {
-                if SwiftDataService.shared.getCurrentUser() == nil {
-                    Button {
-                        if loginViewModel.guestLogin() {
-                            routes.navigate(to: .HomeView)
-                        }
-                    } label: {
-                        Text("Enter as Guest")
-                            .font(.tabiBody)
-                            .foregroundStyle(.textGrey)
-                            .opacity(focusedField != nil ? 0 : 1)
-                    }
-                } else {
-                    Icon(systemName: "arrow.left", size: 16) {
-                        routes.navigateBack()
-                    }
-                }
+                Image(.bigWallet)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 250, height: 250)
+                    .rotationEffect(Angle(degrees: 225))
+                    .offset(x: 75, y: -120)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             
-            VStack (alignment: .leading, spacing: .spacingLarge) {
-                Text("Hey There,\nYou're Back!")
-                    .font(.tabiLargeTitle)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                
-                VStack (alignment: .trailing, spacing: 8) {
-                    VStack(alignment: .leading, spacing: .spacingMedium) {
-                        InputWithLabel(label: "Phone Number",
-                                       placeholder: "Enter your phone number",
-                                       text: $loginViewModel.phoneNumber,
-                                       errorMessage: loginViewModel.phoneNumberError,
-                                       inputTypePicked: .phone,
-                                       focusedField: $focusedField,
-                                       focusCase: .field1)
-                        InputWithLabel(label: "Password",
-                                       placeholder: "Enter your password",
-                                       text: $loginViewModel.password,
-                                       errorMessage: loginViewModel.passwordError, isSecure: true,
-                                       focusedField: $focusedField,
-                                       focusCase: .field2)
+            VStack (spacing: 0) {
+                HStack {
+                    if SwiftDataService.shared.getCurrentUser() == nil {
+                        Button {
+                            if loginViewModel.guestLogin() {
+                                profileViewModel.user = UserData(name: "Guest", phone: "Guest")
+                                routes.navigate(to: .HomeView)
+                            }
+                        } label: {
+                            Text("Enter as Guest")
+                                .font(.tabiBody)
+                                .foregroundStyle(.textGrey)
+                                .padding(14)
+                        }
+                        .padding(-14)
+                    } else {
+                        Icon(systemName: "arrow.left", size: 16) {
+                            routes.navigateBack()
+                        }
                     }
-                    Button {
-                        print("forgot password")
-                    } label: {
-                        Text("Forget Password?")
-                            .font(.tabiBody)
-                            .foregroundStyle(.textBlue)
-                    }
+                    Spacer()
                 }
                 
-                VStack (spacing: .spacingMedium) {
-                    CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In", animation: .default) {
-                        Task {
-                            if SwiftDataService.shared.getCurrentUser() == nil {
-                                if await loginViewModel.login() {
-                                    routes.navigate(to: .HomeView)
-                                }
-                            } else {
-//                                TO DO: HANDLE GUEST LOGIN
-                                if await profileViewModel.logout() {
+                Spacer(minLength: 20)
+                
+                VStack (alignment: .leading, spacing: .spacingLarge) {
+                    Text("Hey There,\nYou're Back!")
+                        .font(.tabiLargeTitle)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    VStack (alignment: .trailing, spacing: 8) {
+                        VStack(alignment: .leading, spacing: .spacingMedium) {
+                            InputWithLabel(label: "Phone Number",
+                                           placeholder: "Enter your phone number",
+                                           text: $loginViewModel.phoneNumber,
+                                           errorMessage: loginViewModel.phoneNumberError,
+                                           inputTypePicked: .phone,
+                                           focusedField: $focusedField,
+                                           focusCase: .field1)
+                            InputWithLabel(label: "Password",
+                                           placeholder: "Enter your password",
+                                           text: $loginViewModel.password,
+                                           errorMessage: loginViewModel.passwordError, isSecure: true,
+                                           focusedField: $focusedField,
+                                           focusCase: .field2)
+                        }
+                        Button {
+                            print("forgot password")
+                        } label: {
+                            Text("Forget Password?")
+                                .font(.tabiBody)
+                                .foregroundStyle(.textBlue)
+                        }
+                    }
+                    
+                    VStack (spacing: .spacingMedium) {
+                        CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In", animation: .default) {
+                            Task {
+                                // TODO: Disable logout on migration
+                                if await profileViewModel.logout(){
                                     if await loginViewModel.login() {
                                         routes.navigate(to: .HomeView)
                                     }
                                 }
                             }
                         }
-                    }
-                    //                TEMPORARILY DISABLED: LOGIN WITH APPLE ID
-                    if (false) {
-                        DividerWithText()
-                        
-                        CustomButton(text: "Sign In With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
-                            print("Login with Apple")
+                        //                TEMPORARILY DISABLED: LOGIN WITH APPLE ID
+                        if (false) {
+                            DividerWithText()
+                            
+                            CustomButton(text: "Sign In With Apple ID", icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
+                                print("Login with Apple")
+                            }
                         }
-                    }
-                    
-                    HStack (spacing: 3) {
-                        Text("Don't have an account?")
-                            .font(.tabiBody)
-                        Button {
-                            routes.navigate(to: .RegisterView)
-                        } label: {
-                            Text("Sign Up")
-                                .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
-                                .foregroundStyle(.textBlue)
+                        
+                        HStack (spacing: 3) {
+                            Text("Don't have an account?")
+                                .font(.tabiBody)
+                            Button {
+                                routes.navigate(to: .RegisterView)
+                            } label: {
+                                Text("Sign Up")
+                                    .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
+                                    .foregroundStyle(.textBlue)
+                            }
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
         }
         .padding()

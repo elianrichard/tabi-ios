@@ -157,6 +157,11 @@ struct OnboardingView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical)
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            Task {
+                try await AuthenticationService.shared.logout()
+            }
+        }
     }
     
     private func changeSlide () {

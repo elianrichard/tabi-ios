@@ -14,13 +14,15 @@ struct PriceInput: View {
     @Binding var price: Float
     var type: UIKeyboardType = .numberPad
     var isError: Bool = false
-    var backgroundColor: Color = .uiWhite
-    var cornerRadius: CGFloat = .infinity
+    var backgroundColor: Color = .bgWhite
+    var cornerRadius: CGFloat = .radiusMedium
+    var isDisabled: Bool = false
     
     var body: some View {
         HStack{
             Text("Rp")
             TextField(placeholder, text: $placeholderPrice)
+                .frame(height: 20)
                 .keyboardType(type)
                 .onChange(of: placeholderPrice) {
                     placeholderPrice = placeholderPrice.formatPrice()
@@ -29,9 +31,9 @@ struct PriceInput: View {
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 16)
-        .background(backgroundColor)
+        .background(isDisabled ? .uiGray : backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .foregroundStyle(.black)
+        .foregroundStyle(isDisabled ? .textGrey : .black)
         .font(.tabiBody)
         .overlay {
             RoundedRectangle(cornerRadius: cornerRadius)

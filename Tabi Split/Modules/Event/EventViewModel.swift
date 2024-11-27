@@ -19,6 +19,7 @@ final class EventViewModel {
                 selectedSection = .expenses
             } else {
                 eventName = ""
+                eventIcon = .icon1
             }
         }
     }
@@ -36,6 +37,12 @@ final class EventViewModel {
             return event.participants.count <= 1
         } else { return true }
     }
+    var isUserCreator: Bool {
+        if let user = UserDefaultsService.shared.getCurrentUser(), let selectedEvent {
+            return user.userId == selectedEvent.creatorId
+        } else { return false }
+    }
+    var isDirectInvite: Bool = false
     
     var participantsBalance: [PersonBalanceData] = []
     var userTransactionHistory: [SummaryHistoryData] = []
@@ -48,42 +55,125 @@ final class EventViewModel {
     var userTotalSpending: Float = 0
     var userSettlementList: [SummarySettlementData] = []
     
+    var isApiCallLoading = false
+    
     @MainActor
-    func handleCreateEditEvent (selectedContacts: [UserData], currentUser: UserData) {
-        var participants = selectedContacts.map { $0 }
-        participants.append(currentUser)
-        
-        if let selectedEvent {
+    func handleEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            var participants: [UserData] = selectedContacts
+            if !isGuest {
+                isApiCallLoading = true
+                let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
+                let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
+                    if let image = ProfileImageEnum(rawValue: user.avatar_url) {
+                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: image, imageUrl: "" )
+                    } else {
+                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: .owl, imageUrl: user.avatar_url )
+                    }
+                }
+                
+                var unregisteredUsers: [UserData] = selectedContacts.filter { contact in
+                    return !registeredUsers.contains(where: { user in user.phone == contact.phone })
+                }
+                
+                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
+                var registeredDummyUsers: [UserData] = []
+                for dummyInfo in response.dummy_user_info {
+                    if let user = unregisteredUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                        user.userId = dummyInfo.dummy_user_id
+                        registeredDummyUsers.append(user)
+                        unregisteredUsers.remove(user)
+                    }
+                }
+                participants = registeredUsers + registeredDummyUsers
+            }
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
             selectedEvent.participants = participants
-        } else {
-            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [])
-            SwiftDataService.shared.addEvent(newEvent)
-            newEvent.participants.append(contentsOf: participants)
             SwiftDataService.shared.saveModelContext()
+        } catch {
+            print("Edit Event failed: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
+        
     }
     
     @MainActor
-    func handleDeleteEvent () {
-        if let selectedEvent {
+    func handleCreateEvent (currentUser: UserData, isGuest: Bool) async -> Bool {
+        do {
+            if !isGuest {
+                isApiCallLoading = true
+                let _ = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
+            }
+            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [], creatorId: currentUser.userId)
+            SwiftDataService.shared.addEvent(newEvent)
+            newEvent.participants.append(currentUser)
+            SwiftDataService.shared.saveModelContext()
+        } catch {
+            print("Create event failed: \(error)")
+            isApiCallLoading = false
+            return false
+        }
+        isApiCallLoading = false
+        return true
+    }
+    
+    @MainActor
+    func handleDeleteEvent (isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            isApiCallLoading = true
+            if !isGuest {
+                try await EventService.shared.deleteEvent(event: selectedEvent)
+            }
             SwiftDataService.shared.deleteEvent(selectedEvent)
+        } catch {
+            print("Delete event failed: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
     }
     
     @MainActor
-    func completeEvent() {
-        if let selectedEvent {
+    func completeEvent(isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            if !isGuest {
+                isApiCallLoading = true
+                try await EventService.shared.completeEvent(event: selectedEvent)
+            }
             SwiftDataService.shared.completeEvent(selectedEvent)
+        } catch {
+            print("Event completion fail: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
     }
     
     @MainActor
-    func incompleteEvent() {
-        if let selectedEvent {
+    func incompleteEvent(isGuest: Bool) async -> Bool {
+        guard let selectedEvent else { return false }
+        do {
+            if !isGuest {
+                isApiCallLoading = true
+                try await EventService.shared.incompleteEvent(event: selectedEvent)
+            }
             SwiftDataService.shared.incompleteEvent(selectedEvent)
+        } catch {
+            print("Event incomplete fail: \(error)")
+            isApiCallLoading = false
+            return false
         }
+        isApiCallLoading = false
+        return true
     }
     
     func calculateOptimization(currentUser: UserData) {
@@ -145,7 +235,7 @@ final class EventViewModel {
                 }
             }
             
-//            record the specific user balance history data
+            //            record the specific user balance history data
             if (userBalanceTemp != 0) {
                 userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalanceTemp))
             }
@@ -183,7 +273,7 @@ final class EventViewModel {
             }
         }
         
-//        Fill up user's settlement list
+        //        Fill up user's settlement list
         userSettlementList = []
         if userBalance.status == .debt {
             for settlement in userBalance.settlement {

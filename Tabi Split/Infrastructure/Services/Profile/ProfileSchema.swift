@@ -28,18 +28,28 @@ struct EditProfileResponse: Codable {
     let message: String
 }
 
-struct BaseProfile: Codable {
-    let user_id: String
-    let phone: String
-    let name: String
-    let avatar_url: String
-}
-
 struct GetProfileRequest: Codable {
     let phones: [String]
 }
 
 struct GetProfileResponse: Codable {
     let message: String
-    let users: [BaseProfile]
+    let users: [UserBase]
 }
+
+struct CheckUsersRequest: Codable {
+    let phones: [String]
+}
+
+struct CheckUsersResponse: Codable {
+    let message: String
+    let users: [UserBase]
+}
+
+struct UserBase: Codable {
+    let user_id: String
+    let phone: String?
+    let name: String
+    let avatar_url: String
+}
+

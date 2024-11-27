@@ -10,10 +10,17 @@ import SwiftData
 import Contacts
 
 extension SwiftDataService {
-    func getAllUsers (excludeLoggedUser: Bool = false) -> [UserData]? {
+    func getAllUsers (excludeLoggedUser: Bool = false, isUnique: Bool = false) -> [UserData]? {
         let fetchDescriptor = FetchDescriptor<UserData>()
         do {
-            let users = try modelContext.fetch(fetchDescriptor)
+            var users = try modelContext.fetch(fetchDescriptor)
+            if isUnique {
+                users = users.reduce(into: [UserData]()) { result, user in
+                    if !result.contains(where: { $0.userId == user.userId }) {
+                        result.append(user)
+                    }
+                }
+            }
             if let currentUser = UserDefaultsService.shared.getCurrentUser(),
                excludeLoggedUser {
                 return users.filter{ $0.phone != currentUser.userPhone }
@@ -23,13 +30,23 @@ extension SwiftDataService {
         }
     }
     
+    func deleteUsersWithNoId () {
+        if let users = getAllUsers() {
+            for user in users {
+                if user.userId == "" {
+                    modelContext.delete(user)
+                }
+            }
+        }
+    }
+    
     func saveCurrentUser (user: CurrentUserDefaults) {
         if let users = getAllUsers() {
             if !users.contains(where: { $0.phone == user.userPhone }) {
                 if let image = ProfileImageEnum(rawValue: user.userImage) {
-                    modelContext.insert(UserData(name: user.userName, phone: user.userPhone, image: image, imageUrl: nil))
+                    modelContext.insert(UserData(userId: user.userId, name: user.userName, phone: user.userPhone, image: image, imageUrl: nil))
                 } else {
-                    modelContext.insert(UserData(name: user.userName, phone: user.userPhone, image: .owl, imageUrl: user.userImage))
+                    modelContext.insert(UserData(userId: user.userId, name: user.userName, phone: user.userPhone, image: .owl, imageUrl: user.userImage))
                 }
                 saveModelContext()
             }
@@ -41,6 +58,12 @@ extension SwiftDataService {
            let currentUser = UserDefaultsService.shared.getCurrentUser(),
            let user = users.first(where: { $0.phone == currentUser.userPhone }) {
             return user
+        } else { return nil }
+    }
+    
+    func getUserByUserId (_ id: String) -> UserData? {
+        if let users = getAllUsers() {
+            return users.first(where: { $0.userId == id })
         } else { return nil }
     }
     

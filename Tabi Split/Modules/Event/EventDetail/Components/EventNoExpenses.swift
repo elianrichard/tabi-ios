@@ -13,9 +13,7 @@ struct EventNoExpenses: View {
         VStack (alignment: .center, spacing: 36) {
             LottieView(animation: .named("NoExpenses"))
                 .looping()
-                .resizable()
-                .frame(width: 200, height: 200)
-                .scaledToFit()
+                .frame(width: 300, height: 300)
             Text("We don't have any\nexpenses yet...")
                 .multilineTextAlignment(.center)
                 .font(.tabiSubtitle)

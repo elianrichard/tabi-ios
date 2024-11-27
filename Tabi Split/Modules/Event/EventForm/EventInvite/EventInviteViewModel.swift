@@ -10,11 +10,7 @@ import Contacts
 
 @Observable
 final class EventInviteViewModel {
-    var isLoadContactLoading: Bool {
-        return allContacts.count == 0 ||
-        CNContactStore.authorizationStatus(for: .contacts) == .denied ||
-        CNContactStore.authorizationStatus(for: .contacts) == .restricted
-    }
+    var isLoadContactLoading: Bool = true
     
     var searchUserText: String = ""
     var searchFilteredContacts: [UserData] {
@@ -65,6 +61,7 @@ final class EventInviteViewModel {
         
         switch CNContactStore.authorizationStatus(for: .contacts) {
         case .authorized, .limited:
+            isLoadContactLoading = true
             do {
                 let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
@@ -74,13 +71,16 @@ final class EventInviteViewModel {
             } catch {
                 print("Error on contact fetching \(error)")
             }
+            isLoadContactLoading = false
         case .notDetermined, .denied, .restricted:
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
                     print("contact granted")
+                    self.isLoadContactLoading = true
                     self.fillUpContacts(currentUser: currentUser, registeredUsers: registeredUsers)
                 } else if let error = error {
                     print("Error requesting contact acces: \(error)")
+                    self.isLoadContactLoading = false
                 }
             }
         default:
@@ -93,16 +93,19 @@ final class EventInviteViewModel {
             } catch {
                 print("Error on contact fetching \(error)")
             }
+            isLoadContactLoading = false
         }
         var allUsers: [UserData] = []
         
         for user in registeredUsers {
-            allUsers.append(user)
+            if user.phone != "" {
+                allUsers.append(user)                
+            }
         }
         
         for user in selectedContacts {
             let phone = user.phone.formattedAsPhoneNumber()
-            if !allUsers.contains(where: { $0.phone == phone }){
+            if !allUsers.contains(where: { $0.phone == phone }) {
                 allUsers.append(user)
             }
         }

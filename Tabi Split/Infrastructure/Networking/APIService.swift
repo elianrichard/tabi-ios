@@ -47,6 +47,7 @@ final class APIService: APIClient {
             request.httpBody = try encoder.encode(body)
         }
         
+        print("\(method) \(endpoint): \(body)")
         return try await requestWithRetry(endpoint: endpoint, request: request)
     }
     
@@ -133,9 +134,12 @@ final class APIService: APIClient {
                 }
                 throw APIError.requestFailed(message: errorMessage ?? "Unknown error")
             }
+            let result = try JSONDecoder().decode(Response.self, from: data)
+//            print("\(result)")
             
-            return try JSONDecoder().decode(Response.self, from: data)
+            return result
         } catch {
+            print(error)
             throw (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
         }
     }

@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import JWTDecode
 
 @Observable
 class LoginViewModel {
+    static var shared = LoginViewModel()
     var phoneNumber: String = ""
     var password: String = ""
     
@@ -18,27 +20,31 @@ class LoginViewModel {
     var isLoading: Bool = false
     
     @MainActor
-    func login() async -> Bool {
+    func login(phoneInput: String? = nil, passwordInput: String? = nil) async -> Bool {
         guard validateInput() else {
             print("Cannot register: form is invalid")
             return false
         }
         
-        var isSuccess = false
         isLoading = true
         do {
             let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
-            isSuccess = true
-            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: "userId")
+            let jwt = try decode(jwt: response.token)
+            guard let userId = jwt["userId"].string else {
+                passwordError = "User ID not found in Token"
+                return false
+            }
+            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: userId)
             UserDefaultsService.shared.saveCurrentUser(user: user)
             SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
             print("Login failed: \(error)")
             passwordError = "Account credential is invalid"
-            isSuccess = false
+            isLoading = false
+            return false
         }
         isLoading = false
-        return isSuccess
+        return true
     }
     
     @MainActor

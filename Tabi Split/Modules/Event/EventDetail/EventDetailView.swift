@@ -16,6 +16,7 @@ struct EventDetailView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
     
     @State var sheetViewModel = SheetViewModel<EventSheets>()
@@ -24,36 +25,38 @@ struct EventDetailView: View {
     var body: some View {
         ZStack {
             TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
-                ElipsisMenu (color: .textWhite) {
-                    Button {
-                        routes.navigate(to: .EventFormView)
-                    } label: {
-                        Label("Edit Event", systemImage: "pencil")
-                    }
-                    if !eventViewModel.isEventCompleted {
+                if eventViewModel.isUserCreator {
+                    ElipsisMenu (color: .textWhite) {
                         Button {
-                            sheetViewModel.setSheet(.complete)
+                            eventViewModel.isDirectInvite = false
+                            routes.navigate(to: .EventFormView)
                         } label: {
-                            Label("Mark as Completed", systemImage: "flag")
+                            Label("Edit Event", systemImage: "pencil")
                         }
-                    } else {
-                        Button {
-                            sheetViewModel.setSheet(.incomplete)
+                        if !eventViewModel.isEventCompleted {
+                            Button {
+                                sheetViewModel.setSheet(.complete)
+                            } label: {
+                                Label("Mark as Completed", systemImage: "flag")
+                            }
+                        } else {
+                            Button {
+                                sheetViewModel.setSheet(.incomplete)
+                            } label: {
+                                Label("Mark as Incomplete", systemImage: "flag.slash")
+                            }
+                        }
+                        Button (role: .destructive) {
+                            sheetViewModel.setSheet(.delete)
                         } label: {
-                            Label("Mark as Incomplete", systemImage: "flag.slash")
+                            Label("Delete Event", systemImage: "trash")
                         }
-                    }
-                    Button (role: .destructive) {
-                        sheetViewModel.setSheet(.delete)
-                    } label: {
-                        Label("Delete Event", systemImage: "trash")
                     }
                 }
             })
-            .padding(.bottom, 36)
             
             VStack (spacing: 0) {
-                EventBanner()
+                EventBanner(resource: EventIconEnum(rawValue: eventViewModel.selectedEvent?.eventIcon ?? "")?.bannerResource ?? .eventBanner1)
                 EventParticipantsList(sheetViewModel: $sheetViewModel)
                 VStack {
                     if eventViewModel.isNoParticipants {
@@ -100,7 +103,7 @@ struct EventDetailView: View {
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .expenses) {
                     HStack(spacing: .spacingTight){
-                        CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26) {
+                        CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26, vPadding: 14) {
                             eventExpenseViewModel.isQuickScanned = false
                             eventExpenseViewModel.resetViewModel()
                             routes.navigate(to: .AddExpenseView)
@@ -125,6 +128,7 @@ struct EventDetailView: View {
         .onAppear {
             hasPreviewed = false
             eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
+            eventInviteViewModel.selectedContacts = eventViewModel.selectedEvent?.participants ?? []
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.complete)) {
@@ -150,8 +154,11 @@ struct EventDetailView: View {
                         sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Complete") {
-                        eventViewModel.completeEvent()
-                        sheetViewModel.clearSheet()
+                        Task {
+                            if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -185,8 +192,11 @@ struct EventDetailView: View {
                         sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Yes") {
-                        eventViewModel.incompleteEvent()
-                        sheetViewModel.clearSheet()
+                        Task {
+                            if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -198,12 +208,11 @@ struct EventDetailView: View {
         }
         .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.delete)) {
             VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: .spacingLarge) {
+                VStack (spacing: 0) {
                     LottieView(animation: .named("DeleteEvent"))
                         .looping()
-                        .resizable()
-                        .frame(width: 200, height: 200)
-                        .scaledToFit()
+                        .scaleEffect(1.4)
+                        .frame(width: 300, height: 200)
                     VStack (spacing: .spacingSmall) {
                         Text("Do you want to delete this event?")
                             .font(.tabiSubtitle)
@@ -219,9 +228,12 @@ struct EventDetailView: View {
                         sheetViewModel.clearSheet()
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
-                        sheetViewModel.clearSheet()
-                        eventViewModel.handleDeleteEvent()
-                        routes.navigateBack()
+                        Task {
+                            if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
+                                sheetViewModel.clearSheet()
+                                routes.navigateBack()
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)

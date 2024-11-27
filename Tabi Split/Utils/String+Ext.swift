@@ -51,12 +51,18 @@ extension String {
     }
     
     func validatePhoneNumber () -> String? {
-        let phoneNumberLengthRegex = /^[0-9]{10,13}$/
+        let phoneNumberLengthRegex = /^[0-9]{9,13}$/
         if !self.contains(phoneNumberLengthRegex) {
-            return "Phone number should contain 10-13 digits"
+            return "Phone number should contain 9-13 digits"
         }
         
         return nil
+    }
+    
+    func convertIsoToDate () -> Date? {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return isoFormatter.date(from: self)    
     }
     
     func formattedAsPhoneNumber() -> String {

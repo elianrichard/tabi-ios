@@ -121,31 +121,30 @@ struct EventCard : View {
     
     ScrollView {
         EventCard(
-            event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, participants: tempParticipants)
+            event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: 0, participants: tempParticipants, creatorId: "")
         )
         EventCard(
             event: EventData(eventName: "New York Trip",
                              completionDate: nil,
                              userEventBalance: 2_500_000,
-                             participants: tempParticipants,
-                             expenses: tempExpense
+                             participants: tempParticipants, expenses: tempExpense, creatorId: ""
                             )
         )
         EventCard(
             event: EventData(eventName: "New York Trip", completionDate: nil, userEventBalance: -1_000_000,
-                             participants: tempParticipants, expenses: tempExpense)
+                             participants: tempParticipants, expenses: tempExpense, creatorId: "")
         )
         EventCard(
             event: EventData(eventName: "New York Trip", completionDate: Date(), userEventBalance: 500_000,
-                             participants: tempParticipants, expenses: tempExpense)
+                             participants: tempParticipants, expenses: tempExpense, creatorId: "")
         )
         EventCard(
             event: EventData(eventName: "New York Trip", completionDate: Date(), userEventBalance: -100_000,
-                             participants: tempParticipants, expenses: tempExpense)
+                             participants: tempParticipants, expenses: tempExpense, creatorId: "")
         )
         EventCard(
             event: EventData(eventName: "New York Trip", completionDate: Date(), userEventBalance: 0,
-                             participants: tempParticipants, expenses: tempExpense)
+                             participants: tempParticipants, expenses: tempExpense, creatorId: "")
         )
     }.padding()
 }

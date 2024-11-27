@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import JWTDecode
 
 @Observable
 class RegisterViewModel {
@@ -102,24 +103,35 @@ class RegisterViewModel {
         )
     }
     
+    @MainActor
     func register() async -> Bool {
         isSubmitted = true
         guard isFormValid() else {
             isSignUpEnabled = false
             print("Cannot register: form is invalid")
+            isLoading = false
             return false
         }
-        var isSuccess = false
         isLoading = true
         do {
-            let _ = try await AuthenticationService.shared.register(name: name, phone: phoneNumber.formattedAsPhoneNumber(), password: password)
-            isSuccess = true
+            let phone = phoneNumber.formattedAsPhoneNumber()
+            let _ = try await AuthenticationService.shared.register(name: name, phone: phone, password: password)
+            let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
+            let jwt = try decode(jwt: response.token)
+            guard let userId = jwt["userId"].string else {
+                passwordError = "User ID not found in Token"
+                return false
+            }
+            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: userId)
+            UserDefaultsService.shared.saveCurrentUser(user: user)
+            SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
             print("Register failed: \(error)")
             passwordError = "\(error)"
-            isSuccess = false
+            isLoading = false
+            return false
         }
         isLoading = false
-        return isSuccess
+        return true
     }
 }

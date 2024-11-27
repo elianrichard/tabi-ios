@@ -14,7 +14,8 @@ final class AuthenticationService {
     private let tokenManager: TokenManaging = KeychainService.shared
     
     func register(name: String, phone: String, password: String) async throws -> RegisterResponse {
-        let registerRequest = RegisterRequest(name: name, phone: phone, password: password)
+        let image = (ProfileImageEnum.allCases.randomElement() ?? .owl).id
+        let registerRequest = RegisterRequest(name: name, phone: phone, password: password, avatar_url: image)
         let response: RegisterResponse = try await apiClient.post(endpoint: "/auth/register", body: registerRequest)
         
         return response

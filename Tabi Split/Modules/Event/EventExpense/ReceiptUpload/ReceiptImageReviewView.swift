@@ -17,7 +17,7 @@ struct ReceiptImageReviewView: View {
     
     var body: some View {
         VStack{
-            TopNavigation(title: "Image Review")
+            TopNavigation(title: "Image Preview")
             VStack{
                 if let image = eventExpenseViewModel.uploadedReceiptImage {
                     Image(uiImage: image)

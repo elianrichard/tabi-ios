@@ -10,6 +10,7 @@ import SwiftUI
 
 @Model
 class Expense {
+    var expenseId: String?
     var event: EventData?
     var name: String
     var coverer: UserData
@@ -20,11 +21,11 @@ class Expense {
     @Relationship(deleteRule: .cascade, inverse: \ExpenseItem.expense) var items: [ExpenseItem]
     @Relationship(deleteRule: .cascade, inverse: \AdditionalCharge.expense) var additionalCharges: [AdditionalCharge]
     
-    init(name: String, coverer: UserData, dateOfCreation: Date = Date(), price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
-//        self.event = event
+    init(expenseId: String? = nil, name: String, coverer: UserData, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
+        self.expenseId = expenseId
         self.name = name
         self.coverer = coverer
-        self.dateOfCreation = dateOfCreation
+        self.dateOfCreation = dateOfCreation ?? Date()
         self.price = price
         self.splitMethod = splitMethod.id
         self.participants = participants
@@ -36,13 +37,15 @@ class Expense {
 // List of expense item, e.g. Chicken, Rice, etc.
 @Model
 class ExpenseItem {
+    var itemId: String?
     var itemName: String
     var itemPrice: Float
     var itemQuantity: Float
-    @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.expenseItem) var assignees: [ExpensePerson]
+    @Relationship(deleteRule: .nullify, inverse: \ExpensePerson.expenseItem) var assignees: [ExpensePerson]
     var expense: Expense?
     
-    init(itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
+    init(itemId: String? = nil, itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
+        self.itemId = itemId
         self.itemName = itemName
         self.itemPrice = itemPrice
         self.itemQuantity = itemQuantity
@@ -64,13 +67,21 @@ class ExpensePerson {
 
 @Model
 class AdditionalCharge {
+    var additionalChargeId: String?
     var additionalChargeType: AdditionalChargeType.ID
     var amount: Float
     var expense: Expense?
     
-    init(additionalChargeType: AdditionalChargeType, amount: Float) {
+    init(additionalChargeId: String? = nil, additionalChargeType: AdditionalChargeType, amount: Float) {
+        self.additionalChargeId = additionalChargeId
         self.additionalChargeType = additionalChargeType.id
         self.amount = amount
+    }
+    
+    init(additionalChargeBase: ExpenseEventAdditionalChargeBase) {
+        self.additionalChargeId = additionalChargeBase.id
+        self.additionalChargeType = additionalChargeBase.name
+        self.amount = additionalChargeBase.amount
     }
 }
 

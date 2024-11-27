@@ -11,6 +11,7 @@ struct RegisterRequest: Codable {
     let name: String
     let phone: String
     let password: String
+    let avatar_url: String
 }
 
 struct RegisterResponse: Codable {
