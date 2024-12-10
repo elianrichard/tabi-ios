@@ -34,6 +34,10 @@ final class HomeViewModel {
         filteredEvents = eventData
     }
     
+<<<<<<< HEAD
+=======
+    // TODO: Handle Migration and check for ios 17
+>>>>>>> main
     func handleMigration (currentUser: UserData, events: [EventData]) async {
         func swapUser (oldUser: UserData, users: [UserData]) -> UserData {
             if oldUser.name == "Guest" && oldUser.phone == "" {
@@ -150,8 +154,16 @@ final class HomeViewModel {
                         }
                     }
                 }
+<<<<<<< HEAD
                 let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants)
                 newEvent.expenses.append(newExpense)
+=======
+                let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: [])
+                
+                newEvent.expenses.append(newExpense)
+                newExpense.participants.append(contentsOf: participants)
+                
+>>>>>>> main
                 for additionalCharge in expense.additional_charges {
                     newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
                 }
