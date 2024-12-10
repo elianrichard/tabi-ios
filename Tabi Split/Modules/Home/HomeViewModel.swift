@@ -154,16 +154,8 @@ final class HomeViewModel {
                         }
                     }
                 }
-<<<<<<< HEAD
                 let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants)
                 newEvent.expenses.append(newExpense)
-=======
-                let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: [])
-                
-                newEvent.expenses.append(newExpense)
-                newExpense.participants.append(contentsOf: participants)
-                
->>>>>>> main
                 for additionalCharge in expense.additional_charges {
                     newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
                 }
