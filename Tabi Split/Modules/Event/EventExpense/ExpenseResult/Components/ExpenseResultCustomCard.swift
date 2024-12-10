@@ -13,66 +13,68 @@ struct ExpenseResultCustomCard: View {
     var person: PersonItem
     
     var body: some View {
-        VStack (spacing: .spacingTight) {
-            HStack {
-                UserAvatar(userData: person.user)
-                HStack(spacing: 0){
-                    Text("\(person.user.name.getFirstName())'s")
-                        .font(.tabiHeadline)
-                    if profileViewModel.isCurrentUser(person.user) {
-                        Text(" (Yours)")
-                            .font(.tabiBody)
-                            .foregroundColor(.textGrey)
-                    }
-                }
-                Spacer()
-                Text("Rp\(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")
-                    .font(.tabiHeadline)
-            }
-            
-            Divider()
-            
-            VStack (spacing: .spacingXSmall) {
-                ForEach (person.items) { item in
-                    HStack(alignment: .top, spacing: .spacingRegular){
-                        Text(item.itemName)
+        if (eventExpenseViewModel.calculatePersonSpending(person: person) > 0) {
+            VStack (spacing: .spacingTight) {
+                HStack {
+                    UserAvatar(userData: person.user)
+                    HStack(spacing: 0){
+                        Text("\(person.user.name.getFirstName())'s")
                             .font(.tabiHeadline)
-                        Text("\(String(item.itemQuantity.rounded(toDecimalPlaces: 2)))x")
-                            .font(.tabiBody)
-                        Spacer()
-                        Text("Rp\((Float(item.itemQuantity) * item.itemPrice).formatPrice())")
-                            .font(.tabiBody)
-                    }
-                }
-            }
-            
-            DisclosureGroup() {
-                Divider()
-                    .padding(.vertical, .spacingSmall)
-                VStack (spacing: .spacingXSmall) {
-                    ForEach(person.additional) { additionalItem in
-                        HStack {
-                            Text((AdditionalChargeType(rawValue: additionalItem.additionalChargeType) ?? .other).name)
-                            Spacer()
-                            Text("Rp\(additionalItem.amount.formatPrice())")
+                        if profileViewModel.isCurrentUser(person.user) {
+                            Text(" (Yours)")
+                                .font(.tabiBody)
+                                .foregroundColor(.textGrey)
                         }
-                        .font(.subheadline)
+                    }
+                    Spacer()
+                    Text("Rp\(eventExpenseViewModel.calculatePersonSpending(person: person).formatPrice())")
+                        .font(.tabiHeadline)
+                }
+                
+                Divider()
+                
+                VStack (spacing: .spacingXSmall) {
+                    ForEach (person.items) { item in
+                        HStack(alignment: .top, spacing: .spacingRegular){
+                            Text(item.itemName)
+                                .font(.tabiHeadline)
+                            Text("\(String(item.itemQuantity.rounded(toDecimalPlaces: 2)))x")
+                                .font(.tabiBody)
+                            Spacer()
+                            Text("Rp\((Float(item.itemQuantity) * item.itemPrice).formatPrice())")
+                                .font(.tabiBody)
+                        }
                     }
                 }
-            } label: {
-                Text("See Details")
-                    .font(.tabiBody)
+                
+                DisclosureGroup() {
+                    Divider()
+                        .padding(.vertical, .spacingSmall)
+                    VStack (spacing: .spacingXSmall) {
+                        ForEach(person.additional) { additionalItem in
+                            HStack {
+                                Text((AdditionalChargeType(rawValue: additionalItem.additionalChargeType) ?? .other).name)
+                                Spacer()
+                                Text("Rp\(additionalItem.amount.formatPrice())")
+                            }
+                            .font(.subheadline)
+                        }
+                    }
+                } label: {
+                    Text("See Details")
+                        .font(.tabiBody)
+                }
+                .accentColor(.textBlack)
             }
-            .accentColor(.textBlack)
-        }
-        .padding(.vertical, .spacingTight)
-        .padding(.horizontal, .spacingMedium)
-        .background(.bgWhite)
-        .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
-        .overlay {
-            RoundedRectangle(cornerRadius: .radiusMedium)
-                .fill(.clear)
-                .strokeBorder(.uiGray, lineWidth: 1)
+            .padding(.vertical, .spacingTight)
+            .padding(.horizontal, .spacingMedium)
+            .background(.bgWhite)
+            .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
+            .overlay {
+                RoundedRectangle(cornerRadius: .radiusMedium)
+                    .fill(.clear)
+                    .strokeBorder(.uiGray, lineWidth: 1)
+            }
         }
     }
 }

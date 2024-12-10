@@ -34,10 +34,7 @@ final class HomeViewModel {
         filteredEvents = eventData
     }
     
-<<<<<<< HEAD
-=======
     // TODO: Handle Migration and check for ios 17
->>>>>>> main
     func handleMigration (currentUser: UserData, events: [EventData]) async {
         func swapUser (oldUser: UserData, users: [UserData]) -> UserData {
             if oldUser.name == "Guest" && oldUser.phone == "" {
