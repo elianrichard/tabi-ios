@@ -47,8 +47,10 @@ struct EventInviteView: View {
                                 UIPasteboard.general.setValue("https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")", forPasteboardType: UTType.plainText.identifier)
                             }
                         })
-                        ShareLink(item: URL(filePath: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")")) {
-                            EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                        if let url = URL(string: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")") {
+                            ShareLink(item: url) {
+                                EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                            }
                         }
                         EventInviteShareButtonView(text: "QR Code",
                                                    icon: .qrIcon,

@@ -47,7 +47,7 @@ final class APIService: APIClient {
             request.httpBody = try encoder.encode(body)
         }
         
-        print("\(method) \(endpoint): \(body)")
+        print("\(method) \(endpoint): \(String(describing: body))")
         return try await requestWithRetry(endpoint: endpoint, request: request)
     }
     

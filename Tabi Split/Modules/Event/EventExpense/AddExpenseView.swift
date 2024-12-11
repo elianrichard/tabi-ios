@@ -301,6 +301,9 @@ struct AddExpenseView: View {
         .addBackgroundColor(.bgWhite) {
             focusedField = nil
         }
+        .onAppear {
+            focusedField = .field1
+        }
         .navigationBarBackButtonHidden(true)
     }
 }

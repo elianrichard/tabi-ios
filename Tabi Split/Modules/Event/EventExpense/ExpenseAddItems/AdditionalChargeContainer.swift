@@ -96,8 +96,3 @@ struct AdditionalChargeContainer: View {
         .frame(height: 50)
     }
 }
-
-#Preview {
-    AdditionalChargeContainer(item: .constant(AdditionalCharge(additionalChargeType: .tax, amount: 10000)))
-        .environment(EventExpenseViewModel())
-}

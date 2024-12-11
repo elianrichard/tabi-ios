@@ -109,10 +109,8 @@ final class EventViewModel {
                 isApiCallLoading = true
                 let _ = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
             }
-            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [], creatorId: currentUser.userId)
+            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId)
             SwiftDataService.shared.addEvent(newEvent)
-            newEvent.participants.append(currentUser)
-            SwiftDataService.shared.saveModelContext()
         } catch {
             print("Create event failed: \(error)")
             isApiCallLoading = false
@@ -183,6 +181,7 @@ final class EventViewModel {
         var userTotalSpendingTemp: Float = 0
         guard let event = selectedEvent else { return }
         participantsBalance = event.participants.map { PersonBalanceData(user: $0) }
+        participantsBalance = participantsBalance.sorted(by: { $0.user.name.lowercased() < $1.user.name.lowercased() })
         
         //        FILL THE PERSON LENT AND PERSON DEBT EXPENSE
         
@@ -251,8 +250,8 @@ final class EventViewModel {
             }
         }
         
-        let personWithDebt: [PersonBalanceData] = participantsBalance.filter { $0.balance < 0 }
-        let personWithLent: [PersonBalanceData] = participantsBalance.filter { $0.balance > 0 }
+        let personWithDebt: [PersonBalanceData] = participantsBalance.filter { $0.balance < 0 }.sorted(by: { $0.balance < $1.balance })
+        let personWithLent: [PersonBalanceData] = participantsBalance.filter { $0.balance > 0 }.sorted(by: { $0.balance < $1.balance })
         
         for debtUser in personWithDebt {
             for lentUser in personWithLent {
@@ -287,6 +286,7 @@ final class EventViewModel {
                 }
             }
         }
+        userSettlementList = userSettlementList.sorted(by: { $0.targetUser.name.lowercased() < $1.targetUser.name.lowercased() })
         
         if let selectedEvent {
             selectedEvent.userEventBalance = userBalance.balance

@@ -151,11 +151,8 @@ final class HomeViewModel {
                         }
                     }
                 }
-                let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: [])
-                
+                let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants)
                 newEvent.expenses.append(newExpense)
-                newExpense.participants.append(contentsOf: participants)
-                
                 for additionalCharge in expense.additional_charges {
                     newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
                 }
@@ -229,24 +226,24 @@ final class HomeViewModel {
                                 }
                             }
                         }
-                        let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: [])
                         
-                        newEvent.expenses.append(newExpense)
-                        newExpense.participants.append(contentsOf: participants)
+                        newEvent.expenses.append( Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants) )
                         
-                        for additionalCharge in expense.additional_charges {
-                            newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
-                        }
-                        
-                        for item in expense.items {
-                            var itemAssignees: [ExpensePerson] = []
-                            for assignee in item.assignees {
-                                if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
-                                    itemAssignees.append(ExpensePerson(user: user, share: assignee.share))
-                                }
+                        if let newExpense = newEvent.expenses.first(where: { $0.expenseId == expense.id }) {
+                            for additionalCharge in expense.additional_charges {
+                                newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
                             }
-                            let expenseItem = ExpenseItem(itemId: item.id, itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
-                            newExpense.items.append(expenseItem)
+                            
+                            for item in expense.items {
+                                var itemAssignees: [ExpensePerson] = []
+                                for assignee in item.assignees {
+                                    if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
+                                        itemAssignees.append(ExpensePerson(user: user, share: assignee.share))
+                                    }
+                                }
+                                let expenseItem = ExpenseItem(itemId: item.id, itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
+                                newExpense.items.append(expenseItem)
+                            }
                         }
                         newEvent.calculateUserEventBalance(currentUser: currentUser)
                     }
