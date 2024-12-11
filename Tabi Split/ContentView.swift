@@ -15,99 +15,111 @@ struct ContentView: View {
     @State private var eventExpenseViewModel = EventExpenseViewModel()
     @State private var eventSettlementViewModel = EventSettlementViewModel()
     @State private var profileViewModel = ProfileViewModel()
+    @State private var loadingViewModel = LoadingViewModel()
     
     @State private var isAuthenticated = false
     
     var body: some View {
-        NavigationStack (path: $routes.navPath) {
-            ZStack {
-                if !UserDefaultsService.shared.getOnboardingStatus() {
-                    OnboardingView()
-                        .onAppear {
-                            UserDefaultsService.shared.setOnboardingStatus(true)
-                        }
-                } else if isAuthenticated {
-                    HomeView()
-                } else {
-                    LoginView()
+        ZStack {
+            NavigationStack (path: $routes.navPath) {
+                ZStack {
+                    if !UserDefaultsService.shared.getOnboardingStatus() {
+                        OnboardingView()
+                            .onAppear {
+                                UserDefaultsService.shared.setOnboardingStatus(true)
+                            }
+                    } else if isAuthenticated {
+                        HomeView()
+                    } else {
+                        LoginView()
+                    }
                 }
-                
-                SplashView()
-                    .ignoresSafeArea()
-            }
-            .navigationDestination(for: Routes.Destination.self) { destination in
-                switch destination {
-                case .HomeView:
-                    HomeView()
+                .navigationDestination(for: Routes.Destination.self) { destination in
+                    switch destination {
+                    case .HomeView:
+                        HomeView()
+                        
+                    case .InboxView:
+                        InboxView()
+                        
+                    case .EventFormView:
+                        EventFormView()
+                        
+                    case .EventDetailView:
+                        EventDetailView()
+                        
+                    case .EventInviteView:
+                        EventInviteView()
+                        
+                    case .SwiftDataTestingView:
+                        SwiftDataTestingView()
+                        
+                    case .LoginView:
+                        LoginView()
+                        
+                    case .RegisterView:
+                        RegisterView()
+                        
+                    case .AddExpenseView:
+                        AddExpenseView()
+                        
+                    case .ExpenseAddItemsView:
+                        ExpenseAddItemsView()
+                        
+                    case .ExpenseAssignView:
+                        ExpenseAssignView()
+                        
+                    case .ExpenseResultView:
+                        ExpenseResultView()
+                        
+                    case .EventSummaryDetailView:
+                        EventSummaryDetailView()
+                        
+                    case .EventSettlementView:
+                        EventSettlementView()
+                        
+                    case .SettlementPaymentMethodView:
+                        SettlementPaymentMethodView()
+                        
+                    case .SettlementOptimizationView:
+                        SettlementOptimizationView()
+                        
+                    case .SettlementReceiptView:
+                        SettlementReceiptView()
+                        
+                    case .SettlementConfirmationView:
+                        SettlementConfirmationView()
+                        
+                    case .SettlementUploadView:
+                        SettlementUploadView()
+                        
+                    case .Profile:
+                        ProfileView()
+                        
+                    case .EditProfile:
+                        EditProfileView()
+                        
+                    case .PaymentMethods:
+                        PaymentMethodView()
+                        
+                    case .ReceiptUploadReview:
+                        ReceiptImageReviewView()
+                    }
                     
-                case .InboxView:
-                    InboxView()
-                    
-                case .EventFormView:
-                    EventFormView()
-                    
-                case .EventDetailView:
-                    EventDetailView()
-                    
-                case .EventInviteView:
-                    EventInviteView()
-                    
-                case .SwiftDataTestingView:
-                    SwiftDataTestingView()
-                    
-                case .LoginView:
-                    LoginView()
-                    
-                case .RegisterView:
-                    RegisterView()
-                    
-                case .AddExpenseView:
-                    AddExpenseView()
-                    
-                case .ExpenseAddItemsView:
-                    ExpenseAddItemsView()
-                    
-                case .ExpenseAssignView:
-                    ExpenseAssignView()
-                    
-                case .ExpenseResultView:
-                    ExpenseResultView()
-                    
-                case .EventSummaryDetailView:
-                    EventSummaryDetailView()
-                    
-                case .EventSettlementView:
-                    EventSettlementView()
-                    
-                case .SettlementPaymentMethodView:
-                    SettlementPaymentMethodView()
-                    
-                case .SettlementOptimizationView:
-                    SettlementOptimizationView()
-                    
-                case .SettlementReceiptView:
-                    SettlementReceiptView()
-                    
-                case .SettlementConfirmationView:
-                    SettlementConfirmationView()
-                    
-                case .SettlementUploadView:
-                    SettlementUploadView()
-                    
-                case .Profile:
-                    ProfileView()
-                    
-                case .EditProfile:
-                    EditProfileView()
-                    
-                case .PaymentMethods:
-                    PaymentMethodView()
-                    
-                case .ReceiptUploadReview:
-                    ReceiptImageReviewView()
                 }
-                
             }
+            
+            if (loadingViewModel.isLoading) {
+                ZStack {
+                    Color(.white).opacity(0.8)
+                    Text("Loading...")
+                        .font(.tabiTitle)
+                }
+                .ignoresSafeArea()
+            }
+            
+            SplashView()
+                .ignoresSafeArea()
         }
         .ignoresSafeArea(.keyboard)
         .environment(routes)
@@ -116,6 +128,7 @@ struct ContentView: View {
         .environment(eventExpenseViewModel)
         .environment(eventSettlementViewModel)
         .environment(profileViewModel)
+        .environment(loadingViewModel)
         .onAppear {
             checkAuthentication()
         }
