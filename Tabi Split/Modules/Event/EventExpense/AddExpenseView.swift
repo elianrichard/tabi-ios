@@ -183,7 +183,7 @@ struct AddExpenseView: View {
                         VStack (alignment: .leading, spacing: 16) {
                             Text("Items")
                                 .font(.tabiHeadline)
-                            LazyVStack(alignment: .leading){
+                            VStack(alignment: .leading) {
                                 ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
                                     if index < eventExpenseViewModel.items.count {
                                         AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)

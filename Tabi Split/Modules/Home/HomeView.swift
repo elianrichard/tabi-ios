@@ -12,6 +12,7 @@ struct HomeView: View {
     @State var homeViewModel = HomeViewModel()
     @Environment(EventViewModel.self) var eventViewModel: EventViewModel
     @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
+    @Environment(LoadingViewModel.self) var loadingViewModel: LoadingViewModel
     
     var body: some View {
         ZStack {
@@ -76,7 +77,7 @@ struct HomeView: View {
         .onAppear {
             profileViewModel.refreshUserData()
             Task {
-                if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
+                if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest, isShowLoading: Bindable(loadingViewModel).isLoading) {
                     if !profileViewModel.isGuest {
                         SwiftDataService.shared.deleteUsersWithNoId()
                     }

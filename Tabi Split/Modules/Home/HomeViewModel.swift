@@ -34,7 +34,7 @@ final class HomeViewModel {
         filteredEvents = eventData
     }
     
-    // TODO: Handle Migration and check for ios 17
+    // TODO: Handle Migration
     func handleMigration (currentUser: UserData, events: [EventData]) async {
         func swapUser (oldUser: UserData, users: [UserData]) -> UserData {
             if oldUser.name == "Guest" && oldUser.phone == "" {
@@ -174,10 +174,11 @@ final class HomeViewModel {
     }
     
     @MainActor
-    func refreshEventData (currentUser: UserData, isGuest: Bool) async -> Bool {
-        if !isGuest {
+    func refreshEventData (currentUser: UserData, isGuest: Bool, isShowLoading: Binding<Bool>) async -> Bool {
+        if (!isGuest && !isLoading) {
             do {
                 isLoading = true
+                isShowLoading.wrappedValue = true
                 let data = try await EventService.shared.getAllEvents()
                 // TODO: MIGRATIE GUEST USER
                 //                if let events = SwiftDataService.shared.fetchAllEvents() {
@@ -222,12 +223,15 @@ final class HomeViewModel {
                         for item in expense.items {
                             for assignee in item.assignees {
                                 if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
-                                    participants.append(user)
+                                    if !participants.contains(where: { $0 == user }) {
+                                        participants.append(user)
+                                    }
                                 }
                             }
                         }
                         
                         newEvent.expenses.append( Expense(expenseId: expense.id, name: expense.name, coverer: coverer, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants) )
+                        SwiftDataService.shared.saveModelContext()
                         
                         if let newExpense = newEvent.expenses.first(where: { $0.expenseId == expense.id }) {
                             for additionalCharge in expense.additional_charges {
@@ -243,9 +247,11 @@ final class HomeViewModel {
                                 }
                                 let expenseItem = ExpenseItem(itemId: item.id, itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
                                 newExpense.items.append(expenseItem)
+                                SwiftDataService.shared.saveModelContext()
                             }
                         }
                         newEvent.calculateUserEventBalance(currentUser: currentUser)
+                        SwiftDataService.shared.saveModelContext()
                     }
                     SwiftDataService.shared.saveModelContext()
                 }
@@ -262,6 +268,7 @@ final class HomeViewModel {
         }
         
         isLoading = false
+        isShowLoading.wrappedValue = false
         return true
     }
     
