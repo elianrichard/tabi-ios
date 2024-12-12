@@ -110,12 +110,7 @@ struct ContentView: View {
             }
             
             if (loadingViewModel.isLoading) {
-                ZStack {
-                    Color(.white).opacity(0.8)
-                    Text("Loading...")
-                        .font(.tabiTitle)
-                }
-                .ignoresSafeArea()
+                LoadingView()
             }
             
             SplashView()
