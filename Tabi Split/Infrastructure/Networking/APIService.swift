@@ -41,6 +41,7 @@ final class APIService: APIClient {
         var request = URLRequest(url: URL(string: config.baseURL + endpoint)!)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(ENV.API_SECRET_KEY, forHTTPHeaderField: "X-Api-Secret")
         
         if let body = body {
             let encoder = JSONEncoder()

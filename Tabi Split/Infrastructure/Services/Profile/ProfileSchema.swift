@@ -9,11 +9,14 @@ import Foundation
 
 enum ProfileAPIError: LocalizedError {
     case userNotFound
+    case userNotFoundInResponse
     
     var errorDescription: String? {
         switch self {
         case .userNotFound:
             return "User not found"
+        case .userNotFoundInResponse:
+            return "User not found in response"
         }
     }
 }
@@ -52,4 +55,3 @@ struct UserBase: Codable {
     let name: String
     let avatar_url: String
 }
-
