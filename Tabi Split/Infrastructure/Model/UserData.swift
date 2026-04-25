@@ -55,7 +55,7 @@ class UserData {
     }
 }
 
-enum ProfileImageEnum: String, Identifiable {
+enum ProfileImageEnum: String, Identifiable, CaseIterable {
     case owl, dragon, wallet, octopus
     
     var id: String { rawValue }
@@ -73,9 +73,6 @@ enum ProfileImageEnum: String, Identifiable {
         }
     }
     
-    static var allCases: [ProfileImageEnum] {
-        [.owl, .dragon, .wallet, .octopus]
-    }
 }
 
 struct PaymentMethod: Identifiable {
@@ -188,7 +185,4 @@ enum BankEnum: Identifiable, CaseIterable {
         }
     }
     
-    static var allCases: [BankEnum] {
-        [.bca, .bni, .bri, .seabank, .ovo, .shopeePay, .goPay, .mandiri]
-    }
 }

@@ -117,11 +117,11 @@ struct ExpenseResultView: View {
                         if eventExpenseViewModel.isEdit {
                             if await eventExpenseViewModel.handleUpdateExpense(event: event, isGuest: profileViewModel.isGuest) {
                                 eventExpenseViewModel.isEdit = false
-                                routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                                routes.pushMany([.home, .eventDetail])
                             }
                         } else {
                             if await eventExpenseViewModel.finalizeExpense(event, isGuest: profileViewModel.isGuest) {
-                                routes.mutlipleNavigate(to: [.HomeView, .EventDetailView])
+                                routes.pushMany([.home, .eventDetail])
                                 return
                             }
                         }

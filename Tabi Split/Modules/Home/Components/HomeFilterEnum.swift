@@ -37,7 +37,4 @@ enum HomeFilterEnum: Identifiable, CaseIterable {
         }
     }
     
-    static var allCases: [HomeFilterEnum] {
-        [.all, .youOwe, .owsYou, .settled]
-    }
 }

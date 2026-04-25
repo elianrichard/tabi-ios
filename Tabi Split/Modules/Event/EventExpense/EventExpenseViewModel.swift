@@ -318,10 +318,11 @@ final class EventExpenseViewModel {
             print("Error")
             return false
         }
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
         
         do {
             let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
-            event.expenses.append(expense)
             if (selectedMethod == .equally) {
                 let assignees = selectedParticipants.map{ ExpensePerson(user: $0, share: 1) }
                 let expenseItem = ExpenseItem(itemName: expenseName, itemPrice: totalSpending, itemQuantity: 1, assignees: [])
@@ -332,60 +333,72 @@ final class EventExpenseViewModel {
                 expense.additionalCharges = additionalCharges
             }
             if !isGuest {
-                isApiCallLoading = true
                 let response = try await ExpenseService.shared.createExpense(event: event, expense: expense)
                 expense.expenseId = response.expense_id
             }
+            event.expenses.append(expense)
             SwiftDataService.shared.saveModelContext()
         } catch {
             print("Create expense failed: \(error)")
-            isApiCallLoading = false
             return false
         }
-        isApiCallLoading = false
         return true
     }
     
     @MainActor
     func handleDeleteExpense(event: EventData?, isGuest: Bool) async -> Bool {
         guard let expense = selectedExpense, let event else { return false }
-        if !isGuest {
-            do {
-                isApiCallLoading = true
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+        
+        do {
+            if !isGuest {
                 try await ExpenseService.shared.deleteExpense(expense: expense)
-            } catch {
-                print("Expense delete failed: \(error)")
-                isApiCallLoading = false
-                return false
             }
+            event.expenses.removeAll(where: { $0 == expense })
+            SwiftDataService.shared.saveModelContext()
+        } catch {
+            print("Expense delete failed: \(error)")
+            return false
         }
-        event.expenses.removeAll(where: { $0 == expense })
-        SwiftDataService.shared.saveModelContext()
-        isApiCallLoading = false
         return true
     }
     
     @MainActor
     func handleUpdateExpense (event: EventData, isGuest: Bool) async -> Bool {
         guard let expense = selectedExpense, let selectedCoverer = selectedCoverer, let selectedMethod = selectedMethod else { return false }
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+        
+        let originalCoverer = expense.coverer
+        let originalPrice = expense.price
+        let originalSplitMethod = expense.splitMethod
+        let originalItems = expense.items
+        let originalAdditionalCharges = expense.additionalCharges
+        let originalParticipants = expense.participants
+        
         do {
-            if !isGuest {
-                isApiCallLoading = true
-                try await ExpenseService.shared.updateExpense(expense: expense)
-            }
             expense.coverer = selectedCoverer
             expense.price = totalSpending
             expense.splitMethod = selectedMethod.id
             expense.items = items
             expense.additionalCharges = additionalCharges
             expense.participants = selectedParticipants
+            
+            if !isGuest {
+                try await ExpenseService.shared.updateExpense(expense: expense)
+            }
             SwiftDataService.shared.saveModelContext()
         } catch {
+            expense.coverer = originalCoverer
+            expense.price = originalPrice
+            expense.splitMethod = originalSplitMethod
+            expense.items = originalItems
+            expense.additionalCharges = originalAdditionalCharges
+            expense.participants = originalParticipants
             print("Update expense failed: \(error)")
-            isApiCallLoading = false
             return false
         }
-        isApiCallLoading = false
         return true
     }
 }
