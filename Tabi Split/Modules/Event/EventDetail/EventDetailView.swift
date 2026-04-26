@@ -8,10 +8,6 @@
 import SwiftUI
 import Lottie
 
-enum EventSheets {
-    case complete, incomplete, delete, quickScan, allParticipants
-}
-
 struct EventDetailView: View {
     @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
@@ -19,8 +15,8 @@ struct EventDetailView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
     
-    @State var sheetViewModel = SheetViewModel<EventSheets>()
     @State private var hasPreviewed: Bool = false
+    @State private var quickScanSheetHeight: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -35,19 +31,19 @@ struct EventDetailView: View {
                         }
                         if !eventViewModel.isEventCompleted {
                             Button {
-                                sheetViewModel.setSheet(.complete)
+                                router.present(.eventComplete)
                             } label: {
                                 Label("Mark as Completed", systemImage: "flag")
                             }
                         } else {
                             Button {
-                                sheetViewModel.setSheet(.incomplete)
+                                router.present(.eventIncomplete)
                             } label: {
                                 Label("Mark as Incomplete", systemImage: "flag.slash")
                             }
                         }
                         Button (role: .destructive) {
-                            sheetViewModel.setSheet(.delete)
+                            router.present(.eventDelete)
                         } label: {
                             Label("Delete Event", systemImage: "trash")
                         }
@@ -57,7 +53,7 @@ struct EventDetailView: View {
             
             VStack (spacing: 0) {
                 EventBanner(resource: EventIconEnum(rawValue: eventViewModel.selectedEvent?.eventIcon ?? "")?.bannerResource ?? .eventBanner1)
-                EventParticipantsList(sheetViewModel: $sheetViewModel)
+                EventParticipantsList()
                 VStack {
                     if eventViewModel.isNoParticipants {
                         EventNoParticipants()
@@ -111,7 +107,7 @@ struct EventDetailView: View {
                         CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {                            
                             eventExpenseViewModel.resetViewModel()
                             eventExpenseViewModel.isQuickScanned = true
-                            sheetViewModel.setSheet(.quickScan)
+                            router.present(.eventQuickScan)
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
@@ -131,7 +127,7 @@ struct EventDetailView: View {
             eventInviteViewModel.selectedContacts = eventViewModel.selectedEvent?.participants ?? []
         }
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.complete)) {
+        .sheet(isPresented: router.sheetBinding(for: .eventComplete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
                     LottieView(animation: .named("CompletedEvent"))
@@ -151,12 +147,12 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        sheetViewModel.clearSheet()
+                        router.dismissSheet()
                     }
                     CustomButton(text: "Complete") {
                         Task {
                             if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
-                                sheetViewModel.clearSheet()
+                                router.dismissSheet()
                             }
                         }
                     }
@@ -168,7 +164,7 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.incomplete)) {
+        .sheet(isPresented: router.sheetBinding(for: .eventIncomplete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
                     LottieView(animation: .named("CompletedEvent"))
@@ -189,12 +185,12 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        sheetViewModel.clearSheet()
+                        router.dismissSheet()
                     }
                     CustomButton(text: "Yes") {
                         Task {
                             if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
-                                sheetViewModel.clearSheet()
+                                router.dismissSheet()
                             }
                         }
                     }
@@ -206,7 +202,7 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.delete)) {
+        .sheet(isPresented: router.sheetBinding(for: .eventDelete)) {
             VStack (alignment: .center, spacing: 0) {
                 VStack (spacing: 0) {
                     LottieView(animation: .named("DeleteEvent"))
@@ -225,12 +221,12 @@ struct EventDetailView: View {
                 .frame(maxHeight: .infinity)
                 HStack {
                     CustomButton(text: "Cancel", type: .secondary) {
-                        sheetViewModel.clearSheet()
+                        router.dismissSheet()
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
                         Task {
                             if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
-                                sheetViewModel.clearSheet()
+                                router.dismissSheet()
                                 router.pop()
                             }
                         }
@@ -243,12 +239,12 @@ struct EventDetailView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.quickScan)){
-            ReceiptUploadSheet(height: $sheetViewModel.sheetHeight, isPresented: sheetViewModel.getIsPresentedBinding(.quickScan))
-                .presentationDetents([.height(sheetViewModel.sheetHeight)])
+        .sheet(isPresented: router.sheetBinding(for: .eventQuickScan)){
+            ReceiptUploadSheet(height: $quickScanSheetHeight, isPresented: router.sheetBinding(for: .eventQuickScan))
+                .presentationDetents([.height(quickScanSheetHeight)])
         }
-        .sheet(isPresented: sheetViewModel.getIsPresentedBinding(.allParticipants)){
-            SeeAllParticipantSheet(isPresented: sheetViewModel.getIsPresentedBinding(.allParticipants), participantsList: eventViewModel.selectedEvent?.participants ?? [])
+        .sheet(isPresented: router.sheetBinding(for: .eventAllParticipants)){
+            SeeAllParticipantSheet(isPresented: router.sheetBinding(for: .eventAllParticipants), participantsList: eventViewModel.selectedEvent?.participants ?? [])
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }

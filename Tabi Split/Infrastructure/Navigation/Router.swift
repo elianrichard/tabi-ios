@@ -33,7 +33,13 @@ enum AppRoute: Hashable {
     case receiptUploadReview
 }
 
-enum SheetRoute: Hashable {}
+enum SheetRoute: Hashable {
+    case eventComplete
+    case eventIncomplete
+    case eventDelete
+    case eventQuickScan
+    case eventAllParticipants
+}
 
 @Observable final class Router {
     var path: [AppRoute] = []
