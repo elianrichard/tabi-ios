@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @State private var routes = Routes()
+    @State private var routes = AppRouter()
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
@@ -34,78 +34,8 @@ struct ContentView: View {
                         LoginView()
                     }
                 }
-                .navigationDestination(for: Routes.Destination.self) { destination in
-                    switch destination {
-                    case .HomeView:
-                        HomeView()
-                        
-                    case .InboxView:
-                        InboxView()
-                        
-                    case .EventFormView:
-                        EventFormView()
-                        
-                    case .EventDetailView:
-                        EventDetailView()
-                        
-                    case .EventInviteView:
-                        EventInviteView()
-                        
-                    case .SwiftDataTestingView:
-                        SwiftDataTestingView()
-                        
-                    case .LoginView:
-                        LoginView()
-                        
-                    case .RegisterView:
-                        RegisterView()
-                        
-                    case .AddExpenseView:
-                        AddExpenseView()
-                        
-                    case .ExpenseAddItemsView:
-                        ExpenseAddItemsView()
-                        
-                    case .ExpenseAssignView:
-                        ExpenseAssignView()
-                        
-                    case .ExpenseResultView:
-                        ExpenseResultView()
-                        
-                    case .EventSummaryDetailView:
-                        EventSummaryDetailView()
-                        
-                    case .EventSettlementView:
-                        EventSettlementView()
-                        
-                    case .SettlementPaymentMethodView:
-                        SettlementPaymentMethodView()
-                        
-                    case .SettlementOptimizationView:
-                        SettlementOptimizationView()
-                        
-                    case .SettlementReceiptView:
-                        SettlementReceiptView()
-                        
-                    case .SettlementConfirmationView:
-                        SettlementConfirmationView()
-                        
-                    case .SettlementUploadView:
-                        SettlementUploadView()
-                        
-                    case .Profile:
-                        ProfileView()
-                        
-                    case .EditProfile:
-                        EditProfileView()
-                        
-                    case .PaymentMethods:
-                        PaymentMethodView()
-                        
-                    case .ReceiptUploadReview:
-                        ReceiptImageReviewView()
-                    }
-                    
+                .navigationDestination(for: AppRoute.self) { route in
+                    AppRouteDestinationView(route: route)
                 }
             }
             
@@ -177,7 +107,7 @@ struct ContentView: View {
                     print("Join event failed: \(error)")
                 }
             }
-            routes.navigate(to: .HomeView)
+            routes.push(.home)
         }
     }
 }

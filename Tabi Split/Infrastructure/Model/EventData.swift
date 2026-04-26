@@ -64,7 +64,7 @@ class EventData {
     }
 }
 
-enum EventIconEnum: String, Identifiable {
+enum EventIconEnum: String, Identifiable, CaseIterable {
     case icon1, icon2, icon3, icon4, icon5, icon6, icon7,icon8
     
     var id: String { rawValue }
@@ -111,12 +111,9 @@ enum EventIconEnum: String, Identifiable {
         }
     }
     
-    static var allCases: [EventIconEnum] {
-        [.icon1, .icon2, .icon3, .icon4, .icon5, .icon6, .icon7, .icon8]
-    }
 }
 
-enum EventSectionEnum: String, Identifiable {
+enum EventSectionEnum: String, Identifiable, CaseIterable {
     case expenses
     case summary
     
@@ -131,9 +128,6 @@ enum EventSectionEnum: String, Identifiable {
         }
     }
     
-    static var allCases: [EventSectionEnum] {
-        [.expenses, .summary]
-    }
 }
 
 enum EventCardStatusEnum: String {

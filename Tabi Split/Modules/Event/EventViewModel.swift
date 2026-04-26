@@ -60,10 +60,12 @@ final class EventViewModel {
     @MainActor
     func handleEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) async -> Bool {
         guard let selectedEvent else { return false }
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+        
         do {
             var participants: [UserData] = selectedContacts
             if !isGuest {
-                isApiCallLoading = true
                 let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
                 let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
                     if let image = ProfileImageEnum(rawValue: user.avatar_url) {
@@ -94,83 +96,83 @@ final class EventViewModel {
             SwiftDataService.shared.saveModelContext()
         } catch {
             print("Edit Event failed: \(error)")
-            isApiCallLoading = false
             return false
         }
-        isApiCallLoading = false
         return true
         
     }
     
     @MainActor
     func handleCreateEvent (currentUser: UserData, isGuest: Bool) async -> Bool {
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+        
         do {
+            var eventId: String?
             if !isGuest {
-                isApiCallLoading = true
-                let _ = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
+                let response = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
+                eventId = response.event_id
             }
-            let newEvent = EventData(eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId)
+            let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId)
             SwiftDataService.shared.addEvent(newEvent)
         } catch {
             print("Create event failed: \(error)")
-            isApiCallLoading = false
             return false
         }
-        isApiCallLoading = false
         return true
     }
     
     @MainActor
     func handleDeleteEvent (isGuest: Bool) async -> Bool {
         guard let selectedEvent else { return false }
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+        
         do {
-            isApiCallLoading = true
             if !isGuest {
                 try await EventService.shared.deleteEvent(event: selectedEvent)
             }
             SwiftDataService.shared.deleteEvent(selectedEvent)
         } catch {
             print("Delete event failed: \(error)")
-            isApiCallLoading = false
             return false
         }
-        isApiCallLoading = false
         return true
     }
     
     @MainActor
     func completeEvent(isGuest: Bool) async -> Bool {
         guard let selectedEvent else { return false }
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+        
         do {
             if !isGuest {
-                isApiCallLoading = true
                 try await EventService.shared.completeEvent(event: selectedEvent)
             }
             SwiftDataService.shared.completeEvent(selectedEvent)
         } catch {
             print("Event completion fail: \(error)")
-            isApiCallLoading = false
             return false
         }
-        isApiCallLoading = false
         return true
     }
     
     @MainActor
     func incompleteEvent(isGuest: Bool) async -> Bool {
         guard let selectedEvent else { return false }
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+        
         do {
             if !isGuest {
-                isApiCallLoading = true
                 try await EventService.shared.incompleteEvent(event: selectedEvent)
             }
             SwiftDataService.shared.incompleteEvent(selectedEvent)
         } catch {
             print("Event incomplete fail: \(error)")
-            isApiCallLoading = false
             return false
         }
-        isApiCallLoading = false
         return true
     }
     

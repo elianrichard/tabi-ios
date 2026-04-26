@@ -93,7 +93,7 @@ struct PersonItem: Identifiable {
     var additional: [AdditionalCharge]
 }
 
-enum SplitMethod: String, Identifiable {
+enum SplitMethod: String, Identifiable, CaseIterable {
     case equally = "equally"
     case custom = "custom"
     
@@ -126,12 +126,9 @@ enum SplitMethod: String, Identifiable {
         }
     }
     
-    static var allCases: [SplitMethod] {
-        [.equally, .custom]
-    }
 }
 
-enum AdditionalChargeType: String, Identifiable {
+enum AdditionalChargeType: String, Identifiable, CaseIterable {
     case tax
     case service
     case discount
@@ -163,7 +160,4 @@ enum AdditionalChargeType: String, Identifiable {
         }
     }
     
-    static var allCases: [AdditionalChargeType]{
-        [.tax, .service, .discount, .other]
-    }
 }

@@ -23,7 +23,11 @@ final class ProfileService {
         let request: GetProfileRequest = GetProfileRequest(phones: [user.userPhone])
         let response: GetProfileResponse = try await apiClient.post(endpoint: "/user/check", body: request)
         
-        return response.users[0]
+        guard let apiUser = response.users.first else {
+            throw ProfileAPIError.userNotFoundInResponse
+        }
+        
+        return apiUser
     }
     
     func deleteUser() async throws {
