@@ -13,7 +13,7 @@ enum EventSheets {
 }
 
 struct EventDetailView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
@@ -29,7 +29,7 @@ struct EventDetailView: View {
                     ElipsisMenu (color: .textWhite) {
                         Button {
                             eventViewModel.isDirectInvite = false
-                            routes.navigate(to: .EventFormView)
+                            router.push(.eventForm)
                         } label: {
                             Label("Edit Event", systemImage: "pencil")
                         }
@@ -106,7 +106,7 @@ struct EventDetailView: View {
                         CustomButton(text: "Add Manually", iconResource: .receiptCheckIcon, iconSize: 26, vPadding: 14) {
                             eventExpenseViewModel.isQuickScanned = false
                             eventExpenseViewModel.resetViewModel()
-                            routes.navigate(to: .AddExpenseView)
+                            router.push(.addExpense)
                         }
                         CustomButton(text: "Quick Scan", iconResource: .scanIcon, iconSize: 18, customBackgroundColor: .buttonDarkBlue) {                            
                             eventExpenseViewModel.resetViewModel()
@@ -231,7 +231,7 @@ struct EventDetailView: View {
                         Task {
                             if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
                                 sheetViewModel.clearSheet()
-                                routes.navigateBack()
+                                router.pop()
                             }
                         }
                     }
@@ -255,7 +255,7 @@ struct EventDetailView: View {
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
             if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil {
                 hasPreviewed.toggle()
-                routes.navigate(to: .ReceiptUploadReview)
+                router.push(.receiptUploadReview)
             }
         }
     }
@@ -264,7 +264,7 @@ struct EventDetailView: View {
 #Preview {
     EventDetailView()
         .environment(EventViewModel())
-        .environment(Routes())
+        .environment(Router())
         .environment(EventExpenseViewModel())
         .environment(ProfileViewModel())
 }

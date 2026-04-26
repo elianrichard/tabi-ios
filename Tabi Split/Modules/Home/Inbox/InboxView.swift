@@ -49,5 +49,5 @@ struct InboxView : View {
 
 #Preview {
     InboxView()
-        .environment(Routes())
+        .environment(Router())
 }

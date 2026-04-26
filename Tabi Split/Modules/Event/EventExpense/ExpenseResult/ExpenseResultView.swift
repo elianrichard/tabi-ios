@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct ExpenseResultView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(EventExpenseViewModel.self) var eventExpenseViewModel
     @Environment(ProfileViewModel.self) var profileViewModel
     @Environment(EventViewModel.self) var eventViewModel
@@ -25,14 +25,14 @@ struct ExpenseResultView: View {
                         Button {
                             eventExpenseViewModel.isEdit = true
                             eventExpenseViewModel.isQuickScanned = false
-                            routes.navigate(to: .AddExpenseView)
+                            router.push(.addExpense)
                         } label: {
                             Label("Edit Expense", systemImage: "pencil")
                         }
                         Button (role: .destructive) {
                             Task {
                                 if await eventExpenseViewModel.handleDeleteExpense(event: eventViewModel.selectedEvent, isGuest: profileViewModel.isGuest){
-                                    routes.navigateBack()
+                                    router.pop()
                                 }
                             }
                         } label: {
@@ -117,11 +117,13 @@ struct ExpenseResultView: View {
                         if eventExpenseViewModel.isEdit {
                             if await eventExpenseViewModel.handleUpdateExpense(event: event, isGuest: profileViewModel.isGuest) {
                                 eventExpenseViewModel.isEdit = false
-                                routes.pushMany([.home, .eventDetail])
+                                router.popToRoot()
+                                router.push(.eventDetail)
                             }
                         } else {
                             if await eventExpenseViewModel.finalizeExpense(event, isGuest: profileViewModel.isGuest) {
-                                routes.pushMany([.home, .eventDetail])
+                                router.popToRoot()
+                                router.push(.eventDetail)
                                 return
                             }
                         }
@@ -158,7 +160,7 @@ struct ExpenseResultView: View {
 
 #Preview {
     ExpenseResultView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventViewModel())
         .environment(EventExpenseViewModel())
         .environment(ProfileViewModel())

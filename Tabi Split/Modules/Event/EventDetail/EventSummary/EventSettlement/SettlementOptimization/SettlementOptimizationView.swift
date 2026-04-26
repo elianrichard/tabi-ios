@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettlementOptimizationView: View {
     @Environment(ProfileViewModel.self) private var profileViewModel
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
     
     @State private var contentSize: CGSize = .zero
@@ -70,5 +70,5 @@ struct SettlementOptimizationView: View {
 
 #Preview {
     SettlementOptimizationView()
-        .environment(Routes())
+        .environment(Router())
 }

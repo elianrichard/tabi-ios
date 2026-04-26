@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EventSettlementView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
     
@@ -37,7 +37,7 @@ struct EventSettlementView: View {
                 .frame(maxWidth: .infinity, maxHeight: contentSize.height)
                 
                 Button {
-                    routes.navigate(to: .SettlementOptimizationView)
+                    router.push(.settlementOptimization)
                 } label: {
                     Text("See optimization details")
                         .font(.tabiHeadline)
@@ -53,7 +53,7 @@ struct EventSettlementView: View {
                     if receiptUploadViewModel.receiptImageFromGallery != nil {
                         await receiptUploadViewModel.getImage()
                         eventSettlementViewModel.receiptImage = receiptUploadViewModel.receiptImage
-                        routes.navigate(to: .SettlementUploadView)
+                        router.push(.settlementUpload)
                     }
                 }
             }
@@ -65,7 +65,7 @@ struct EventSettlementView: View {
 
 #Preview {
     EventSettlementView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventSettlementViewModel())
         .environment(EventViewModel())
 }

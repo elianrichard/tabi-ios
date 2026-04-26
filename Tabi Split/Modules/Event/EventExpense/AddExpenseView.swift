@@ -13,7 +13,7 @@ import Combine
 struct AddExpenseView: View {
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
     @State var hasPreviewed: Bool = false
     
@@ -232,10 +232,10 @@ struct AddExpenseView: View {
                 CustomButton(text: "Next") {
                     viewModel.validateInput()
                     if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
-                        routes.navigate(to: .ExpenseAddItemsView)
+                        router.push(.expenseAddItems)
                     } else if (eventExpenseViewModel.selectedMethod == .equally && viewModel.isValid) {
                         eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
-                        routes.navigate(to: .ExpenseResultView)
+                        router.push(.expenseResult)
                     }
                 }
             }else{
@@ -262,7 +262,7 @@ struct AddExpenseView: View {
                     CustomButton(text: "Next", isEnabled: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0, customBackgroundColor: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0 ? .buttonBlue : .buttonGrey) {
                         viewModel.validateInput()
                         if viewModel.isValid{
-                            routes.navigate(to: .ExpenseAssignView)
+                            router.push(.expenseAssign)
                         }
                     }
                     .zIndex(2)
@@ -294,7 +294,7 @@ struct AddExpenseView: View {
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
             if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{
                 hasPreviewed.toggle()
-                routes.navigate(to: .ReceiptUploadReview)
+                router.push(.receiptUploadReview)
             }
         }
         .padding()
@@ -311,7 +311,7 @@ struct AddExpenseView: View {
 
 #Preview {
     AddExpenseView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventViewModel())
         .environment(EventExpenseViewModel())
 }

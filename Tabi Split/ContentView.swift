@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @State private var routes = AppRouter()
+    @State private var router = Router()
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
@@ -21,7 +21,7 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            NavigationStack (path: $routes.navPath) {
+            NavigationStack (path: $router.path) {
                 ZStack {
                     if !UserDefaultsService.shared.getOnboardingStatus() {
                         OnboardingView()
@@ -34,9 +34,7 @@ struct ContentView: View {
                         LoginView()
                     }
                 }
-                .navigationDestination(for: AppRoute.self) { route in
-                    AppRouteDestinationView(route: route)
-                }
+                .appNavigationDestinations()
             }
             
             if (loadingViewModel.isLoading) {
@@ -47,7 +45,7 @@ struct ContentView: View {
                 .ignoresSafeArea()
         }
         .ignoresSafeArea(.keyboard)
-        .environment(routes)
+        .environment(router)
         .environment(eventViewModel)
         .environment(eventInviteViewModel)
         .environment(eventExpenseViewModel)
@@ -107,7 +105,7 @@ struct ContentView: View {
                     print("Join event failed: \(error)")
                 }
             }
-            routes.push(.home)
+            router.push(.home)
         }
     }
 }

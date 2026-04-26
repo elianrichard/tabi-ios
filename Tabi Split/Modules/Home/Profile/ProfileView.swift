@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct ProfileView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) private var profileViewModel
     
     var body: some View {
@@ -22,7 +22,7 @@ struct ProfileView: View {
                         Spacer()
                         if !profileViewModel.isGuest {
                             Icon(systemName: "pencil", color: .textBlack, size: 16) {
-                                routes.navigate(to: .EditProfile)
+                                router.push(.editProfile)
                             }
                         }
                     }
@@ -38,7 +38,7 @@ struct ProfileView: View {
                             .font(.tabiSubtitle)
                             .multilineTextAlignment(.center)
                         CustomButton(text: "Sign In", type: .tertiary, iconResource: .logout) {
-                            routes.navigate(to: .LoginView)
+                            router.push(.login)
                         }
                     }
                     .frame(maxHeight: .infinity)
@@ -51,7 +51,7 @@ struct ProfileView: View {
                             Text("Settings")
                                 .font(.tabiBody)
                             Button {
-                                routes.navigate(to: .PaymentMethods)
+                                router.push(.paymentMethods)
                             } label: {
                                 HStack(spacing: .spacingTight){
                                     Icon(systemName: "wallet.bifold")
@@ -71,7 +71,7 @@ struct ProfileView: View {
                                 let isSuccess = await profileViewModel.logout()
                                 
                                 if isSuccess {
-                                    routes.navigate(to: .LoginView)
+                                    router.push(.login)
                                 }
                             }
                         } label: {
@@ -97,6 +97,6 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
-        .environment(Routes())
+        .environment(Router())
         .environment(ProfileViewModel())
 }

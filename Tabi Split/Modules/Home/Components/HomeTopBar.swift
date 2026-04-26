@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeTopBar: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) private var profileViewModel
     @Bindable var homeViewModel: HomeViewModel
     
@@ -17,7 +17,7 @@ struct HomeTopBar: View {
             HStack (spacing: 10){
                 UserAvatar(userData: profileViewModel.user)
                     .onTapGesture {
-                        routes.navigate(to: .Profile)
+                        router.push(.profile)
                     }
                 Text("Hi, " + profileViewModel.user.name.getFirstName() + "!")
                     .font(.tabiHeadline)
@@ -26,7 +26,7 @@ struct HomeTopBar: View {
             if (false) {
                 Spacer()
                 Button {
-                    routes.navigate(to: .InboxView)
+                    router.push(.inbox)
                 } label: {
                     Icon(.notification)
                         .overlay {

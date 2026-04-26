@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct TopNavigation<Content: View>: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     
     var RightToolbar: Content?
     var title: String
@@ -36,7 +36,7 @@ struct TopNavigation<Content: View>: View {
                         if let backFunction = additionalBackFunction {
                             backFunction()
                         }
-                        routes.navigateBack()
+                        router.pop()
                     } label: {
                         if isCircleBackButton {
                             Icon(systemName: "arrow.left", size: 16)
@@ -71,6 +71,6 @@ struct TopNavigation<Content: View>: View {
     ZStack {
         Color(.red)
         TopNavigation(title: "Testing", isCircleBackButton: true, isInline: true)
-            .environment(Routes())
+            .environment(Router())
     }
 }

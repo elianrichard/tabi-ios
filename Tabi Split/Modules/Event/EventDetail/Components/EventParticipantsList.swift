@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EventParticipantsList: View {
     @Environment(EventViewModel.self) private var eventViewModel
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Binding var sheetViewModel:SheetViewModel<EventSheets>
     
     var body: some View {

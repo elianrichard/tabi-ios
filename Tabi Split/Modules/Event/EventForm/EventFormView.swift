@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EventFormView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
@@ -59,7 +59,7 @@ struct EventFormView: View {
                                 VStack (alignment: .leading, spacing: .spacingTight) {
                                     Divided {
                                         Button {
-                                            routes.navigate(to: .EventInviteView)
+                                            router.push(.eventInvite)
                                         } label: {
                                             HStack(spacing: .spacingTight) {
                                                 Icon(systemName: "plus", color: .buttonBlue, size: 20)
@@ -114,11 +114,11 @@ struct EventFormView: View {
                 Task {
                     if isEdit {
                         if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
-                            routes.navigateBack()
+                            router.pop()
                         }
                     } else {
                         if await eventViewModel.handleCreateEvent(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
-                            routes.navigateBack()
+                            router.pop()
                         }
                     }
                 }
@@ -194,6 +194,6 @@ struct EventFormView: View {
     EventFormView()
         .environment(EventViewModel())
         .environment(EventInviteViewModel())
-        .environment(Routes())
+        .environment(Router())
         .environment(ProfileViewModel())
 }

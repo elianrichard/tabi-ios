@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct EditProfileView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) private var profileViewModel
     @State var editProfileViewModel = EditProfileViewModel()
     @State private var isShowDeleteSheet = false
@@ -57,7 +57,7 @@ struct EditProfileView: View {
             CustomButton(text: profileViewModel.isApiCallLoading ? "Loading..." : "Save") {
                 Task {
                     if await profileViewModel.updateProfile(editProfileViewModel: editProfileViewModel) {
-                        routes.navigateBack()
+                        router.pop()
                     }
                 }
             }
@@ -95,7 +95,7 @@ struct EditProfileView: View {
                         Task {
                             if await profileViewModel.deleteUser() {
                                 isShowDeleteSheet = false
-                                routes.navigate(to: .LoginView)
+                                router.push(.login)
                             }
                         }
                     }
@@ -115,6 +115,6 @@ struct EditProfileView: View {
 
 #Preview {
     EditProfileView()
-        .environment(Routes())
+        .environment(Router())
         .environment(ProfileViewModel())
 }

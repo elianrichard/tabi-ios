@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 import CoreImage.CIFilterBuiltins
 
 struct EventInviteView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
@@ -102,11 +102,11 @@ struct EventInviteView: View {
                                 if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts,
                                                                         currentUser: profileViewModel.user,
                                                                         isGuest: profileViewModel.isGuest) {
-                                    routes.navigateBack()
+                                    router.pop()
                                 }
                             }
                         } else {
-                            routes.navigateBack()
+                            router.pop()
                         }
                     }
                 }
@@ -209,7 +209,7 @@ struct EventInviteView: View {
 
 #Preview {
     EventInviteView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventViewModel())
         .environment(EventInviteViewModel())
 }
