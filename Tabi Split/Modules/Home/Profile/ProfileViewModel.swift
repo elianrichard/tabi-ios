@@ -13,9 +13,10 @@ final class ProfileViewModel{
     var userPaymentMethods: [PaymentMethod] = []
 
     var isApiCallLoading: Bool = false
+    var error: AppError?
     
     var isGuest: Bool {
-        return user.phone == "Guest"
+        return UserDefaultsService.shared.getCurrentUser()?.isGuest ?? true
     }
     
     @MainActor
@@ -31,7 +32,7 @@ final class ProfileViewModel{
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")
         } catch {
-            print("Logout failed: \(error)")
+            self.error = .from(error)
             isApiCallLoading = false
             return false
         }
@@ -60,7 +61,7 @@ final class ProfileViewModel{
             }
             SwiftDataService.shared.saveModelContext()
         } catch {
-            print("Update profile failed: \(error)")
+            self.error = .from(error)
             isApiCallLoading = false
             return false
         }
@@ -80,7 +81,7 @@ final class ProfileViewModel{
                 let freshUser = try await ProfileService.shared.getCurrentProfile()
                 user.update(fromUserBase: freshUser)
             } catch {
-                print("Refresh profile failed: \(error)")
+                self.error = .from(error)
             }
             isApiCallLoading = false
         }
@@ -99,7 +100,7 @@ final class ProfileViewModel{
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")
         } catch {
-            print("User delete failed: \(error)")
+            self.error = .from(error)
             return false
         }
         

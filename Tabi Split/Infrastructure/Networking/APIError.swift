@@ -8,15 +8,18 @@
 import Foundation
 
 enum APIError: LocalizedError {
+    case invalidURL
     case invalidResponse
     case refreshFailed
     case unauthorized
     case requestFailed(message: String)
     case tokenMissing
     case internalServerError(message: String)
-    
+
     var errorDescription: String? {
         switch self {
+        case .invalidURL:
+            return "Invalid request URL"
         case .invalidResponse:
             return "Invalid response from server"
         case .refreshFailed:

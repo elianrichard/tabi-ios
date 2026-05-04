@@ -13,6 +13,7 @@ import Vision
 @Observable
 final class EventExpenseViewModel {
     var isApiCallLoading = false
+    var error: AppError?
     var selectedExpense: Expense? = nil {
         didSet {
             populateViewModel()
@@ -49,6 +50,9 @@ final class EventExpenseViewModel {
         case imageConversionError
         case textRecognizerError
     }
+
+    // Prices whose bounding box right-edge exceeds this threshold are treated as column-aligned totals.
+    private static let ocrRightEdgeThreshold: CGFloat = 0.7
     
     func deleteItem(item: ExpenseItem){
         items.removeAll(where: { $0.id == item.id })
@@ -164,135 +168,132 @@ final class EventExpenseViewModel {
         return Float(cleanedString2) ?? 0
     }
     func performOCROnImage(_ image: UIImage) throws {
-        var itemsAndPrice: [[String]] = []
-        self.words.removeAll()
-        var totalFound: Bool = false
-        var subTotalFound: Bool = false
-        var serviceFound: Bool = false
-        var taxFound: Bool = false
-        let taxKeywords: [String] = ["tax", "ppn", "pb10", "prest10", "pajak", "taxes", "pb1"]
-        let serviceKeywords: [String] = ["service", "charge"]
-        
         self.items.removeAll()
         self.additionalCharges.removeAll()
-        
-        guard let cgImage = image.cgImage else {
-            throw ocrError.imageConversionError
+        self.words.removeAll()
+
+        guard let cgImage = image.cgImage else { throw ocrError.imageConversionError }
+        words = try extractObservations(from: cgImage)
+        let pairs = parseReceiptPairs(from: words)
+        applyParsedItems(pairs)
+    }
+
+    // Runs Vision text recognition and returns the raw observations.
+    private func extractObservations(from cgImage: CGImage) throws -> [VNRecognizedTextObservation] {
+        var observations: [VNRecognizedTextObservation] = []
+        let request = VNRecognizeTextRequest { req, _ in
+            observations = (req.results as? [VNRecognizedTextObservation]) ?? []
         }
-        
-        let request = VNRecognizeTextRequest { (request, error) in
-            guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                print("No recognized text.")
-                return
-            }
-            
-            for observation in observations {
-                self.words.append(observation)
-            }
-        }
-        
-        request.recognitionLevel = .accurate // You can also use .fast for faster but less accurate recognition
-        
-        let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        
+        request.recognitionLevel = .accurate
         do {
-            try requestHandler.perform([request])
+            try VNImageRequestHandler(cgImage: cgImage, options: [:]).perform([request])
         } catch {
             throw ocrError.textRecognizerError
         }
-        
-        firstLoop: for word in words {
-            if let topCandidate = word.topCandidates(1).first {
-                let recognizedText = topCandidate.string.replacingOccurrences(of: " ", with: "")
-                print(recognizedText)
-                let pattern = "^((Rp|rp|RP)?\\d{1,3})(((,|\\.)\\d{3})*((,|\\.)\\d{2})?)$"
-                let regex = try? NSRegularExpression(pattern: pattern)
-                let range = NSRange(location: 0, length: recognizedText.utf16.count)
-                if regex?.firstMatch(in: recognizedText, options: [], range: range) != nil {
-                    if word.boundingBox.maxX > 0.7 { // find the prices that is on the right (TBD: find a better solution than 0.7)
-                        for (index, word2) in words.enumerated() {
-                            var currentIndex = index
-                            if (((word2.boundingBox.midY) <= word.boundingBox.maxY) && ((word2.boundingBox.midY) >= (word.boundingBox.minY))){ // find the closest item that is parallel in the same row
-                                if let recognizedText2 = word2.topCandidates(1).first?.string{
-                                    if recognizedText2 != recognizedText {
-                                        
-                                        let isItTax = taxKeywords.contains { additionalChargeKeywords in
-                                            normalizeString(recognizedText2).contains(additionalChargeKeywords)
-                                        }
-                                        let isItService = serviceKeywords.contains { serviceKeywords in
-                                            normalizeString(recognizedText2).contains(serviceKeywords)
-                                        }
-                                        
-                                        if normalizeString(recognizedText2).range(of: "[a-zA-Z0-9]*", options: .regularExpression) != nil && !isItTax && !isItService  && isValidNumberGreaterThanAlphabets(recognizedText2){ // if the item contains a symbol or number likely it isnt the item name
-                                            var recognizedText3 = words[currentIndex-1].topCandidates(1).first?.string
-                                            while normalizeString(recognizedText3 ?? "").range(of: "[a-zA-Z0-9]*", options: .regularExpression) != nil && isValidNumberGreaterThanAlphabets(recognizedText3 ?? "") {
-                                                currentIndex -= 1
-                                                recognizedText3 = words[currentIndex-1].topCandidates(1).first?.string
-                                            }// when the while loop ends recognized text 3 should be an item name
-                                            itemsAndPrice.append([recognizedText3 ?? "", normalizeString(recognizedText3 ?? ""), recognizedText])
-                                            continue firstLoop
-                                        }else{
-                                            let recognizedText2 = word2.topCandidates(1).first?.string
-                                            itemsAndPrice.append([recognizedText2 ?? "", normalizeString(recognizedText2 ?? ""), recognizedText])
-                                            continue firstLoop
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        return observations
+    }
+
+    // Extracts (displayName, normalizedName, priceString) triples from OCR observations.
+    private func parseReceiptPairs(from observations: [VNRecognizedTextObservation]) -> [[String]] {
+        let pricePattern = "^((Rp|rp|RP)?\\d{1,3})(((,|\\.)\\d{3})*((,|\\.)\\d{2})?)$"
+        let priceRegex = try? NSRegularExpression(pattern: pricePattern)
+        var pairs: [[String]] = []
+
+        firstLoop: for (_, word) in observations.enumerated() {
+            guard let candidate = word.topCandidates(1).first else { continue }
+            let text = candidate.string.replacingOccurrences(of: " ", with: "")
+            let range = NSRange(location: 0, length: text.utf16.count)
+            guard priceRegex?.firstMatch(in: text, options: [], range: range) != nil else { continue }
+            guard word.boundingBox.maxX > Self.ocrRightEdgeThreshold else { continue }
+
+            for (index, word2) in observations.enumerated() {
+                var currentIndex = index
+                let isOnSameRow = word2.boundingBox.midY <= word.boundingBox.maxY
+                    && word2.boundingBox.midY >= word.boundingBox.minY
+                guard isOnSameRow else { continue }
+                guard let label = word2.topCandidates(1).first?.string, label != text else { continue }
+
+                let normalizedLabel = normalizeString(label)
+                let labelHasMoreNumbers = isValidNumberGreaterThanAlphabets(label)
+
+                if normalizedLabel.range(of: "[a-zA-Z0-9]*", options: .regularExpression) != nil
+                    && !isTax(normalizedLabel) && !isService(normalizedLabel)
+                    && labelHasMoreNumbers {
+                    // Label looks like a quantity/code — walk backwards for the real name
+                    var name = observations[currentIndex - 1].topCandidates(1).first?.string
+                    while let n = name,
+                          normalizeString(n).range(of: "[a-zA-Z0-9]*", options: .regularExpression) != nil,
+                          isValidNumberGreaterThanAlphabets(n) {
+                        currentIndex -= 1
+                        name = observations[currentIndex - 1].topCandidates(1).first?.string
                     }
+                    pairs.append([name ?? "", normalizeString(name ?? ""), text])
+                } else {
+                    pairs.append([label, normalizedLabel, text])
                 }
+                continue firstLoop
             }
         }
-        
-        print(itemsAndPrice)
-        
-        for item in itemsAndPrice {
-            let isItTax = taxKeywords.contains { additionalChargeKeywords in
-                item[1].contains(additionalChargeKeywords)
-            }
-            if isItTax {
-                taxFound.toggle()
-                if !item[1].contains("dasar") || !item[1].contains("sebelum") || !item[1].contains("incl") {
-                    additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: stringToFloat(item[2])))
-                    itemsAndPrice.remove(item)
-                    continue
-                }else{
-                    itemsAndPrice.remove(item)
-                    continue
+        return pairs
+    }
+
+    // Categorises parsed pairs into items, additional charges, and total spending.
+    private func applyParsedItems(_ pairs: [[String]]) {
+        let taxKeywords = ["tax", "ppn", "pb10", "prest10", "pajak", "taxes", "pb1"]
+        let serviceKeywords = ["service", "charge"]
+        var remaining = pairs
+        var subTotalFound = false
+        var serviceFound = false
+        var taxFound = false
+
+        for item in remaining {
+            let normalized = item[1]
+            let price = stringToFloat(item[2])
+
+            if taxKeywords.contains(where: { normalized.contains($0) }) {
+                taxFound = true
+                let isSummaryRow = normalized.contains("dasar") || normalized.contains("sebelum") || normalized.contains("incl")
+                if !isSummaryRow {
+                    additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: price))
                 }
-            }
-            
-            let isItService = serviceKeywords.contains { serviceKeywords in
-                item[1].contains(serviceKeywords)
-            }
-            if isItService {
-                serviceFound.toggle()
-                additionalCharges.append(AdditionalCharge(additionalChargeType: .service, amount: stringToFloat(item[2])))
-                itemsAndPrice.remove(item)
+                remaining.remove(item)
                 continue
             }
-            
-            if (item[1].contains("total") && item[1] != "subtotal"){
-                if (item[1].contains("food") || item[1].contains("beverage")){
-                    itemsAndPrice.remove(item)
+
+            if serviceKeywords.contains(where: { normalized.contains($0) }) {
+                serviceFound = true
+                additionalCharges.append(AdditionalCharge(additionalChargeType: .service, amount: price))
+                remaining.remove(item)
+                continue
+            }
+
+            if normalized.contains("total") && normalized != "subtotal" {
+                if normalized.contains("food") || normalized.contains("beverage") {
+                    remaining.remove(item)
                     continue
                 }
-                totalFound.toggle()
-                self.totalSpending = stringToFloat(item[2])
-                itemsAndPrice.remove(item)
+                totalSpending = price
+                remaining.remove(item)
                 break
             }
-            
-            if !subTotalFound && !serviceFound && !taxFound{
-                if (item[1].contains("subtotal")){
-                    subTotalFound.toggle()
+
+            if !subTotalFound && !serviceFound && !taxFound {
+                if normalized.contains("subtotal") {
+                    subTotalFound = true
                     continue
                 }
-                items.append(ExpenseItem(itemName: item[0], itemPrice: stringToFloat(item[2]), itemQuantity: 1))
-                itemsAndPrice.remove(item)
+                items.append(ExpenseItem(itemName: item[0], itemPrice: price, itemQuantity: 1))
+                remaining.remove(item)
             }
         }
+    }
+
+    private func isTax(_ normalized: String) -> Bool {
+        ["tax", "ppn", "pb10", "prest10", "pajak", "taxes", "pb1"].contains { normalized.contains($0) }
+    }
+
+    private func isService(_ normalized: String) -> Bool {
+        ["service", "charge"].contains { normalized.contains($0) }
     }
     func removeZeroShareAssignee(item: ExpenseItem) {
         if let item = items.first(where: { $0.id == item.id }){
@@ -315,7 +316,7 @@ final class EventExpenseViewModel {
     @MainActor
     func finalizeExpense(_ event: EventData, isGuest: Bool) async -> Bool {
         guard let selectedCoverer, let selectedMethod else {
-            print("Error")
+            self.error = .validation("Coverer and split method are required")
             return false
         }
         isApiCallLoading = true
@@ -339,7 +340,7 @@ final class EventExpenseViewModel {
             event.expenses.append(expense)
             SwiftDataService.shared.saveModelContext()
         } catch {
-            print("Create expense failed: \(error)")
+            self.error = .from(error)
             return false
         }
         return true
@@ -358,7 +359,7 @@ final class EventExpenseViewModel {
             event.expenses.removeAll(where: { $0 == expense })
             SwiftDataService.shared.saveModelContext()
         } catch {
-            print("Expense delete failed: \(error)")
+            self.error = .from(error)
             return false
         }
         return true
@@ -396,7 +397,7 @@ final class EventExpenseViewModel {
             expense.items = originalItems
             expense.additionalCharges = originalAdditionalCharges
             expense.participants = originalParticipants
-            print("Update expense failed: \(error)")
+            self.error = .from(error)
             return false
         }
         return true

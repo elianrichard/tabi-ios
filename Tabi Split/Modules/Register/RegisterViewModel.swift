@@ -108,7 +108,6 @@ class RegisterViewModel {
         isSubmitted = true
         guard isFormValid() else {
             isSignUpEnabled = false
-            print("Cannot register: form is invalid")
             isLoading = false
             return false
         }
@@ -126,8 +125,7 @@ class RegisterViewModel {
             UserDefaultsService.shared.saveCurrentUser(user: user)
             SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
-            print("Register failed: \(error)")
-            passwordError = "\(error)"
+            passwordError = error.localizedDescription
             isLoading = false
             return false
         }

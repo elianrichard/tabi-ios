@@ -10,6 +10,8 @@ struct CurrentUserDefaults: Codable {
     let userPhone: String
     let userImage: ProfileImageEnum.ID
     let userId: String
+
+    var isGuest: Bool { userPhone == "Guest" }
 }
 
 extension UserDefaultsService {

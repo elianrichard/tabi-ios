@@ -69,7 +69,7 @@ struct TopNavigation<Content: View>: View {
 
 #Preview {
     ZStack {
-        Color(.red)
+        Color(.buttonRed)
         TopNavigation(title: "Testing", isCircleBackButton: true, isInline: true)
             .environment(Router())
     }

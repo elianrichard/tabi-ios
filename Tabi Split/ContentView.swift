@@ -56,7 +56,6 @@ struct ContentView: View {
             checkAuthentication()
         }
         .onOpenURL { incomingURL in
-            print("App was opened via URL: \(incomingURL)")
             handleIncomingURL(incomingURL)
         }
     }
@@ -77,33 +76,18 @@ struct ContentView: View {
         guard url.scheme == "tabisplit" else {
             return
         }
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-            print("Invalid URL")
-            return
-        }
-        
-        guard let action = components.host, action == "join-event" else {
-            print("Unknown URL action!")
-            return
-        }
-        
-        guard let eventId = components.queryItems?.first(where: { $0.name == "event-id" })?.value else {
-            print("eventId not found")
-            return
-        }
-        
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return }
+        guard let action = components.host, action == "join-event" else { return }
+        guard let eventId = components.queryItems?.first(where: { $0.name == "event-id" })?.value else { return }
         if let events = SwiftDataService.shared.fetchAllEvents(), events.contains(where: { $0.eventId == eventId }) {
-            print("Event already joined")
             return
         }
-        
+
         Task {
             if !profileViewModel.isGuest {
                 do {
                     try await EventService.shared.joinEvent(eventId: eventId)
-                } catch {
-                    print("Join event failed: \(error)")
-                }
+                } catch { }
             }
             router.push(.home)
         }

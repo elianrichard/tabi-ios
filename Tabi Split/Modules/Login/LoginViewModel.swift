@@ -21,10 +21,7 @@ class LoginViewModel {
     
     @MainActor
     func login(phoneInput: String? = nil, passwordInput: String? = nil) async -> Bool {
-        guard validateInput() else {
-            print("Cannot register: form is invalid")
-            return false
-        }
+        guard validateInput() else { return false }
         
         isLoading = true
         do {
@@ -38,7 +35,6 @@ class LoginViewModel {
             UserDefaultsService.shared.saveCurrentUser(user: user)
             SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
-            print("Login failed: \(error)")
             passwordError = "Account credential is invalid"
             isLoading = false
             return false

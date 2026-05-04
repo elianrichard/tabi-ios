@@ -54,32 +54,7 @@ struct AddExpenseView: View {
                         }
                         HStack(alignment: .center){
                             if eventExpenseViewModel.selectedParticipants != [] {
-                                
-                                HStack (spacing: -6) {
-                                    ForEach(Array(eventExpenseViewModel.selectedParticipants.enumerated()), id: \.offset) { index, user in
-                                        if (index < 4) {
-                                            if (eventExpenseViewModel.selectedParticipants.count > 4 && index == 3) {
-                                                Circle()
-                                                    .fill(.uiGray)
-                                                    .frame(width: 40)
-                                                    .overlay {
-                                                        Text("+\(eventExpenseViewModel.selectedParticipants.count - 3)")
-                                                            .font(.tabiBody)
-                                                    }
-                                            } else {
-                                                UserAvatar(userData: user)
-                                                    .zIndex(Double(4-index))
-                                            }
-                                        }
-                                    }
-                                    if (eventExpenseViewModel.selectedParticipants.count < 4) {
-                                        ForEach(Array(0 ..< (4-eventExpenseViewModel.selectedParticipants.count)), id: \.self) { _ in
-                                            Circle()
-                                                .frame(width: 40)
-                                                .opacity(0)
-                                        }
-                                    }
-                                }
+                                AvatarStack(users: eventExpenseViewModel.selectedParticipants)
                                 Spacer()
                                 Button{
                                     viewModel.toggleSeeAll.toggle()

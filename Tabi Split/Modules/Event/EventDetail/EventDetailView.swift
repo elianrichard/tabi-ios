@@ -128,116 +128,50 @@ struct EventDetailView: View {
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: router.sheetBinding(for: .eventComplete)) {
-            VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: 0) {
-                    LottieView(animation: .named("CompletedEvent"))
-                        .looping()
-                        .resizable()
-                        .frame(width: 200, height: 200)
-                        .scaledToFit()
-                    VStack (spacing: .spacingSmall) {
-                        Text("Mark this event as completed?")
-                            .font(.tabiSubtitle)
-                            .multilineTextAlignment(.center)
-                        Text("You can’t add or edit the expenses on this event anymore.")
-                            .font(.tabiBody)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .frame(maxHeight: .infinity)
-                HStack {
-                    CustomButton(text: "Cancel", type: .secondary) {
+            ConfirmationDialog(
+                animationName: "CompletedEvent",
+                title: "Mark this event as completed?",
+                message: "You can’t add or edit the expenses on this event anymore.",
+                confirmLabel: "Complete",
+                onCancel: { router.dismissSheet() },
+                onConfirm: {
+                    if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
                         router.dismissSheet()
                     }
-                    CustomButton(text: "Complete") {
-                        Task {
-                            if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
-                                router.dismissSheet()
-                            }
-                        }
-                    }
                 }
-                .frame(maxWidth: .infinity)
-            }
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding()
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
+            )
         }
         .sheet(isPresented: router.sheetBinding(for: .eventIncomplete)) {
-            VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: 0) {
-                    LottieView(animation: .named("CompletedEvent"))
-                        .looping()
-                        .resizable()
-                        .frame(width: 200, height: 200)
-                        .saturation(0)
-                        .scaledToFit()
-                    VStack (spacing: .spacingSmall) {
-                        Text("Mark this event as incomplete?")
-                            .font(.tabiSubtitle)
-                            .multilineTextAlignment(.center)
-                        Text("The expenses on this event can be edited or added again.")
-                            .font(.tabiBody)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .frame(maxHeight: .infinity)
-                HStack {
-                    CustomButton(text: "Cancel", type: .secondary) {
+            ConfirmationDialog(
+                animationName: "CompletedEvent",
+                animationSaturation: 0,
+                title: "Mark this event as incomplete?",
+                message: "The expenses on this event can be edited or added again.",
+                confirmLabel: "Yes",
+                onCancel: { router.dismissSheet() },
+                onConfirm: {
+                    if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
                         router.dismissSheet()
                     }
-                    CustomButton(text: "Yes") {
-                        Task {
-                            if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
-                                router.dismissSheet()
-                            }
-                        }
-                    }
                 }
-                .frame(maxWidth: .infinity)
-            }
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding()
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
+            )
         }
         .sheet(isPresented: router.sheetBinding(for: .eventDelete)) {
-            VStack (alignment: .center, spacing: 0) {
-                VStack (spacing: 0) {
-                    LottieView(animation: .named("DeleteEvent"))
-                        .looping()
-                        .scaleEffect(1.4)
-                        .frame(width: 300, height: 200)
-                    VStack (spacing: .spacingSmall) {
-                        Text("Do you want to delete this event?")
-                            .font(.tabiSubtitle)
-                            .multilineTextAlignment(.center)
-                        Text("This event can no longer be accessed and can’t be recovered.")
-                            .font(.tabiBody)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .frame(maxHeight: .infinity)
-                HStack {
-                    CustomButton(text: "Cancel", type: .secondary) {
+            ConfirmationDialog(
+                animationName: "DeleteEvent",
+                animationScale: 1.4,
+                title: "Do you want to delete this event?",
+                message: "This event can no longer be accessed and can’t be recovered.",
+                confirmLabel: "Delete",
+                confirmColor: .buttonRed,
+                onCancel: { router.dismissSheet() },
+                onConfirm: {
+                    if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
                         router.dismissSheet()
-                    }
-                    CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
-                        Task {
-                            if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
-                                router.dismissSheet()
-                                router.pop()
-                            }
-                        }
+                        router.pop()
                     }
                 }
-                .frame(maxWidth: .infinity)
-            }
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding()
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
+            )
         }
         .sheet(isPresented: router.sheetBinding(for: .eventQuickScan)){
             ReceiptUploadSheet(height: $quickScanSheetHeight, isPresented: router.sheetBinding(for: .eventQuickScan))
