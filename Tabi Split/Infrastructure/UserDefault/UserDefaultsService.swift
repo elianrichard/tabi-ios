@@ -22,8 +22,6 @@ class UserDefaultsService {
     func setValue<T: Codable>(_ value: T, forKey key: UserDefaultKeys) {
         if let encoded = try? JSONEncoder().encode(value) {
             defaults.set(encoded, forKey: key.rawValue)
-        } else {
-            print("Failed to encode and save value for key: \(key)")
         }
     }
 

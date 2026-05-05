@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @State var homeViewModel = HomeViewModel()
     @Environment(EventViewModel.self) var eventViewModel: EventViewModel
     @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
@@ -30,7 +30,7 @@ struct HomeView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         eventViewModel.selectedEvent = event
-                                        routes.navigate(to: .EventDetailView)
+                                        router.push(.eventDetail)
                                     }
                             }
                         }
@@ -58,7 +58,7 @@ struct HomeView: View {
                 HStack {
                     Button {
                         eventViewModel.selectedEvent = nil
-                        routes.navigate(to: .EventFormView)
+                        router.push(.eventForm)
                     } label: {
                         Icon(systemName: "plus", color: .textWhite, size: 24)
                             .frame(width: 64, height: 64)
@@ -75,8 +75,8 @@ struct HomeView: View {
         .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            profileViewModel.refreshUserData()
             Task {
+                await profileViewModel.refreshUserData()
                 if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest, isShowLoading: Bindable(loadingViewModel).isLoading) {
                     if !profileViewModel.isGuest {
                         SwiftDataService.shared.deleteUsersWithNoId()
@@ -90,5 +90,5 @@ struct HomeView: View {
 #Preview {
     HomeView()
         .environment(EventViewModel())
-        .environment(Routes())
+        .environment(Router())
 }

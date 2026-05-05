@@ -32,35 +32,8 @@ class EventData {
         self.creatorId = creatorId
     }
     
-    func calculateUserEventBalance (currentUser: UserData) {
-        var userBalanceTemp: Float = 0
-        
-        for expense in self.expenses {
-            if expense.coverer == currentUser {
-                userBalanceTemp += expense.price
-            }
-            
-            if (expense.splitMethod == SplitMethod.custom.id) {
-                let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
-                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
-                for item in expense.items {
-                    let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
-                    if let assignee = item.assignees.first(where: { $0.user == currentUser }){
-                        let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
-                        let amountSpent = personQuantity * item.itemPrice
-                        let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
-                        let amountDebt = Float(amountSpent + amountAdditional).properRound()
-                        userBalanceTemp -= amountDebt
-                    }
-                }
-            } else if (expense.splitMethod == SplitMethod.equally.id) {
-                let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
-                if (expense.participants.contains(where: { $0 == currentUser })) {
-                    userBalanceTemp -= amountDebt
-                }
-            }
-        }
-        self.userEventBalance = userBalanceTemp
+    func calculateUserEventBalance(currentUser: UserData) {
+        self.userEventBalance = BalanceCalculator.userBalance(for: currentUser, in: self.expenses)
     }
 }
 
@@ -113,7 +86,7 @@ enum EventIconEnum: String, Identifiable, CaseIterable {
     
 }
 
-enum EventSectionEnum: String, Identifiable, CaseIterable {
+enum EventSection: String, Identifiable, CaseIterable {
     case expenses
     case summary
     
@@ -130,7 +103,7 @@ enum EventSectionEnum: String, Identifiable, CaseIterable {
     
 }
 
-enum EventCardStatusEnum: String {
+enum EventCardStatus: String {
     case debt
     case credit
     case settled
@@ -162,7 +135,7 @@ enum EventCardStatusEnum: String {
     var summaryCardText: String {
         switch self {
         case .credit:
-            "You Should Recieve"
+            "You Should Receive"
         case .debt:
             "You Should Pay"
         case .settled:

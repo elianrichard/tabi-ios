@@ -25,7 +25,7 @@ struct EventSummaryHistoryCard : View {
                     .fontWeight(.medium)
                     .padding(.vertical, 5)
                     .padding(.horizontal, 10)
-                    .background(data.amount > 0 ? Color(UIColor(hex: "#D4FFDA")) : Color(UIColor(hex: "#FBD0DA")))
+                    .background(data.amount > 0 ? Color(.highlightGreen) : Color(.highlightRed))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             Spacer()

@@ -68,18 +68,14 @@ final class EventInviteViewModel {
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
                     cnContacts.append(contact)
                 })
-            } catch {
-                print("Error on contact fetching \(error)")
-            }
+            } catch { }
             isLoadContactLoading = false
         case .notDetermined, .denied, .restricted:
             CNStore.requestAccess(for: .contacts) { granted, error in
                 if (granted) {
-                    print("contact granted")
                     self.isLoadContactLoading = true
                     self.fillUpContacts(currentUser: currentUser, registeredUsers: registeredUsers)
-                } else if let error = error {
-                    print("Error requesting contact acces: \(error)")
+                } else if error != nil {
                     self.isLoadContactLoading = false
                 }
             }
@@ -90,9 +86,7 @@ final class EventInviteViewModel {
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
                     cnContacts.append(contact)
                 })
-            } catch {
-                print("Error on contact fetching \(error)")
-            }
+            } catch { }
             isLoadContactLoading = false
         }
         var allUsers: [UserData] = []

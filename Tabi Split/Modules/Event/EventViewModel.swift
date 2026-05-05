@@ -9,7 +9,7 @@ import SwiftUI
 
 @Observable
 final class EventViewModel {
-    var selectedSection: EventSectionEnum = .expenses
+    var selectedSection: EventSection = .expenses
     
     var selectedEvent: EventData? {
         didSet {
@@ -56,6 +56,7 @@ final class EventViewModel {
     var userSettlementList: [SummarySettlementData] = []
     
     var isApiCallLoading = false
+    var error: AppError?
     
     @MainActor
     func handleEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) async -> Bool {
@@ -95,7 +96,7 @@ final class EventViewModel {
             selectedEvent.participants = participants
             SwiftDataService.shared.saveModelContext()
         } catch {
-            print("Edit Event failed: \(error)")
+            self.error = .from(error)
             return false
         }
         return true
@@ -116,7 +117,7 @@ final class EventViewModel {
             let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId)
             SwiftDataService.shared.addEvent(newEvent)
         } catch {
-            print("Create event failed: \(error)")
+            self.error = .from(error)
             return false
         }
         return true
@@ -134,7 +135,7 @@ final class EventViewModel {
             }
             SwiftDataService.shared.deleteEvent(selectedEvent)
         } catch {
-            print("Delete event failed: \(error)")
+            self.error = .from(error)
             return false
         }
         return true
@@ -152,7 +153,7 @@ final class EventViewModel {
             }
             SwiftDataService.shared.completeEvent(selectedEvent)
         } catch {
-            print("Event completion fail: \(error)")
+            self.error = .from(error)
             return false
         }
         return true
@@ -170,140 +171,42 @@ final class EventViewModel {
             }
             SwiftDataService.shared.incompleteEvent(selectedEvent)
         } catch {
-            print("Event incomplete fail: \(error)")
+            self.error = .from(error)
             return false
         }
         return true
     }
     
     func calculateOptimization(currentUser: UserData) {
-        let debug = false // enable this to debug print
-        
-        var userSummaryData: [SummaryHistoryData] = []
-        var userTotalSpendingTemp: Float = 0
         guard let event = selectedEvent else { return }
-        participantsBalance = event.participants.map { PersonBalanceData(user: $0) }
-        participantsBalance = participantsBalance.sorted(by: { $0.user.name.lowercased() < $1.user.name.lowercased() })
-        
-        //        FILL THE PERSON LENT AND PERSON DEBT EXPENSE
-        
-        for expense in event.expenses {
-            var userBalanceTemp: Float = 0
-            if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice())") }
-            guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
-            personPaid.lent += expense.price
-            
-            if expense.coverer == currentUser {
-                userBalanceTemp += expense.price
-            }
-            
-            if (expense.splitMethod == SplitMethod.custom.id) {
-                let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
-                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
-                for item in expense.items {
-                    let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
-                    for assignee in item.assignees {
-                        guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
-                        let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
-                        let amountSpent = personQuantity * item.itemPrice
-                        let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
-                        let amountDebt = Float(amountSpent + amountAdditional).properRound()
-                        if debug { print("Participants: " + assignee.user.name, "\(item.itemName) Spent: ", amountSpent, "Additional: ", amountAdditional, "debt: ", amountDebt) }
-                        if (expense.coverer == currentUser && personBuy.user == currentUser) {
-                            personPaid.lent -= amountDebt
-                        } else {
-                            personBuy.debt += amountDebt
-                        }
-                        if (assignee.user == currentUser) {
-                            userTotalSpendingTemp += amountDebt
-                            userBalanceTemp -= amountDebt
-                        }
-                    }
-                }
-            } else if (expense.splitMethod == SplitMethod.equally.id) {
-                let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
-                for person in expense.participants {
-                    guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
-                    if (expense.coverer == currentUser && personBuy.user == currentUser) {
-                        personPaid.lent -= amountDebt
-                    } else {
-                        personBuy.debt += amountDebt
-                    }
-                    if (person == currentUser) {
-                        userTotalSpendingTemp += amountDebt
-                        userBalanceTemp -= amountDebt
-                    }
-                }
-            }
-            
-            //            record the specific user balance history data
-            if (userBalanceTemp != 0) {
-                userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalanceTemp))
-            }
-        }
-        
-        userTotalSpending = userTotalSpendingTemp
-        userTransactionHistory = userSummaryData.sorted(by: { $0.expenseDate > $1.expenseDate })
-        
-        //        CALCULATE EACH PERSON BALANCE BASED ON LENT AND DEBT VALUE
-        if debug {
-            for participant in participantsBalance {
-                print("\(participant.user.name) balance: " + String(participant.balance.formatPrice()))
-            }
-        }
-        
-        let personWithDebt: [PersonBalanceData] = participantsBalance.filter { $0.balance < 0 }.sorted(by: { $0.balance < $1.balance })
-        let personWithLent: [PersonBalanceData] = participantsBalance.filter { $0.balance > 0 }.sorted(by: { $0.balance < $1.balance })
-        
-        for debtUser in personWithDebt {
-            for lentUser in personWithLent {
-                if debug { print("lent: ", lentUser.user.name, lentUser.calculationBalance, "debt: ", debtUser.user.name, debtUser.calculationBalance) }
-                if (lentUser.calculationBalance <= 0) { continue }
-                let sum = debtUser.calculationBalance + lentUser.calculationBalance
-                if debug { print(debtUser.user.name, lentUser.user.name, sum) }
-                if (sum >= 0) {
-                    debtUser.settlement.append(PersonSettlementData(userPaid: lentUser.user, amount: abs(debtUser.calculationBalance)))
-                    debtUser.calculationBalance = 0
-                    lentUser.calculationBalance = sum
-                    break
-                } else if (sum < 0) {
-                    debtUser.settlement.append(PersonSettlementData(userPaid: lentUser.user, amount: lentUser.calculationBalance))
-                    debtUser.calculationBalance = sum
-                    lentUser.calculationBalance = 0
-                }
-            }
-        }
-        
-        //        Fill up user's settlement list
+
+        participantsBalance = event.participants
+            .map { PersonBalanceData(user: $0) }
+            .sorted { $0.user.name.lowercased() < $1.user.name.lowercased() }
+
+        let result = BalanceCalculator.optimize(
+            participants: participantsBalance,
+            expenses: event.expenses,
+            currentUser: currentUser
+        )
+        userTransactionHistory = result.history
+        userTotalSpending = result.totalSpending
+
         userSettlementList = []
         if userBalance.status == .debt {
-            for settlement in userBalance.settlement {
-                userSettlementList.append(SummarySettlementData(targetUser: settlement.userPaid, amount: settlement.amount, status: .NeedPayment))
+            userSettlementList = userBalance.settlement.map {
+                SummarySettlementData(targetUser: $0.userPaid, amount: $0.amount, status: .NeedPayment)
             }
         } else if userBalance.status == .credit {
-            let relatedPersonBalance = participantsBalance.filter { $0.settlement.contains(where: { $0.userPaid == currentUser }) }
-            for balance in relatedPersonBalance {
+            let related = participantsBalance.filter { $0.settlement.contains { $0.userPaid == currentUser } }
+            for balance in related {
                 for settlement in balance.settlement {
                     userSettlementList.append(SummarySettlementData(targetUser: balance.user, amount: settlement.amount, status: .WaitingPayment))
                 }
             }
         }
-        userSettlementList = userSettlementList.sorted(by: { $0.targetUser.name.lowercased() < $1.targetUser.name.lowercased() })
-        
-        if let selectedEvent {
-            selectedEvent.userEventBalance = userBalance.balance
-        }
-        
-        if debug {
-            print("=== CALCULATE FINISH ===")
-            for person in participantsBalance {
-                for settlement in person.settlement {
-                    print("\(person.user.name) should pay \(settlement.userPaid.name) for amount of \(settlement.amount.formatPrice())")
-                }
-            }
-            for person in participantsBalance {
-                print("\(person.user.name) balance: \(person.balance) calculation balance: \(person.calculationBalance)")
-            }
-        }
+        userSettlementList.sort { $0.targetUser.name.lowercased() < $1.targetUser.name.lowercased() }
+
+        selectedEvent?.userEventBalance = userBalance.balance
     }
 }

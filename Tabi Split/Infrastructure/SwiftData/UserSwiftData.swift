@@ -8,9 +8,13 @@
 import Foundation
 import SwiftData
 import Contacts
+import OSLog
+
+private let userLogger = Logger(subsystem: "com.tabi.split", category: "SwiftData.User")
 
 extension SwiftDataService {
-    func getAllUsers (excludeLoggedUser: Bool = false, isUnique: Bool = false) -> [UserData]? {
+    @MainActor
+    func getAllUsers(excludeLoggedUser: Bool = false, isUnique: Bool = false) -> [UserData]? {
         let fetchDescriptor = FetchDescriptor<UserData>()
         do {
             var users = try modelContext.fetch(fetchDescriptor)
@@ -21,76 +25,69 @@ extension SwiftDataService {
                     }
                 }
             }
-            if let currentUser = UserDefaultsService.shared.getCurrentUser(),
-               excludeLoggedUser {
-                return users.filter{ $0.phone != currentUser.userPhone }
-            } else { return users }
+            if let currentUser = UserDefaultsService.shared.getCurrentUser(), excludeLoggedUser {
+                return users.filter { $0.phone != currentUser.userPhone }
+            }
+            return users
         } catch {
-            fatalError(error.localizedDescription)
+            userLogger.error("getAllUsers failed: \(error.localizedDescription)")
+            return nil
         }
     }
-    
-    func deleteUsersWithNoId () {
-        if let users = getAllUsers() {
-            for user in users {
-                if user.userId == "" {
-                    modelContext.delete(user)
-                }
-            }
+
+    @MainActor
+    func deleteUsersWithNoId() {
+        guard let users = getAllUsers() else { return }
+        for user in users where user.userId == "" {
+            modelContext.delete(user)
         }
     }
-    
-    func saveCurrentUser (user: CurrentUserDefaults) {
-        if let users = getAllUsers() {
-            if !users.contains(where: { $0.phone == user.userPhone }) {
-                if let image = ProfileImageEnum(rawValue: user.userImage) {
-                    modelContext.insert(UserData(userId: user.userId, name: user.userName, phone: user.userPhone, image: image, imageUrl: nil))
-                } else {
-                    modelContext.insert(UserData(userId: user.userId, name: user.userName, phone: user.userPhone, image: .owl, imageUrl: user.userImage))
-                }
-                saveModelContext()
-            }
+
+    @MainActor
+    func saveCurrentUser(user: CurrentUserDefaults) {
+        guard let users = getAllUsers() else { return }
+        guard !users.contains(where: { $0.phone == user.userPhone }) else { return }
+        if let image = ProfileImageEnum(rawValue: user.userImage) {
+            modelContext.insert(UserData(userId: user.userId, name: user.userName, phone: user.userPhone, image: image, imageUrl: nil))
+        } else {
+            modelContext.insert(UserData(userId: user.userId, name: user.userName, phone: user.userPhone, image: .owl, imageUrl: user.userImage))
         }
+        saveModelContext()
     }
-    
-    func getCurrentUser () -> UserData? {
-        if let users = getAllUsers(),
-           let currentUser = UserDefaultsService.shared.getCurrentUser(),
-           let user = users.first(where: { $0.phone == currentUser.userPhone }) {
-            return user
-        } else { return nil }
+
+    @MainActor
+    func getCurrentUser() -> UserData? {
+        guard let users = getAllUsers(),
+              let currentUser = UserDefaultsService.shared.getCurrentUser() else { return nil }
+        return users.first(where: { $0.phone == currentUser.userPhone })
     }
-    
-    func getUserByUserId (_ id: String) -> UserData? {
-        if let users = getAllUsers() {
-            return users.first(where: { $0.userId == id })
-        } else { return nil }
+
+    @MainActor
+    func getUserByUserId(_ id: String) -> UserData? {
+        return getAllUsers()?.first(where: { $0.userId == id })
     }
-    
-    func editCurrentUser (name: String, phone: String, image: ProfileImageEnum.ID? = nil, imageUrl: String? = nil) {
-        if let user = getCurrentUser() {
-            user.name = name
-            user.phone = phone
-            if let image {
-                user.image = image
-            }
-            if let imageUrl {
-                user.imageUrl = imageUrl
-            }
-            saveModelContext()
-        }
+
+    @MainActor
+    func editCurrentUser(name: String, phone: String, image: ProfileImageEnum.ID? = nil, imageUrl: String? = nil) {
+        guard let user = getCurrentUser() else { return }
+        user.name = name
+        user.phone = phone
+        if let image { user.image = image }
+        if let imageUrl { user.imageUrl = imageUrl }
+        saveModelContext()
     }
-    
-    func deleteAllUser () {
+
+    @MainActor
+    func deleteAllUser() {
         deleteModelContext(type: UserData.self)
     }
-    
-    func addContact (name: String, phone: String) {
-        if let users = getAllUsers(excludeLoggedUser: true) {
-            if !users.contains(where: { $0.phone == phone }) {
-                modelContext.insert(UserData(name: name, phone: phone))
-                saveModelContext()
-            }
+
+    @MainActor
+    func addContact(name: String, phone: String) {
+        if let users = getAllUsers(excludeLoggedUser: true),
+           !users.contains(where: { $0.phone == phone }) {
+            modelContext.insert(UserData(name: name, phone: phone))
+            saveModelContext()
         }
     }
 }

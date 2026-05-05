@@ -22,9 +22,6 @@ class ExpenseAssignViewModel {
                 item.assignees.append(ExpensePerson(user: user, share: 1))
             } else {
                 item.assignees.removeAll(where: { $0.user == user })
-                for assignee in item.assignees {
-                    print(assignee.user.name)
-                }
             }
         }
     }

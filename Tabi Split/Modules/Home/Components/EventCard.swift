@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EventCard : View {
     var event: EventData
-    var status: EventCardStatusEnum = .settled
+    var status: EventCardStatus = .settled
     var isNew: Bool = false
     
     init(event: EventData) {
@@ -50,34 +50,10 @@ struct EventCard : View {
                 }
             }
             Rectangle()
-                .fill(Color(UIColor(hex: "#D9D9D9")))
+                .fill(Color(.uiGray))
                 .frame(height: 1)
             HStack (spacing: .spacingTight) {
-                HStack (spacing: -6) {
-                    ForEach(Array(event.participants.enumerated()), id: \.offset) { index, user in
-                        if (index < 4) {
-                            if (event.participants.count > 4 && index == 3) {
-                                Circle()
-                                    .fill(.uiGray)
-                                    .frame(width: 40)
-                                    .overlay {
-                                        Text("+\(event.participants.count - 3)")
-                                            .font(.tabiBody)
-                                    }
-                            } else {
-                                UserAvatar(userData: user)
-                                    .zIndex(Double(4-index))
-                            }
-                        }
-                    }
-                    if (event.participants.count < 4) {
-                        ForEach(Array(0 ..< (4-event.participants.count)), id: \.self) { _ in
-                            Circle()
-                                .frame(width: 40)
-                                .opacity(0)
-                        }
-                    }
-                }
+                AvatarStack(users: event.participants)
                 HStack {
                     if (isNew) {
                         Text("New Event")

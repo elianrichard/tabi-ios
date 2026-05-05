@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RegisterView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @State private var registerViewModel = RegisterViewModel()
     @FocusState private var focusedField: FocusField?
     
@@ -64,7 +64,7 @@ struct RegisterView: View {
                                      animation: .default) {
                             Task {
                                 if await registerViewModel.register() {
-                                    routes.navigate(to: .HomeView)
+                                    router.push(.home)
                                 }
                             }
                         }
@@ -83,7 +83,7 @@ struct RegisterView: View {
                         Text("Already have an account?")
                             .font(.tabiBody)
                         Button {
-                            routes.navigateBack()
+                            router.pop()
                         } label: {
                             Text("Sign In")
                                 .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
@@ -103,5 +103,5 @@ struct RegisterView: View {
 
 #Preview {
     RegisterView()
-        .environment(Routes())
+        .environment(Router())
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettlementCard: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
     
     var data: SummarySettlementData
@@ -37,7 +37,7 @@ struct SettlementCard: View {
                     Spacer()
                     if (data.status == .NeedPayment) {
                         Button {
-                            routes.navigate(to: .SettlementPaymentMethodView)
+                            router.push(.settlementPaymentMethod)
                         } label: {
                             HStack (spacing: .spacingXSmall) {
                                 Text("Payment Methods")
@@ -71,7 +71,7 @@ struct SettlementCard: View {
                         eventSettlementViewModel.user = data.targetUser
                         if (data.status == .NeedConfirmation) {
                             eventSettlementViewModel.receiptImage = .samplePaymentReceipt
-                            routes.navigate(to: .SettlementConfirmationView)
+                            router.push(.settlementConfirmation)
                         } else {
                             isShowUploadSheet = true
                         }

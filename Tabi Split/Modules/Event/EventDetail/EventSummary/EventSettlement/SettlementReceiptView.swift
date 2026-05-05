@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettlementReceiptView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
     
     @State var lastScaleValue: CGFloat = 1.0
@@ -36,6 +36,6 @@ struct SettlementReceiptView: View {
 
 #Preview {
     SettlementReceiptView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventSettlementViewModel())
 }

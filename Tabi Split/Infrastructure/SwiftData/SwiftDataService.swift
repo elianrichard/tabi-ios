@@ -7,14 +7,17 @@
 
 import Foundation
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "com.tabi.split", category: "SwiftData")
 
 class SwiftDataService {
     public let modelContainer: ModelContainer
     public let modelContext: ModelContext
-    
+
     @MainActor
     static let shared = SwiftDataService()
-    
+
     @MainActor
     private init() {
         do {
@@ -24,24 +27,27 @@ class SwiftDataService {
             )
             self.modelContext = modelContainer.mainContext
         } catch {
-            fatalError("Failed to create the application's model container: \(error.localizedDescription)")
+            // ModelContainer creation is non-recoverable at launch; re-throw as a crash with context.
+            preconditionFailure("Failed to create ModelContainer: \(error)")
         }
     }
-    
-    func saveModelContext(){
+
+    @MainActor
+    func saveModelContext() {
         do {
             try modelContext.save()
         } catch {
-            fatalError(error.localizedDescription)
+            logger.error("SwiftData save failed: \(error.localizedDescription)")
         }
     }
-    
+
+    @MainActor
     func deleteModelContext<T: PersistentModel>(type: T.Type) {
         do {
             try modelContext.delete(model: T.self)
             saveModelContext()
         } catch {
-            fatalError(error.localizedDescription)
+            logger.error("SwiftData delete(\(String(describing: T.self))) failed: \(error.localizedDescription)")
         }
     }
 }

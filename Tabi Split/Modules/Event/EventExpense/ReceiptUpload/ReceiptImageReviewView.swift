@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ReceiptImageReviewView: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @State var receiptSheetHeight: CGFloat = 0
     @State var toggleReceiptSheet: Bool = false
     @State var isUploaded: Bool = false
@@ -36,14 +36,13 @@ struct ReceiptImageReviewView: View {
                         do {
                             try eventExpenseViewModel.performOCROnImage(eventExpenseViewModel.uploadedReceiptImage ?? UIImage())
                         } catch {
-                            print(error)
                         }
                         
                         isUploaded.toggle()
                         if !eventExpenseViewModel.isQuickScanned{
-                            routes.navigateBack()
+                            router.pop()
                         }else{
-                            routes.navigate(to: .AddExpenseView)
+                            router.push(.addExpense)
                         }
                     }
                 }
@@ -66,5 +65,5 @@ struct ReceiptImageReviewView: View {
 #Preview {
     ReceiptImageReviewView()
         .environment(EventExpenseViewModel())
-        .environment(Routes())
+        .environment(Router())
 }

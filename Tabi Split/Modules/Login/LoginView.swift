@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LoginView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
     @State private var loginViewModel = LoginViewModel()
     
@@ -32,7 +32,7 @@ struct LoginView: View {
                         Button {
                             if loginViewModel.guestLogin() {
                                 profileViewModel.user = UserData(name: "Guest", phone: "Guest")
-                                routes.navigate(to: .HomeView)
+                                router.push(.home)
                             }
                         } label: {
                             Text("Enter as Guest")
@@ -43,7 +43,7 @@ struct LoginView: View {
                         .padding(-14)
                     } else {
                         Icon(systemName: "arrow.left", size: 16) {
-                            routes.navigateBack()
+                            router.pop()
                         }
                     }
                     Spacer()
@@ -88,7 +88,7 @@ struct LoginView: View {
                                 // TODO: Disable logout on migration
                                 if await profileViewModel.logout(){
                                     if await loginViewModel.login() {
-                                        routes.navigate(to: .HomeView)
+                                        router.push(.home)
                                     }
                                 }
                             }
@@ -106,7 +106,7 @@ struct LoginView: View {
                             Text("Don't have an account?")
                                 .font(.tabiBody)
                             Button {
-                                routes.navigate(to: .RegisterView)
+                                router.push(.register)
                             } label: {
                                 Text("Sign Up")
                                     .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
@@ -128,5 +128,5 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
-        .environment(Routes())
+        .environment(Router())
 }

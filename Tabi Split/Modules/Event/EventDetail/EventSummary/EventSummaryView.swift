@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EventSummaryView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
     
     
@@ -67,7 +67,7 @@ struct EventSummaryView: View {
                                     .font(.tabiSubtitle)
                                 if eventViewModel.isEventCompleted {
                                     Button {
-                                        routes.navigate(to: .SettlementOptimizationView)
+                                        router.push(.settlementOptimization)
                                     } label: {
                                         Text("See Optimization Details")
                                             .foregroundStyle(.textBlue)
@@ -89,8 +89,8 @@ struct EventSummaryView: View {
                 .onTapGesture {
                     if (eventViewModel.isEventCompleted) {
 //                        TEMPORARILY DISABLED: SETTLEMENT
-//                        routes.navigate(to: .EventSettlementView)
-                        routes.navigate(to: .SettlementOptimizationView)
+//                        router.push(.eventSettlement)
+                        router.push(.settlementOptimization)
                     } else {
                         print("Cannot do this action yet")
                     }
@@ -102,7 +102,7 @@ struct EventSummaryView: View {
                             .font(.tabiHeadline)
                         Spacer()
                         Button {
-                            routes.navigate(to: .EventSummaryDetailView)
+                            router.push(.eventSummaryDetail)
                         } label: {
                             Text("See All")
                                 .font(.tabiBody)
@@ -133,6 +133,6 @@ struct EventSummaryView: View {
 
 #Preview {
     EventSummaryView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventViewModel())
 }

@@ -35,7 +35,7 @@ class PersonBalanceData: Identifiable {
         }
     }
     var settlement: [PersonSettlementData]
-    var status: EventCardStatusEnum
+    var status: EventCardStatus
     
     init(user: UserData) {
         self.id = UUID()

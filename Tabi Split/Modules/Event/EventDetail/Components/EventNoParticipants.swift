@@ -9,7 +9,7 @@ import SwiftUI
 import Lottie
 
 struct EventNoParticipants : View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(EventViewModel.self) var eventViewModel
     
     var body: some View {
@@ -23,7 +23,7 @@ struct EventNoParticipants : View {
                 .font(.tabiSubtitle)
             Button {
                 eventViewModel.isDirectInvite = true
-                routes.navigate(to: .EventInviteView)
+                router.push(.eventInvite)
             } label: {
                 Text("+ Add Participants")
                     .font(.tabiHeadline)

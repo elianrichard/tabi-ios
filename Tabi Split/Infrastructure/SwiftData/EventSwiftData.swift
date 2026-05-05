@@ -7,57 +7,71 @@
 
 import Foundation
 import SwiftData
+import OSLog
+
+private let eventLogger = Logger(subsystem: "com.tabi.split", category: "SwiftData.Event")
 
 extension SwiftDataService {
-    func addEvent (_ event: EventData) {
+    @MainActor
+    func addEvent(_ event: EventData) {
         modelContext.insert(event)
         saveModelContext()
     }
-    
-    func fetchAllEvents () -> [EventData]? {
+
+    @MainActor
+    func fetchAllEvents() -> [EventData]? {
         let fetchDescriptor = FetchDescriptor<EventData>()
         do {
             return try modelContext.fetch(fetchDescriptor)
         } catch {
-            fatalError(error.localizedDescription)
+            eventLogger.error("fetchAllEvents failed: \(error.localizedDescription)")
+            return nil
         }
     }
-    
-    func updateEvent (_ event: EventData, index: Int) {
-        if var allEvents = fetchAllEvents() {
-            allEvents[index] = event
-            saveModelContext()
-        }
+
+    @MainActor
+    func updateEvent(_ event: EventData, index: Int) {
+        guard let allEvents = fetchAllEvents(), index < allEvents.count else { return }
+        let target = allEvents[index]
+        target.eventName = event.eventName
+        target.eventIcon = event.eventIcon
+        target.participants = event.participants
+        target.completionDate = event.completionDate
+        saveModelContext()
     }
-    
-    func deleteEvent (at index: Int) {
+
+    @MainActor
+    func deleteEvent(at index: Int) {
         if let allEvents = fetchAllEvents() {
             let event = allEvents[index]
             modelContext.delete(event)
             saveModelContext()
         }
     }
-    func deleteEvent (_ event: EventData) {
+
+    @MainActor
+    func deleteEvent(_ event: EventData) {
         modelContext.delete(event)
     }
-    
+
+    @MainActor
     func completeEvent(_ event: EventData) {
-        if let allEvents = fetchAllEvents() {
-            if let selectedEvent = allEvents.first(where: { $0 == event }) {
-                selectedEvent.completionDate = Date()
-            }
+        if let target = fetchAllEvents()?.first(where: { $0 == event }) {
+            target.completionDate = Date()
+            saveModelContext()
         }
     }
-    
+
+    @MainActor
     func incompleteEvent(_ event: EventData) {
-        if let allEvents = fetchAllEvents() {
-            if let selectedEvent = allEvents.first(where: { $0 == event }) {
-                selectedEvent.completionDate = nil
-            }
+        if let target = fetchAllEvents()?.first(where: { $0 == event }) {
+            target.completionDate = nil
+            saveModelContext()
         }
     }
-    
-    func deleteAllEvents () {
+
+    @MainActor
+    func deleteAllEvents() {
         deleteModelContext(type: EventData.self)
     }
 }

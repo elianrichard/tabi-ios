@@ -60,7 +60,7 @@ class SubNote {
 
 // VIEW
 struct SwiftDataTestingView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @State var swiftDataTestingViewModel = SwiftDataTestingViewModel()
     
     var body: some View {
@@ -97,7 +97,7 @@ struct SwiftDataTestingView: View {
             .toolbar {
                 ToolbarItemGroup (placement: .bottomBar) {
                     Button(action: {
-                        routes.navigate(to: .HomeView)
+                        router.push(.home)
                     }) {
                         Label("Home", systemImage: "house.fill")
                     }
@@ -218,7 +218,7 @@ struct SwiftDataTestingSubNoteDetailView: View {
 
 #Preview {
     SwiftDataTestingView()
-        .environment(Routes())
+        .environment(Router())
 }
 
 // VIEW MODEL

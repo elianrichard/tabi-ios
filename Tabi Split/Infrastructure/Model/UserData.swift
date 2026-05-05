@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SwiftData
-import SwiftUI
 
 @Model
 class UserData {

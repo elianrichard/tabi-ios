@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EventSummaryDetailView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
     
     var body: some View {
@@ -33,6 +33,6 @@ struct EventSummaryDetailView: View {
 
 #Preview {
     EventSummaryDetailView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventViewModel())
 }

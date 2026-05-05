@@ -20,7 +20,7 @@ struct EventNavigation: View {
             .frame(maxWidth: .infinity, alignment: eventViewModel.selectedSection == .expenses ? .leading : .trailing)
             
             HStack (spacing: 0) {
-                ForEach(EventSectionEnum.allCases) { section in
+                ForEach(EventSection.allCases) { section in
                     Text("\(section.displayName)")
                         .frame(maxWidth: 100, maxHeight: .infinity)
                         .foregroundStyle(eventViewModel.selectedSection == section ? .textBlue : .textBlack)
