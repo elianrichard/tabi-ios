@@ -75,8 +75,8 @@ struct HomeView: View {
         .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            profileViewModel.refreshUserData()
             Task {
+                await profileViewModel.refreshUserData()
                 if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest, isShowLoading: Bindable(loadingViewModel).isLoading) {
                     if !profileViewModel.isGuest {
                         SwiftDataService.shared.deleteUsersWithNoId()

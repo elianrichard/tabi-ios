@@ -19,6 +19,7 @@ final class HomeViewModel {
     var filteredEvents: [EventData] = []
     var notificationCount: Int = 0
     var isLoading: Bool = false
+    var error: AppError?
 
     func filterEvents(by filter: HomeFilterEnum) {
         switch filter {
@@ -114,6 +115,7 @@ final class HomeViewModel {
                 }
             } catch {
                 homeLogger.error("Fetch events failed: \(error.localizedDescription)")
+                self.error = .from(error)
             }
         }
 

@@ -304,14 +304,14 @@ final class EventExpenseViewModel {
             }
         }
     }
+    private static let digitRegex = (try? NSRegularExpression(pattern: "\\d")) ?? NSRegularExpression()
+    private static let alphaRegex = (try? NSRegularExpression(pattern: "[a-zA-Z]")) ?? NSRegularExpression()
+
     func isValidNumberGreaterThanAlphabets(_ string: String) -> Bool {
-        let numbersRegex = try! NSRegularExpression(pattern: "\\d") // Match digits
-        let alphabetsRegex = try! NSRegularExpression(pattern: "[a-zA-Z]") // Match alphabets
-        
-        let numbersCount = numbersRegex.numberOfMatches(in: string, range: NSRange(location: 0, length: string.utf16.count))
-        let alphabetsCount = alphabetsRegex.numberOfMatches(in: string, range: NSRange(location: 0, length: string.utf16.count))
-        
-        return numbersCount >= alphabetsCount
+        let range = NSRange(location: 0, length: string.utf16.count)
+        let digits = Self.digitRegex.numberOfMatches(in: string, range: range)
+        let letters = Self.alphaRegex.numberOfMatches(in: string, range: range)
+        return digits >= letters
     }
     @MainActor
     func finalizeExpense(_ event: EventData, isGuest: Bool) async -> Bool {

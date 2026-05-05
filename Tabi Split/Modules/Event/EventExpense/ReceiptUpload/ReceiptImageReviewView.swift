@@ -36,7 +36,6 @@ struct ReceiptImageReviewView: View {
                         do {
                             try eventExpenseViewModel.performOCROnImage(eventExpenseViewModel.uploadedReceiptImage ?? UIImage())
                         } catch {
-                            print(error)
                         }
                         
                         isUploaded.toggle()

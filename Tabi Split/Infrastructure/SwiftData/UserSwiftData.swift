@@ -13,6 +13,7 @@ import OSLog
 private let userLogger = Logger(subsystem: "com.tabi.split", category: "SwiftData.User")
 
 extension SwiftDataService {
+    @MainActor
     func getAllUsers(excludeLoggedUser: Bool = false, isUnique: Bool = false) -> [UserData]? {
         let fetchDescriptor = FetchDescriptor<UserData>()
         do {
@@ -34,6 +35,7 @@ extension SwiftDataService {
         }
     }
 
+    @MainActor
     func deleteUsersWithNoId() {
         guard let users = getAllUsers() else { return }
         for user in users where user.userId == "" {
@@ -41,6 +43,7 @@ extension SwiftDataService {
         }
     }
 
+    @MainActor
     func saveCurrentUser(user: CurrentUserDefaults) {
         guard let users = getAllUsers() else { return }
         guard !users.contains(where: { $0.phone == user.userPhone }) else { return }
@@ -52,16 +55,19 @@ extension SwiftDataService {
         saveModelContext()
     }
 
+    @MainActor
     func getCurrentUser() -> UserData? {
         guard let users = getAllUsers(),
               let currentUser = UserDefaultsService.shared.getCurrentUser() else { return nil }
         return users.first(where: { $0.phone == currentUser.userPhone })
     }
 
+    @MainActor
     func getUserByUserId(_ id: String) -> UserData? {
         return getAllUsers()?.first(where: { $0.userId == id })
     }
 
+    @MainActor
     func editCurrentUser(name: String, phone: String, image: ProfileImageEnum.ID? = nil, imageUrl: String? = nil) {
         guard let user = getCurrentUser() else { return }
         user.name = name
@@ -71,10 +77,12 @@ extension SwiftDataService {
         saveModelContext()
     }
 
+    @MainActor
     func deleteAllUser() {
         deleteModelContext(type: UserData.self)
     }
 
+    @MainActor
     func addContact(name: String, phone: String) {
         if let users = getAllUsers(excludeLoggedUser: true),
            !users.contains(where: { $0.phone == phone }) {

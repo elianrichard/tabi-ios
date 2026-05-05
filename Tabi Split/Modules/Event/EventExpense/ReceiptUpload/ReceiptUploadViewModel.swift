@@ -31,14 +31,12 @@ final class ReceiptUploadViewModel{
         }
         
         let request = VNDetectDocumentSegmentationRequest { request, error in
-            if let error = error {
-                print("Error detecting rectangles: \(error)")
+            if error != nil {
                 completion(nil)
                 return
             }
-            
+
             guard let results = request.results as? [VNRectangleObservation], let rectangle = results.first else {
-                print("No rectangle found")
                 completion(nil)
                 return
             }
@@ -55,7 +53,6 @@ final class ReceiptUploadViewModel{
             do {
                 try requestHandler.perform([request])
             } catch {
-                print("Failed to perform rectangle detection: \(error)")
                 completion(nil)
             }
         }

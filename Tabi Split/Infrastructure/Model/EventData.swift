@@ -135,7 +135,7 @@ enum EventCardStatus: String {
     var summaryCardText: String {
         switch self {
         case .credit:
-            "You Should Recieve"
+            "You Should Receive"
         case .debt:
             "You Should Pay"
         case .settled:

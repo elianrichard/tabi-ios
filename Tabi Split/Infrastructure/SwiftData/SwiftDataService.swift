@@ -32,6 +32,7 @@ class SwiftDataService {
         }
     }
 
+    @MainActor
     func saveModelContext() {
         do {
             try modelContext.save()
@@ -40,6 +41,7 @@ class SwiftDataService {
         }
     }
 
+    @MainActor
     func deleteModelContext<T: PersistentModel>(type: T.Type) {
         do {
             try modelContext.delete(model: T.self)
