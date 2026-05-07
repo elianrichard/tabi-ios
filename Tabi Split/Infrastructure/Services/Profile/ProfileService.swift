@@ -13,7 +13,7 @@ final class ProfileService {
     
     func editProfile(user: CurrentUserDefaults) async throws -> EditProfileResponse {
         let request = EditProfileRequest(name: user.userName, phone: user.userPhone, avatar_url: user.userImage)
-        let response: EditProfileResponse = try await apiClient.patch(endpoint: "/user/edit", body: request)
+        let response: EditProfileResponse = try await apiClient.patch(endpoint: "/user", body: request)
         
         return response
     }
@@ -31,7 +31,7 @@ final class ProfileService {
     }
     
     func deleteUser() async throws {
-        let _: DeleteResponse = try await apiClient.delete(endpoint: "/user/delete")
+        let _: DeleteResponse = try await apiClient.delete(endpoint: "/user")
     }
     
     func checkUsers(phoneNumbers: [String]) async throws -> CheckUsersResponse {
