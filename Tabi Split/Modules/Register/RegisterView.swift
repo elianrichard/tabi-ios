@@ -64,6 +64,14 @@ struct RegisterView: View {
                                      animation: .default) {
                             Task {
                                 if await registerViewModel.register() {
+                                    SessionState.shared.sessionExpiredBanner = false
+                                    let phone = registerViewModel.phoneNumber.formattedAsPhoneNumber()
+                                    SessionState.shared.migrationRunning = true
+                                    let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: phone, ownerName: registerViewModel.name)
+                                    SessionState.shared.migrationRunning = false
+                                    if !ok {
+                                        SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
+                                    }
                                     routes.navigate(to: .HomeView)
                                 }
                             }

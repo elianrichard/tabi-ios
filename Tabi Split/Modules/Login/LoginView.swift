@@ -11,9 +11,10 @@ struct LoginView: View {
     @Environment(Routes.self) var routes
     @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
     @State private var loginViewModel = LoginViewModel()
-    
+    @State private var sessionState = SessionState.shared
+
     @FocusState private var focusedField: FocusField?
-    
+
     var body: some View {
         ZStack {
             VStack {
@@ -25,8 +26,19 @@ struct LoginView: View {
                     .offset(x: 75, y: -120)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-            
+
             VStack (spacing: 0) {
+                if sessionState.sessionExpiredBanner {
+                    Text("Your session expired. Sign in to sync your local data.")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
+                        .multilineTextAlignment(.center)
+                        .padding(8)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.yellow.opacity(0.25))
+                        .cornerRadius(8)
+                        .padding(.bottom, 8)
+                }
                 HStack {
                     if SwiftDataService.shared.getCurrentUser() == nil {
                         Button {
@@ -85,11 +97,26 @@ struct LoginView: View {
                     VStack (spacing: .spacingMedium) {
                         CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In", animation: .default) {
                             Task {
-                                // TODO: Disable logout on migration
-                                if await profileViewModel.logout(){
-                                    if await loginViewModel.login() {
-                                        routes.navigate(to: .HomeView)
+                                let incomingPhone = loginViewModel.phoneNumber.formattedAsPhoneNumber()
+                                // Wipe local data if a different user previously owned this device.
+                                let prev = UserDefaultsService.shared.getCurrentUser()
+                                if let prev, prev.userPhone != "Guest", prev.userPhone != incomingPhone {
+                                    SwiftDataService.shared.deleteAllEvents()
+                                    SwiftDataService.shared.deleteAllExpenses()
+                                    SwiftDataService.shared.deleteAllUser()
+                                    UserDefaultsService.shared.deleteCurrentUser()
+                                }
+                                if await loginViewModel.login() {
+                                    sessionState.sessionExpiredBanner = false
+                                    profileViewModel.refreshUserData()
+                                    let name = profileViewModel.user.name
+                                    sessionState.migrationRunning = true
+                                    let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: incomingPhone, ownerName: name)
+                                    sessionState.migrationRunning = false
+                                    if !ok {
+                                        sessionState.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
                                     }
+                                    routes.navigate(to: .HomeView)
                                 }
                             }
                         }

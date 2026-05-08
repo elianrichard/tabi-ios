@@ -19,8 +19,10 @@ class EventData {
     @Relationship(deleteRule: .nullify, inverse: \Expense.event) var expenses: [Expense]
     var createdAt: Date
     var creatorId: String = ""
-    
-    init(eventId: String? = nil, eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date? = nil, creatorId: String) {
+    var localId: String = UUID().uuidString
+    var isSynced: Bool = false
+
+    init(eventId: String? = nil, eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date? = nil, creatorId: String, localId: String = UUID().uuidString, isSynced: Bool = false) {
         self.eventId = eventId
         self.eventName = eventName
         self.completionDate = completionDate
@@ -30,6 +32,8 @@ class EventData {
         self.expenses = expenses
         self.createdAt = createdAt ?? Date()
         self.creatorId = creatorId
+        self.localId = localId
+        self.isSynced = isSynced
     }
     
     func calculateUserEventBalance (currentUser: UserData) {

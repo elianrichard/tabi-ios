@@ -18,7 +18,7 @@ struct ContentView: View {
     @State private var loadingViewModel = LoadingViewModel()
     
     @State private var isAuthenticated = false
-    
+
     var body: some View {
         ZStack {
             NavigationStack (path: $routes.navPath) {
@@ -38,11 +38,11 @@ struct ContentView: View {
                     AppRouteDestinationView(route: route)
                 }
             }
-            
+
             if (loadingViewModel.isLoading) {
                 LoadingView()
             }
-            
+
             SplashView()
                 .ignoresSafeArea()
         }
@@ -55,23 +55,71 @@ struct ContentView: View {
         .environment(profileViewModel)
         .environment(loadingViewModel)
         .onAppear {
-            checkAuthentication()
+            Task { await checkAuthentication() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sessionExpired)) { _ in
+            handleSessionExpired()
         }
         .onOpenURL { incomingURL in
             print("App was opened via URL: \(incomingURL)")
             handleIncomingURL(incomingURL)
         }
     }
-    
-    private func checkAuthentication() {
-        let isAccessTokenAvailable: Bool
+
+    private func checkAuthentication() async {
+        let hasToken: Bool
         do {
             let accessToken = try KeychainService.shared.getAccessToken()
-            isAccessTokenAvailable = !accessToken.isEmpty
+            hasToken = !accessToken.isEmpty
         } catch {
-            isAccessTokenAvailable = false
+            hasToken = false
         }
-        isAuthenticated = (isAccessTokenAvailable || SwiftDataService.shared.getCurrentUser() != nil)
+
+        let hasLocalUser = SwiftDataService.shared.getCurrentUser() != nil
+        let isGuest = SwiftDataService.shared.getCurrentUser()?.phone == "Guest"
+
+        if isGuest {
+            isAuthenticated = true
+            return
+        }
+
+        if !hasToken && !hasLocalUser {
+            isAuthenticated = false
+            return
+        }
+
+        if !hasToken && hasLocalUser {
+            SessionState.shared.sessionExpiredBanner = true
+            isAuthenticated = false
+            return
+        }
+
+        do {
+            let _ = try await ProfileService.shared.probeSession()
+            isAuthenticated = true
+            await runMigrationIfNeeded()
+        } catch {
+            isAuthenticated = false
+            SessionState.shared.sessionExpiredBanner = true
+        }
+    }
+
+    private func runMigrationIfNeeded() async {
+        guard MigrationCoordinator.shared.hasUnsynced else { return }
+        guard let cur = UserDefaultsService.shared.getCurrentUser(),
+              !cur.userPhone.isEmpty,
+              cur.userPhone != "Guest" else { return }
+        SessionState.shared.migrationRunning = true
+        let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: cur.userPhone, ownerName: cur.userName)
+        SessionState.shared.migrationRunning = false
+        if !ok {
+            SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
+        }
+    }
+
+    private func handleSessionExpired() {
+        SessionState.shared.sessionExpiredBanner = true
+        isAuthenticated = false
     }
     
     

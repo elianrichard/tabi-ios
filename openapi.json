@@ -1,0 +1,1780 @@
+{
+  "schemes": ["http", "https"],
+  "swagger": "2.0",
+  "info": {
+    "description": "REST API for Tabi service. X-Api-Secret header is required on all endpoints. Authorization bearer token is required only for /user, /expense, and /event endpoints.",
+    "title": "tabi-service API",
+    "contact": {},
+    "version": "1.0"
+  },
+  "host": "",
+  "basePath": "/",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Login with phone and password",
+        "parameters": [
+          {
+            "description": "Login payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthLoginRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthLoginResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Logout and revoke refresh token",
+        "parameters": [
+          {
+            "description": "Logout payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthLogoutRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthLogoutResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Refresh access token",
+        "parameters": [
+          {
+            "description": "Refresh token payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthRefreshRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthRefreshResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Register a new user",
+        "parameters": [
+          {
+            "description": "Registration payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthRegisterRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.AuthRegisterResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/event": {
+      "get": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["event"],
+        "summary": "List events for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["event"],
+        "summary": "Create a new event",
+        "parameters": [
+          {
+            "description": "Event payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventCreateResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/event/complete/{id}": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["event"],
+        "summary": "Mark an event as completed or not completed",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Completion payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventCompleteRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventCompleteResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/event/join/{id}": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["event"],
+        "summary": "Join an event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventJoinResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/event/swap-dummy/{id}": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["event"],
+        "summary": "Replace a dummy participant with a real user",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Transition payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.DummyUserTransitionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.DummyUserTransitionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/event/{id}": {
+      "delete": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["event"],
+        "summary": "Delete an event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventDeleteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["event"],
+        "summary": "Update an event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Event update payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventUpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.EventUpdateResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/expense/{id}": {
+      "get": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["expense"],
+        "summary": "List expenses for an event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ExpenseListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["expense"],
+        "summary": "Create an expense for an event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Expense payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ExpenseCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ExpenseCreateResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["expense"],
+        "summary": "Delete an expense",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Expense ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ExpenseDeleteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["expense"],
+        "summary": "Update an expense",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Expense ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Expense update payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ExpenseUpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ExpenseUpdateResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/image/{id}": {
+      "get": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["image"],
+        "summary": "Get image detail with signed URL",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Image ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ImageUploadResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/migrate": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["migrate"],
+        "summary": "Bulk migrate local events, participants, expenses, and payments",
+        "parameters": [
+          {
+            "description": "Migration payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.MigrateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.MigrateResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/upload": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          }
+        ],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "tags": ["image"],
+        "summary": "Upload an image",
+        "parameters": [
+          {
+            "type": "file",
+            "description": "Image file",
+            "name": "image",
+            "in": "formData",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Image alt text",
+            "name": "alt",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.ImageUploadResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["user"],
+        "summary": "Get the authenticated user's profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.UserGetResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": ["application/json"],
+        "tags": ["user"],
+        "summary": "Delete the authenticated user's account",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.UserDeleteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["user"],
+        "summary": "Update the authenticated user's profile",
+        "parameters": [
+          {
+            "description": "User edit payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.UserEditRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.UserEditResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    },
+    "/user/check": {
+      "post": {
+        "security": [
+          {
+            "ApiSecretAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["user"],
+        "summary": "Check whether users exist by phone number",
+        "parameters": [
+          {
+            "description": "User check payload",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.UserCheckRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/tabi-service_internal_model.UserCheckResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "fiber.Map": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "tabi-service_internal_model.AdditionalCharge": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.Assignee": {
+      "type": "object",
+      "required": ["user_id"],
+      "properties": {
+        "share": {
+          "type": "number",
+          "minimum": 0
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthLoginRequest": {
+      "type": "object",
+      "required": ["password", "phone"],
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthLoginResponse": {
+      "type": "object",
+      "properties": {
+        "full_name": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "profile_image": {
+          "type": "string"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthLogoutRequest": {
+      "type": "object",
+      "required": ["refresh_token"],
+      "properties": {
+        "refresh_token": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthLogoutResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthRefreshRequest": {
+      "type": "object",
+      "required": ["refresh_token"],
+      "properties": {
+        "refresh_token": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthRefreshResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthRegisterRequest": {
+      "type": "object",
+      "required": ["name", "password"],
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.AuthRegisterResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.DummyUserInfo": {
+      "type": "object",
+      "properties": {
+        "dummy_name": {
+          "type": "string"
+        },
+        "dummy_user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.DummyUserTransitionRequest": {
+      "type": "object",
+      "required": ["dummy_user_id", "real_user_id"],
+      "properties": {
+        "dummy_user_id": {
+          "type": "string"
+        },
+        "real_user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.DummyUserTransitionResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.Event": {
+      "type": "object",
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "completion_date": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "creator_id": {
+          "type": "string"
+        },
+        "expenses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.Expense"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.User"
+          }
+        }
+      }
+    },
+    "tabi-service_internal_model.EventCompleteRequest": {
+      "type": "object",
+      "properties": {
+        "is_completed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "tabi-service_internal_model.EventCompleteResponse": {
+      "type": "object",
+      "properties": {
+        "completion_date": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.EventCreateRequest": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "event_image": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.EventCreateResponse": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.EventDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.EventJoinResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.EventListResponse": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.Event"
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.EventUpdateRequest": {
+      "type": "object",
+      "required": ["dummy_names", "name"],
+      "properties": {
+        "dummy_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "event_image": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tabi-service_internal_model.EventUpdateResponse": {
+      "type": "object",
+      "properties": {
+        "dummy_user_info": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.DummyUserInfo"
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.Expense": {
+      "type": "object",
+      "properties": {
+        "additional_charges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.AdditionalCharge"
+          }
+        },
+        "coverer_id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.Item"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "receipt_url": {
+          "type": "string"
+        },
+        "split_method": {
+          "type": "string"
+        },
+        "total_expense": {
+          "type": "number"
+        }
+      }
+    },
+    "tabi-service_internal_model.ExpenseCreateRequest": {
+      "type": "object",
+      "required": ["coverer_id", "items", "name", "split_method"],
+      "properties": {
+        "additional_charges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.AdditionalCharge"
+          }
+        },
+        "coverer_id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.Item"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "receipt_url": {
+          "type": "string"
+        },
+        "split_method": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.ExpenseCreateResponse": {
+      "type": "object",
+      "properties": {
+        "expense_id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.ExpenseDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.ExpenseListResponse": {
+      "type": "object",
+      "properties": {
+        "expenses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.Expense"
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.ExpenseUpdateRequest": {
+      "type": "object",
+      "required": ["coverer_id", "items", "name", "split_method"],
+      "properties": {
+        "additional_charges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.AdditionalCharge"
+          }
+        },
+        "coverer_id": {
+          "type": "string"
+        },
+        "deleted_charges_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deleted_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.Item"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "receipt_url": {
+          "type": "string"
+        },
+        "split_method": {
+          "type": "string"
+        },
+        "total_expense": {
+          "type": "number"
+        }
+      }
+    },
+    "tabi-service_internal_model.ExpenseUpdateResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.ImageUploadResponse": {
+      "type": "object",
+      "properties": {
+        "alt": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "full_path": {
+          "type": "string"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        }
+      }
+    },
+    "tabi-service_internal_model.Item": {
+      "type": "object",
+      "required": ["assignees", "name"],
+      "properties": {
+        "assignees": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.Assignee"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0
+        },
+        "quantity": {
+          "type": "number"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateAdditionalCharge": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateAssignee": {
+      "type": "object",
+      "required": ["phone"],
+      "properties": {
+        "phone": {
+          "type": "string"
+        },
+        "share": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateEvent": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "date_completed": {
+          "type": "string"
+        },
+        "expenses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigrateExpense"
+          }
+        },
+        "local_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigrateParticipant"
+          }
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigratePayment"
+          }
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateEventResult": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "local_id": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateExpense": {
+      "type": "object",
+      "required": ["coverer_phone", "items", "name", "split_method"],
+      "properties": {
+        "additional_charges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigrateAdditionalCharge"
+          }
+        },
+        "coverer_phone": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigrateItem"
+          }
+        },
+        "local_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "receipt_url": {
+          "type": "string"
+        },
+        "split_method": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateItem": {
+      "type": "object",
+      "required": ["assignees", "name"],
+      "properties": {
+        "assignees": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigrateAssignee"
+          }
+        },
+        "local_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0
+        },
+        "quantity": {
+          "type": "number"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateParticipant": {
+      "type": "object",
+      "required": ["phone"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigratePayment": {
+      "type": "object",
+      "required": ["payer_phone", "receiver_phone"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "date_created": {
+          "type": "string"
+        },
+        "payer_phone": {
+          "type": "string"
+        },
+        "receipt_url": {
+          "type": "string"
+        },
+        "receiver_phone": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateRequest": {
+      "type": "object",
+      "required": ["events", "owner_phone"],
+      "properties": {
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigrateEvent"
+          }
+        },
+        "owner_name": {
+          "type": "string"
+        },
+        "owner_phone": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.MigrateResponse": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.MigrateEventResult"
+          }
+        },
+        "message": {
+          "type": "string"
+        },
+        "owner_user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.User": {
+      "type": "object",
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.UserCheckRequest": {
+      "type": "object",
+      "required": ["phones"],
+      "properties": {
+        "phones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tabi-service_internal_model.UserCheckResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tabi-service_internal_model.User"
+          }
+        }
+      }
+    },
+    "tabi-service_internal_model.UserDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.UserEditRequest": {
+      "type": "object",
+      "properties": {
+        "avatar_image_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.UserEditResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "profile_image": {
+          "type": "string"
+        }
+      }
+    },
+    "tabi-service_internal_model.UserGetResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "profile_image": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "ApiSecretAuth": {
+      "type": "apiKey",
+      "name": "X-Api-Secret",
+      "in": "header"
+    },
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

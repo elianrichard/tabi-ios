@@ -33,6 +33,11 @@ final class ProfileService {
     func deleteUser() async throws {
         let _: DeleteResponse = try await apiClient.delete(endpoint: "/user")
     }
+
+    func probeSession() async throws -> UserGetResponse {
+        let response: UserGetResponse = try await apiClient.get(endpoint: "/user")
+        return response
+    }
     
     func checkUsers(phoneNumbers: [String]) async throws -> CheckUsersResponse {
         let request: CheckUsersRequest = CheckUsersRequest(phones: phoneNumbers)

@@ -25,9 +25,7 @@ final class ProfileViewModel{
                 isApiCallLoading = true
                 try await AuthenticationService.shared.logout()
             }
-            SwiftDataService.shared.deleteAllEvents()
-            SwiftDataService.shared.deleteAllExpenses()
-            SwiftDataService.shared.deleteAllUser()
+            // Keep local SwiftData. Wiped only on account delete or foreign-user login.
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")
         } catch {
@@ -35,7 +33,7 @@ final class ProfileViewModel{
             isApiCallLoading = false
             return false
         }
-        
+
         isApiCallLoading = false
         return true
     }
@@ -95,6 +93,7 @@ final class ProfileViewModel{
                 try await AuthenticationService.shared.logout()
             }
             SwiftDataService.shared.deleteAllEvents()
+            SwiftDataService.shared.deleteAllExpenses()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
             user = UserData(name: "unknown", phone: "unknown")
