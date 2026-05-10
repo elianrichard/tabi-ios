@@ -1,12 +1,8 @@
 ---
-description: This skill should be used when code search is needed (whether explicitly requested or as part of completing a task), when indexing the codebase after changes, or when the user asks about ccc, cocoindex-code, or the codebase index. Trigger phrases include 'search the codebase', 'find code related to', 'update the index', 'ccc', 'cocoindex-code'.
-metadata:
-    github-path: skills/ccc
-    github-ref: refs/tags/v0.2.29
-    github-repo: https://github.com/cocoindex-io/cocoindex-code
-    github-tree-sha: 73284474fe78bcc766ec69bc2fda91dbef0d6ca2
 name: ccc
+description: "This skill should be used when code search is needed (whether explicitly requested or as part of completing a task), when indexing the codebase after changes, or when the user asks about ccc, cocoindex-code, or the codebase index. Trigger phrases include 'search the codebase', 'find code related to', 'update the index', 'ccc', 'cocoindex-code'."
 ---
+
 # ccc - Semantic Code Search & Indexing
 
 `ccc` is the CLI for CocoIndex Code, providing semantic search over the current codebase and index management.

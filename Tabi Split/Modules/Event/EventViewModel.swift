@@ -113,7 +113,9 @@ final class EventViewModel {
                 let response = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
                 eventId = response.event_id
             }
-            let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId)
+            // Logged-in path already POSTed to BE; mark synced so /migrate doesn't re-create it.
+            // Guest path stays unsynced and rides the next migration.
+            let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId, isSynced: !isGuest)
             SwiftDataService.shared.addEvent(newEvent)
         } catch {
             print("Create event failed: \(error)")

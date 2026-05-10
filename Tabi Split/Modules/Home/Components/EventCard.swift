@@ -9,23 +9,19 @@ import SwiftUI
 
 struct EventCard : View {
     var event: EventData
-    var status: EventCardStatusEnum = .settled
-    var isNew: Bool = false
-    
+
+    private var status: EventCardStatusEnum {
+        if event.userEventBalance > 0 { return .credit }
+        if event.userEventBalance < 0 { return .debt }
+        return .settled
+    }
+
+    private var isNew: Bool { event.expenses.count == 0 }
+
     init(event: EventData) {
         self.event = event
-        if (event.userEventBalance > 0) {
-            self.status = .credit
-        } else if (event.userEventBalance < 0) {
-            self.status = .debt
-        } else {
-            self.status = .settled
-        }
-        if (event.expenses.count == 0) {
-            isNew = true
-        }
     }
-    
+
     var body : some View {
         VStack (alignment: .leading, spacing: 10) {
             HStack (spacing: 12) {

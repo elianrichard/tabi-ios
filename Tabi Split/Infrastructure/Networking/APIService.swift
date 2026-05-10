@@ -85,6 +85,8 @@ final class APIService: APIClient {
         endpoint: String,
         request: URLRequest
     ) async throws -> Response {
+        await MainActor.run { LoadingViewModel.shared.beginRequest() }
+        defer { Task { @MainActor in LoadingViewModel.shared.endRequest() } }
         do {
             let authService = AuthenticationService()
             var modifiedRequest = request
@@ -102,8 +104,14 @@ final class APIService: APIClient {
             }
             
             if httpResponse.statusCode == 401 {
-                try await authService.refresh()
-                
+                do {
+                    try await authService.refresh()
+                } catch {
+                    try? tokenManager.clearTokens()
+                    NotificationCenter.default.post(name: .sessionExpired, object: nil)
+                    throw APIError.unauthorized
+                }
+
                 if let newAccessToken = try? tokenManager.getAccessToken() {
                     modifiedRequest.setValue("Bearer \(newAccessToken)", forHTTPHeaderField: "Authorization")
                     let (newData, _) = try await URLSession.shared.data(for: modifiedRequest)
@@ -150,4 +158,8 @@ struct Empty: Codable {}
 
 struct ErrorResponse: Codable {
     let errors: String
+}
+
+extension Notification.Name {
+    static let sessionExpired = Notification.Name("TabiSessionExpired")
 }

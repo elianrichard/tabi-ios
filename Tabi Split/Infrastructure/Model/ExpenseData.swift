@@ -20,8 +20,10 @@ class Expense {
     var participants: [UserData]
     @Relationship(deleteRule: .cascade, inverse: \ExpenseItem.expense) var items: [ExpenseItem]
     @Relationship(deleteRule: .cascade, inverse: \AdditionalCharge.expense) var additionalCharges: [AdditionalCharge]
-    
-    init(expenseId: String? = nil, name: String, coverer: UserData, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = []) {
+    var localId: String = UUID().uuidString
+    var isSynced: Bool = false
+
+    init(expenseId: String? = nil, name: String, coverer: UserData, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = [], localId: String = UUID().uuidString, isSynced: Bool = false) {
         self.expenseId = expenseId
         self.name = name
         self.coverer = coverer
@@ -31,6 +33,8 @@ class Expense {
         self.participants = participants
         self.items = items
         self.additionalCharges = additionalCharges
+        self.localId = localId
+        self.isSynced = isSynced
     }
 }
 
@@ -43,13 +47,15 @@ class ExpenseItem {
     var itemQuantity: Float
     @Relationship(deleteRule: .nullify, inverse: \ExpensePerson.expenseItem) var assignees: [ExpensePerson]
     var expense: Expense?
-    
-    init(itemId: String? = nil, itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = []) {
+    var localId: String = UUID().uuidString
+
+    init(itemId: String? = nil, itemName: String, itemPrice: Float, itemQuantity: Float, assignees: [ExpensePerson] = [], localId: String = UUID().uuidString) {
         self.itemId = itemId
         self.itemName = itemName
         self.itemPrice = itemPrice
         self.itemQuantity = itemQuantity
         self.assignees = assignees
+        self.localId = localId
     }
 }
 

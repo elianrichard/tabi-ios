@@ -55,3 +55,11 @@ struct UserBase: Codable {
     let name: String
     let avatar_url: String
 }
+
+struct UserGetResponse: Codable {
+    let message: String?
+    let user_id: String?
+    let name: String?
+    let phone: String?
+    let profile_image: String?
+}
