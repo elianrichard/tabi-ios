@@ -84,6 +84,36 @@ extension SwiftDataService {
     func deleteAllUser () {
         deleteModelContext(type: UserData.self)
     }
+
+    /// Convert pre-login Guest rows (UserData phone == "Guest", events.creatorId == "") into the
+    /// authed user. Called from LoginViewModel right after a successful login, before
+    /// saveCurrentUser inserts a fresh row.
+    func promoteGuestUserData(to user: CurrentUserDefaults) {
+        guard let users = getAllUsers() else { return }
+
+        // Promote the Guest UserData (if any) so subsequent saveCurrentUser is a no-op.
+        if let guestUser = users.first(where: { $0.phone == "Guest" }) {
+            guestUser.userId = user.userId
+            guestUser.name = user.userName
+            guestUser.phone = user.userPhone
+            if let image = ProfileImageEnum(rawValue: user.userImage) {
+                guestUser.image = image.id
+                guestUser.imageUrl = nil
+            } else {
+                guestUser.image = ProfileImageEnum.owl.id
+                guestUser.imageUrl = user.userImage
+            }
+        }
+
+        // Patch creatorId on any Guest-era events (creatorId was "") so isUserCreator works.
+        if let events = fetchAllEvents() {
+            for event in events where event.creatorId.isEmpty {
+                event.creatorId = user.userId
+            }
+        }
+
+        saveModelContext()
+    }
     
     func addContact (name: String, phone: String) {
         if let users = getAllUsers(excludeLoggedUser: true) {

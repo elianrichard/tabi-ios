@@ -335,6 +335,7 @@ final class EventExpenseViewModel {
             if !isGuest {
                 let response = try await ExpenseService.shared.createExpense(event: event, expense: expense)
                 expense.expenseId = response.expense_id
+                expense.isSynced = true
             }
             event.expenses.append(expense)
             SwiftDataService.shared.saveModelContext()

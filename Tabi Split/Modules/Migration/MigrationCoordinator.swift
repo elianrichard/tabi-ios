@@ -64,8 +64,15 @@ final class MigrationCoordinator {
     }
 
     private func migrateBatch(_ events: [EventData], ownerPhone: String, ownerName: String) async throws {
+        // Dedupe by localId in case SwiftData has phantom duplicates.
+        var seenLocalIds: Set<String> = []
+        let uniqueEvents = events.filter { seenLocalIds.insert($0.localId).inserted }
+        if uniqueEvents.count != events.count {
+            print("Migration: dropped \(events.count - uniqueEvents.count) duplicate localId rows")
+        }
+
         var migrateEvents: [MigrateEvent] = []
-        for event in events {
+        for event in uniqueEvents {
             try migrateEvents.append(buildMigrateEvent(from: event))
         }
 
@@ -80,13 +87,13 @@ final class MigrationCoordinator {
             response = try await MigrateService.shared.migrate(request)
         } catch APIError.requestFailed(let message) where message.lowercased().contains("conflict") || message.contains("409") {
             // BE returns 409 when these events were already migrated; mark synced so we never retry.
-            for event in events { event.isSynced = true }
+            for event in uniqueEvents { event.isSynced = true }
             SwiftDataService.shared.saveModelContext()
             return
         }
 
-        let resultByLocalId = Dictionary(uniqueKeysWithValues: response.events.map { ($0.local_id, $0.event_id) })
-        for event in events {
+        let resultByLocalId = Dictionary(response.events.map { ($0.local_id, $0.event_id) }, uniquingKeysWith: { first, _ in first })
+        for event in uniqueEvents {
             if let serverId = resultByLocalId[event.localId] {
                 event.eventId = serverId
             }
@@ -113,7 +120,8 @@ final class MigrationCoordinator {
             }
         }
 
-        let migrateExpenses = try event.expenses.map { try buildMigrateExpense(from: $0) }
+        // Skip already-synced expenses to avoid BE-side duplicates when a Guest event gets a post-login expense.
+        let migrateExpenses = try event.expenses.filter { !$0.isSynced }.map { try buildMigrateExpense(from: $0) }
 
         return MigrateEvent(
             local_id: event.localId,
