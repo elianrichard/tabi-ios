@@ -85,6 +85,8 @@ final class APIService: APIClient {
         endpoint: String,
         request: URLRequest
     ) async throws -> Response {
+        await MainActor.run { LoadingViewModel.shared.beginRequest() }
+        defer { Task { @MainActor in LoadingViewModel.shared.endRequest() } }
         do {
             let authService = AuthenticationService()
             var modifiedRequest = request

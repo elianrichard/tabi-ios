@@ -15,7 +15,7 @@ struct ContentView: View {
     @State private var eventExpenseViewModel = EventExpenseViewModel()
     @State private var eventSettlementViewModel = EventSettlementViewModel()
     @State private var profileViewModel = ProfileViewModel()
-    @State private var loadingViewModel = LoadingViewModel()
+    private var loadingViewModel = LoadingViewModel.shared
     
     @State private var isAuthenticated = false
 
