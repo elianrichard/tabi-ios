@@ -7,11 +7,16 @@
 
 import Foundation
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ProfileView: View {
     @Environment(Routes.self) var routes
     @Environment(ProfileViewModel.self) private var profileViewModel
-    
+
+    @State private var isImporterPresented: Bool = false
+    @State private var exportURL: URL?
+    @State private var backupAlert: BackupAlert?
+
     var body: some View {
         VStack{
             TopNavigation(title: "Profile")
@@ -28,6 +33,40 @@ struct ProfileView: View {
                     }
                 }
                 
+                VStack (spacing: .spacingSmall) {
+                    Button {
+                        handleExport()
+                    } label: {
+                        HStack(spacing: .spacingTight){
+                            Icon(systemName: "square.and.arrow.up")
+                            Text("Export Data")
+                                .font(.tabiHeadline)
+                                .foregroundStyle(.textBlack)
+                            Spacer()
+                            Icon(systemName: "chevron.right", size: 16)
+                        }
+                        .padding(.vertical, .spacingSmall)
+                        .contentShape(Rectangle())
+                    }
+                    Button {
+                        isImporterPresented = true
+                    } label: {
+                        HStack(spacing: .spacingTight){
+                            Icon(systemName: "square.and.arrow.down")
+                            Text("Import Data")
+                                .font(.tabiHeadline)
+                                .foregroundStyle(.textBlack)
+                            Spacer()
+                            Icon(systemName: "chevron.right", size: 16)
+                        }
+                        .padding(.vertical, .spacingSmall)
+                        .contentShape(Rectangle())
+                    }
+                    Divider()
+
+                }
+
+                
                 if profileViewModel.isGuest {
                     VStack (spacing: .spacingLarge) {
                         Image(.initialOnboarding)
@@ -43,7 +82,7 @@ struct ProfileView: View {
                     }
                     .frame(maxHeight: .infinity)
                 }
-                
+                                
                 if !profileViewModel.isGuest {
                     VStack(alignment: .leading, spacing: .spacingTight) {
                         //                    TEMPORARILY DISABLED: PAYMENT METHOD
@@ -92,7 +131,64 @@ struct ProfileView: View {
         .navigationBarBackButtonHidden(true)
         .padding(.spacingMedium)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .fileImporter(
+            isPresented: $isImporterPresented,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            handleImport(result: result)
+        }
+        .sheet(item: $exportURL) { url in
+            ShareSheet(items: [url])
+        }
+        .alert(item: $backupAlert) { alert in
+            Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))
+        }
     }
+
+    private func handleExport() {
+        do {
+            let url = try BackupService.shared.exportToTemporaryFile()
+            exportURL = url
+        } catch {
+            backupAlert = BackupAlert(title: "Export Failed", message: error.localizedDescription)
+        }
+    }
+
+    private func handleImport(result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            do {
+                try BackupService.shared.importFromFile(url: url)
+                backupAlert = BackupAlert(title: "Import Complete", message: "Data restored from backup.")
+            } catch {
+                backupAlert = BackupAlert(title: "Import Failed", message: error.localizedDescription)
+            }
+        case .failure(let error):
+            backupAlert = BackupAlert(title: "Import Failed", message: error.localizedDescription)
+        }
+    }
+}
+
+private struct BackupAlert: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+}
+
+extension URL: Identifiable {
+    public var id: String { absoluteString }
+}
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
 
 #Preview {
