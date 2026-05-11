@@ -262,6 +262,9 @@ class BackupService {
         let svc = SwiftDataService.shared
         let ctx = svc.modelContext
 
+        let currentUser = svc.getCurrentUser()
+        let currentCreatorId = currentUser?.userId ?? ""
+
         let existingUsers = svc.getAllUsers() ?? []
         var phoneIndex: [String: UserData] = [:]
         var userIdIndex: [String: UserData] = [:]
@@ -309,7 +312,10 @@ class BackupService {
         let existingEvents = svc.fetchAllEvents() ?? []
 
         for eventDTO in payload.events {
-            let participants: [UserData] = eventDTO.participantKeys.compactMap { keyToUser[$0] }
+            var participants: [UserData] = eventDTO.participantKeys.compactMap { keyToUser[$0] }
+            if let cu = currentUser, !participants.contains(where: { $0 === cu }) {
+                participants.append(cu)
+            }
 
             let duplicate: EventData? = existingEvents.first { ev in
                 if let id = eventDTO.eventId, let evId = ev.eventId, !id.isEmpty {
@@ -321,7 +327,7 @@ class BackupService {
 
             let iconEnum = EventIconEnum(rawValue: eventDTO.eventIcon) ?? .icon1
             let newEvent = EventData(
-                eventId: eventDTO.eventId,
+                eventId: nil,
                 eventName: eventDTO.eventName,
                 completionDate: eventDTO.completionDate,
                 eventIcon: iconEnum,
@@ -329,13 +335,18 @@ class BackupService {
                 participants: participants,
                 expenses: [],
                 createdAt: eventDTO.createdAt,
-                creatorId: eventDTO.creatorId
+                creatorId: currentCreatorId
             )
             ctx.insert(newEvent)
 
             for expDTO in eventDTO.expenses {
-                guard let coverer = keyToUser[expDTO.covererKey] else {
-                    print("BackupService: expense skipped, missing coverer key=\(expDTO.covererKey) name=\(expDTO.name)")
+                let coverer: UserData
+                if let c = keyToUser[expDTO.covererKey] {
+                    coverer = c
+                } else if let cu = currentUser {
+                    coverer = cu
+                } else {
+                    print("BackupService: expense skipped, no coverer + no current user name=\(expDTO.name)")
                     continue
                 }
                 let expParticipants: [UserData] = expDTO.participantKeys.compactMap { keyToUser[$0] }
@@ -377,6 +388,10 @@ class BackupService {
                 )
                 ctx.insert(expense)
                 newEvent.expenses.append(expense)
+            }
+
+            if let cu = currentUser {
+                newEvent.calculateUserEventBalance(currentUser: cu)
             }
         }
 
