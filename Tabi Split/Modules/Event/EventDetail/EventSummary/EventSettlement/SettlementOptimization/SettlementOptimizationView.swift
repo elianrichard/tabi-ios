@@ -11,12 +11,20 @@ struct SettlementOptimizationView: View {
     @Environment(ProfileViewModel.self) private var profileViewModel
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
-    
+
     @State private var contentSize: CGSize = .zero
-    
+    @State private var exportedPDF: ExportedPDF?
+
     var body: some View {
         VStack (spacing: 0) {
-            TopNavigation(title: "Optimization Details")
+            TopNavigation(title: "Optimization Details", RightToolbar: {
+                Button {
+                    exportPDF()
+                } label: {
+                    Icon(systemName: "square.and.arrow.up", color: .textBlue, size: 18)
+                }
+                .padding(.trailing, 16)
+            })
                 .padding([.top, .horizontal])
             VStack (spacing: .spacingMedium) {
                 VStack {
@@ -65,7 +73,80 @@ struct SettlementOptimizationView: View {
             Spacer()
         }
         .navigationBarBackButtonHidden(true)
+        .sheet(item: $exportedPDF) { pdf in
+            ShareSheet(items: [pdf.url])
+        }
     }
+
+    /// Participants ordered the same way the cards are: current user first.
+    private var orderedParticipants: [PersonBalanceData] {
+        let current = eventViewModel.participantsBalance.filter { profileViewModel.isCurrentUser($0.user) }
+        let others = eventViewModel.participantsBalance.filter { !profileViewModel.isCurrentUser($0.user) }
+        return current + others
+    }
+
+    private func statusText(for status: EventCardStatusEnum) -> String {
+        switch status {
+        case .debt: return "Should pay"
+        case .credit: return "Should receive"
+        case .settled: return "Settled"
+        }
+    }
+
+    private func exportPDF() {
+        let persons = orderedParticipants.map { participant in
+            OptimizationPersonPDFData(
+                name: participant.user.name,
+                isCurrentUser: profileViewModel.isCurrentUser(participant.user),
+                lent: participant.lent,
+                debt: participant.debt,
+                balance: participant.balance,
+                statusText: statusText(for: participant.status)
+            )
+        }
+
+        let recap = orderedParticipants.flatMap { participant in
+            participant.settlement.map { settlement in
+                OptimizationRecapPDFData(
+                    fromName: participant.user.name,
+                    toName: settlement.userPaid.name,
+                    amount: settlement.amount
+                )
+            }
+        }
+
+        let expenses = (eventViewModel.selectedEvent?.expenses ?? []).map { expense in
+            OptimizationExpensePDFData(
+                name: expense.name,
+                payerName: expense.coverer.name,
+                amount: expense.price
+            )
+        }
+
+        let data = SettlementOptimizationPDFExporter.generatePDF(from: SettlementOptimizationPDFData(
+            eventName: eventViewModel.eventName,
+            generatedByName: eventViewModel.userBalance.user.name,
+            persons: persons,
+            recap: recap,
+            expenses: expenses
+        ))
+
+        let sanitizedEventName = eventViewModel.eventName.replacingOccurrences(of: "/", with: "-")
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(sanitizedEventName)-optimization.pdf")
+
+        guard (try? data.write(to: url)) != nil else { return }
+        exportedPDF = ExportedPDF(url: url)
+    }
+}
+
+/// Identifiable wrapper so the share sheet can be driven by `.sheet(item:)`,
+/// which guarantees the URL is available when the sheet body is built (unlike
+/// `.sheet(isPresented:)`, which can present before the URL state has settled
+/// and show a blank sheet).
+private struct ExportedPDF: Identifiable {
+    let id = UUID()
+    let url: URL
 }
 
 #Preview {

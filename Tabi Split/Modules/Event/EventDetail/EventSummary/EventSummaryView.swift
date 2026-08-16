@@ -10,15 +10,10 @@ import SwiftUI
 struct EventSummaryView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
-    
-    @State private var isShowingShareSheet = false
-    @State private var exportedPDFURL: URL?
-    
-    
+
     var body: some View {
         ScrollView (showsIndicators: false) {
             VStack (spacing: .spacingRegular) {
-                exportPDFButton
                 if (!eventViewModel.isEventCompleted) {
                     DialogBox(image: .dialogIcon, iconSize: 36,
                               text: "You can only settle after you set the event to complete",
@@ -132,44 +127,6 @@ struct EventSummaryView: View {
                 }
             }
         }
-        .sheet(isPresented: $isShowingShareSheet) {
-            if let exportedPDFURL {
-                ShareSheet(items: [exportedPDFURL])
-            }
-        }
-    }
-    
-    private var exportPDFButton: some View {
-        HStack {
-            Spacer()
-            Button {
-                exportPDF()
-            } label: {
-                Label("Export to PDF", systemImage: "square.and.arrow.up")
-                    .font(.tabiHeadline)
-                    .foregroundStyle(.textBlue)
-            }
-            .padding(.top, .spacingXSmall)
-        }
-    }
-    
-    private func exportPDF() {
-        let data = EventSummaryPDFExporter.generatePDF(from: EventSummaryPDFData(
-            eventName: eventViewModel.eventName,
-            userName: eventViewModel.userBalance.user.name,
-            statusText: eventViewModel.userBalance.status.summaryCardText,
-            balance: eventViewModel.userBalance.balance,
-            totalSpending: eventViewModel.userTotalSpending,
-            transactions: eventViewModel.userTransactionHistory
-        ))
-        
-        let sanitizedEventName = eventViewModel.eventName.replacingOccurrences(of: "/", with: "-")
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("\(sanitizedEventName)-summary.pdf")
-        
-        guard (try? data.write(to: url)) != nil else { return }
-        exportedPDFURL = url
-        isShowingShareSheet = true
     }
 }
 
