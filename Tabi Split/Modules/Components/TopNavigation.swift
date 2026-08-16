@@ -51,12 +51,6 @@ struct TopNavigation<Content: View>: View {
                     }
                     .padding(isCircleBackButton ? 8 : 16)
                     .contentShape(Rectangle())
-                    .onTapGesture {
-                        if let backFunction = additionalBackFunction {
-                            backFunction()
-                        }
-                        routes.navigateBack()
-                    }
                     .padding(isCircleBackButton ? -8 : -16)
                     Spacer()
                     RightToolbar

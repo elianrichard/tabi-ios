@@ -110,19 +110,19 @@ Schema:
 
 ```yaml
 defaults:
-  enabled: true                     # disables all guides when false
-  model: openai/gpt-5.4-nano        # falls back to summary.model when omitted
+  enabled: true # disables all guides when false
+  model: openai/gpt-5.4-nano # falls back to summary.model when omitted
   session_budget: 200
   max_logical_depth: 3
   max_turns_per_session: 18
 
 guides:
-  - slug: memoization                          # [a-z0-9][a-z0-9-]*
+  - slug: memoization # [a-z0-9][a-z0-9-]*
     description: |
       What this guide covers, framed for the reader.
       Name the canonical starting files (e.g. "start with src/cache.py").
-    deps: [other-slug]                         # optional; must not cycle
-    max_turns_per_session: 28                  # optional per-entry overrides
+    deps: [other-slug] # optional; must not cycle
+    max_turns_per_session: 28 # optional per-entry overrides
 ```
 
 A multi-line description is fine and often clearer than one terse sentence — the description seeds the guide-generation agent's question, so concrete file/directory anchors pay off.

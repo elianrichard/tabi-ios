@@ -9,16 +9,16 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @State private var routes = Routes()
+    @State private var routes = AppRouter()
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
     @State private var eventSettlementViewModel = EventSettlementViewModel()
     @State private var profileViewModel = ProfileViewModel()
-    @State private var loadingViewModel = LoadingViewModel()
+    private var loadingViewModel = LoadingViewModel.shared
     
     @State private var isAuthenticated = false
-    
+
     var body: some View {
         ZStack {
             NavigationStack (path: $routes.navPath) {
@@ -34,85 +34,15 @@ struct ContentView: View {
                         LoginView()
                     }
                 }
-                .navigationDestination(for: Routes.Destination.self) { destination in
-                    switch destination {
-                    case .HomeView:
-                        HomeView()
-                        
-                    case .InboxView:
-                        InboxView()
-                        
-                    case .EventFormView:
-                        EventFormView()
-                        
-                    case .EventDetailView:
-                        EventDetailView()
-                        
-                    case .EventInviteView:
-                        EventInviteView()
-                        
-                    case .SwiftDataTestingView:
-                        SwiftDataTestingView()
-                        
-                    case .LoginView:
-                        LoginView()
-                        
-                    case .RegisterView:
-                        RegisterView()
-                        
-                    case .AddExpenseView:
-                        AddExpenseView()
-                        
-                    case .ExpenseAddItemsView:
-                        ExpenseAddItemsView()
-                        
-                    case .ExpenseAssignView:
-                        ExpenseAssignView()
-                        
-                    case .ExpenseResultView:
-                        ExpenseResultView()
-                        
-                    case .EventSummaryDetailView:
-                        EventSummaryDetailView()
-                        
-                    case .EventSettlementView:
-                        EventSettlementView()
-                        
-                    case .SettlementPaymentMethodView:
-                        SettlementPaymentMethodView()
-                        
-                    case .SettlementOptimizationView:
-                        SettlementOptimizationView()
-                        
-                    case .SettlementReceiptView:
-                        SettlementReceiptView()
-                        
-                    case .SettlementConfirmationView:
-                        SettlementConfirmationView()
-                        
-                    case .SettlementUploadView:
-                        SettlementUploadView()
-                        
-                    case .Profile:
-                        ProfileView()
-                        
-                    case .EditProfile:
-                        EditProfileView()
-                        
-                    case .PaymentMethods:
-                        PaymentMethodView()
-                        
-                    case .ReceiptUploadReview:
-                        ReceiptImageReviewView()
-                    }
-                    
+                .navigationDestination(for: AppRoute.self) { route in
+                    AppRouteDestinationView(route: route)
                 }
             }
-            
+
             if (loadingViewModel.isLoading) {
                 LoadingView()
             }
-            
+
             SplashView()
                 .ignoresSafeArea()
         }
@@ -125,23 +55,71 @@ struct ContentView: View {
         .environment(profileViewModel)
         .environment(loadingViewModel)
         .onAppear {
-            checkAuthentication()
+            Task { await checkAuthentication() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .sessionExpired)) { _ in
+            handleSessionExpired()
         }
         .onOpenURL { incomingURL in
             print("App was opened via URL: \(incomingURL)")
             handleIncomingURL(incomingURL)
         }
     }
-    
-    private func checkAuthentication() {
-        let isAccessTokenAvailable: Bool
+
+    private func checkAuthentication() async {
+        let hasToken: Bool
         do {
             let accessToken = try KeychainService.shared.getAccessToken()
-            isAccessTokenAvailable = !accessToken.isEmpty
+            hasToken = !accessToken.isEmpty
         } catch {
-            isAccessTokenAvailable = false
+            hasToken = false
         }
-        isAuthenticated = (isAccessTokenAvailable || SwiftDataService.shared.getCurrentUser() != nil)
+
+        let hasLocalUser = SwiftDataService.shared.getCurrentUser() != nil
+        let isGuest = SwiftDataService.shared.getCurrentUser()?.phone == "Guest"
+
+        if isGuest {
+            isAuthenticated = true
+            return
+        }
+
+        if !hasToken && !hasLocalUser {
+            isAuthenticated = false
+            return
+        }
+
+        if !hasToken && hasLocalUser {
+            SessionState.shared.sessionExpiredBanner = true
+            isAuthenticated = false
+            return
+        }
+
+        do {
+            let _ = try await ProfileService.shared.probeSession()
+            isAuthenticated = true
+            await runMigrationIfNeeded()
+        } catch {
+            isAuthenticated = false
+            SessionState.shared.sessionExpiredBanner = true
+        }
+    }
+
+    private func runMigrationIfNeeded() async {
+        guard MigrationCoordinator.shared.hasUnsynced else { return }
+        guard let cur = UserDefaultsService.shared.getCurrentUser(),
+              !cur.userPhone.isEmpty,
+              cur.userPhone != "Guest" else { return }
+        SessionState.shared.migrationRunning = true
+        let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: cur.userPhone, ownerName: cur.userName)
+        SessionState.shared.migrationRunning = false
+        if !ok {
+            SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
+        }
+    }
+
+    private func handleSessionExpired() {
+        SessionState.shared.sessionExpiredBanner = true
+        isAuthenticated = false
     }
     
     
@@ -177,7 +155,7 @@ struct ContentView: View {
                     print("Join event failed: \(error)")
                 }
             }
-            routes.navigate(to: .HomeView)
+            routes.push(.home)
         }
     }
 }

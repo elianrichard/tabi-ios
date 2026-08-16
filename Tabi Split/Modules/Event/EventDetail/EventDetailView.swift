@@ -229,9 +229,9 @@ struct EventDetailView: View {
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
                         Task {
+                            sheetViewModel.clearSheet()
                             if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
-                                sheetViewModel.clearSheet()
-                                routes.navigateBack()
+                                routes.navigateToRoot()
                             }
                         }
                     }

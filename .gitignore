@@ -48,3 +48,5 @@ dSYMs.zip
 
 Pods/
 Podfile.lock
+# CocoIndex Code (ccc)
+/.cocoindex_code/

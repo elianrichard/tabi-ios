@@ -29,13 +29,16 @@ final class ProfileViewModel{
             SwiftDataService.shared.deleteAllExpenses()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
+            try? KeychainService.shared.clearTokens()
+            SessionState.shared.sessionExpiredBanner = false
+            SessionState.shared.lastMigrationError = nil
             user = UserData(name: "unknown", phone: "unknown")
         } catch {
             print("Logout failed: \(error)")
             isApiCallLoading = false
             return false
         }
-        
+
         isApiCallLoading = false
         return true
     }
@@ -95,14 +98,18 @@ final class ProfileViewModel{
                 try await AuthenticationService.shared.logout()
             }
             SwiftDataService.shared.deleteAllEvents()
+            SwiftDataService.shared.deleteAllExpenses()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
+            try? KeychainService.shared.clearTokens()
+            SessionState.shared.sessionExpiredBanner = false
+            SessionState.shared.lastMigrationError = nil
             user = UserData(name: "unknown", phone: "unknown")
         } catch {
             print("User delete failed: \(error)")
             return false
         }
-        
+
         isApiCallLoading = false
         return true
     }
