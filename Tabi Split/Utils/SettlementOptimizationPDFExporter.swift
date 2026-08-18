@@ -25,11 +25,39 @@ struct OptimizationRecapPDFData {
     var amount: Float
 }
 
-/// One expense of the event: the item, who paid for it, and how much.
+/// One person sharing a line item, and how much of it they cover.
+struct OptimizationAssigneePDFData {
+    var name: String
+    var share: Float
+}
+
+/// A single line item within an expense (e.g. "Chicken", "Rice"), and who shares it.
+struct OptimizationExpenseItemPDFData {
+    var name: String
+    var quantity: Float
+    var price: Float
+    var assignees: [OptimizationAssigneePDFData]
+}
+
+/// An additional charge on an expense (e.g. Tax, Service, Discount).
+struct OptimizationAdditionalChargePDFData {
+    var typeName: String
+    var amount: Float
+}
+
+/// One expense of the event: the receipt name, who paid for it, the total, the
+/// split method, and — for custom splits — its finer line-item breakdown plus
+/// any additional charges (tax / service / discount / other).
 struct OptimizationExpensePDFData {
     var name: String
     var payerName: String
     var amount: Float
+    /// Whether the expense was split equally. Equal splits omit the item breakdown.
+    var isEquallySplit: Bool
+    /// For equal splits, the per-person amount (total ÷ participants); nil otherwise.
+    var equalSplitPerPerson: Float?
+    var items: [OptimizationExpenseItemPDFData]
+    var additionalCharges: [OptimizationAdditionalChargePDFData]
 }
 
 /// Immutable snapshot of everything needed to render the Settlement Optimization
@@ -132,13 +160,11 @@ enum SettlementOptimizationPDFExporter {
                 pageY = drawRecapRow(entry, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
             }
 
-            // ---- Expense list (always starts on its own page) ----
+            // ---- Expense list with per-item breakdown (always starts on its own page) ----
             context.beginPage()
             pageY = 40
             pageY = drawSectionTitle("Expense List", maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth)
             pageY += 6
-            pageY = drawExpenseHeader(maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
-            pageY += 4
 
             if data.expenses.isEmpty {
                 pageY = drawInfoRow(label: "No expenses recorded.", value: "", maxY: pageY,
@@ -146,15 +172,57 @@ enum SettlementOptimizationPDFExporter {
             }
 
             for expense in data.expenses {
-                if pageY > pageBottom {
+                // Keep the expense header with at least its first item on the same page.
+                if pageY + 54 > pageBottom {
                     context.beginPage()
                     pageY = drawSectionTitle("Expense List (cont.)", maxY: 40.0,
                                              leftMargin: leftMargin, contentWidth: contentWidth)
                     pageY += 6
-                    pageY = drawExpenseHeader(maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
-                    pageY += 4
                 }
-                pageY = drawExpenseRow(expense, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
+                pageY = drawExpenseGroupHeader(expense, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
+
+                // Equal splits carry no per-item detail — the header already says how it was split.
+                if !expense.isEquallySplit {
+                    if expense.items.isEmpty {
+                        pageY = drawExpenseItemRow(name: "No itemised breakdown.", quantity: nil, price: nil,
+                                                   maxY: pageY, leftMargin: leftMargin, pageWidth: pageSize.width)
+                    }
+
+                    for item in expense.items {
+                        if pageY > pageBottom {
+                            context.beginPage()
+                            pageY = drawSectionTitle("Expense List (cont.)", maxY: 40.0,
+                                                     leftMargin: leftMargin, contentWidth: contentWidth)
+                            pageY += 6
+                        }
+                        pageY = drawExpenseItemRow(name: item.name, quantity: item.quantity, price: item.price,
+                                                   maxY: pageY, leftMargin: leftMargin, pageWidth: pageSize.width)
+
+                        // Assignees (who shares this item) sit indented under it.
+                        if !item.assignees.isEmpty {
+                            if pageY > pageBottom {
+                                context.beginPage()
+                                pageY = drawSectionTitle("Expense List (cont.)", maxY: 40.0,
+                                                         leftMargin: leftMargin, contentWidth: contentWidth)
+                                pageY += 6
+                            }
+                            pageY = drawAssigneesRow(item.assignees, maxY: pageY, leftMargin: leftMargin, pageWidth: pageSize.width)
+                        }
+                    }
+
+                    // Additional charges (tax / service / discount / other) — no assignees.
+                    for charge in expense.additionalCharges {
+                        if pageY > pageBottom {
+                            context.beginPage()
+                            pageY = drawSectionTitle("Expense List (cont.)", maxY: 40.0,
+                                                     leftMargin: leftMargin, contentWidth: contentWidth)
+                            pageY += 6
+                        }
+                        pageY = drawExpenseItemRow(name: charge.typeName, quantity: nil, price: charge.amount,
+                                                   maxY: pageY, leftMargin: leftMargin, pageWidth: pageSize.width)
+                    }
+                }
+                pageY += 14
             }
         }
     }
@@ -278,44 +346,93 @@ enum SettlementOptimizationPDFExporter {
         return maxY + max(payment.size(withAttributes: paymentAttributes).height, 18) + 6
     }
 
-    private static func drawExpenseHeader(maxY: CGFloat, leftMargin: CGFloat, contentWidth: CGFloat, pageWidth: CGFloat) -> CGFloat {
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 11, weight: .semibold),
-            .foregroundColor: UIColor.gray,
-        ]
-        ("Expense" as NSString).draw(at: CGPoint(x: leftMargin, y: maxY), withAttributes: attributes)
-        ("Paid by" as NSString).draw(at: CGPoint(x: leftMargin + 230, y: maxY), withAttributes: attributes)
-        ("Amount" as NSString).draw(at: CGPoint(x: pageWidth - leftMargin - 80, y: maxY), withAttributes: attributes)
-        UIColor.separator.setFill()
-        UIRectFill(CGRect(x: leftMargin, y: maxY + 18, width: contentWidth, height: 1))
-        return maxY + 24
-    }
-
-    private static func drawExpenseRow(_ expense: OptimizationExpensePDFData, maxY: CGFloat, leftMargin: CGFloat, contentWidth: CGFloat, pageWidth: CGFloat) -> CGFloat {
+    /// The expense-level header: receipt name, who paid, and the total — the item
+    /// rows drawn by `drawExpenseItemRow` sit indented beneath it.
+    private static func drawExpenseGroupHeader(_ expense: OptimizationExpensePDFData, maxY: CGFloat, leftMargin: CGFloat, contentWidth: CGFloat, pageWidth: CGFloat) -> CGFloat {
         let nameAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 13, weight: .medium),
+            .font: UIFont.systemFont(ofSize: 14, weight: .bold),
             .foregroundColor: UIColor.black,
         ]
         let payerAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 12, weight: .regular),
-            .foregroundColor: UIColor.darkGray,
+            .font: UIFont.systemFont(ofSize: 11, weight: .regular),
+            .foregroundColor: UIColor.gray,
         ]
         let amountAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 13, weight: .semibold),
+            .font: UIFont.systemFont(ofSize: 14, weight: .bold),
             .foregroundColor: UIColor.black,
         ]
 
-        let drawName = (expense.name as NSString).truncated(toWidth: 210, using: nameAttributes)
+        let drawName = (expense.name as NSString).truncated(toWidth: 300, using: nameAttributes)
         drawName.draw(at: CGPoint(x: leftMargin, y: maxY), withAttributes: nameAttributes)
-
-        let drawPayer = (expense.payerName as NSString).truncated(toWidth: 150, using: payerAttributes)
-        drawPayer.draw(at: CGPoint(x: leftMargin + 230, y: maxY), withAttributes: payerAttributes)
 
         let amount = formatMoney(expense.amount) as NSString
         let amountSize = amount.size(withAttributes: amountAttributes)
         amount.draw(at: CGPoint(x: pageWidth - leftMargin - max(amountSize.width, 80), y: maxY), withAttributes: amountAttributes)
 
-        return maxY + max(drawName.size(withAttributes: nameAttributes).height, 18) + 6
+        let payerY = maxY + drawName.size(withAttributes: nameAttributes).height + 1
+        var splitLabel = expense.isEquallySplit ? "Split equally" : "Split custom"
+        if expense.isEquallySplit, let perPerson = expense.equalSplitPerPerson {
+            splitLabel += " (\(formatMoney(perPerson))/person)"
+        }
+        ("Paid by \(expense.payerName)  •  \(splitLabel)" as NSString)
+            .draw(at: CGPoint(x: leftMargin, y: payerY), withAttributes: payerAttributes)
+
+        let bottom = payerY + ("Paid by" as NSString).size(withAttributes: payerAttributes).height + 6
+        UIColor.separator.setFill()
+        UIRectFill(CGRect(x: leftMargin, y: bottom, width: contentWidth, height: 1))
+        return bottom + 6
+    }
+
+    /// One indented line item beneath an expense header. Pass nil quantity/price
+    /// for placeholder text (e.g. "No itemised breakdown.").
+    private static func drawExpenseItemRow(name: String, quantity: Float?, price: Float?, maxY: CGFloat, leftMargin: CGFloat, pageWidth: CGFloat) -> CGFloat {
+        let indent = leftMargin + 16
+        let nameAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 12, weight: .regular),
+            .foregroundColor: UIColor.darkGray,
+        ]
+        let priceAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 12, weight: .medium),
+            .foregroundColor: UIColor.black,
+        ]
+
+        var label = name
+        if let quantity, quantity > 0 {
+            // Show whole quantities without a trailing ".0".
+            let qtyText = quantity.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(quantity)) : String(quantity)
+            label = "\(name)  ×\(qtyText)"
+        }
+        let drawName = (label as NSString).truncated(toWidth: 360, using: nameAttributes)
+        drawName.draw(at: CGPoint(x: indent, y: maxY), withAttributes: nameAttributes)
+
+        if let price {
+            let priceText = formatMoney(price) as NSString
+            let priceSize = priceText.size(withAttributes: priceAttributes)
+            priceText.draw(at: CGPoint(x: pageWidth - leftMargin - max(priceSize.width, 70), y: maxY), withAttributes: priceAttributes)
+        }
+
+        return maxY + max(drawName.size(withAttributes: nameAttributes).height, 16) + 5
+    }
+
+    /// The list of people sharing an item, indented under the item row.
+    private static func drawAssigneesRow(_ assignees: [OptimizationAssigneePDFData], maxY: CGFloat, leftMargin: CGFloat, pageWidth: CGFloat) -> CGFloat {
+        let indent = leftMargin + 32
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 11, weight: .regular),
+            .foregroundColor: UIColor.gray,
+        ]
+        let parts = assignees.map { assignee -> String in
+            guard assignee.share > 0 else { return assignee.name }
+            // Share is a multiplier/portion, not a price — show whole values without ".0".
+            let shareText = assignee.share.truncatingRemainder(dividingBy: 1) == 0
+                ? String(Int(assignee.share))
+                : String(assignee.share)
+            return "\(assignee.name) (\(shareText)x)"
+        }
+        let text = ("Shared by: " + parts.joined(separator: ", ") as NSString)
+            .truncated(toWidth: pageWidth - leftMargin - indent, using: attributes)
+        text.draw(at: CGPoint(x: indent, y: maxY), withAttributes: attributes)
+        return maxY + text.size(withAttributes: attributes).height + 5
     }
 
     private static func drawInfoRow(label: String, value: String, maxY: CGFloat, leftMargin: CGFloat, contentWidth: CGFloat, pageWidth: CGFloat) -> CGFloat {

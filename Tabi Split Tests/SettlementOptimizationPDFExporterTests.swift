@@ -19,8 +19,19 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             OptimizationRecapPDFData(fromName: "Budi", toName: "Elian", amount: 75_000),
         ],
         expenses: [OptimizationExpensePDFData] = [
-            OptimizationExpensePDFData(name: "KFC", payerName: "Elian", amount: 100_000),
-            OptimizationExpensePDFData(name: "Taxi", payerName: "Budi", amount: 50_000),
+            OptimizationExpensePDFData(name: "KFC", payerName: "Elian", amount: 100_000, isEquallySplit: false, equalSplitPerPerson: nil, items: [
+                OptimizationExpenseItemPDFData(name: "Chicken Bucket", quantity: 2, price: 80_000, assignees: [
+                    OptimizationAssigneePDFData(name: "Elian", share: 1),
+                    OptimizationAssigneePDFData(name: "Budi", share: 1),
+                ]),
+                OptimizationExpenseItemPDFData(name: "Rice", quantity: 4, price: 20_000, assignees: []),
+            ], additionalCharges: [
+                OptimizationAdditionalChargePDFData(typeName: "Tax", amount: 11_000),
+                OptimizationAdditionalChargePDFData(typeName: "Service", amount: 5_000),
+                OptimizationAdditionalChargePDFData(typeName: "Discount", amount: 10_000),
+            ]),
+            // Equally-split expense: item breakdown should be omitted in the PDF.
+            OptimizationExpensePDFData(name: "Taxi", payerName: "Budi", amount: 50_000, isEquallySplit: true, equalSplitPerPerson: 25_000, items: [], additionalCharges: []),
         ]
     ) -> SettlementOptimizationPDFData {
         SettlementOptimizationPDFData(
@@ -70,6 +81,34 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             recap.append(OptimizationRecapPDFData(fromName: "Person \(index)", toName: "Person 0", amount: balance))
         }
         let data = SettlementOptimizationPDFExporter.generatePDF(from: makeData(persons: persons, recap: recap))
+        XCTAssertFalse(data.isEmpty)
+    }
+
+    func testGeneratePDFWithManyExpensesAndItemsSpansPages() throws {
+        // 40 expenses, each with several line items, should force the expense
+        // section to paginate beyond its own starting page.
+        var expenses: [OptimizationExpensePDFData] = []
+        for expenseIndex in 0..<40 {
+            var items: [OptimizationExpenseItemPDFData] = []
+            for itemIndex in 0..<5 {
+                items.append(OptimizationExpenseItemPDFData(
+                    name: "Item \(expenseIndex)-\(itemIndex)",
+                    quantity: Float(itemIndex + 1),
+                    price: Float((itemIndex + 1) * 1000),
+                    assignees: [OptimizationAssigneePDFData(name: "Person \(itemIndex % 3)", share: Float(itemIndex + 1))]
+                ))
+            }
+            expenses.append(OptimizationExpensePDFData(
+                name: "Expense \(expenseIndex)",
+                payerName: "Person \(expenseIndex % 3)",
+                amount: Float(expenseIndex * 10_000),
+                isEquallySplit: false,
+                equalSplitPerPerson: nil,
+                items: items,
+                additionalCharges: [OptimizationAdditionalChargePDFData(typeName: "Tax", amount: Float(expenseIndex * 1000))]
+            ))
+        }
+        let data = SettlementOptimizationPDFExporter.generatePDF(from: makeData(expenses: expenses))
         XCTAssertFalse(data.isEmpty)
     }
 }

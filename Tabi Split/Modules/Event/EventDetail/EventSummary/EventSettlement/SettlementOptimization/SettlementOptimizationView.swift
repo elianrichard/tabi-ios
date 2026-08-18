@@ -116,10 +116,32 @@ struct SettlementOptimizationView: View {
         }
 
         let expenses = (eventViewModel.selectedEvent?.expenses ?? []).map { expense in
-            OptimizationExpensePDFData(
+            let isEqual = SplitMethod(rawValue: expense.splitMethod) == .equally
+            let perPerson: Float? = (isEqual && !expense.participants.isEmpty)
+                ? expense.price / Float(expense.participants.count)
+                : nil
+            return OptimizationExpensePDFData(
                 name: expense.name,
                 payerName: expense.coverer.name,
-                amount: expense.price
+                amount: expense.price,
+                isEquallySplit: isEqual,
+                equalSplitPerPerson: perPerson,
+                items: expense.items.map { item in
+                    OptimizationExpenseItemPDFData(
+                        name: item.itemName,
+                        quantity: item.itemQuantity,
+                        price: item.itemPrice,
+                        assignees: item.assignees.map { assignee in
+                            OptimizationAssigneePDFData(name: assignee.user.name, share: assignee.share)
+                        }
+                    )
+                },
+                additionalCharges: expense.additionalCharges.map { charge in
+                    OptimizationAdditionalChargePDFData(
+                        typeName: AdditionalChargeType(rawValue: charge.additionalChargeType)?.name ?? "Other",
+                        amount: charge.amount
+                    )
+                }
             )
         }
 
