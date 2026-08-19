@@ -225,12 +225,12 @@ struct EventDetailView: View {
                     }
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
                         Task {
+                            router.dismissSheet()
                             if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
-                                router.dismissSheet()
                                 router.pop()
                             }
                         }
-                    }
+                }
                 }
                 .frame(maxWidth: .infinity)
             }

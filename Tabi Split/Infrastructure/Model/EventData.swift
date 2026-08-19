@@ -19,8 +19,10 @@ class EventData {
     @Relationship(deleteRule: .nullify, inverse: \Expense.event) var expenses: [Expense]
     var createdAt: Date
     var creatorId: String = ""
-    
-    init(eventId: String? = nil, eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date? = nil, creatorId: String) {
+    var localId: String = UUID().uuidString
+    var isSynced: Bool = false
+
+    init(eventId: String? = nil, eventName: String, completionDate: Date? = nil, eventIcon: EventIconEnum = .icon1, userEventBalance: Float = 0, participants: [UserData] = [], expenses: [Expense] = [], createdAt: Date? = nil, creatorId: String, localId: String = UUID().uuidString, isSynced: Bool = false) {
         self.eventId = eventId
         self.eventName = eventName
         self.completionDate = completionDate
@@ -30,22 +32,31 @@ class EventData {
         self.expenses = expenses
         self.createdAt = createdAt ?? Date()
         self.creatorId = creatorId
+        self.localId = localId
+        self.isSynced = isSynced
     }
     
     func calculateUserEventBalance (currentUser: UserData) {
+        // Identity match by userId (or phone fallback) to survive duplicate UserData rows after a refresh.
+        func sameUser(_ a: UserData) -> Bool {
+            if !a.userId.isEmpty && !currentUser.userId.isEmpty { return a.userId == currentUser.userId }
+            if !a.phone.isEmpty && !currentUser.phone.isEmpty { return a.phone == currentUser.phone }
+            return a == currentUser
+        }
+
         var userBalanceTemp: Float = 0
-        
+
         for expense in self.expenses {
-            if expense.coverer == currentUser {
+            if sameUser(expense.coverer) {
                 userBalanceTemp += expense.price
             }
-            
+
             if (expense.splitMethod == SplitMethod.custom.id) {
                 let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
                 let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
                 for item in expense.items {
                     let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
-                    if let assignee = item.assignees.first(where: { $0.user == currentUser }){
+                    if let assignee = item.assignees.first(where: { sameUser($0.user) }){
                         let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
                         let amountSpent = personQuantity * item.itemPrice
                         let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
@@ -55,7 +66,7 @@ class EventData {
                 }
             } else if (expense.splitMethod == SplitMethod.equally.id) {
                 let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
-                if (expense.participants.contains(where: { $0 == currentUser })) {
+                if (expense.participants.contains(where: { sameUser($0) })) {
                     userBalanceTemp -= amountDebt
                 }
             }

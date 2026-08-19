@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 protocol APIClient {
     func request<Response: Codable>(
@@ -48,7 +49,7 @@ final class APIService: APIClient {
             request.httpBody = try encoder.encode(body)
         }
         
-        print("\(method) \(endpoint): \(String(describing: body))")
+        os_log(.debug, log: .api, "API Request %{public}@ %{public}@ body: %{public}@", method, endpoint, String(describing: body))
         return try await requestWithRetry(endpoint: endpoint, request: request)
     }
     
@@ -85,6 +86,8 @@ final class APIService: APIClient {
         endpoint: String,
         request: URLRequest
     ) async throws -> Response {
+        await MainActor.run { LoadingViewModel.shared.beginRequest() }
+        defer { Task { @MainActor in LoadingViewModel.shared.endRequest() } }
         do {
             let authService = AuthenticationService()
             var modifiedRequest = request
@@ -102,8 +105,14 @@ final class APIService: APIClient {
             }
             
             if httpResponse.statusCode == 401 {
-                try await authService.refresh()
-                
+                do {
+                    try await authService.refresh()
+                } catch {
+                    try? tokenManager.clearTokens()
+                    NotificationCenter.default.post(name: .sessionExpired, object: nil)
+                    throw APIError.unauthorized
+                }
+
                 if let newAccessToken = try? tokenManager.getAccessToken() {
                     modifiedRequest.setValue("Bearer \(newAccessToken)", forHTTPHeaderField: "Authorization")
                     let (newData, _) = try await URLSession.shared.data(for: modifiedRequest)
@@ -140,7 +149,7 @@ final class APIService: APIClient {
             
             return result
         } catch {
-            print(error)
+            os_log(.error, log: .api, "API Error: %{public}@", String(describing: error))
             throw (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
         }
     }
@@ -150,4 +159,13 @@ struct Empty: Codable {}
 
 struct ErrorResponse: Codable {
     let errors: String
+}
+
+extension Notification.Name {
+    static let sessionExpired = Notification.Name("TabiSessionExpired")
+}
+
+
+private extension OSLog {
+    static let api = OSLog(subsystem: "com.tabisplit.TabiSplit", category: "API")
 }

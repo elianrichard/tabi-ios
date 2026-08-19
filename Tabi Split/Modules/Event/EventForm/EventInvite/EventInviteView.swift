@@ -18,9 +18,6 @@ struct EventInviteView: View {
     
     @State private var isLinkCopied = false
     @State private var isShowQrSheet = false
-    @State private var isShowCustomParticipantSheet = false
-    
-    @State private var sheetHeight: CGFloat = 0
     
     private var deeplinkHost = "tabi-web.vercel.app"
     
@@ -75,7 +72,10 @@ struct EventInviteView: View {
                                 }
                                 if (eventInviteViewModel.searchUserText != "") {
                                     Button {
-                                        isShowCustomParticipantSheet = true
+                                        let newUser = UserData(name: eventInviteViewModel.searchUserText, phone: "")
+                                        eventInviteViewModel.allContacts.append(newUser)
+                                        eventInviteViewModel.selectedContacts.append(newUser)
+                                        eventInviteViewModel.searchUserText = ""
                                     } label: {
                                         HStack (spacing: .spacingTight) {
                                             Icon(systemName: "plus", color: .buttonBlue, size: 20)
@@ -124,43 +124,6 @@ struct EventInviteView: View {
             if let selectedEvent = eventViewModel.selectedEvent {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
-        }
-        .sheet(isPresented: $isShowCustomParticipantSheet) {
-            CustomSheet(xToggleBinding: $isShowCustomParticipantSheet) {
-                VStack (spacing: .spacingLarge) {
-                    VStack (spacing: .spacingMedium) {
-                        Image(.eventUnregistered)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 200, height: 200)
-                        VStack (spacing: .spacingSmall) {
-                            Text("Add an unregistered participant?")
-                                .font(.tabiSubtitle)
-                                .multilineTextAlignment(.center)
-                            Text("You can replace **'\(eventInviteViewModel.searchUserText)'** with their real account later.")
-                                .font(.tabiBody)
-                                .multilineTextAlignment(.center)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    CustomButton (text: "Add") {
-                        let newUser = UserData(name: eventInviteViewModel.searchUserText, phone: "")
-                        eventInviteViewModel.allContacts.append(newUser)
-                        eventInviteViewModel.selectedContacts.append(newUser)
-                        eventInviteViewModel.searchUserText = ""
-                        isShowCustomParticipantSheet = false
-                    }
-                }
-            }
-            .presentationDetents([.height(sheetHeight)])
-            .presentationDragIndicator(.visible)
-            .background (
-                GeometryReader { geometry in
-                    Color.clear.onAppear {
-                        sheetHeight = geometry.size.height
-                    }
-                }
-            )
         }
         .sheet(isPresented: $isShowQrSheet) {
             CustomSheet (xToggleBinding: $isShowQrSheet) {

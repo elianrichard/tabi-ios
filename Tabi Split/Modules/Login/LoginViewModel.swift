@@ -36,6 +36,10 @@ class LoginViewModel {
             }
             let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: userId)
             UserDefaultsService.shared.saveCurrentUser(user: user)
+            // Promote any pre-existing Guest UserData in place so it matches the freshly-authed identity.
+            // This avoids creating a duplicate UserData row alongside the Guest one and keeps
+            // event/expense relationships pointing at the same in-memory user.
+            SwiftDataService.shared.promoteGuestUserData(to: user)
             SwiftDataService.shared.saveCurrentUser(user: user)
         } catch {
             print("Login failed: \(error)")
