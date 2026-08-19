@@ -126,6 +126,7 @@ struct SettlementOptimizationView: View {
                 amount: expense.price,
                 isEquallySplit: isEqual,
                 equalSplitPerPerson: perPerson,
+                participantNames: isEqual ? expense.participants.map { $0.name } : [],
                 items: expense.items.map { item in
                     OptimizationExpenseItemPDFData(
                         name: item.itemName,

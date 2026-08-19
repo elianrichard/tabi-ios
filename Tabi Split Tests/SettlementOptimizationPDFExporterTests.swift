@@ -19,7 +19,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             OptimizationRecapPDFData(fromName: "Budi", toName: "Elian", amount: 75_000),
         ],
         expenses: [OptimizationExpensePDFData] = [
-            OptimizationExpensePDFData(name: "KFC", payerName: "Elian", amount: 100_000, isEquallySplit: false, equalSplitPerPerson: nil, items: [
+            OptimizationExpensePDFData(name: "KFC", payerName: "Elian", amount: 100_000, isEquallySplit: false, equalSplitPerPerson: nil, participantNames: [], items: [
                 OptimizationExpenseItemPDFData(name: "Chicken Bucket", quantity: 2, price: 80_000, assignees: [
                     OptimizationAssigneePDFData(name: "Elian", share: 1),
                     OptimizationAssigneePDFData(name: "Budi", share: 1),
@@ -31,7 +31,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
                 OptimizationAdditionalChargePDFData(typeName: "Discount", amount: 10_000),
             ]),
             // Equally-split expense: item breakdown should be omitted in the PDF.
-            OptimizationExpensePDFData(name: "Taxi", payerName: "Budi", amount: 50_000, isEquallySplit: true, equalSplitPerPerson: 25_000, items: [], additionalCharges: []),
+            OptimizationExpensePDFData(name: "Taxi", payerName: "Budi", amount: 50_000, isEquallySplit: true, equalSplitPerPerson: 25_000, participantNames: ["Elian", "Budi"], items: [], additionalCharges: []),
         ]
     ) -> SettlementOptimizationPDFData {
         SettlementOptimizationPDFData(
@@ -84,6 +84,22 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
         XCTAssertFalse(data.isEmpty)
     }
 
+    func testGeneratePDFWithEquallySplitSubsetParticipants() throws {
+        // An equally-split expense shared by only a subset of the event's members.
+        let equal = OptimizationExpensePDFData(
+            name: "Drinks",
+            payerName: "Elian",
+            amount: 60_000,
+            isEquallySplit: true,
+            equalSplitPerPerson: 30_000,
+            participantNames: ["Elian", "Budi"],
+            items: [],
+            additionalCharges: []
+        )
+        let data = SettlementOptimizationPDFExporter.generatePDF(from: makeData(expenses: [equal]))
+        XCTAssertFalse(data.isEmpty)
+    }
+
     func testGeneratePDFWithManyExpensesAndItemsSpansPages() throws {
         // 40 expenses, each with several line items, should force the expense
         // section to paginate beyond its own starting page.
@@ -104,6 +120,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
                 amount: Float(expenseIndex * 10_000),
                 isEquallySplit: false,
                 equalSplitPerPerson: nil,
+                participantNames: [],
                 items: items,
                 additionalCharges: [OptimizationAdditionalChargePDFData(typeName: "Tax", amount: Float(expenseIndex * 1000))]
             ))

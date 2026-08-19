@@ -56,6 +56,8 @@ struct OptimizationExpensePDFData {
     var isEquallySplit: Bool
     /// For equal splits, the per-person amount (total ÷ participants); nil otherwise.
     var equalSplitPerPerson: Float?
+    /// For equal splits, the participants sharing it (may be a subset of the event).
+    var participantNames: [String]
     var items: [OptimizationExpenseItemPDFData]
     var additionalCharges: [OptimizationAdditionalChargePDFData]
 }
@@ -181,8 +183,13 @@ enum SettlementOptimizationPDFExporter {
                 }
                 pageY = drawExpenseGroupHeader(expense, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
 
-                // Equal splits carry no per-item detail — the header already says how it was split.
-                if !expense.isEquallySplit {
+                // Equal splits carry no per-item detail, but list the participants sharing it
+                // (which may be only a subset of the event's members).
+                if expense.isEquallySplit {
+                    if !expense.participantNames.isEmpty {
+                        pageY = drawParticipantsRow(expense.participantNames, maxY: pageY, leftMargin: leftMargin, pageWidth: pageSize.width)
+                    }
+                } else {
                     if expense.items.isEmpty {
                         pageY = drawExpenseItemRow(name: "No itemised breakdown.", quantity: nil, price: nil,
                                                    maxY: pageY, leftMargin: leftMargin, pageWidth: pageSize.width)
@@ -430,6 +437,19 @@ enum SettlementOptimizationPDFExporter {
             return "\(assignee.name) (\(shareText)x)"
         }
         let text = ("Shared by: " + parts.joined(separator: ", ") as NSString)
+            .truncated(toWidth: pageWidth - leftMargin - indent, using: attributes)
+        text.draw(at: CGPoint(x: indent, y: maxY), withAttributes: attributes)
+        return maxY + text.size(withAttributes: attributes).height + 5
+    }
+
+    /// The participants sharing an equally-split expense, indented under its header.
+    private static func drawParticipantsRow(_ names: [String], maxY: CGFloat, leftMargin: CGFloat, pageWidth: CGFloat) -> CGFloat {
+        let indent = leftMargin + 16
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 11, weight: .regular),
+            .foregroundColor: UIColor.gray,
+        ]
+        let text = ("Split between: " + names.joined(separator: ", ") as NSString)
             .truncated(toWidth: pageWidth - leftMargin - indent, using: attributes)
         text.draw(at: CGPoint(x: indent, y: maxY), withAttributes: attributes)
         return maxY + text.size(withAttributes: attributes).height + 5
