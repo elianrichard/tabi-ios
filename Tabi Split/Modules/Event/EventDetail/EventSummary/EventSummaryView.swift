@@ -10,8 +10,7 @@ import SwiftUI
 struct EventSummaryView: View {
     @Environment(Routes.self) private var routes
     @Environment(EventViewModel.self) private var eventViewModel
-    
-    
+
     var body: some View {
         ScrollView (showsIndicators: false) {
             VStack (spacing: .spacingRegular) {
