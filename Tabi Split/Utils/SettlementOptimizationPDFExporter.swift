@@ -50,6 +50,8 @@ struct OptimizationAdditionalChargePDFData {
 /// any additional charges (tax / service / discount / other).
 struct OptimizationExpensePDFData {
     var name: String
+    /// When the expense was created; the list is sorted by this and it is shown under the title.
+    var date: Date
     var payerName: String
     var amount: Float
     /// Whether the expense was split equally. Equal splits omit the item breakdown.
@@ -133,13 +135,9 @@ enum SettlementOptimizationPDFExporter {
                 pageY += 12
             }
 
-            pageY += 12
-
-            // ---- Recapitulation (who pays whom) ----
-            if pageY + 60 > pageBottom {
-                context.beginPage()
-                pageY = 40
-            }
+            // ---- Recapitulation (who pays whom) — always starts on its own page ----
+            context.beginPage()
+            pageY = 40
             pageY = drawSectionTitle("Recapitulation", maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth)
             pageY += 6
             pageY = drawRecapHeader(maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
@@ -381,7 +379,8 @@ enum SettlementOptimizationPDFExporter {
         if expense.isEquallySplit, let perPerson = expense.equalSplitPerPerson {
             splitLabel += " (\(formatMoney(perPerson))/person)"
         }
-        ("Paid by \(expense.payerName)  •  \(splitLabel)" as NSString)
+        let dateText = expense.date.customDateFormat("dd MMM yyyy").string(from: expense.date)
+        ("\(dateText)  •  Paid by \(expense.payerName)  •  \(splitLabel)" as NSString)
             .draw(at: CGPoint(x: leftMargin, y: payerY), withAttributes: payerAttributes)
 
         let bottom = payerY + ("Paid by" as NSString).size(withAttributes: payerAttributes).height + 6
