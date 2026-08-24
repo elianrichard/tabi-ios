@@ -275,6 +275,11 @@ class BackupService {
 
         var keyToUser: [String: UserData] = [:]
 
+        // Multiple incoming userKeys that share a phone (or userId) are the SAME real
+        // person — the "#n" suffix is only an export-side de-dup artifact of duplicate
+        // local UserData rows, not a distinct participant. Collapse them: every userKey
+        // with the same phone/userId resolves to one UserData so the split does not
+        // count one person as many.
         for dto in payload.users {
             let match: UserData?
             if !dto.phone.isEmpty, let u = phoneIndex[dto.phone] {
@@ -309,6 +314,12 @@ class BackupService {
             }
         }
 
+        print("[IMPORT] keyToUser map:")
+        for (k, u) in keyToUser {
+            print("[IMPORT]   key=\(k) -> name=\(u.name) id=\(u.userId) phone=\(u.phone) ptr=\(ObjectIdentifier(u))")
+        }
+        print("[IMPORT] currentUser=\(currentUser.map { "name=\($0.name) id=\($0.userId) phone=\($0.phone) ptr=\(ObjectIdentifier($0))" } ?? "nil")")
+
         let existingEvents = svc.fetchAllEvents() ?? []
 
         for eventDTO in payload.events {
@@ -316,6 +327,7 @@ class BackupService {
             if let cu = currentUser, !participants.contains(where: { $0 === cu }) {
                 participants.append(cu)
             }
+            print("[IMPORT] event=\(eventDTO.eventName) participantKeys=\(eventDTO.participantKeys) resolvedParticipants=\(participants.map { ObjectIdentifier($0) }) count=\(participants.count)")
 
             let duplicate: EventData? = existingEvents.first { ev in
                 if let id = eventDTO.eventId, let evId = ev.eventId, !id.isEmpty {
@@ -345,11 +357,13 @@ class BackupService {
                     coverer = c
                 } else if let cu = currentUser {
                     coverer = cu
+                    print("[IMPORT] !! expense=\(expDTO.name) covererKey=\(expDTO.covererKey) NOT in keyToUser -> fell back to currentUser")
                 } else {
                     print("BackupService: expense skipped, no coverer + no current user name=\(expDTO.name)")
                     continue
                 }
                 let expParticipants: [UserData] = expDTO.participantKeys.compactMap { keyToUser[$0] }
+                print("[IMPORT]   expense=\(expDTO.name) covererKey=\(expDTO.covererKey) coverer.ptr=\(ObjectIdentifier(coverer)) expParticipantKeys=\(expDTO.participantKeys) expParticipant.ptrs=\(expParticipants.map { ObjectIdentifier($0) })")
                 let splitMethod = SplitMethod(rawValue: expDTO.splitMethod) ?? .equally
 
                 let charges = expDTO.additionalCharges.map { c -> AdditionalCharge in

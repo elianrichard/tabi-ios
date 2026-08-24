@@ -179,11 +179,20 @@ final class EventViewModel {
     }
     
     func calculateOptimization(currentUser: UserData) {
-        let debug = false // enable this to debug print
-        
+        let debug = true // enable this to debug print
+
         var userSummaryData: [SummaryHistoryData] = []
         var userTotalSpendingTemp: Float = 0
-        guard let event = selectedEvent else { return }
+        guard let event = selectedEvent else { print("[OPT] no selectedEvent -> bail"); return }
+        if debug {
+            print("[OPT] ===== calculateOptimization START event=\(event.eventName) =====")
+            print("[OPT] currentUser name=\(currentUser.name) id=\(currentUser.userId) phone=\(currentUser.phone) ptr=\(ObjectIdentifier(currentUser))")
+            print("[OPT] event.participants count=\(event.participants.count)")
+            for p in event.participants {
+                print("[OPT]   participant name=\(p.name) id=\(p.userId) phone=\(p.phone) ptr=\(ObjectIdentifier(p))")
+            }
+            print("[OPT] event.expenses count=\(event.expenses.count)")
+        }
         participantsBalance = event.participants.map { PersonBalanceData(user: $0) }
         participantsBalance = participantsBalance.sorted(by: { $0.user.name.lowercased() < $1.user.name.lowercased() })
         
@@ -191,8 +200,12 @@ final class EventViewModel {
         
         for expense in event.expenses {
             var userBalanceTemp: Float = 0
-            if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice())") }
-            guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
+            if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice()) split=\(expense.splitMethod) participants=\(expense.participants.count) items=\(expense.items.count)") }
+            if debug { print("[OPT]   coverer name=\(expense.coverer.name) id=\(expense.coverer.userId) phone=\(expense.coverer.phone) ptr=\(ObjectIdentifier(expense.coverer))") }
+            guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else {
+                print("[OPT] !! BAIL: coverer not in participantsBalance (identity ==). expense=\(expense.name) coverer.ptr=\(ObjectIdentifier(expense.coverer)) balanceUserPtrs=\(participantsBalance.map { ObjectIdentifier($0.user) })")
+                return
+            }
             personPaid.lent += expense.price
             
             if expense.coverer == currentUser {
@@ -201,11 +214,14 @@ final class EventViewModel {
             
             if (expense.splitMethod == SplitMethod.custom.id) {
                 let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
-                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
+                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice * $1.itemQuantity}
                 for item in expense.items {
                     let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
                     for assignee in item.assignees {
-                        guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
+                        guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else {
+                            print("[OPT] !! BAIL: assignee not in participantsBalance (custom split). expense=\(expense.name) item=\(item.itemName) assignee.name=\(assignee.user.name) assignee.ptr=\(ObjectIdentifier(assignee.user)) balanceUserPtrs=\(participantsBalance.map { ObjectIdentifier($0.user) })")
+                            return
+                        }
                         let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
                         let amountSpent = personQuantity * item.itemPrice
                         let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
@@ -225,7 +241,10 @@ final class EventViewModel {
             } else if (expense.splitMethod == SplitMethod.equally.id) {
                 let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
                 for person in expense.participants {
-                    guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
+                    guard let personBuy = participantsBalance.first(where: { $0.user == person }) else {
+                        print("[OPT] !! BAIL: participant not in participantsBalance (equally split). expense=\(expense.name) person.name=\(person.name) person.ptr=\(ObjectIdentifier(person)) balanceUserPtrs=\(participantsBalance.map { ObjectIdentifier($0.user) })")
+                        return
+                    }
                     if (expense.coverer == currentUser && personBuy.user == currentUser) {
                         personPaid.lent -= amountDebt
                     } else {
@@ -244,6 +263,8 @@ final class EventViewModel {
             }
         }
         
+        if debug { print("[OPT] all expenses processed OK (no early return). participantsBalance count=\(participantsBalance.count)") }
+
         userTotalSpending = userTotalSpendingTemp
         userTransactionHistory = userSummaryData.sorted(by: { $0.expenseDate > $1.expenseDate })
         
