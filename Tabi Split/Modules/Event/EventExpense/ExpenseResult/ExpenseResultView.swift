@@ -76,7 +76,9 @@ struct ExpenseResultView: View {
             ScrollView(showsIndicators: false) {
                 VStack (spacing: .spacingTight) {
                     if eventExpenseViewModel.selectedMethod == .equally {
-                        ExpenseResultEqualCard(person: profileViewModel.user)
+                        if eventExpenseViewModel.selectedParticipants.contains(where: { profileViewModel.isCurrentUser($0) }) {
+                            ExpenseResultEqualCard(person: profileViewModel.user)
+                        }
                         ForEach(eventExpenseViewModel.selectedParticipants.filter { !profileViewModel.isCurrentUser($0) }) { person in
                             ExpenseResultEqualCard(person: person)
                         }

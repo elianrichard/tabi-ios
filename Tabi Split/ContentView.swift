@@ -41,6 +41,8 @@ struct ContentView: View {
                 LoadingView()
             }
 
+            ToastOverlay()
+
             SplashView()
                 .ignoresSafeArea()
         }

@@ -150,8 +150,18 @@ final class APIService: APIClient {
             return result
         } catch {
             os_log(.error, log: .api, "API Error: %{public}@", String(describing: error))
-            throw (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
+            let apiError = (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
+            notifyError(apiError)
+            throw apiError
         }
+    }
+
+    private func notifyError(_ error: APIError) {
+        // .unauthorized is handled by the session-expired flow (banner + logout);
+        // surfacing it as a toast would be redundant/noisy.
+        if case .unauthorized = error { return }
+        let message = error.errorDescription ?? "Something went wrong. Please try again."
+        Task { @MainActor in ToastViewModel.shared.showError(message) }
     }
 }
 
