@@ -16,8 +16,7 @@ struct ContentView: View {
     @State private var eventSettlementViewModel = EventSettlementViewModel()
     @State private var profileViewModel = ProfileViewModel()
     private var loadingViewModel = LoadingViewModel.shared
-    
-    @State private var isAuthenticated = false
+    @State private var sessionState = SessionState.shared
 
     var body: some View {
         ZStack {
@@ -28,7 +27,7 @@ struct ContentView: View {
                             .onAppear {
                                 UserDefaultsService.shared.setOnboardingStatus(true)
                             }
-                    } else if isAuthenticated {
+                    } else if sessionState.isAuthenticated {
                         HomeView()
                     } else {
                         LoginView()
@@ -79,27 +78,27 @@ struct ContentView: View {
         let isGuest = SwiftDataService.shared.getCurrentUser()?.phone == "Guest"
 
         if isGuest {
-            isAuthenticated = true
+            sessionState.isAuthenticated = true
             return
         }
 
         if !hasToken && !hasLocalUser {
-            isAuthenticated = false
+            sessionState.isAuthenticated = false
             return
         }
 
         if !hasToken && hasLocalUser {
             SessionState.shared.sessionExpiredBanner = true
-            isAuthenticated = false
+            sessionState.isAuthenticated = false
             return
         }
 
         do {
             let _ = try await ProfileService.shared.probeSession()
-            isAuthenticated = true
+            sessionState.isAuthenticated = true
             await runMigrationIfNeeded()
         } catch {
-            isAuthenticated = false
+            sessionState.isAuthenticated = false
             SessionState.shared.sessionExpiredBanner = true
         }
     }
@@ -119,7 +118,10 @@ struct ContentView: View {
 
     private func handleSessionExpired() {
         SessionState.shared.sessionExpiredBanner = true
-        isAuthenticated = false
+        sessionState.isAuthenticated = false
+        // Root swaps back to LoginView; clear any pushed screens so stale
+        // authed views do not linger on top of the login root.
+        router.popToRoot()
     }
     
     
@@ -155,7 +157,9 @@ struct ContentView: View {
                     print("Join event failed: \(error)")
                 }
             }
-            router.push(.home)
+            // Home is the stack root; clear the path to land there rather than
+            // pushing a duplicate Home screen.
+            router.popToRoot()
         }
     }
 }

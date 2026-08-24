@@ -95,7 +95,11 @@ struct EditProfileView: View {
                         Task {
                             if await profileViewModel.deleteUser() {
                                 isShowDeleteSheet = false
-                                router.push(.login)
+                                // Swap the stack root back to LoginView and clear
+                                // the path so the deleted account's screens are
+                                // gone and Back cannot return.
+                                SessionState.shared.isAuthenticated = false
+                                router.popToRoot()
                             }
                         }
                     }

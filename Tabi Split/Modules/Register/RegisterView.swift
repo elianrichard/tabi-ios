@@ -72,7 +72,11 @@ struct RegisterView: View {
                                     if !ok {
                                         SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
                                     }
-                                    router.push(.home)
+                                    // Make Home the root: swap the stack root to
+                                    // HomeView and clear the path so the auth
+                                    // screens are gone and Back cannot return.
+                                    SessionState.shared.isAuthenticated = true
+                                    router.popToRoot()
                                 }
                             }
                         }

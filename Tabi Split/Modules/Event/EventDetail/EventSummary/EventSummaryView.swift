@@ -95,31 +95,33 @@ struct EventSummaryView: View {
                     }
                 }
                 
-                VStack (spacing: 16) {
-                    HStack {
-                        Text("Your Balance History")
-                            .font(.tabiHeadline)
-                        Spacer()
-                        Button {
-                            router.push(.eventSummaryDetail)
-                        } label: {
-                            Text("See All")
-                                .font(.tabiBody)
-                                .foregroundStyle(.textBlue)
+                if !eventViewModel.userTransactionHistory.isEmpty {
+                    VStack (spacing: 16) {
+                        HStack {
+                            Text("Your Balance History")
+                                .font(.tabiHeadline)
+                            Spacer()
+                            Button {
+                                router.push(.eventSummaryDetail)
+                            } label: {
+                                Text("See All")
+                                    .font(.tabiBody)
+                                    .foregroundStyle(.textBlue)
+                            }
+                        }
+                        VStack (spacing: 0) {
+                            ForEach(Array(eventViewModel.userTransactionHistory.prefix(3))) { data in
+                                EventSummaryHistoryCard(data: data)
+                            }
                         }
                     }
-                    VStack (spacing: 0) {
-                        ForEach(Array(eventViewModel.userTransactionHistory.prefix(3))) { data in
-                            EventSummaryHistoryCard(data: data)
-                        }
+                    .padding(.spacingRegular)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(.uiGray, lineWidth: 1)
                     }
+                    .padding(1)
                 }
-                .padding(.spacingRegular)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(.uiGray, lineWidth: 1)
-                }
-                .padding(1)
                 
                 
                 HStack (alignment: .top) {

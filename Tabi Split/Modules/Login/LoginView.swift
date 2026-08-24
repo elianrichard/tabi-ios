@@ -44,7 +44,8 @@ struct LoginView: View {
                         Button {
                             if loginViewModel.guestLogin() {
                                 profileViewModel.user = UserData(name: "Guest", phone: "Guest")
-                                router.push(.home)
+                                sessionState.isAuthenticated = true
+                                router.popToRoot()
                             }
                         } label: {
                             Text("Enter as Guest")
@@ -116,7 +117,11 @@ struct LoginView: View {
                                     if !ok {
                                         sessionState.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
                                     }
-                                    router.push(.home)
+                                    // Make Home the root: swap the stack root to
+                                    // HomeView and clear the path so the auth
+                                    // screens are gone and Back cannot return.
+                                    sessionState.isAuthenticated = true
+                                    router.popToRoot()
                                 }
                             }
                         }

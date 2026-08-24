@@ -108,9 +108,13 @@ struct ProfileView: View {
                         Button {
                             Task {
                                 let isSuccess = await profileViewModel.logout()
-                                
+
                                 if isSuccess {
-                                    router.push(.login)
+                                    // Swap the stack root back to LoginView and
+                                    // clear the path so Home is gone and Back
+                                    // cannot return into the authed area.
+                                    SessionState.shared.isAuthenticated = false
+                                    router.popToRoot()
                                 }
                             }
                         } label: {
