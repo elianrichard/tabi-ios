@@ -40,21 +40,12 @@ struct Input: View {
     @State var isShowPassword = false
     
     var type: InputTypeEnum = .text
-    var phoneCode: String = "62"
-    
+
     @FocusState.Binding var focusedField: FocusField?
     var focusCase: FocusField
     
     var body: some View {
         HStack(spacing: .spacingRegular) {
-            if type == .phone {
-                Text("+" + phoneCode)
-                    .font(.tabiBody)
-                    .foregroundColor(.buttonGrey)
-                Divider()
-                    .frame(height: 19)
-                    .background(.buttonGrey)
-            }
             if isSecure {
                 HStack {
                     if !isShowPassword {

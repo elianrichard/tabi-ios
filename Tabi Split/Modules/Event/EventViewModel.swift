@@ -66,7 +66,7 @@ final class EventViewModel {
         do {
             var participants: [UserData] = selectedContacts
             if !isGuest {
-                let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
+                let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone }.filter { !$0.isEmpty })
                 let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
                     if let image = ProfileImageEnum(rawValue: user.avatar_url) {
                         UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: image, imageUrl: "" )
@@ -179,7 +179,7 @@ final class EventViewModel {
     }
     
     func calculateOptimization(currentUser: UserData) {
-        let debug = true // enable this to debug print
+        let debug = false // enable this to debug print
 
         var userSummaryData: [SummaryHistoryData] = []
         var userTotalSpendingTemp: Float = 0
