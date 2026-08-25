@@ -33,37 +33,39 @@ struct ProfileView: View {
                     }
                 }
                 
-                VStack (spacing: .spacingSmall) {
-                    Button {
-                        handleExport()
-                    } label: {
-                        HStack(spacing: .spacingTight){
-                            Icon(systemName: "square.and.arrow.up")
-                            Text("Export Data")
-                                .font(.tabiHeadline)
-                                .foregroundStyle(.textBlack)
-                            Spacer()
-                            Icon(systemName: "chevron.right", size: 16)
+                // TEMPORARILY DISABLED: EXPORT / IMPORT DATA
+                if false {
+                    VStack (spacing: .spacingSmall) {
+                        Button {
+                            handleExport()
+                        } label: {
+                            HStack(spacing: .spacingTight){
+                                Icon(systemName: "square.and.arrow.up")
+                                Text("Export Data")
+                                    .font(.tabiHeadline)
+                                    .foregroundStyle(.textBlack)
+                                Spacer()
+                                Icon(systemName: "chevron.right", size: 16)
+                            }
+                            .padding(.vertical, .spacingSmall)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, .spacingSmall)
-                        .contentShape(Rectangle())
-                    }
-                    Button {
-                        isImporterPresented = true
-                    } label: {
-                        HStack(spacing: .spacingTight){
-                            Icon(systemName: "square.and.arrow.down")
-                            Text("Import Data")
-                                .font(.tabiHeadline)
-                                .foregroundStyle(.textBlack)
-                            Spacer()
-                            Icon(systemName: "chevron.right", size: 16)
+                        Button {
+                            isImporterPresented = true
+                        } label: {
+                            HStack(spacing: .spacingTight){
+                                Icon(systemName: "square.and.arrow.down")
+                                Text("Import Data")
+                                    .font(.tabiHeadline)
+                                    .foregroundStyle(.textBlack)
+                                Spacer()
+                                Icon(systemName: "chevron.right", size: 16)
+                            }
+                            .padding(.vertical, .spacingSmall)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, .spacingSmall)
-                        .contentShape(Rectangle())
+                        Divider()
                     }
-                    Divider()
-
                 }
 
                 
