@@ -12,7 +12,7 @@ struct UserCard : View {
     var user: UserData
     var isShowYouText: Bool = false
     var isShowOwnerText: Bool = false
-    var isShowPhoneText: Bool = true
+    var isShowEmailText: Bool = true
     
     var body: some View {
         HStack (spacing: .spacingTight) {
@@ -32,9 +32,9 @@ struct UserCard : View {
                             .foregroundStyle(.textGrey)
                     }
                 }
-                if (isShowPhoneText && user.phone != "") {
+                if (isShowEmailText && user.email != "") {
                     if !(profileViewModel.isGuest && profileViewModel.isCurrentUser(user)) {
-                        Text(user.phone)
+                        Text(user.email)
                             .font(.tabiBody)
                             .foregroundColor(.textGrey)
                     }
@@ -46,5 +46,5 @@ struct UserCard : View {
 }
 
 #Preview {
-    UserCard(user: UserData(name: "Testing", phone: "628123456789"))
+    UserCard(user: UserData(name: "Testing", email: "test@example.com"))
 }

@@ -72,7 +72,7 @@ struct EventInviteView: View {
                                 }
                                 if (eventInviteViewModel.searchUserText != "") {
                                     Button {
-                                        let newUser = UserData(name: eventInviteViewModel.searchUserText, phone: "")
+                                        let newUser = UserData(name: eventInviteViewModel.searchUserText, email: "")
                                         eventInviteViewModel.allContacts.append(newUser)
                                         eventInviteViewModel.selectedContacts.append(newUser)
                                         eventInviteViewModel.searchUserText = ""

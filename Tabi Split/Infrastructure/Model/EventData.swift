@@ -37,10 +37,10 @@ class EventData {
     }
     
     func calculateUserEventBalance (currentUser: UserData) {
-        // Identity match by userId (or phone fallback) to survive duplicate UserData rows after a refresh.
+        // Identity match by userId (or email fallback) to survive duplicate UserData rows after a refresh.
         func sameUser(_ a: UserData) -> Bool {
             if !a.userId.isEmpty && !currentUser.userId.isEmpty { return a.userId == currentUser.userId }
-            if !a.phone.isEmpty && !currentUser.phone.isEmpty { return a.phone == currentUser.phone }
+            if !a.email.isEmpty && !currentUser.email.isEmpty { return a.email == currentUser.email }
             return a == currentUser
         }
 

@@ -13,6 +13,9 @@ packages:
   JWTDecode:
     url: https://github.com/auth0/JWTDecode.swift.git
     minorVersion: 3.2.0
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS.git
+    minorVersion: 8.0.0
 targets:
   Tabi Split:
     type: application
@@ -26,6 +29,7 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.sora.Tabi
       INFOPLIST_FILE: Tabi Split/Info.plist
+      CODE_SIGN_ENTITLEMENTS: Tabi Split/Tabi Split.entitlements
       base:
         GENERATE_INFOPLIST_FILE: YES
         MARKETING_VERSION: "1.1.5"
@@ -55,6 +59,8 @@ targets:
     dependencies:
       - package: Lottie
       - package: JWTDecode
+      - package: GoogleSignIn
+        product: GoogleSignIn
   Tabi Split Tests:
     type: bundle.unit-test
     platform: iOS

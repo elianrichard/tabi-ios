@@ -33,16 +33,16 @@ struct InboxCard : View {
 #Preview {
     ScrollView {
         VStack {
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-10), isUnread: true))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInMinute)))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInMinute * 2)))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInHour)))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInHour * 2)))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInWeek)))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInWeek * 2)))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInYear)))
-            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInYear * 2)))
-            InboxCard(inboxItem: InboxData(type: .NeedPayment, targetUser: UserData(name: "Ferry", phone: "Phone"), eventName: "Jepara Trip", dateTime: Date().yesterday(), amount: 10_000))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-10), isUnread: true))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInMinute)))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInMinute * 2)))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInHour)))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInHour * 2)))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInWeek)))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInWeek * 2)))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInYear)))
+            InboxCard(inboxItem: InboxData(type: .NeedConfirmation, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().addingTimeInterval(-Date.secondsInYear * 2)))
+            InboxCard(inboxItem: InboxData(type: .NeedPayment, targetUser: UserData(name: "Ferry", email: "test@example.com"), eventName: "Jepara Trip", dateTime: Date().yesterday(), amount: 10_000))
         }
         .padding(.horizontal)
     }

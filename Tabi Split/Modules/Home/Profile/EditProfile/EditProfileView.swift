@@ -45,7 +45,6 @@ struct EditProfileView: View {
                     
                     VStack(spacing: .spacingRegular){
                         InputWithLabel(label: "Full Name", placeholder: "Full Name", text: $editProfileViewModel.nameText, focusedField: $focusedField, focusCase: .field1)
-                        InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $editProfileViewModel.phoneText, focusedField: $focusedField, focusCase: .field2)
                     }
                 }
                 CustomButton(text: "Delete Account", type: .tertiary, customTextColor: .buttonRed) {

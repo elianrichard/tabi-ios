@@ -45,14 +45,14 @@ struct UserAvatar : View {
 }
 
 #Preview {
-    UserAvatar(userData: UserData(name: "Elian Richard", phone: "Phone"))
-    UserAvatar(userData: UserData(name: "Elian Richard", phone: "Phone"), namePosition: .right)
-    UserAvatar(userData: UserData(name: "Elian Richard", phone: "Phone"), namePosition: .bottom)
+    UserAvatar(userData: UserData(name: "Elian Richard", email: "test@example.com"))
+    UserAvatar(userData: UserData(name: "Elian Richard", email: "test@example.com"), namePosition: .right)
+    UserAvatar(userData: UserData(name: "Elian Richard", email: "test@example.com"), namePosition: .bottom)
     HStack (alignment: .top) {
-        UserAvatar(userData: UserData(name: "Elian Richard", phone: "Phone"), namePosition: .bottom)
-        UserAvatar(userData: UserData(name: "Vincensia", phone: "Phone"), namePosition: .bottom)
-        UserAvatar(userData: UserData(name: "SuperLognName Richard", phone: "Phone"), namePosition: .bottom)
-        UserAvatar(userData: UserData(name: "Elian Richard", phone: "Phone"), namePosition: .bottom)
+        UserAvatar(userData: UserData(name: "Elian Richard", email: "test@example.com"), namePosition: .bottom)
+        UserAvatar(userData: UserData(name: "Vincensia", email: "test@example.com"), namePosition: .bottom)
+        UserAvatar(userData: UserData(name: "SuperLognName Richard", email: "test@example.com"), namePosition: .bottom)
+        UserAvatar(userData: UserData(name: "Elian Richard", email: "test@example.com"), namePosition: .bottom)
     }
 }
 

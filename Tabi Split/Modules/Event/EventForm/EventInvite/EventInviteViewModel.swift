@@ -63,7 +63,7 @@ final class EventInviteViewModel {
         case .authorized, .limited:
             isLoadContactLoading = true
             do {
-                let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
+                let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactEmailAddressesKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
                     cnContacts.append(contact)
@@ -85,7 +85,7 @@ final class EventInviteViewModel {
             }
         default:
             do {
-                let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactPhoneNumbersKey as CNKeyDescriptor]
+                let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor, CNContactEmailAddressesKey as CNKeyDescriptor]
                 let request = CNContactFetchRequest(keysToFetch: keys)
                 try CNStore.enumerateContacts(with: request, usingBlock: { contact, _ in
                     cnContacts.append(contact)
@@ -96,29 +96,29 @@ final class EventInviteViewModel {
             isLoadContactLoading = false
         }
         var allUsers: [UserData] = []
-        
+
         for user in registeredUsers {
-            if user.phone != "" {
-                allUsers.append(user)                
-            }
-        }
-        
-        for user in selectedContacts {
-            let phone = user.phone.formattedAsPhoneNumber()
-            if !allUsers.contains(where: { $0.phone == phone }) {
+            if user.email != "" {
                 allUsers.append(user)
             }
         }
-        
+
+        for user in selectedContacts {
+            let email = user.email.lowercased()
+            if !allUsers.contains(where: { $0.email == email }) {
+                allUsers.append(user)
+            }
+        }
+
         for contact in cnContacts {
-            for number in contact.phoneNumbers {
-                let phone = number.value.stringValue.formattedAsPhoneNumber()
-                if !allUsers.contains(where: { $0.phone == phone }){
-                    allUsers.append(UserData(name: "\(contact.givenName) \(contact.familyName)", phone: number.value.stringValue.formattedAsPhoneNumber()))
+            for emailValue in contact.emailAddresses {
+                let email = (emailValue.value as String).lowercased()
+                if !allUsers.contains(where: { $0.email == email }){
+                    allUsers.append(UserData(name: "\(contact.givenName) \(contact.familyName)", email: email))
                 }
             }
         }
-        
-        allContacts = allUsers.filter{ $0.phone != currentUser.phone }
+
+        allContacts = allUsers.filter{ $0.email != currentUser.email }
     }
 }

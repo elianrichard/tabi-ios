@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import GoogleSignIn
 
 struct ContentView: View {
     @State private var router = Router()
@@ -61,6 +62,11 @@ struct ContentView: View {
         }
         .onOpenURL { incomingURL in
             print("App was opened via URL: \(incomingURL)")
+            // Let GoogleSignIn claim its OAuth callback URL first; if it handles
+            // it, skip the app's own deep-link routing.
+            if GIDSignIn.sharedInstance.handle(incomingURL) {
+                return
+            }
             handleIncomingURL(incomingURL)
         }
     }
@@ -75,7 +81,7 @@ struct ContentView: View {
         }
 
         let hasLocalUser = SwiftDataService.shared.getCurrentUser() != nil
-        let isGuest = SwiftDataService.shared.getCurrentUser()?.phone == "Guest"
+        let isGuest = SwiftDataService.shared.getCurrentUser()?.email == "Guest"
 
         if isGuest {
             sessionState.isAuthenticated = true
@@ -106,10 +112,10 @@ struct ContentView: View {
     private func runMigrationIfNeeded() async {
         guard MigrationCoordinator.shared.hasUnsynced else { return }
         guard let cur = UserDefaultsService.shared.getCurrentUser(),
-              !cur.userPhone.isEmpty,
-              cur.userPhone != "Guest" else { return }
+              !cur.userEmail.isEmpty,
+              cur.userEmail != "Guest" else { return }
         SessionState.shared.migrationRunning = true
-        let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: cur.userPhone, ownerName: cur.userName)
+        let ok = await MigrationCoordinator.shared.runIfNeeded(ownerEmail: cur.userEmail, ownerName: cur.userName)
         SessionState.shared.migrationRunning = false
         if !ok {
             SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription

@@ -6,26 +6,26 @@
 import Foundation
 
 enum MigrateAPIError: LocalizedError {
-    case ownerPhoneMissing
+    case ownerEmailMissing
     case noLocalEvents
-    case participantPhoneMissing(eventName: String)
-    case covererPhoneMissing(expenseName: String)
-    case assigneePhoneMissing(itemName: String)
+    case participantEmailMissing(eventName: String)
+    case covererEmailMissing(expenseName: String)
+    case assigneeEmailMissing(itemName: String)
     case conflict
     case unknown(String)
 
     var errorDescription: String? {
         switch self {
-        case .ownerPhoneMissing:
-            return "Cannot migrate: missing your phone number"
+        case .ownerEmailMissing:
+            return "Cannot migrate: missing your email"
         case .noLocalEvents:
             return "No local events to migrate"
-        case .participantPhoneMissing(let n):
-            return "Event \"\(n)\" has a participant without a phone number"
-        case .covererPhoneMissing(let n):
-            return "Expense \"\(n)\" coverer has no phone number"
-        case .assigneePhoneMissing(let n):
-            return "Item \"\(n)\" has an assignee without a phone number"
+        case .participantEmailMissing(let n):
+            return "Event \"\(n)\" has a participant without an email"
+        case .covererEmailMissing(let n):
+            return "Expense \"\(n)\" coverer has no email"
+        case .assigneeEmailMissing(let n):
+            return "Item \"\(n)\" has an assignee without an email"
         case .conflict:
             return "Some events were already migrated"
         case .unknown(let s):
@@ -35,7 +35,7 @@ enum MigrateAPIError: LocalizedError {
 }
 
 struct MigrateRequest: Codable {
-    let owner_phone: String
+    let owner_email: String
     let owner_name: String
     let events: [MigrateEvent]
 }
@@ -51,7 +51,7 @@ struct MigrateEvent: Codable {
 }
 
 struct MigrateParticipant: Codable {
-    let phone: String
+    let email: String
     let name: String?
 }
 
@@ -59,7 +59,7 @@ struct MigrateExpense: Codable {
     let local_id: String
     let name: String
     let split_method: String
-    let coverer_phone: String
+    let coverer_email: String
     let receipt_url: String?
     let date: String?
     let items: [MigrateItem]
@@ -75,7 +75,7 @@ struct MigrateItem: Codable {
 }
 
 struct MigrateAssignee: Codable {
-    let phone: String
+    let email: String
     let share: Float
 }
 
@@ -85,8 +85,8 @@ struct MigrateAdditionalCharge: Codable {
 }
 
 struct MigratePayment: Codable {
-    let payer_phone: String
-    let receiver_phone: String
+    let payer_email: String
+    let receiver_email: String
     let amount: Float
     let status: String?
     let date_created: String?

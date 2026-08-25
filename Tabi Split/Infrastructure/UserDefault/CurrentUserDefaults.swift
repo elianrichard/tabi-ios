@@ -7,7 +7,7 @@
 
 struct CurrentUserDefaults: Codable {
     let userName: String
-    let userPhone: String
+    let userEmail: String
     let userImage: ProfileImageEnum.ID
     let userId: String
 }

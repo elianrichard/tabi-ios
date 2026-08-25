@@ -22,7 +22,7 @@ struct UserDTO: Codable {
     var userKey: String
     var userId: String
     var name: String
-    var phone: String
+    var email: String
     var image: String
     var imageUrl: String?
 }
@@ -140,8 +140,8 @@ class BackupService {
             let oid = ObjectIdentifier(u)
             if let existing = keyByUser[oid] { return existing }
             var base: String
-            if !u.phone.isEmpty {
-                base = "phone:\(u.phone)"
+            if !u.email.isEmpty {
+                base = "email:\(u.email)"
             } else if !u.userId.isEmpty {
                 base = "uid:\(u.userId)"
             } else {
@@ -175,7 +175,7 @@ class BackupService {
                 userKey: key,
                 userId: u.userId,
                 name: u.name,
-                phone: u.phone,
+                email: u.email,
                 image: u.image,
                 imageUrl: u.imageUrl
             )
@@ -266,23 +266,23 @@ class BackupService {
         let currentCreatorId = currentUser?.userId ?? ""
 
         let existingUsers = svc.getAllUsers() ?? []
-        var phoneIndex: [String: UserData] = [:]
+        var emailIndex: [String: UserData] = [:]
         var userIdIndex: [String: UserData] = [:]
         for u in existingUsers {
-            if !u.phone.isEmpty, phoneIndex[u.phone] == nil { phoneIndex[u.phone] = u }
+            if !u.email.isEmpty, emailIndex[u.email] == nil { emailIndex[u.email] = u }
             if !u.userId.isEmpty, userIdIndex[u.userId] == nil { userIdIndex[u.userId] = u }
         }
 
         var keyToUser: [String: UserData] = [:]
 
-        // Multiple incoming userKeys that share a phone (or userId) are the SAME real
+        // Multiple incoming userKeys that share an email (or userId) are the SAME real
         // person — the "#n" suffix is only an export-side de-dup artifact of duplicate
         // local UserData rows, not a distinct participant. Collapse them: every userKey
-        // with the same phone/userId resolves to one UserData so the split does not
+        // with the same email/userId resolves to one UserData so the split does not
         // count one person as many.
         for dto in payload.users {
             let match: UserData?
-            if !dto.phone.isEmpty, let u = phoneIndex[dto.phone] {
+            if !dto.email.isEmpty, let u = emailIndex[dto.email] {
                 match = u
             } else if !dto.userId.isEmpty, let u = userIdIndex[dto.userId] {
                 match = u
@@ -293,7 +293,7 @@ class BackupService {
             if let existing = match {
                 if !dto.userId.isEmpty { existing.userId = dto.userId }
                 existing.name = dto.name
-                if !dto.phone.isEmpty { existing.phone = dto.phone }
+                if !dto.email.isEmpty { existing.email = dto.email }
                 existing.image = dto.image
                 existing.imageUrl = dto.imageUrl
                 keyToUser[dto.userKey] = existing
@@ -302,13 +302,13 @@ class BackupService {
                 let user = UserData(
                     userId: dto.userId,
                     name: dto.name,
-                    phone: dto.phone,
+                    email: dto.email,
                     image: imageEnum,
                     imageUrl: dto.imageUrl
                 )
                 if imageEnum == nil { user.image = dto.image }
                 ctx.insert(user)
-                if !dto.phone.isEmpty { phoneIndex[dto.phone] = user }
+                if !dto.email.isEmpty { emailIndex[dto.email] = user }
                 if !dto.userId.isEmpty { userIdIndex[dto.userId] = user }
                 keyToUser[dto.userKey] = user
             }
@@ -316,9 +316,9 @@ class BackupService {
 
         print("[IMPORT] keyToUser map:")
         for (k, u) in keyToUser {
-            print("[IMPORT]   key=\(k) -> name=\(u.name) id=\(u.userId) phone=\(u.phone) ptr=\(ObjectIdentifier(u))")
+            print("[IMPORT]   key=\(k) -> name=\(u.name) id=\(u.userId) email=\(u.email) ptr=\(ObjectIdentifier(u))")
         }
-        print("[IMPORT] currentUser=\(currentUser.map { "name=\($0.name) id=\($0.userId) phone=\($0.phone) ptr=\(ObjectIdentifier($0))" } ?? "nil")")
+        print("[IMPORT] currentUser=\(currentUser.map { "name=\($0.name) id=\($0.userId) email=\($0.email) ptr=\(ObjectIdentifier($0))" } ?? "nil")")
 
         let existingEvents = svc.fetchAllEvents() ?? []
 

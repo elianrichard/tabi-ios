@@ -7,20 +7,14 @@
 
 import Foundation
 
-struct RegisterRequest: Codable {
-    let name: String
-    let phone: String
-    let password: String
-    let avatar_url: String
-}
-
-struct RegisterResponse: Codable {
-    let message: String
-}
-
-struct LoginRequest: Codable {
-    let phone: String
-    let password: String
+/// Body for POST /auth/google and /auth/apple. The client runs the native
+/// provider sign-in, then sends the resulting id_token here. `name`/`email` are
+/// optional hints used only when the backend creates a brand-new account (Apple
+/// returns them reliably only on the user's first authorization).
+struct OAuthRequest: Codable {
+    let id_token: String
+    let name: String?
+    let email: String?
 }
 
 struct LoginResponse: Codable {
@@ -28,6 +22,7 @@ struct LoginResponse: Codable {
     let refresh_token: String
     let message: String
     let full_name: String
+    let email: String?
     let profile_image: String
 }
 

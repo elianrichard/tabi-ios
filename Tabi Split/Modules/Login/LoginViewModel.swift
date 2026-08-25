@@ -11,74 +11,85 @@ import JWTDecode
 @Observable
 class LoginViewModel {
     static var shared = LoginViewModel()
-    var phoneNumber: String = ""
-    var password: String = ""
-    
-    var phoneNumberError: String? = nil
-    var passwordError: String? = nil
-    
+
     var isLoading: Bool = false
-    
+    var errorMessage: String? = nil
+
+    /// The email of the account that just signed in, so the view can key the
+    /// device-owner wipe check and migration off it.
+    private(set) var lastSignedInEmail: String = ""
+
     @MainActor
-    func login(phoneInput: String? = nil, passwordInput: String? = nil) async -> Bool {
-        guard validateInput() else {
-            print("Cannot register: form is invalid")
-            return false
+    func signInWithGoogle() async -> Bool {
+        await signIn {
+            let credential = try await ProviderSignIn.shared.signInWithGoogle()
+            let response = try await AuthenticationService.shared.loginWithGoogle(
+                idToken: credential.idToken, name: credential.name, email: credential.email)
+            return (response, credential)
         }
-        
+    }
+
+    @MainActor
+    func signInWithApple() async -> Bool {
+        await signIn {
+            let credential = try await ProviderSignIn.shared.signInWithApple()
+            let response = try await AuthenticationService.shared.loginWithApple(
+                idToken: credential.idToken, name: credential.name, email: credential.email)
+            return (response, credential)
+        }
+    }
+
+    @MainActor
+    private func signIn(_ perform: () async throws -> (LoginResponse, ProviderCredential)) async -> Bool {
         isLoading = true
+        errorMessage = nil
         do {
-            let response = try await AuthenticationService.shared.login(phone: phoneNumber.formattedAsPhoneNumber(), password: password)
+            let (response, credential) = try await perform()
             let jwt = try decode(jwt: response.token)
             guard let userId = jwt["userId"].string else {
-                passwordError = "User ID not found in Token"
+                errorMessage = "User ID not found in Token"
+                isLoading = false
                 return false
             }
-            let user = CurrentUserDefaults(userName: response.full_name, userPhone: phoneNumber.formattedAsPhoneNumber(), userImage: response.profile_image, userId: userId)
+            // Prefer the email the backend echoes; fall back to the provider's.
+            let email = response.email ?? credential.email ?? ""
+            lastSignedInEmail = email
+            let user = CurrentUserDefaults(
+                userName: response.full_name,
+                userEmail: email,
+                userImage: response.profile_image,
+                userId: userId
+            )
             UserDefaultsService.shared.saveCurrentUser(user: user)
-            // Promote any pre-existing Guest UserData in place so it matches the freshly-authed identity.
-            // This avoids creating a duplicate UserData row alongside the Guest one and keeps
-            // event/expense relationships pointing at the same in-memory user.
+            // Promote any pre-existing Guest UserData in place so it matches the
+            // freshly-authed identity, avoiding a duplicate UserData row.
             SwiftDataService.shared.promoteGuestUserData(to: user)
             SwiftDataService.shared.saveCurrentUser(user: user)
+        } catch let providerError as ProviderSignInError {
+            // User backing out of the provider sheet is not an error to surface.
+            if case .cancelled = providerError {
+                isLoading = false
+                return false
+            }
+            print("Sign-in failed: \(providerError)")
+            errorMessage = providerError.localizedDescription
+            isLoading = false
+            return false
         } catch {
-            print("Login failed: \(error)")
-            passwordError = "Account credential is invalid"
+            print("Sign-in failed: \(error)")
+            errorMessage = "Sign-in failed. Please try again."
             isLoading = false
             return false
         }
         isLoading = false
         return true
     }
-    
+
     @MainActor
     func guestLogin() -> Bool {
-        let user = CurrentUserDefaults(userName: "Guest", userPhone: "Guest", userImage: "owl", userId: "")
+        let user = CurrentUserDefaults(userName: "Guest", userEmail: "Guest", userImage: "owl", userId: "")
         UserDefaultsService.shared.saveCurrentUser(user: user)
         SwiftDataService.shared.saveCurrentUser(user: user)
         return true
-    }
-    
-    func validateInput () -> Bool {
-        var isValid = true
-        phoneNumberError = nil
-        passwordError = nil
-        
-        if phoneNumber == "" {
-            phoneNumberError = "Please input your phone number"
-            isValid = false
-        }
-        
-        if password == "" {
-            passwordError = "Please input your password"
-            isValid = false
-        }
-
-        if let phoneValidationError = phoneNumber.validatePhoneNumber() {
-            phoneNumberError = phoneValidationError
-            isValid = false
-        }
-        
-        return isValid
     }
 }

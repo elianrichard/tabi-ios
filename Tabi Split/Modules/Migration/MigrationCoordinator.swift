@@ -27,10 +27,10 @@ final class MigrationCoordinator {
     }
 
     @discardableResult
-    func runIfNeeded(ownerPhone: String, ownerName: String) async -> Bool {
+    func runIfNeeded(ownerEmail: String, ownerName: String) async -> Bool {
         guard !isRunning else { return false }
-        guard !ownerPhone.isEmpty, ownerPhone != "Guest" else {
-            lastError = MigrateAPIError.ownerPhoneMissing
+        guard !ownerEmail.isEmpty, ownerEmail != "Guest" else {
+            lastError = MigrateAPIError.ownerEmailMissing
             return false
         }
 
@@ -41,7 +41,7 @@ final class MigrationCoordinator {
         isRunning = true
         defer { isRunning = false }
 
-        rewriteGuestPhones(events: pending, ownerPhone: ownerPhone)
+        rewriteGuestEmails(events: pending, ownerEmail: ownerEmail)
         SwiftDataService.shared.saveModelContext()
 
         let batches = stride(from: 0, to: pending.count, by: Self.batchSize).map {
@@ -50,7 +50,7 @@ final class MigrationCoordinator {
 
         for batch in batches {
             do {
-                try await migrateBatch(batch, ownerPhone: ownerPhone, ownerName: ownerName)
+                try await migrateBatch(batch, ownerEmail: ownerEmail, ownerName: ownerName)
             } catch {
                 lastError = error
                 print("Migration batch failed: \(error)")
@@ -63,7 +63,7 @@ final class MigrationCoordinator {
         return true
     }
 
-    private func migrateBatch(_ events: [EventData], ownerPhone: String, ownerName: String) async throws {
+    private func migrateBatch(_ events: [EventData], ownerEmail: String, ownerName: String) async throws {
         // Dedupe by localId in case SwiftData has phantom duplicates.
         var seenLocalIds: Set<String> = []
         let uniqueEvents = events.filter { seenLocalIds.insert($0.localId).inserted }
@@ -77,7 +77,7 @@ final class MigrationCoordinator {
         }
 
         let request = MigrateRequest(
-            owner_phone: ownerPhone,
+            owner_email: ownerEmail,
             owner_name: ownerName,
             events: migrateEvents
         )
@@ -107,16 +107,16 @@ final class MigrationCoordinator {
     }
 
     private func buildMigrateEvent(from event: EventData) throws -> MigrateEvent {
-        var seenPhones: Set<String> = []
+        var seenEmails: Set<String> = []
         var migrateParticipants: [MigrateParticipant] = []
         for user in event.participants {
-            let phone = user.phone
-            guard !phone.isEmpty, phone != "Guest" else {
-                throw MigrateAPIError.participantPhoneMissing(eventName: event.eventName)
+            let email = user.email
+            guard !email.isEmpty, email != "Guest" else {
+                throw MigrateAPIError.participantEmailMissing(eventName: event.eventName)
             }
-            if !seenPhones.contains(phone) {
-                seenPhones.insert(phone)
-                migrateParticipants.append(MigrateParticipant(phone: phone, name: user.name))
+            if !seenEmails.contains(email) {
+                seenEmails.insert(email)
+                migrateParticipants.append(MigrateParticipant(email: email, name: user.name))
             }
         }
 
@@ -135,18 +135,18 @@ final class MigrationCoordinator {
     }
 
     private func buildMigrateExpense(from expense: Expense) throws -> MigrateExpense {
-        let covererPhone = expense.coverer.phone
-        guard !covererPhone.isEmpty, covererPhone != "Guest" else {
-            throw MigrateAPIError.covererPhoneMissing(expenseName: expense.name)
+        let covererEmail = expense.coverer.email
+        guard !covererEmail.isEmpty, covererEmail != "Guest" else {
+            throw MigrateAPIError.covererEmailMissing(expenseName: expense.name)
         }
 
         let items = try expense.items.map { item -> MigrateItem in
             let assignees = try item.assignees.map { person -> MigrateAssignee in
-                let phone = person.user.phone
-                guard !phone.isEmpty, phone != "Guest" else {
-                    throw MigrateAPIError.assigneePhoneMissing(itemName: item.itemName)
+                let email = person.user.email
+                guard !email.isEmpty, email != "Guest" else {
+                    throw MigrateAPIError.assigneeEmailMissing(itemName: item.itemName)
                 }
-                return MigrateAssignee(phone: phone, share: person.share)
+                return MigrateAssignee(email: email, share: person.share)
             }
             return MigrateItem(
                 local_id: item.localId,
@@ -165,7 +165,7 @@ final class MigrationCoordinator {
             local_id: expense.localId,
             name: expense.name,
             split_method: expense.splitMethod,
-            coverer_phone: covererPhone,
+            coverer_email: covererEmail,
             receipt_url: nil,
             date: expense.dateOfCreation.iso8601String,
             items: items,
@@ -173,18 +173,18 @@ final class MigrationCoordinator {
         )
     }
 
-    private func rewriteGuestPhones(events: [EventData], ownerPhone: String) {
+    private func rewriteGuestEmails(events: [EventData], ownerEmail: String) {
         for event in events {
-            for user in event.participants where user.phone == "Guest" || user.phone.isEmpty {
-                user.phone = ownerPhone
+            for user in event.participants where user.email == "Guest" || user.email.isEmpty {
+                user.email = ownerEmail
             }
             for expense in event.expenses {
-                if expense.coverer.phone == "Guest" || expense.coverer.phone.isEmpty {
-                    expense.coverer.phone = ownerPhone
+                if expense.coverer.email == "Guest" || expense.coverer.email.isEmpty {
+                    expense.coverer.email = ownerEmail
                 }
                 for item in expense.items {
-                    for assignee in item.assignees where assignee.user.phone == "Guest" || assignee.user.phone.isEmpty {
-                        assignee.user.phone = ownerPhone
+                    for assignee in item.assignees where assignee.user.email == "Guest" || assignee.user.email.isEmpty {
+                        assignee.user.email = ownerEmail
                     }
                 }
             }
