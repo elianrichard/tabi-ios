@@ -28,6 +28,11 @@ struct TabiApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    // Enroll this device with App Attest once, before any
+                    // protected API call. No-ops on Simulator / if already enrolled.
+                    await AppAttestService.shared.enrollIfNeeded()
+                }
         }
         .modelContainer(sharedModelContainer)
     }

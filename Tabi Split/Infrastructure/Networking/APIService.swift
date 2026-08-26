@@ -42,13 +42,19 @@ final class APIService: APIClient {
         var request = URLRequest(url: URL(string: config.baseURL + endpoint)!)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(ENV.API_SECRET_KEY, forHTTPHeaderField: "X-Api-Secret")
-        
+
         if let body = body {
             let encoder = JSONEncoder()
             request.httpBody = try encoder.encode(body)
         }
-        
+
+        // App Attest assertion, signed over the exact body bytes above. Empty on
+        // Simulator / pre-enrollment; the backend then falls back to its bypass.
+        let attestHeaders = await AppAttestService.shared.assertionHeaders(for: request.httpBody ?? Data())
+        for (name, value) in attestHeaders {
+            request.setValue(value, forHTTPHeaderField: name)
+        }
+
         os_log(.debug, log: .api, "API Request %{public}@ %{public}@ body: %{public}@", method, endpoint, String(describing: body))
         return try await requestWithRetry(endpoint: endpoint, request: request)
     }
@@ -115,6 +121,12 @@ final class APIService: APIClient {
 
                 if let newAccessToken = try? tokenManager.getAccessToken() {
                     modifiedRequest.setValue("Bearer \(newAccessToken)", forHTTPHeaderField: "Authorization")
+                    // The App Attest challenge is single-use, so the resend needs a
+                    // fresh assertion over the same (unchanged) body bytes.
+                    let retryHeaders = await AppAttestService.shared.assertionHeaders(for: modifiedRequest.httpBody ?? Data())
+                    for (name, value) in retryHeaders {
+                        modifiedRequest.setValue(value, forHTTPHeaderField: name)
+                    }
                     let (newData, _) = try await URLSession.shared.data(for: modifiedRequest)
                     return try JSONDecoder().decode(Response.self, from: newData)
                 } else {
