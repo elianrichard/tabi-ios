@@ -43,7 +43,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         # BASE_URL is defined per-config in the xcconfig and surfaced to runtime
         # via the BASE_URL key in the explicit Info.plist ($(BASE_URL)).
-        MARKETING_VERSION: "1.1.5"
+        MARKETING_VERSION: "1.2.0"
         CURRENT_PROJECT_VERSION: 1
         DEVELOPMENT_ASSET_PATHS: '"Tabi Split/Resources/Preview Content"'
         ENABLE_USER_SCRIPT_SANDBOXING: YES

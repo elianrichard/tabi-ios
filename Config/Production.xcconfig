@@ -7,8 +7,9 @@ API_HOST = api.tabisplit.my.id
 SLASH = /
 BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
 
-// Production uses the App Attest *production* environment.
-CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.Production.entitlements
+// App Attest production environment; shared entitlement with staging (see note
+// in Staging.xcconfig).
+CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.entitlements
 
 // No STAGING flag in production.
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)

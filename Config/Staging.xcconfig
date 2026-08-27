@@ -7,8 +7,10 @@ API_HOST = api-stg.tabisplit.my.id
 SLASH = /
 BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
 
-// Staging uses the App Attest *development* environment, matching debug builds.
-CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.Staging.entitlements
+// App Attest uses the *production* environment for both staging and production,
+// because TestFlight (internal included) always signs with a distribution
+// profile and runs App Attest in production. Both configs share one entitlement.
+CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.entitlements
 
 // Compile-time flag for staging-only behavior (#if STAGING).
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) STAGING
