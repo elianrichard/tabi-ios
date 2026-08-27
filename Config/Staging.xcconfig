@@ -1,0 +1,14 @@
+// Staging configuration.
+// Note: `//` starts a comment in xcconfig — even mid-value — so the `//` in a
+// URL is built from a SLASH variable to avoid it being eaten.
+
+API_SCHEME = https
+API_HOST = api-stg.tabisplit.my.id
+SLASH = /
+BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
+
+// Staging uses the App Attest *development* environment, matching debug builds.
+CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.Staging.entitlements
+
+// Compile-time flag for staging-only behavior (#if STAGING).
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) STAGING

@@ -1,6 +1,11 @@
 name: Tabi Split
+configs:
+  Debug-Staging: debug
+  Debug-Production: debug
+  Release-Staging: release
+  Release-Production: release
 settings:
-  MARKETING_VERSION: "1.1.5"
+  MARKETING_VERSION: "1.2.0"
   CURRENT_PROJECT_VERSION: 1
   base:
     GENERATE_INFOPLIST_FILE: YES
@@ -26,12 +31,18 @@ targets:
       - path: "Tabi Split.app"
         type: wrapper.application
         buildPhase: none
+    configFiles:
+      Debug-Staging: Config/Staging.xcconfig
+      Release-Staging: Config/Staging.xcconfig
+      Debug-Production: Config/Production.xcconfig
+      Release-Production: Config/Production.xcconfig
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sora.TabiSplit
         INFOPLIST_FILE: Tabi Split/Info.plist
-        CODE_SIGN_ENTITLEMENTS: Tabi Split/Tabi Split.entitlements
         GENERATE_INFOPLIST_FILE: YES
+        # BASE_URL is defined per-config in the xcconfig and surfaced to runtime
+        # via the BASE_URL key in the explicit Info.plist ($(BASE_URL)).
         MARKETING_VERSION: "1.1.5"
         CURRENT_PROJECT_VERSION: 1
         DEVELOPMENT_ASSET_PATHS: '"Tabi Split/Resources/Preview Content"'
@@ -52,9 +63,13 @@ targets:
         INFOPLIST_KEY_UIStatusBarHidden: YES
         TARGETED_DEVICE_FAMILY: 1
       configs:
-        Debug:
+        Debug-Staging:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
-        Release:
+        Debug-Production:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        Release-Staging:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        Release-Production:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     dependencies:
       - package: Lottie
@@ -72,12 +87,39 @@ targets:
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Tabi Split.app/Tabi Split"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
-  Tabi Split:
+  Tabi Split (Staging):
     build:
       targets:
         Tabi Split: all
         Tabi Split Tests: all
+    run:
+      config: Debug-Staging
     test:
+      config: Debug-Staging
       targets:
         - name: "Tabi Split Tests"
       gatherCoverageData: true
+    profile:
+      config: Release-Staging
+    analyze:
+      config: Debug-Staging
+    archive:
+      config: Release-Staging
+  Tabi Split (Production):
+    build:
+      targets:
+        Tabi Split: all
+        Tabi Split Tests: all
+    run:
+      config: Debug-Production
+    test:
+      config: Debug-Production
+      targets:
+        - name: "Tabi Split Tests"
+      gatherCoverageData: true
+    profile:
+      config: Release-Production
+    analyze:
+      config: Debug-Production
+    archive:
+      config: Release-Production

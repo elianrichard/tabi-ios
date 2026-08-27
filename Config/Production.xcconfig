@@ -1,0 +1,14 @@
+// Production configuration.
+// Note: `//` starts a comment in xcconfig — even mid-value — so the `//` in a
+// URL is built from a SLASH variable to avoid it being eaten.
+
+API_SCHEME = https
+API_HOST = api.tabisplit.my.id
+SLASH = /
+BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
+
+// Production uses the App Attest *production* environment.
+CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.Production.entitlements
+
+// No STAGING flag in production.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)
