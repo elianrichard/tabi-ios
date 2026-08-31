@@ -1,7 +1,9 @@
 name: Tabi Split
 configs:
+  Debug-Dev: debug
   Debug-Staging: debug
   Debug-Production: debug
+  Release-Dev: release
   Release-Staging: release
   Release-Production: release
 settings:
@@ -32,6 +34,8 @@ targets:
         type: wrapper.application
         buildPhase: none
     configFiles:
+      Debug-Dev: Config/Dev.xcconfig
+      Release-Dev: Config/Dev.xcconfig
       Debug-Staging: Config/Staging.xcconfig
       Release-Staging: Config/Staging.xcconfig
       Debug-Production: Config/Production.xcconfig
@@ -63,9 +67,13 @@ targets:
         INFOPLIST_KEY_UIStatusBarHidden: YES
         TARGETED_DEVICE_FAMILY: 1
       configs:
+        Debug-Dev:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
         Debug-Staging:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
         Debug-Production:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        Release-Dev:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
         Release-Staging:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
@@ -87,6 +95,24 @@ targets:
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Tabi Split.app/Tabi Split"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
+  Tabi Split (Dev):
+    build:
+      targets:
+        Tabi Split: all
+        Tabi Split Tests: all
+    run:
+      config: Debug-Dev
+    test:
+      config: Debug-Dev
+      targets:
+        - name: "Tabi Split Tests"
+      gatherCoverageData: true
+    profile:
+      config: Release-Dev
+    analyze:
+      config: Debug-Dev
+    archive:
+      config: Release-Dev
   Tabi Split (Staging):
     build:
       targets:

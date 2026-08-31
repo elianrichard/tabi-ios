@@ -18,4 +18,15 @@ enum ENV {
         }
         return value
     }()
+
+    /// X-Api-Secret sent on every request, injected per build configuration via
+    /// the xcconfig API_SECRET_KEY -> Info.plist key. Staging and Production can
+    /// carry different secrets; see Config/Staging.xcconfig / Production.xcconfig.
+    static let API_SECRET_KEY: String = {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "API_SECRET_KEY") as? String,
+              !value.isEmpty else {
+            fatalError("API_SECRET_KEY missing from Info.plist — check the active scheme's xcconfig")
+        }
+        return value
+    }()
 }
