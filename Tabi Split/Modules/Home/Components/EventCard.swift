@@ -94,6 +94,10 @@ struct EventCard : View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(.systemBackground))
+        )
         .overlay {
             RoundedRectangle(cornerRadius: 24)
                 .fill(.clear)

@@ -37,8 +37,17 @@ struct HomeView: View {
                         .padding(.horizontal)
                         .padding(.bottom, 90)
                     }
+                    .refreshable {
+                        await refreshData(isShowLoading: false)
+                    }
                 } else {
-                    EventEmptyList()
+                    ScrollView (showsIndicators: false) {
+                        EventEmptyList()
+                            .frame(maxWidth: .infinity, minHeight: 400)
+                    }
+                    .refreshable {
+                        await refreshData(isShowLoading: false)
+                    }
                 }
             }
             .padding(.top)
@@ -75,13 +84,18 @@ struct HomeView: View {
         .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            profileViewModel.refreshUserData()
             Task {
-                if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest, isShowLoading: Bindable(loadingViewModel).isLoading) {
-                    if !profileViewModel.isGuest {
-                        SwiftDataService.shared.deleteUsersWithNoId()
-                    }
-                }
+                await refreshData(isShowLoading: true)
+            }
+        }
+    }
+
+    private func refreshData(isShowLoading: Bool) async {
+        profileViewModel.refreshUserData()
+        let loadingBinding = isShowLoading ? Bindable(loadingViewModel).isLoading : .constant(false)
+        if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest, isShowLoading: loadingBinding) {
+            if !profileViewModel.isGuest {
+                SwiftDataService.shared.deleteUsersWithNoId()
             }
         }
     }
