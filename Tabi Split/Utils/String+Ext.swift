@@ -55,8 +55,17 @@ extension String {
         if !self.contains(phoneNumberLengthRegex) {
             return "Phone number should contain 9-13 digits"
         }
-        
+
         return nil
+    }
+
+    /// Whether the trimmed string looks like a single email address. Used to
+    /// decide between adding a name-only dummy participant and prompting for a
+    /// name to invite this email.
+    var isValidEmail: Bool {
+        let trimmed = self.trimmingCharacters(in: .whitespacesAndNewlines)
+        let pattern = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$"
+        return NSPredicate(format: "SELF MATCHES[c] %@", pattern).evaluate(with: trimmed)
     }
     
     func convertIsoToDate () -> Date? {

@@ -65,7 +65,7 @@ struct EventFormView: View {
                                                 Icon(systemName: "plus", color: .buttonBlue, size: 20)
                                                     .frame(width: 40, height: 40)
                                                     .addDashedCircleBorder()
-                                                Text("Add")
+                                                Text("Add or Edit")
                                                     .font(.tabiBody)
                                                     .foregroundColor(.buttonBlue)
                                                 Spacer()

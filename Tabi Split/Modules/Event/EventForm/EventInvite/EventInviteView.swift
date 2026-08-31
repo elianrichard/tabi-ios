@@ -18,7 +18,24 @@ struct EventInviteView: View {
     
     @State private var isLinkCopied = false
     @State private var isShowQrSheet = false
-    
+
+    // Email-invite flow: when the typed text is an email, present this payload.
+    // Driving the sheet with `.sheet(item:)` (rather than a bool + separate
+    // @State) avoids a stale-state race where the sheet body would snapshot the
+    // old `alreadyAddedName` because it was set in the same tick the sheet opened.
+    @State private var inviteByEmailPayload: InviteByEmailPayload?
+    @State private var inviteNameText = ""
+    @FocusState private var focusedField: FocusField?
+
+    // Payload for the invite-by-email sheet. `existingName` is non-nil when the
+    // email is already a selected participant, switching the sheet to an info
+    // message instead of the add form.
+    private struct InviteByEmailPayload: Identifiable {
+        let email: String
+        let existingName: String?
+        var id: String { email }
+    }
+
     private var deeplinkHost = "tabi-web.vercel.app"
     
     var body: some View {
@@ -64,7 +81,7 @@ struct EventInviteView: View {
                                 if (eventInviteViewModel.searchUserText == "") {
                                     EventInviteCardView(userData: profileViewModel.user, isCurrentUser: true)
                                 }
-                                ForEach(eventInviteViewModel.selectedContactsList.filter{ $0 != profileViewModel.user }) { contact in
+                                ForEach(eventInviteViewModel.selectedContactsList.filter{ !profileViewModel.isCurrentUser($0) }) { contact in
                                     EventInviteCardView(userData: contact, isSelected: true)
                                 }
                                 ForEach(eventInviteViewModel.unselectedContactsList) { contact in
@@ -72,10 +89,29 @@ struct EventInviteView: View {
                                 }
                                 if (eventInviteViewModel.searchUserText != "") {
                                     Button {
-                                        let newUser = UserData(name: eventInviteViewModel.searchUserText, email: "")
-                                        eventInviteViewModel.allContacts.append(newUser)
-                                        eventInviteViewModel.selectedContacts.append(newUser)
-                                        eventInviteViewModel.searchUserText = ""
+                                        let searchText = eventInviteViewModel.searchUserText
+                                        if searchText.isValidEmail {
+                                            // Email typed: prompt for a name before
+                                            // adding, so it enters the list as a real
+                                            // participant rather than a name-only dummy.
+                                            let email = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                                            inviteNameText = ""
+                                            // If this email is already selected (including
+                                            // the current user), show an info message
+                                            // instead of the add form.
+                                            let existingName: String?
+                                            if profileViewModel.user.email.lowercased() == email {
+                                                existingName = profileViewModel.user.name
+                                            } else {
+                                                existingName = eventInviteViewModel.selectedUser(withEmail: email)?.name
+                                            }
+                                            inviteByEmailPayload = InviteByEmailPayload(email: email, existingName: existingName)
+                                        } else {
+                                            let newUser = UserData(name: searchText, email: "")
+                                            eventInviteViewModel.allContacts.append(newUser)
+                                            eventInviteViewModel.selectedContacts.append(newUser)
+                                            eventInviteViewModel.searchUserText = ""
+                                        }
                                     } label: {
                                         HStack (spacing: .spacingTight) {
                                             Icon(systemName: "plus", color: .buttonBlue, size: 20)
@@ -94,7 +130,7 @@ struct EventInviteView: View {
                         }
                     }
                     
-                    CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Add",
+                    CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Save",
                                  isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContacts.count > 1) {
                         eventInviteViewModel.searchUserText = ""
                         if (eventViewModel.isDirectInvite) {
@@ -148,8 +184,54 @@ struct EventInviteView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
+        .sheet(item: $inviteByEmailPayload) { payload in
+            CustomSheet(xToggleBinding: Binding(
+                get: { inviteByEmailPayload != nil },
+                set: { if !$0 { inviteByEmailPayload = nil } }
+            )) {
+                VStack(alignment: .leading, spacing: .spacingMedium) {
+                    VStack(alignment: .leading, spacing: .spacingXSmall) {
+                        Text("Invite by Email")
+                            .font(.tabiTitle)
+                        Text(payload.email)
+                            .font(.tabiBody)
+                            .foregroundStyle(.textGrey)
+                    }
+                    if let existingName = payload.existingName {
+                        // This email is already a participant: just inform, no add.
+                        Text("This email is already added as \(existingName) in the list.")
+                            .font(.tabiBody)
+                            .foregroundStyle(.textGrey)
+                    } else {
+                        InputWithLabel(label: "Full Name",
+                                       placeholder: "Full Name",
+                                       text: $inviteNameText,
+                                       focusedField: $focusedField,
+                                       focusCase: .field1)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                if payload.existingName != nil {
+                    CustomButton(text: "OK") {
+                        eventInviteViewModel.searchUserText = ""
+                        focusedField = nil
+                        inviteByEmailPayload = nil
+                    }
+                } else {
+                    CustomButton(text: "Add Participant",
+                                 isEnabled: !inviteNameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                        eventInviteViewModel.addInvitedUser(name: inviteNameText, email: payload.email)
+                        eventInviteViewModel.searchUserText = ""
+                        focusedField = nil
+                        inviteByEmailPayload = nil
+                    }
+                }
+            }
+            .presentationDetents([.height(payload.existingName == nil ? 280 : 240)])
+            .presentationDragIndicator(.visible)
+        }
     }
-    
+
     private func generateQRCode(from string: String) -> UIImage {
         let context = CIContext()
         let filter = CIFilter.qrCodeGenerator()

@@ -15,23 +15,43 @@ final class EventInviteViewModel {
     var searchUserText: String = ""
     var searchFilteredContacts: [UserData] {
         if (searchUserText != "") {
+            let query = searchUserText.lowercased()
             return allContacts.filter {
-                let searchedText = $0.name.lowercased()
-                return searchedText.contains(searchUserText.lowercased())
+                $0.name.lowercased().contains(query) || $0.email.lowercased().contains(query)
             }
         } else { return allContacts }
     }
     var searchFilteredSelectedContacts: [UserData] {
-        return searchFilteredContacts.filter{ selectedContacts.contains($0) }
+        return searchFilteredContacts.filter{ isSelected($0) }
     }
     var searchFilteredUnselectedContacts: [UserData] {
-        return searchFilteredContacts.filter{ !selectedContacts.contains($0) }
+        return searchFilteredContacts.filter{ !isSelected($0) }
     }
-    
+
     var allContacts: [UserData] = []
     var selectedContacts: [UserData] = []
     var unselectedContacts: [UserData] {
-        return allContacts.filter { !selectedContacts.contains($0) }
+        return allContacts.filter { !isSelected($0) }
+    }
+
+    /// Whether two contacts are the same person. Matches on userId first
+    /// (authoritative), then email, then instance — so a selected event
+    /// participant and its `allContacts` entry (different SwiftData instances,
+    /// same identity) are recognized as one. Empty userId/email never match, so
+    /// name-only dummy rows fall back to instance equality.
+    func isSameContact(_ a: UserData, _ b: UserData) -> Bool {
+        if !a.userId.isEmpty && !b.userId.isEmpty {
+            return a.userId == b.userId
+        }
+        if !a.email.isEmpty && !b.email.isEmpty {
+            return a.email.lowercased() == b.email.lowercased()
+        }
+        return a == b
+    }
+
+    /// Whether this contact is in the selected list, matched by identity.
+    func isSelected(_ user: UserData) -> Bool {
+        return selectedContacts.contains(where: { isSameContact($0, user) })
     }
     
     var selectedContactsList: [UserData] {
@@ -47,9 +67,56 @@ final class EventInviteViewModel {
         return contacts.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
     }
     
+    /// The already-selected participant matching this email, if any. Used to warn
+    /// when an invited email is already in the list rather than adding a duplicate.
+    ///
+    /// Resolves the contact from `allContacts` first (that entry carries the email
+    /// even when the selected participant instance only has a userId), then checks
+    /// selection by identity — so a selected contact whose participant row lacks a
+    /// matching email string is still recognized as already added.
+    func selectedUser(withEmail email: String) -> UserData? {
+        let email = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !email.isEmpty else { return nil }
+        return selectedContacts.first(where: { selected in
+            // Direct match on the selected participant's own email.
+            if selected.email.lowercased() == email { return true }
+            // Otherwise resolve via any allContacts entry with this email that is
+            // the same person (covers participants stored with a userId but an
+            // empty/absent email).
+            if let contact = allContacts.first(where: { $0.email.lowercased() == email }) {
+                return isSameContact(selected, contact)
+            }
+            return false
+        })
+    }
+
+    /// Adds a participant invited by email. If a contact with the same email is
+    /// already known, it is selected instead of appending a duplicate — mirroring
+    /// the email-based dedup used when building `allContacts`.
+    func addInvitedUser(name: String, email: String) {
+        let email = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let existing = allContacts.first(where: { $0.email.lowercased() == email }) {
+            // Dedup by identity, not instance: the selected list may hold the
+            // equivalent participant object rather than this `allContacts` entry.
+            if !isSelected(existing) {
+                selectedContacts.append(existing)
+            }
+            return
+        }
+
+        let newUser = UserData(name: name, email: email)
+        allContacts.append(newUser)
+        selectedContacts.append(newUser)
+    }
+
     func toggleSelectContact (user: UserData) {
-        if selectedContacts.contains(user) {
-            selectedContacts.remove(user)
+        // Match by identity, not instance: the tapped card may be an `allContacts`
+        // entry while the selected list holds the equivalent event-participant
+        // instance (same person, different SwiftData object).
+        if let existing = selectedContacts.first(where: { isSameContact($0, user) }) {
+            selectedContacts.remove(existing)
         } else {
             selectedContacts.append(user)
         }
