@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettlementPaymentMethodView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @State var settlementPaymentMethodViewModel = SettlementPaymentMethodViewModel()
     
     var body: some View {
@@ -50,5 +50,5 @@ struct SettlementPaymentMethodView: View {
 
 #Preview {
     SettlementPaymentMethodView()
-        .environment(Routes())
+        .environment(Router())
 }

@@ -43,12 +43,12 @@ final class APIService: APIClient {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(ENV.API_SECRET_KEY, forHTTPHeaderField: "X-Api-Secret")
-        
+
         if let body = body {
             let encoder = JSONEncoder()
             request.httpBody = try encoder.encode(body)
         }
-        
+
         os_log(.debug, log: .api, "API Request %{public}@ %{public}@ body: %{public}@", method, endpoint, String(describing: body))
         return try await requestWithRetry(endpoint: endpoint, request: request)
     }
@@ -150,8 +150,20 @@ final class APIService: APIClient {
             return result
         } catch {
             os_log(.error, log: .api, "API Error: %{public}@", String(describing: error))
-            throw (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
+            let apiError = (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
+            notifyError(apiError)
+            throw apiError
         }
+    }
+
+    private func notifyError(_ error: APIError) {
+        // .unauthorized is handled by the session-expired flow (banner + logout);
+        // surfacing it here would be redundant/noisy.
+        if case .unauthorized = error { return }
+        let message = error.errorDescription ?? "Something went wrong. Please try again."
+        // Errors are shown in a blocking dialog (demands acknowledgment); the toast
+        // is reserved for success/info messages.
+        Task { @MainActor in ErrorDialogViewModel.shared.show(message) }
     }
 }
 

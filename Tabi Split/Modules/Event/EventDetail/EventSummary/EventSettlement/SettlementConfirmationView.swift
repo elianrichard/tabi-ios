@@ -9,7 +9,7 @@ import SwiftUI
 import PhotosUI
 
 struct SettlementConfirmationView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
     
     @State var receiptUploadViewModel = ReceiptUploadViewModel()
@@ -31,11 +31,11 @@ struct SettlementConfirmationView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .onTapGesture {
-                    routes.navigate(to: .SettlementReceiptView)
+                    router.push(.settlementReceipt)
                 }
                 Spacer()
                 CustomButton(text: "Confirm") {
-                    routes.navigateBack()
+                    router.pop()
                 }
             }
         }
@@ -46,6 +46,6 @@ struct SettlementConfirmationView: View {
 
 #Preview {
     SettlementConfirmationView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventSettlementViewModel())
 }

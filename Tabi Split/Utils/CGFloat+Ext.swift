@@ -30,4 +30,6 @@ extension CGFloat {
     public static let radiusMedium = UIConfig.Radius.Medium
     /// 12px Radius
     public static let radiusSmall = UIConfig.Radius.Small
+    /// 10px Radius
+    public static let radiusXSmall = UIConfig.Radius.XSmall
 }

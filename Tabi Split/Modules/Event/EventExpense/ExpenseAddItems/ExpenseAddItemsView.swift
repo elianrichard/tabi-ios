@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftData
 
 struct ExpenseAddItemsView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     
     var body: some View {
@@ -87,7 +87,7 @@ struct ExpenseAddItemsView: View {
                 .offset(CGSize(width: 0, height: -50))
                     .zIndex(1)
                 CustomButton(text: "Next", isEnabled: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0, customBackgroundColor: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0 ? .buttonBlue : .buttonGrey) {
-                    routes.navigate(to: .ExpenseAssignView)
+                    router.push(.expenseAssign)
                 }
                 .zIndex(2)
             }
@@ -101,6 +101,6 @@ struct ExpenseAddItemsView: View {
 
 #Preview {
     ExpenseAddItemsView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventExpenseViewModel())
 }

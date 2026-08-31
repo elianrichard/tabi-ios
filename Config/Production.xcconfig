@@ -1,0 +1,16 @@
+// Production configuration.
+// Note: `//` starts a comment in xcconfig — even mid-value — so the `//` in a
+// URL is built from a SLASH variable to avoid it being eaten.
+
+API_SCHEME = https
+API_HOST = api.tabisplit.my.id
+SLASH = /
+BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
+
+// X-Api-Secret for the production backend. Change this to differ from staging.
+API_SECRET_KEY = cx40TsowDQFm6kAO9JXCJYZvAFh7U7SEXRvb066aeW7OPBMxzBxGAg3eduO8IITM
+
+CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.entitlements
+
+// No STAGING flag in production.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)

@@ -9,7 +9,7 @@ import Foundation
 
 @Observable
 final class SettlementPaymentMethodViewModel {
-    var user: UserData = UserData(name: "Elian", phone: "phone")
+    var user: UserData = UserData(name: "Elian", email: "phone")
     var paymentMethods: [PaymentMethod] = [
         PaymentMethod(name: "Elian Richard", bank: .bca, bankNumber: "000123456789", isFavorite: true),
         PaymentMethod(name: "Elian Richard", bank: .bni, bankNumber: "000123456789", isFavorite: true),

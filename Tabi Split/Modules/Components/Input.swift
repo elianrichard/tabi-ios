@@ -34,27 +34,19 @@ struct Input: View {
     @Binding var text: String
     var isError: Bool = false
     var isDisabled: Bool = false
+    var showClearButton: Bool = false
     var backgroundColor: Color = .bgWhite
     var cornerRadius: CGFloat = .radiusMedium
     
     @State var isShowPassword = false
     
     var type: InputTypeEnum = .text
-    var phoneCode: String = "62"
-    
+
     @FocusState.Binding var focusedField: FocusField?
     var focusCase: FocusField
     
     var body: some View {
         HStack(spacing: .spacingRegular) {
-            if type == .phone {
-                Text("+" + phoneCode)
-                    .font(.tabiBody)
-                    .foregroundColor(.buttonGrey)
-                Divider()
-                    .frame(height: 19)
-                    .background(.buttonGrey)
-            }
             if isSecure {
                 HStack {
                     if !isShowPassword {
@@ -85,6 +77,13 @@ struct Input: View {
                 .keyboardType(type.keyboard)
                 .focused($focusedField, equals: focusCase)
                 .disabled(isDisabled)
+                if showClearButton && !text.isEmpty && !isDisabled {
+                    Button {
+                        text = ""
+                    } label: {
+                        Icon(systemName: "xmark.circle.fill", color: .textGrey, size: 18)
+                    }
+                }
             }
         }
         .padding(.vertical, 16)

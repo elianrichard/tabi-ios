@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct PaymentMethodView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) private var profileViewModel
     @State var viewModel = PaymentMethodViewModel()
     
@@ -181,6 +181,6 @@ struct PaymentMethodView: View {
 
 #Preview {
     PaymentMethodView()
-        .environment(Routes())
+        .environment(Router())
         .environment(ProfileViewModel())
 }

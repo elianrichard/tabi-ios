@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 
-// MODEL
 struct PostListModel: Encodable ,Decodable, Identifiable {
     let id: Int
     let userId: Int
@@ -58,9 +57,8 @@ class SubNote {
     }
 }
 
-// VIEW
 struct SwiftDataTestingView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @State var swiftDataTestingViewModel = SwiftDataTestingViewModel()
     
     var body: some View {
@@ -97,7 +95,7 @@ struct SwiftDataTestingView: View {
             .toolbar {
                 ToolbarItemGroup (placement: .bottomBar) {
                     Button(action: {
-                        routes.navigate(to: .HomeView)
+                        router.push(.home)
                     }) {
                         Label("Home", systemImage: "house.fill")
                     }
@@ -218,10 +216,9 @@ struct SwiftDataTestingSubNoteDetailView: View {
 
 #Preview {
     SwiftDataTestingView()
-        .environment(Routes())
+        .environment(Router())
 }
 
-// VIEW MODEL
 @Observable
 final class SwiftDataTestingViewModel {
     var notes: [NoteData] = []
@@ -327,29 +324,34 @@ final class SwiftDataTestingViewModel {
     }
     
     func fetchPosts() {
-        APIServiceOld.shared.getRequest(urlString: "https://jsonplaceholder.typicode.com/posts") { (result: Result<[PostListModel], Error>) in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let data):
-                    self.posts.append(contentsOf: data)
-                case .failure(let error):
-                    fatalError(error.localizedDescription)
-                }
+        Task { @MainActor in
+            do {
+                let url = URL(string: "https://jsonplaceholder.typicode.com/posts")!
+                let (data, _) = try await URLSession.shared.data(from: url)
+                let decoded = try JSONDecoder().decode([PostListModel].self, from: data)
+                self.posts.append(contentsOf: decoded)
+            } catch {
+                fatalError(error.localizedDescription)
             }
         }
     }
-    
+
     func createPost () {
-        APIServiceOld.shared.postRequest(urlString: "https://jsonplaceholder.typicode.com/posts", body: PostListModel(id: 1, userId: 1, title: "title", body: "body")) { (result: Result<PostListModel, Error>) in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let data):
-                    self.posts.append(data)
-                case .failure(let error):
-                    fatalError(error.localizedDescription)
-                }
+        Task { @MainActor in
+            do {
+                let url = URL(string: "https://jsonplaceholder.typicode.com/posts")!
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.httpBody = try JSONEncoder().encode(
+                    PostListModel(id: 1, userId: 1, title: "title", body: "body")
+                )
+                let (data, _) = try await URLSession.shared.data(for: request)
+                let decoded = try JSONDecoder().decode(PostListModel.self, from: data)
+                self.posts.append(decoded)
+            } catch {
+                fatalError(error.localizedDescription)
             }
-            
         }
     }
 }

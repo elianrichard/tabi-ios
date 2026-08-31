@@ -1,6 +1,13 @@
 name: Tabi Split
+configs:
+  Debug-Dev: debug
+  Debug-Staging: debug
+  Debug-Production: debug
+  Release-Dev: release
+  Release-Staging: release
+  Release-Production: release
 settings:
-  MARKETING_VERSION: "1.1.5"
+  MARKETING_VERSION: "1.2.0"
   CURRENT_PROJECT_VERSION: 1
   base:
     GENERATE_INFOPLIST_FILE: YES
@@ -13,6 +20,9 @@ packages:
   JWTDecode:
     url: https://github.com/auth0/JWTDecode.swift.git
     minorVersion: 3.2.0
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS.git
+    minorVersion: 8.0.0
 targets:
   Tabi Split:
     type: application
@@ -23,12 +33,21 @@ targets:
       - path: "Tabi Split.app"
         type: wrapper.application
         buildPhase: none
+    configFiles:
+      Debug-Dev: Config/Dev.xcconfig
+      Release-Dev: Config/Dev.xcconfig
+      Debug-Staging: Config/Staging.xcconfig
+      Release-Staging: Config/Staging.xcconfig
+      Debug-Production: Config/Production.xcconfig
+      Release-Production: Config/Production.xcconfig
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.sora.Tabi
-      INFOPLIST_FILE: Tabi Split/Info.plist
       base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sora.TabiSplit
+        INFOPLIST_FILE: Tabi Split/Info.plist
         GENERATE_INFOPLIST_FILE: YES
-        MARKETING_VERSION: "1.1.5"
+        # BASE_URL is defined per-config in the xcconfig and surfaced to runtime
+        # via the BASE_URL key in the explicit Info.plist ($(BASE_URL)).
+        MARKETING_VERSION: "1.2.0"
         CURRENT_PROJECT_VERSION: 1
         DEVELOPMENT_ASSET_PATHS: '"Tabi Split/Resources/Preview Content"'
         ENABLE_USER_SCRIPT_SANDBOXING: YES
@@ -48,13 +67,23 @@ targets:
         INFOPLIST_KEY_UIStatusBarHidden: YES
         TARGETED_DEVICE_FAMILY: 1
       configs:
-        Debug:
+        Debug-Dev:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
-        Release:
+        Debug-Staging:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        Debug-Production:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        Release-Dev:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        Release-Staging:
+          ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        Release-Production:
           ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     dependencies:
       - package: Lottie
       - package: JWTDecode
+      - package: GoogleSignIn
+        product: GoogleSignIn
   Tabi Split Tests:
     type: bundle.unit-test
     platform: iOS
@@ -66,12 +95,57 @@ targets:
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Tabi Split.app/Tabi Split"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
-  Tabi Split:
+  Tabi Split (Dev):
     build:
       targets:
         Tabi Split: all
         Tabi Split Tests: all
+    run:
+      config: Debug-Dev
     test:
+      config: Debug-Dev
       targets:
         - name: "Tabi Split Tests"
       gatherCoverageData: true
+    profile:
+      config: Release-Dev
+    analyze:
+      config: Debug-Dev
+    archive:
+      config: Release-Dev
+  Tabi Split (Staging):
+    build:
+      targets:
+        Tabi Split: all
+        Tabi Split Tests: all
+    run:
+      config: Debug-Staging
+    test:
+      config: Debug-Staging
+      targets:
+        - name: "Tabi Split Tests"
+      gatherCoverageData: true
+    profile:
+      config: Release-Staging
+    analyze:
+      config: Debug-Staging
+    archive:
+      config: Release-Staging
+  Tabi Split (Production):
+    build:
+      targets:
+        Tabi Split: all
+        Tabi Split Tests: all
+    run:
+      config: Debug-Production
+    test:
+      config: Debug-Production
+      targets:
+        - name: "Tabi Split Tests"
+      gatherCoverageData: true
+    profile:
+      config: Release-Production
+    analyze:
+      config: Debug-Production
+    archive:
+      config: Release-Production

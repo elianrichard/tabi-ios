@@ -9,12 +9,11 @@ import SwiftUI
 
 struct EventParticipantsList: View {
     @Environment(EventViewModel.self) private var eventViewModel
-    @Environment(Routes.self) private var routes
-    @Binding var sheetViewModel:SheetViewModel<EventSheets>
+    @Environment(Router.self) private var router
     
     var body: some View {
         Button {
-            sheetViewModel.setSheet(.allParticipants)
+            router.present(.eventAllParticipants)
         } label: {
             HStack (spacing: 4) {
                 if let selectedEvent = eventViewModel.selectedEvent {

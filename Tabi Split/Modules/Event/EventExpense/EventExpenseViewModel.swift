@@ -144,7 +144,6 @@ final class EventExpenseViewModel {
         }
     }
     func normalizeString(_ input: String) -> String {
-        // Lowercase the string
         let lowercasedString = input.lowercased()
         
         // Remove whitespaces, punctuation, and symbols
@@ -160,7 +159,6 @@ final class EventExpenseViewModel {
         let cleanedString = input.replacingOccurrences(of: "[.,]", with: "", options: .regularExpression)
         let cleanedString2 = cleanedString.lowercased().replacingOccurrences(of: "[rp|rp.|rp. |rp .]", with: "", options: .regularExpression)
         
-        // Convert the cleaned string to Float
         return Float(cleanedString2) ?? 0
     }
     func performOCROnImage(_ image: UIImage) throws {

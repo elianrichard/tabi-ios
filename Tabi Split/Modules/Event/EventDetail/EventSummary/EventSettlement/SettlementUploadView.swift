@@ -9,7 +9,7 @@ import SwiftUI
 import PhotosUI
 
 struct SettlementUploadView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventSettlementViewModel.self) private var eventSettlementViewModel
     
     @State var receiptUploadViewModel = ReceiptUploadViewModel()
@@ -43,7 +43,7 @@ struct SettlementUploadView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .onTapGesture {
-                    routes.navigate(to: .SettlementReceiptView)
+                    router.push(.settlementReceipt)
                 }
                 Spacer()
                 HStack {
@@ -52,7 +52,7 @@ struct SettlementUploadView: View {
                     }
                     CustomButton(text: "Upload",
                                  isEnabled: eventSettlementViewModel.receiptImage != nil) {
-                        routes.navigateBack()
+                        router.pop()
                     }
                 }
             }
@@ -77,6 +77,6 @@ struct SettlementUploadView: View {
 
 #Preview {
     SettlementUploadView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventSettlementViewModel())
 }

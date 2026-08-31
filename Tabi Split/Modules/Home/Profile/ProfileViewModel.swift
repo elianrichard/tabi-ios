@@ -9,13 +9,13 @@ import SwiftUI
 
 @Observable
 final class ProfileViewModel{
-    var user: UserData = UserData(name: "unknown", phone: "unknown")
+    var user: UserData = UserData(name: "unknown", email: "unknown")
     var userPaymentMethods: [PaymentMethod] = []
 
     var isApiCallLoading: Bool = false
     
     var isGuest: Bool {
-        return user.phone == "Guest"
+        return user.email == "Guest"
     }
     
     @MainActor
@@ -32,7 +32,7 @@ final class ProfileViewModel{
             try? KeychainService.shared.clearTokens()
             SessionState.shared.sessionExpiredBanner = false
             SessionState.shared.lastMigrationError = nil
-            user = UserData(name: "unknown", phone: "unknown")
+            user = UserData(name: "unknown", email: "unknown")
         } catch {
             print("Logout failed: \(error)")
             isApiCallLoading = false
@@ -51,13 +51,16 @@ final class ProfileViewModel{
         }
         do {
             isApiCallLoading = true
-            let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userPhone: editProfileViewModel.phoneText, userImage: chosenImage.rawValue, userId: "userId")
+            // Email is provider-owned and not editable; preserve the existing value.
+            // Preserve the real userId (JWT subject) — it identifies the account and
+            // gates event-edit ownership; a placeholder here would break isUserCreator.
+            let existingUserId = UserDefaultsService.shared.getCurrentUser()?.userId ?? user.userId
+            let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userEmail: user.email, userImage: chosenImage.rawValue, userId: existingUserId)
             if !isGuest {
                 let _ = try await ProfileService.shared.editProfile(user: updatedUser)
             }
             UserDefaultsService.shared.saveCurrentUser(user: updatedUser)
             user.name = editProfileViewModel.nameText
-            user.phone = editProfileViewModel.phoneText
             if let image = editProfileViewModel.chosenImage {
                 user.image = image.id
             }
@@ -104,7 +107,7 @@ final class ProfileViewModel{
             try? KeychainService.shared.clearTokens()
             SessionState.shared.sessionExpiredBanner = false
             SessionState.shared.lastMigrationError = nil
-            user = UserData(name: "unknown", phone: "unknown")
+            user = UserData(name: "unknown", email: "unknown")
         } catch {
             print("User delete failed: \(error)")
             return false
@@ -115,6 +118,16 @@ final class ProfileViewModel{
     }
     
     func isCurrentUser (_ userData: UserData) -> Bool {
-        return userData == user || userData.phone == user.phone
+        if userData == user { return true }
+        // Match on userId first (authoritative); fall back to email. Empty values
+        // never match, so an unresolved/placeholder current user ("unknown") or a
+        // guest ("Guest") does not mis-identify empty-identity rows as "you".
+        if !userData.userId.isEmpty && !user.userId.isEmpty {
+            return userData.userId == user.userId
+        }
+        if !userData.email.isEmpty && !user.email.isEmpty && user.email != "unknown" {
+            return userData.email == user.email
+        }
+        return false
     }
 }

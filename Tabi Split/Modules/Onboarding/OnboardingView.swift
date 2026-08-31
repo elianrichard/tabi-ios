@@ -17,7 +17,7 @@ private struct OnboardingData: Identifiable {
 }
 
 struct OnboardingView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     
     @State private var isNextPressed = false
     @State private var scrollPosition: Int?
@@ -128,7 +128,7 @@ struct OnboardingView: View {
                     withAnimation {
                         if let pos = scrollPosition {
                             if pos == 3 {
-                                routes.navigate(to: .LoginView)
+                                router.push(.login)
                             }else{
                                 scrollPosition = pos + 1
                             }
@@ -147,7 +147,7 @@ struct OnboardingView: View {
                 .zIndex(10)
                 if scrollPosition == 3 {
                     CustomButton(text: "Sign Up", type: .secondary) {
-                        routes.navigate(to: .RegisterView)
+                        router.push(.register)
                     }
                 }
             }
@@ -178,7 +178,7 @@ struct OnboardingView: View {
 
 #Preview {
     OnboardingView()
-        .environment(Routes())
+        .environment(Router())
 }
 
 private struct OnboardingDetailView: View {

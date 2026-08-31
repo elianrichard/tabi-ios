@@ -10,6 +10,6 @@ import SwiftUI
 @Observable
 final class EventSettlementViewModel {
     var selectedSettlementType: SettlementCardTypeEnum = .NeedPayment
-    var user: UserData = UserData(name: "Name", phone: "Phone")
+    var user: UserData = UserData(name: "Name", email: "Phone")
     var receiptImage: UIImage?
 }

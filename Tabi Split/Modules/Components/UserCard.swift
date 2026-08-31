@@ -12,8 +12,11 @@ struct UserCard : View {
     var user: UserData
     var isShowYouText: Bool = false
     var isShowOwnerText: Bool = false
-    var isShowPhoneText: Bool = true
-    
+    var isShowEmailText: Bool = true
+    // When set, a trailing pencil button is shown that invokes this action. Callers
+    // pass nil for cards that shouldn't be editable (e.g. the current user).
+    var onEdit: (() -> Void)? = nil
+
     var body: some View {
         HStack (spacing: .spacingTight) {
             UserAvatar(userData: user)
@@ -32,19 +35,29 @@ struct UserCard : View {
                             .foregroundStyle(.textGrey)
                     }
                 }
-                if (isShowPhoneText && user.phone != "") {
+                if (isShowEmailText && user.email != "") {
                     if !(profileViewModel.isGuest && profileViewModel.isCurrentUser(user)) {
-                        Text(user.phone)
+                        Text(user.email)
                             .font(.tabiBody)
                             .foregroundColor(.textGrey)
                     }
                 }
             }
             Spacer()
+            if let onEdit {
+                Button {
+                    onEdit()
+                } label: {
+                    // Nugget-style chip (bordered, light fill) but a rounded
+                    // rectangle instead of the full pill, holding a pencil icon.
+                    Icon(systemName: "square.and.pencil", color: .buttonBlue, size: 16)
+                        .padding(.spacingSmall)
+                }
+            }
         }
     }
 }
 
 #Preview {
-    UserCard(user: UserData(name: "Testing", phone: "628123456789"))
+    UserCard(user: UserData(name: "Testing", email: "test@example.com"))
 }

@@ -9,9 +9,11 @@ import Foundation
 import SwiftUI
 
 struct SeeAllParticipantSheet: View {
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
+    @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
-    
+
     @Binding var isPresented: Bool
     @State var nameToBeSearched: String = ""
     var participantsList: [UserData] = []
@@ -33,7 +35,13 @@ struct SeeAllParticipantSheet: View {
                                 participantsList.filter {
                                     (nameToBeSearched.isEmpty || $0.name.lowercased().contains(nameToBeSearched.lowercased())) && !profileViewModel.isCurrentUser($0)
                                 }.sorted(by: { $0.name < $1.name }) ) { user in
-                                    UserCard(user: user, isShowOwnerText: user.userId == eventViewModel.selectedEvent?.creatorId)
+                                    UserCard(user: user,
+                                             isShowOwnerText: user.userId == eventViewModel.selectedEvent?.creatorId,
+                                             onEdit: (eventViewModel.isUserCreator && !profileViewModel.isCurrentUser(user)) ? {
+                                                 eventInviteViewModel.editingParticipant = user
+                                                 isPresented = false
+                                                 router.push(.editParticipant)
+                                             } : nil)
                                 }
                         }
                     }
@@ -45,5 +53,8 @@ struct SeeAllParticipantSheet: View {
 
 #Preview {
     SeeAllParticipantSheet(isPresented: .constant(false ))
+        .environment(Router())
         .environment(EventViewModel())
+        .environment(EventInviteViewModel())
+        .environment(ProfileViewModel())
 }

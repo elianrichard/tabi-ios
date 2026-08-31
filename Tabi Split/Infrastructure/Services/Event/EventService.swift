@@ -22,13 +22,29 @@ final class EventService {
         return response
     }
     
-    func updateEvent(event: EventData, dummyNames: [String] = []) async throws -> EditEventResponse {
+    func updateEvent(event: EventData, newDummyUsers: [UserData] = []) async throws -> EditEventResponse {
         guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
-        let request: EditEventRequest = EditEventRequest(name: event.eventName, participants: event.participants.compactMap{ $0.userId }, event_image: event.eventIcon, dummy_names: dummyNames)
+        // Only participants with a real userId (registered users and already-anchored
+        // dummies) go in `participants`; un-anchored dummies have an empty userId and
+        // are sent by name+avatar via `dummy_users`. Filtering empties also keeps the
+        // backend's uuid validation from rejecting the request.
+        let dummyInputs = newDummyUsers.map { DummyUserInput(name: $0.name, avatar: $0.image) }
+        let request: EditEventRequest = EditEventRequest(name: event.eventName, participants: event.participants.compactMap{ $0.userId.isEmpty ? nil : $0.userId }, event_image: event.eventIcon, dummy_users: dummyInputs)
         let response : EditEventResponse = try await apiClient.patch(endpoint: "/event/\(eventId)", body: request)
         return response
     }
     
+    func editParticipant(eventId: String, participantId: String, name: String, avatar: String, email: String?) async throws -> EditParticipantResponse {
+        let request = EditParticipantRequest(name: name, avatar: avatar, email: email)
+        let response: EditParticipantResponse = try await apiClient.patch(endpoint: "/event/\(eventId)/participant/\(participantId)", body: request)
+        return response
+    }
+
+    func removeParticipant(eventId: String, participantId: String) async throws -> RemoveParticipantResponse {
+        let response: RemoveParticipantResponse = try await apiClient.delete(endpoint: "/event/\(eventId)/participant/\(participantId)")
+        return response
+    }
+
     func completeEvent(event: EventData) async throws {
         guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
         let request = CompleteEventRequest(is_completed: true)

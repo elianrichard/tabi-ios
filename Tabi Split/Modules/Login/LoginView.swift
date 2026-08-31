@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LoginView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) var profileViewModel: ProfileViewModel
     @State private var loginViewModel = LoginViewModel()
     @State private var sessionState = SessionState.shared
@@ -43,8 +43,9 @@ struct LoginView: View {
                     if SwiftDataService.shared.getCurrentUser() == nil {
                         Button {
                             if loginViewModel.guestLogin() {
-                                profileViewModel.user = UserData(name: "Guest", phone: "Guest")
-                                routes.navigate(to: .HomeView)
+                                profileViewModel.user = UserData(name: "Guest", email: "Guest")
+                                sessionState.isAuthenticated = true
+                                router.popToRoot()
                             }
                         } label: {
                             Text("Enter as Guest")
@@ -55,7 +56,7 @@ struct LoginView: View {
                         .padding(-14)
                     } else {
                         Icon(systemName: "arrow.left", size: 16) {
-                            routes.navigateBack()
+                            router.pop()
                         }
                     }
                     Spacer()
@@ -64,81 +65,32 @@ struct LoginView: View {
                 Spacer(minLength: 20)
                 
                 VStack (alignment: .leading, spacing: .spacingLarge) {
-                    Text("Hey There,\nYou're Back!")
+                    Text("Hey There,\nWelcome to Tabi!")
                         .font(.tabiLargeTitle)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-                    
-                    VStack (alignment: .trailing, spacing: 8) {
-                        VStack(alignment: .leading, spacing: .spacingMedium) {
-                            InputWithLabel(label: "Phone Number",
-                                           placeholder: "Enter your phone number",
-                                           text: $loginViewModel.phoneNumber,
-                                           errorMessage: loginViewModel.phoneNumberError,
-                                           inputTypePicked: .phone,
-                                           focusedField: $focusedField,
-                                           focusCase: .field1)
-                            InputWithLabel(label: "Password",
-                                           placeholder: "Enter your password",
-                                           text: $loginViewModel.password,
-                                           errorMessage: loginViewModel.passwordError, isSecure: true,
-                                           focusedField: $focusedField,
-                                           focusCase: .field2)
-                        }
-                        Button {
-                            print("forgot password")
-                        } label: {
-                            Text("Forget Password?")
-                                .font(.tabiBody)
-                                .foregroundStyle(.textBlue)
-                        }
+
+                    Text("Sign in with your Apple or Google account to sync your events across devices.")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
+
+                    if let errorMessage = loginViewModel.errorMessage {
+                        Text(errorMessage)
+                            .font(.tabiBody)
+                            .foregroundStyle(.buttonRed)
                     }
-                    
+
                     VStack (spacing: .spacingMedium) {
-                        CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Sign In", animation: .default) {
-                            Task {
-                                let incomingPhone = loginViewModel.phoneNumber.formattedAsPhoneNumber()
-                                // Wipe local data if a different user previously owned this device.
-                                let prev = UserDefaultsService.shared.getCurrentUser()
-                                if let prev, prev.userPhone != "Guest", prev.userPhone != incomingPhone {
-                                    SwiftDataService.shared.deleteAllEvents()
-                                    SwiftDataService.shared.deleteAllExpenses()
-                                    SwiftDataService.shared.deleteAllUser()
-                                    UserDefaultsService.shared.deleteCurrentUser()
-                                }
-                                if await loginViewModel.login() {
-                                    sessionState.sessionExpiredBanner = false
-                                    profileViewModel.refreshUserData()
-                                    let name = profileViewModel.user.name
-                                    sessionState.migrationRunning = true
-                                    let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: incomingPhone, ownerName: name)
-                                    sessionState.migrationRunning = false
-                                    if !ok {
-                                        sessionState.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
-                                    }
-                                    routes.navigate(to: .HomeView)
-                                }
-                            }
+                        CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Continue with Apple",
+                                     icon: "apple.logo",
+                                     customBackgroundColor: .black,
+                                     customTextColor: .white) {
+                            Task { await handleSignIn { await loginViewModel.signInWithApple() } }
                         }
-                        //                TEMPORARILY DISABLED: LOGIN WITH APPLE ID
-                        if (false) {
-                            DividerWithText()
-                            
-                            CustomButton(text: "Sign In With Apple ID", icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
-                                print("Login with Apple")
-                            }
-                        }
-                        
-                        HStack (spacing: 3) {
-                            Text("Don't have an account?")
-                                .font(.tabiBody)
-                            Button {
-                                routes.navigate(to: .RegisterView)
-                            } label: {
-                                Text("Sign Up")
-                                    .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
-                                    .foregroundStyle(.textBlue)
-                            }
+
+                        CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Continue with Google",
+                                     type: .secondary) {
+                            Task { await handleSignIn { await loginViewModel.signInWithGoogle() } }
                         }
                     }
                 }
@@ -151,9 +103,42 @@ struct LoginView: View {
             focusedField = nil
         }
     }
+
+    /// Runs a provider sign-in, then the shared post-login flow: wipe local data
+    /// if a different account previously owned this device, run the pending
+    /// migration, and make Home the root.
+    @MainActor
+    private func handleSignIn(_ signIn: () async -> Bool) async {
+        let ok = await signIn()
+        guard ok else { return }
+
+        let incomingEmail = loginViewModel.lastSignedInEmail
+        let prev = UserDefaultsService.shared.getCurrentUser()
+        if let prev, prev.userEmail != "Guest", prev.userEmail != incomingEmail {
+            SwiftDataService.shared.deleteAllEvents()
+            SwiftDataService.shared.deleteAllExpenses()
+            SwiftDataService.shared.deleteAllUser()
+            UserDefaultsService.shared.deleteCurrentUser()
+        }
+
+        sessionState.sessionExpiredBanner = false
+        profileViewModel.refreshUserData()
+        let name = profileViewModel.user.name
+        sessionState.migrationRunning = true
+        let migrated = await MigrationCoordinator.shared.runIfNeeded(ownerEmail: incomingEmail, ownerName: name)
+        sessionState.migrationRunning = false
+        if !migrated {
+            sessionState.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
+        }
+        // Make Home the root: swap the stack root to HomeView and clear the path
+        // so the auth screens are gone and Back cannot return.
+        sessionState.isAuthenticated = true
+        router.popToRoot()
+    }
 }
 
 #Preview {
     LoginView()
-        .environment(Routes())
+        .environment(Router())
+        .environment(ProfileViewModel())
 }

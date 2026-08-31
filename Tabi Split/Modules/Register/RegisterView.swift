@@ -1,5 +1,5 @@
 //
-//  LoginView.swift
+//  RegisterView.swift
 //  Tabi
 //
 //  Created by ahmad naufal alfakhar on 03/10/24.
@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct RegisterView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
+    @Environment(ProfileViewModel.self) private var profileViewModel: ProfileViewModel
     @State private var registerViewModel = RegisterViewModel()
-    @FocusState private var focusedField: FocusField?
-    
+    @State private var sessionState = SessionState.shared
+
     var body: some View {
         ZStack {
             VStack {
@@ -23,75 +24,41 @@ struct RegisterView: View {
                     .offset(x: 65, y: -110)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-            
+
             VStack (alignment: .leading, spacing: .spacingLarge) {
                 Text("Start Your\nJourney!")
                     .font(.tabiLargeTitle)
-                
-                VStack (spacing: .spacingMedium) {
-                    InputWithLabel(label: "Fullname",
-                                   placeholder: "Enter your full name",
-                                   text: $registerViewModel.name,
-                                   errorMessage: registerViewModel.nameError,
-                                   focusedField: $focusedField, focusCase: .field1
-                    )
-                    InputWithLabel(label: "Phone Number",
-                                   placeholder: "Enter your phone number",
-                                   text: $registerViewModel.phoneNumber,
-                                   errorMessage: registerViewModel.phoneNumberError,
-                                   inputTypePicked: .phone,
-                                   focusedField: $focusedField, focusCase: .field2
-                    )
-                    InputWithLabel(label: "Password",
-                                   placeholder: "Enter your password",
-                                   text: $registerViewModel.password,
-                                   errorMessage: registerViewModel.passwordError,
-                                   isSecure: true,
-                                   focusedField: $focusedField, focusCase: .field3
-                    )
-                    InputWithLabel(label: "Confirm Password",
-                                   placeholder: "Re-enter your Password",
-                                   text: $registerViewModel.confirmPassword,
-                                   errorMessage: registerViewModel.confirmPasswordError,
-                                   isSecure: true,
-                                   focusedField: $focusedField, focusCase: .field4
-                    )
+
+                Text("Create your account with Apple or Google — no password needed.")
+                    .font(.tabiBody)
+                    .foregroundStyle(.textGrey)
+
+                if let errorMessage = registerViewModel.errorMessage {
+                    Text(errorMessage)
+                        .font(.tabiBody)
+                        .foregroundStyle(.buttonRed)
                 }
+
                 VStack (spacing: .spacingTight) {
                     VStack (spacing: .spacingMedium) {
-                        CustomButton(text: registerViewModel.isLoading ? "Loading..." : "Sign Up",
-                                     isEnabled: registerViewModel.isSignUpEnabled,
-                                     animation: .default) {
-                            Task {
-                                if await registerViewModel.register() {
-                                    SessionState.shared.sessionExpiredBanner = false
-                                    let phone = registerViewModel.phoneNumber.formattedAsPhoneNumber()
-                                    SessionState.shared.migrationRunning = true
-                                    let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: phone, ownerName: registerViewModel.name)
-                                    SessionState.shared.migrationRunning = false
-                                    if !ok {
-                                        SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
-                                    }
-                                    routes.navigate(to: .HomeView)
-                                }
-                            }
+                        CustomButton(text: registerViewModel.isLoading ? "Loading..." : "Continue with Apple",
+                                     icon: "apple.logo",
+                                     customBackgroundColor: .black,
+                                     customTextColor: .white) {
+                            Task { await handleSignIn { await registerViewModel.signInWithApple() } }
                         }
-                        
-//                TEMPORARILY DISABLED: REGISTER WITH APPLE ID
-                        if (false) {
-                            DividerWithText(text: "Or")
-                            
-                            CustomButton(text: "Sign Up With Apple ID",icon: "apple.logo", customBackgroundColor: .black, customTextColor: .white) {
-                                print("SignUp with Apple")
-                            }
+
+                        CustomButton(text: registerViewModel.isLoading ? "Loading..." : "Continue with Google",
+                                     type: .secondary) {
+                            Task { await handleSignIn { await registerViewModel.signInWithGoogle() } }
                         }
                     }
-                    
+
                     HStack (spacing: .spacingXSmall) {
                         Text("Already have an account?")
                             .font(.tabiBody)
                         Button {
-                            routes.navigateBack()
+                            router.pop()
                         } label: {
                             Text("Sign In")
                                 .font(.custom(UIConfig.Font.Name.Bold, size: UIConfig.Font.Size.Body))
@@ -104,12 +71,33 @@ struct RegisterView: View {
         }
         .navigationBarBackButtonHidden(true)
         .addBackgroundColor(.bgWhite) {
-            focusedField = nil
         }
+    }
+
+    /// Shared post-sign-in flow, mirroring LoginView: run any pending migration
+    /// and make Home the root.
+    @MainActor
+    private func handleSignIn(_ signIn: () async -> Bool) async {
+        let ok = await signIn()
+        guard ok else { return }
+
+        let incomingEmail = registerViewModel.lastSignedInEmail
+        sessionState.sessionExpiredBanner = false
+        profileViewModel.refreshUserData()
+        let name = profileViewModel.user.name
+        sessionState.migrationRunning = true
+        let migrated = await MigrationCoordinator.shared.runIfNeeded(ownerEmail: incomingEmail, ownerName: name)
+        sessionState.migrationRunning = false
+        if !migrated {
+            sessionState.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
+        }
+        sessionState.isAuthenticated = true
+        router.popToRoot()
     }
 }
 
 #Preview {
     RegisterView()
-        .environment(Routes())
+        .environment(Router())
+        .environment(ProfileViewModel())
 }

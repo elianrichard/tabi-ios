@@ -14,26 +14,28 @@ struct InputWithLabel: View {
     var placeholder: String
     var isSecure: Bool = false
     var isDisabled: Bool
+    var showClearButton: Bool = false
     var inputTypePicked: InputTypeEnum
-    
+
     @Binding var text: String
     @Binding var price: Float
     var errorMessage: String?
-    
+
     @FocusState.Binding var focusedField: FocusField?
     var focusCase: FocusField
 
     // Initializer for text input only
-    init(label: String, isOptional: Bool = false, placeholder: String, text: Binding<String>, errorMessage: String? = nil, isSecure: Bool = false, isDisabled: Bool = false, inputTypePicked: InputTypeEnum = .text, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
+    init(label: String, isOptional: Bool = false, placeholder: String, text: Binding<String>, errorMessage: String? = nil, isSecure: Bool = false, isDisabled: Bool = false, showClearButton: Bool = false, inputTypePicked: InputTypeEnum = .text, focusedField: FocusState<FocusField?>.Binding, focusCase: FocusField) {
         self.label = label
         self.isOptional = isOptional
         self.placeholder = placeholder
         self._text = text
-        self._price = .constant(0)  // Default to nil
+        self._price = .constant(0)
         self.errorMessage = errorMessage
         self.inputTypePicked = inputTypePicked
         self.isSecure = isSecure
         self.isDisabled = isDisabled
+        self.showClearButton = showClearButton
         self._focusedField = focusedField
         self.focusCase = focusCase
     }
@@ -43,7 +45,7 @@ struct InputWithLabel: View {
         self.label = label
         self.isOptional = isOptional
         self.placeholder = placeholder
-        self._text = .constant("")  // Default to empty string
+        self._text = .constant("")
         self._price = price
         self.errorMessage = errorMessage
         self.inputTypePicked = .price
@@ -70,6 +72,7 @@ struct InputWithLabel: View {
                       text: $text,
                       isError: errorMessage != nil,
                       isDisabled: isDisabled,
+                      showClearButton: showClearButton,
                       type: inputTypePicked,
                       focusedField: $focusedField,
                       focusCase: focusCase)

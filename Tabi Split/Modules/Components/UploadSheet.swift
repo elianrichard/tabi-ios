@@ -58,5 +58,5 @@ struct UploadSheet: View {
 }
 
 #Preview {
-    UploadSheet(receiptImage: .constant(.none), isShowSheet: .constant(false), isShowScanner: .constant(false), user: UserData(name: "Elian", phone: "phone"))
+    UploadSheet(receiptImage: .constant(.none), isShowSheet: .constant(false), isShowScanner: .constant(false), user: UserData(name: "Elian", email: "phone"))
 }

@@ -12,7 +12,7 @@ import PhotosUI
 struct ReceiptUploadSheet: View {
     @State var receiptUploadViewModel = ReceiptUploadViewModel()
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Binding var height: CGFloat
     @Binding var isPresented: Bool
     
@@ -105,6 +105,6 @@ struct ReceiptUploadSheet: View {
 
 #Preview {
     ReceiptUploadSheet(height: .constant(0), isPresented: .constant(true))
-        .environment(Routes())
+        .environment(Router())
         .environment(EventExpenseViewModel())
 }

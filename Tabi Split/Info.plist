@@ -16,7 +16,19 @@
 				<string>tabisplit</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>CFBundleURLName</key>
+			<string>com.google.GoogleSignIn</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.957708762385-40ulf6gud8h9p6i1hj3pa9ndjqg2rrid</string>
+			</array>
+		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>957708762385-40ulf6gud8h9p6i1hj3pa9ndjqg2rrid.apps.googleusercontent.com</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Figtree-Bold.ttf</string>
@@ -30,5 +42,16 @@
 	<string>Light</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We would like to access your camera to scan receipts</string>
+	<key>BASE_URL</key>
+	<string>$(BASE_URL)</string>
+	<key>API_SECRET_KEY</key>
+	<string>$(API_SECRET_KEY)</string>
+	<!-- Allow the Dev config's plain-HTTP localhost backend. Harmless for the
+	     HTTPS staging/production configs. -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

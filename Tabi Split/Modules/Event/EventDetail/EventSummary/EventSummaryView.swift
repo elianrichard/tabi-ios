@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EventSummaryView: View {
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
 
     var body: some View {
@@ -66,7 +66,7 @@ struct EventSummaryView: View {
                                     .font(.tabiSubtitle)
                                 if eventViewModel.isEventCompleted {
                                     Button {
-                                        routes.navigate(to: .SettlementOptimizationView)
+                                        router.push(.settlementOptimization)
                                     } label: {
                                         Text("See Optimization Details")
                                             .foregroundStyle(.textBlue)
@@ -88,38 +88,40 @@ struct EventSummaryView: View {
                 .onTapGesture {
                     if (eventViewModel.isEventCompleted) {
 //                        TEMPORARILY DISABLED: SETTLEMENT
-//                        routes.navigate(to: .EventSettlementView)
-                        routes.navigate(to: .SettlementOptimizationView)
+//                        router.push(.eventSettlement)
+                        router.push(.settlementOptimization)
                     } else {
                         print("Cannot do this action yet")
                     }
                 }
                 
-                VStack (spacing: 16) {
-                    HStack {
-                        Text("Your Balance History")
-                            .font(.tabiHeadline)
-                        Spacer()
-                        Button {
-                            routes.navigate(to: .EventSummaryDetailView)
-                        } label: {
-                            Text("See All")
-                                .font(.tabiBody)
-                                .foregroundStyle(.textBlue)
+                if !eventViewModel.userTransactionHistory.isEmpty {
+                    VStack (spacing: 16) {
+                        HStack {
+                            Text("Your Balance History")
+                                .font(.tabiHeadline)
+                            Spacer()
+                            Button {
+                                router.push(.eventSummaryDetail)
+                            } label: {
+                                Text("See All")
+                                    .font(.tabiBody)
+                                    .foregroundStyle(.textBlue)
+                            }
+                        }
+                        VStack (spacing: 0) {
+                            ForEach(Array(eventViewModel.userTransactionHistory.prefix(3))) { data in
+                                EventSummaryHistoryCard(data: data)
+                            }
                         }
                     }
-                    VStack (spacing: 0) {
-                        ForEach(Array(eventViewModel.userTransactionHistory.prefix(3))) { data in
-                            EventSummaryHistoryCard(data: data)
-                        }
+                    .padding(.spacingRegular)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(.uiGray, lineWidth: 1)
                     }
+                    .padding(1)
                 }
-                .padding(.spacingRegular)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(.uiGray, lineWidth: 1)
-                }
-                .padding(1)
                 
                 
                 HStack (alignment: .top) {
@@ -132,6 +134,6 @@ struct EventSummaryView: View {
 
 #Preview {
     EventSummaryView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventViewModel())
 }

@@ -48,9 +48,9 @@ final class EventViewModel {
     var userTransactionHistory: [SummaryHistoryData] = []
     var userBalance: PersonBalanceData {
         if let currentUser = UserDefaultsService.shared.getCurrentUser(),
-           let personBalance = participantsBalance.first(where: { $0.user.phone == currentUser.userPhone }) {
+           let personBalance = participantsBalance.first(where: { $0.user.isSameUser(as: currentUser) }) {
             return personBalance
-        } else { return PersonBalanceData(user: UserData(name: "Unkown", phone: "Phone")) }
+        } else { return PersonBalanceData(user: UserData(name: "Unkown", email: "")) }
     }
     var userTotalSpending: Float = 0
     var userSettlementList: [SummarySettlementData] = []
@@ -66,29 +66,44 @@ final class EventViewModel {
         do {
             var participants: [UserData] = selectedContacts
             if !isGuest {
-                let checkUsersResponse = try await ProfileService.shared.checkUsers(phoneNumbers: selectedContacts.map{ $0.phone })
+                let checkUsersResponse = try await ProfileService.shared.checkUsers(emails: selectedContacts.map{ $0.email }.filter { !$0.isEmpty })
                 let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
                     if let image = ProfileImageEnum(rawValue: user.avatar_url) {
-                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: image, imageUrl: "" )
+                        UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: image, imageUrl: "" )
                     } else {
-                        UserData(userId: user.user_id, name: user.name, phone: user.phone ?? "", image: .owl, imageUrl: user.avatar_url )
+                        UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: .owl, imageUrl: user.avatar_url )
                     }
                 }
-                
-                var unregisteredUsers: [UserData] = selectedContacts.filter { contact in
-                    return !registeredUsers.contains(where: { user in user.phone == contact.phone })
+
+                let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
+                    return !registeredUsers.contains(where: { user in user.email == contact.email })
                 }
-                
-                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
+
+                // A dummy that already has a userId was created on a previous invite.
+                // Keep its anchor (id + image) and send it as a normal participant so
+                // the backend reuses the existing row instead of minting a new dummy
+                // with a fresh random avatar. Only brand-new dummies (empty userId)
+                // are sent via dummy_users (name + client-chosen avatar).
+                let anchoredDummyUsers: [UserData] = unregisteredUsers.filter { !$0.userId.isEmpty }
+                var newDummyUsers: [UserData] = unregisteredUsers.filter { $0.userId.isEmpty }
+
+                let participantsToSend = registeredUsers + anchoredDummyUsers
+                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: participantsToSend, creatorId: selectedEvent.creatorId), newDummyUsers: newDummyUsers)
+
                 var registeredDummyUsers: [UserData] = []
                 for dummyInfo in response.dummy_user_info {
-                    if let user = unregisteredUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                    if let user = newDummyUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                        // Anchor the new dummy to the backend's id, and adopt the
+                        // avatar it assigned so the image stays fixed from now on.
                         user.userId = dummyInfo.dummy_user_id
+                        if let avatar = dummyInfo.avatar_url, let image = ProfileImageEnum(rawValue: avatar) {
+                            user.image = image.id
+                        }
                         registeredDummyUsers.append(user)
-                        unregisteredUsers.remove(user)
+                        newDummyUsers.remove(user)
                     }
                 }
-                participants = registeredUsers + registeredDummyUsers
+                participants = registeredUsers + anchoredDummyUsers + registeredDummyUsers
             }
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
@@ -115,7 +130,14 @@ final class EventViewModel {
             }
             // Logged-in path already POSTed to BE; mark synced so /migrate doesn't re-create it.
             // Guest path stays unsynced and rides the next migration.
-            let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: currentUser.userId, isSynced: !isGuest)
+            //
+            // Source creatorId from the same authoritative identity the edit gate
+            // reads (UserDefaults JWT userId) rather than currentUser.userId, which
+            // can be "" when the SwiftData user row hasn't resolved yet — an empty
+            // creatorId would make isUserCreator false and hide the Edit menu.
+            // Guests have no userId; they keep "" and get patched by promoteGuestUserData on login.
+            let creatorId = isGuest ? currentUser.userId : (UserDefaultsService.shared.getCurrentUser()?.userId ?? currentUser.userId)
+            let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: creatorId, isSynced: !isGuest)
             SwiftDataService.shared.addEvent(newEvent)
         } catch {
             print("Create event failed: \(error)")
@@ -180,10 +202,19 @@ final class EventViewModel {
     
     func calculateOptimization(currentUser: UserData) {
         let debug = false // enable this to debug print
-        
+
         var userSummaryData: [SummaryHistoryData] = []
         var userTotalSpendingTemp: Float = 0
-        guard let event = selectedEvent else { return }
+        guard let event = selectedEvent else { print("[OPT] no selectedEvent -> bail"); return }
+        if debug {
+            print("[OPT] ===== calculateOptimization START event=\(event.eventName) =====")
+            print("[OPT] currentUser name=\(currentUser.name) id=\(currentUser.userId) email=\(currentUser.email) ptr=\(ObjectIdentifier(currentUser))")
+            print("[OPT] event.participants count=\(event.participants.count)")
+            for p in event.participants {
+                print("[OPT]   participant name=\(p.name) id=\(p.userId) email=\(p.email) ptr=\(ObjectIdentifier(p))")
+            }
+            print("[OPT] event.expenses count=\(event.expenses.count)")
+        }
         participantsBalance = event.participants.map { PersonBalanceData(user: $0) }
         participantsBalance = participantsBalance.sorted(by: { $0.user.name.lowercased() < $1.user.name.lowercased() })
         
@@ -191,8 +222,12 @@ final class EventViewModel {
         
         for expense in event.expenses {
             var userBalanceTemp: Float = 0
-            if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice())") }
-            guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else { return }
+            if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice()) split=\(expense.splitMethod) participants=\(expense.participants.count) items=\(expense.items.count)") }
+            if debug { print("[OPT]   coverer name=\(expense.coverer.name) id=\(expense.coverer.userId) email=\(expense.coverer.email) ptr=\(ObjectIdentifier(expense.coverer))") }
+            guard let personPaid = participantsBalance.first(where: { $0.user == expense.coverer }) else {
+                print("[OPT] !! BAIL: coverer not in participantsBalance (identity ==). expense=\(expense.name) coverer.ptr=\(ObjectIdentifier(expense.coverer)) balanceUserPtrs=\(participantsBalance.map { ObjectIdentifier($0.user) })")
+                return
+            }
             personPaid.lent += expense.price
             
             if expense.coverer == currentUser {
@@ -201,11 +236,14 @@ final class EventViewModel {
             
             if (expense.splitMethod == SplitMethod.custom.id) {
                 let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
-                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
+                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice * $1.itemQuantity}
                 for item in expense.items {
                     let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
                     for assignee in item.assignees {
-                        guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else { return }
+                        guard let personBuy = participantsBalance.first(where: { $0.user == assignee.user }) else {
+                            print("[OPT] !! BAIL: assignee not in participantsBalance (custom split). expense=\(expense.name) item=\(item.itemName) assignee.name=\(assignee.user.name) assignee.ptr=\(ObjectIdentifier(assignee.user)) balanceUserPtrs=\(participantsBalance.map { ObjectIdentifier($0.user) })")
+                            return
+                        }
                         let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
                         let amountSpent = personQuantity * item.itemPrice
                         let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
@@ -225,7 +263,10 @@ final class EventViewModel {
             } else if (expense.splitMethod == SplitMethod.equally.id) {
                 let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
                 for person in expense.participants {
-                    guard let personBuy = participantsBalance.first(where: { $0.user == person }) else { return }
+                    guard let personBuy = participantsBalance.first(where: { $0.user == person }) else {
+                        print("[OPT] !! BAIL: participant not in participantsBalance (equally split). expense=\(expense.name) person.name=\(person.name) person.ptr=\(ObjectIdentifier(person)) balanceUserPtrs=\(participantsBalance.map { ObjectIdentifier($0.user) })")
+                        return
+                    }
                     if (expense.coverer == currentUser && personBuy.user == currentUser) {
                         personPaid.lent -= amountDebt
                     } else {
@@ -244,6 +285,8 @@ final class EventViewModel {
             }
         }
         
+        if debug { print("[OPT] all expenses processed OK (no early return). participantsBalance count=\(participantsBalance.count)") }
+
         userTotalSpending = userTotalSpendingTemp
         userTransactionHistory = userSummaryData.sorted(by: { $0.expenseDate > $1.expenseDate })
         

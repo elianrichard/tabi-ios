@@ -12,7 +12,7 @@ struct ExpenseAssignView: View {
     @State var expenseAssignViewModel = ExpenseAssignViewModel()
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     
     @State var searchQuery: String = ""
     
@@ -165,7 +165,7 @@ struct ExpenseAssignView: View {
             
             CustomButton(text: "Next") {
                 eventExpenseViewModel.calculatePeopleItems()
-                routes.navigate(to: .ExpenseResultView)
+                router.push(.expenseResult)
             }
         }
         .padding()
@@ -188,6 +188,6 @@ struct ExpenseAssignView: View {
 
 #Preview {
     ExpenseAssignView()
-        .environment(Routes())
+        .environment(Router())
         .environment(EventExpenseViewModel())
 }

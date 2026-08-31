@@ -19,7 +19,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             OptimizationRecapPDFData(fromName: "Budi", toName: "Elian", amount: 75_000),
         ],
         expenses: [OptimizationExpensePDFData] = [
-            OptimizationExpensePDFData(name: "KFC", payerName: "Elian", amount: 100_000, isEquallySplit: false, equalSplitPerPerson: nil, participantNames: [], items: [
+            OptimizationExpensePDFData(name: "KFC", date: Date(timeIntervalSince1970: 1_700_000_000), payerName: "Elian", amount: 100_000, isEquallySplit: false, equalSplitPerPerson: nil, participantNames: [], items: [
                 OptimizationExpenseItemPDFData(name: "Chicken Bucket", quantity: 2, price: 80_000, assignees: [
                     OptimizationAssigneePDFData(name: "Elian", share: 1),
                     OptimizationAssigneePDFData(name: "Budi", share: 1),
@@ -31,7 +31,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
                 OptimizationAdditionalChargePDFData(typeName: "Discount", amount: 10_000),
             ]),
             // Equally-split expense: item breakdown should be omitted in the PDF.
-            OptimizationExpensePDFData(name: "Taxi", payerName: "Budi", amount: 50_000, isEquallySplit: true, equalSplitPerPerson: 25_000, participantNames: ["Elian", "Budi"], items: [], additionalCharges: []),
+            OptimizationExpensePDFData(name: "Taxi", date: Date(timeIntervalSince1970: 1_700_100_000), payerName: "Budi", amount: 50_000, isEquallySplit: true, equalSplitPerPerson: 25_000, participantNames: ["Elian", "Budi"], items: [], additionalCharges: []),
         ]
     ) -> SettlementOptimizationPDFData {
         SettlementOptimizationPDFData(
@@ -88,6 +88,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
         // An equally-split expense shared by only a subset of the event's members.
         let equal = OptimizationExpensePDFData(
             name: "Drinks",
+            date: Date(timeIntervalSince1970: 1_700_200_000),
             payerName: "Elian",
             amount: 60_000,
             isEquallySplit: true,
@@ -116,6 +117,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             }
             expenses.append(OptimizationExpensePDFData(
                 name: "Expense \(expenseIndex)",
+                date: Date(timeIntervalSince1970: 1_700_000_000 + Double(expenseIndex) * 86_400),
                 payerName: "Person \(expenseIndex % 3)",
                 amount: Float(expenseIndex * 10_000),
                 isEquallySplit: false,

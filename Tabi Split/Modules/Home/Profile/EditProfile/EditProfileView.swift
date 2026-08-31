@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct EditProfileView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) private var profileViewModel
     @State var editProfileViewModel = EditProfileViewModel()
     @State private var isShowDeleteSheet = false
@@ -45,7 +45,6 @@ struct EditProfileView: View {
                     
                     VStack(spacing: .spacingRegular){
                         InputWithLabel(label: "Full Name", placeholder: "Full Name", text: $editProfileViewModel.nameText, focusedField: $focusedField, focusCase: .field1)
-                        InputWithLabel(label: "Phone Number", placeholder: "Phone Number", text: $editProfileViewModel.phoneText, focusedField: $focusedField, focusCase: .field2)
                     }
                 }
                 CustomButton(text: "Delete Account", type: .tertiary, customTextColor: .buttonRed) {
@@ -57,7 +56,7 @@ struct EditProfileView: View {
             CustomButton(text: profileViewModel.isApiCallLoading ? "Loading..." : "Save") {
                 Task {
                     if await profileViewModel.updateProfile(editProfileViewModel: editProfileViewModel) {
-                        routes.navigateBack()
+                        router.pop()
                     }
                 }
             }
@@ -95,7 +94,11 @@ struct EditProfileView: View {
                         Task {
                             if await profileViewModel.deleteUser() {
                                 isShowDeleteSheet = false
-                                routes.navigate(to: .LoginView)
+                                // Swap the stack root back to LoginView and clear
+                                // the path so the deleted account's screens are
+                                // gone and Back cannot return.
+                                SessionState.shared.isAuthenticated = false
+                                router.popToRoot()
                             }
                         }
                     }
@@ -115,6 +118,6 @@ struct EditProfileView: View {
 
 #Preview {
     EditProfileView()
-        .environment(Routes())
+        .environment(Router())
         .environment(ProfileViewModel())
 }

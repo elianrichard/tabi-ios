@@ -69,6 +69,6 @@ struct QuantityChangeView: View {
 }
 
 #Preview {
-    QuantityChangeView(item: .constant(ExpenseItem(itemName: "Teh tarik", itemPrice: 10000, itemQuantity: 10, assignees: [ExpensePerson(user: UserData(name: "Darma", phone: ""), share: 1), ExpensePerson(user: UserData(name: "Eko", phone: ""), share: 2)])), close: .constant(true))
+    QuantityChangeView(item: .constant(ExpenseItem(itemName: "Teh tarik", itemPrice: 10000, itemQuantity: 10, assignees: [ExpensePerson(user: UserData(name: "Darma", email: ""), share: 1), ExpensePerson(user: UserData(name: "Eko", email: ""), share: 2)])), close: .constant(true))
         .environment(EventExpenseViewModel())
 }

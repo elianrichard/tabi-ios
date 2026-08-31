@@ -10,7 +10,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ProfileView: View {
-    @Environment(Routes.self) var routes
+    @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) private var profileViewModel
 
     @State private var isImporterPresented: Bool = false
@@ -26,44 +26,46 @@ struct ProfileView: View {
                         UserCard(user: profileViewModel.user)
                         Spacer()
                         if !profileViewModel.isGuest {
-                            Icon(systemName: "pencil", color: .textBlack, size: 16) {
-                                routes.navigate(to: .EditProfile)
+                            Icon(systemName: "square.and.pencil", color: .textBlack, size: 16) {
+                                router.push(.editProfile)
                             }
                         }
                     }
                 }
                 
-                VStack (spacing: .spacingSmall) {
-                    Button {
-                        handleExport()
-                    } label: {
-                        HStack(spacing: .spacingTight){
-                            Icon(systemName: "square.and.arrow.up")
-                            Text("Export Data")
-                                .font(.tabiHeadline)
-                                .foregroundStyle(.textBlack)
-                            Spacer()
-                            Icon(systemName: "chevron.right", size: 16)
+                // TEMPORARILY DISABLED: EXPORT / IMPORT DATA
+                if false {
+                    VStack (spacing: .spacingSmall) {
+                        Button {
+                            handleExport()
+                        } label: {
+                            HStack(spacing: .spacingTight){
+                                Icon(systemName: "square.and.arrow.up")
+                                Text("Export Data")
+                                    .font(.tabiHeadline)
+                                    .foregroundStyle(.textBlack)
+                                Spacer()
+                                Icon(systemName: "chevron.right", size: 16)
+                            }
+                            .padding(.vertical, .spacingSmall)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, .spacingSmall)
-                        .contentShape(Rectangle())
-                    }
-                    Button {
-                        isImporterPresented = true
-                    } label: {
-                        HStack(spacing: .spacingTight){
-                            Icon(systemName: "square.and.arrow.down")
-                            Text("Import Data")
-                                .font(.tabiHeadline)
-                                .foregroundStyle(.textBlack)
-                            Spacer()
-                            Icon(systemName: "chevron.right", size: 16)
+                        Button {
+                            isImporterPresented = true
+                        } label: {
+                            HStack(spacing: .spacingTight){
+                                Icon(systemName: "square.and.arrow.down")
+                                Text("Import Data")
+                                    .font(.tabiHeadline)
+                                    .foregroundStyle(.textBlack)
+                                Spacer()
+                                Icon(systemName: "chevron.right", size: 16)
+                            }
+                            .padding(.vertical, .spacingSmall)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, .spacingSmall)
-                        .contentShape(Rectangle())
+                        Divider()
                     }
-                    Divider()
-
                 }
 
                 
@@ -77,7 +79,7 @@ struct ProfileView: View {
                             .font(.tabiSubtitle)
                             .multilineTextAlignment(.center)
                         CustomButton(text: "Sign In", type: .tertiary, iconResource: .logout) {
-                            routes.navigate(to: .LoginView)
+                            router.push(.login)
                         }
                     }
                     .frame(maxHeight: .infinity)
@@ -90,7 +92,7 @@ struct ProfileView: View {
                             Text("Settings")
                                 .font(.tabiBody)
                             Button {
-                                routes.navigate(to: .PaymentMethods)
+                                router.push(.paymentMethods)
                             } label: {
                                 HStack(spacing: .spacingTight){
                                     Icon(systemName: "wallet.bifold")
@@ -108,9 +110,13 @@ struct ProfileView: View {
                         Button {
                             Task {
                                 let isSuccess = await profileViewModel.logout()
-                                
+
                                 if isSuccess {
-                                    routes.navigate(to: .LoginView)
+                                    // Swap the stack root back to LoginView and
+                                    // clear the path so Home is gone and Back
+                                    // cannot return into the authed area.
+                                    SessionState.shared.isAuthenticated = false
+                                    router.popToRoot()
                                 }
                             }
                         } label: {
@@ -177,22 +183,12 @@ private struct BackupAlert: Identifiable {
     let message: String
 }
 
-extension URL: Identifiable {
+extension URL: @retroactive Identifiable {
     public var id: String { absoluteString }
-}
-
-private struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
 
 #Preview {
     ProfileView()
-        .environment(Routes())
+        .environment(Router())
         .environment(ProfileViewModel())
 }

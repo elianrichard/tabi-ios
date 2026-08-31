@@ -11,8 +11,7 @@ import SwiftUI
 @Observable
 class EditProfileViewModel{
     var nameText: String = ""
-    var phoneText: String = ""
-    
+
     var profileImage: UIImage = UIImage(resource: .owl)
     var uploadedImage: UIImage? = nil {
         didSet {
@@ -35,8 +34,7 @@ class EditProfileViewModel{
     
     func populateData(profileViewModel: ProfileViewModel) {
         nameText = profileViewModel.user.name
-        phoneText = profileViewModel.user.phone
-        
+
         if let chosenTemplateImage = ProfileImageEnum(rawValue: profileViewModel.user.image) {
             chosenImage = chosenTemplateImage
         }

@@ -13,26 +13,26 @@ import SwiftUI
 class UserData {
     var userId: String = ""
     var name: String
-    var phone: String
+    var email: String
     var image: ProfileImageEnum.ID
     var imageUrl: String?
     @Relationship(deleteRule: .nullify, inverse: \EventData.participants) var events: [EventData]? = []
     @Relationship(deleteRule: .nullify, inverse: \Expense.participants) var expenses: [Expense]? = []
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]? = []
     @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]? = []
-    
-    init(userId: String = "", name: String, phone: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
+
+    init(userId: String = "", name: String, email: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
         self.userId = userId
         self.name = name != "" ? name : "Deleted User"
-        self.phone = phone
+        self.email = email
         self.image = (image ?? ProfileImageEnum.allCases.randomElement() ?? .owl).id
         self.imageUrl = imageUrl
     }
-    
+
     init(userBase: UserBase) {
         self.userId = userBase.user_id
         self.name = userBase.name != "" ? userBase.name : "Deleted User"
-        self.phone = userBase.phone ?? ""
+        self.email = userBase.email ?? ""
         if let image = ProfileImageEnum(rawValue: userBase.avatar_url) {
             self.image = image.id
             self.imageUrl = ""
@@ -41,17 +41,31 @@ class UserData {
             self.imageUrl = userBase.avatar_url
         }
     }
-    
+
     func update(from user: UserData) {
         self.userId = user.userId
         self.name = user.name
-        self.phone = user.phone
+        self.email = user.email
         self.image = user.image
         self.imageUrl = user.imageUrl
     }
     
     func update(fromUserBase user: UserBase) {
         self.update(from: UserData(userBase: user))
+    }
+
+    /// Whether this participant is the given signed-in user. Matches on userId
+    /// first (the authoritative identity), then falls back to email. Empty
+    /// values never match, so unresolved/dummy rows (userId "" and email "")
+    /// and multiple guests (email "Guest") are not collapsed into "you".
+    func isSameUser(as current: CurrentUserDefaults) -> Bool {
+        if !userId.isEmpty && !current.userId.isEmpty {
+            return userId == current.userId
+        }
+        if !email.isEmpty && !current.userEmail.isEmpty {
+            return email == current.userEmail
+        }
+        return false
     }
 }
 

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettlementOptimizationView: View {
     @Environment(ProfileViewModel.self) private var profileViewModel
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
 
     @State private var contentSize: CGSize = .zero
@@ -115,13 +115,16 @@ struct SettlementOptimizationView: View {
             }
         }
 
-        let expenses = (eventViewModel.selectedEvent?.expenses ?? []).map { expense in
+        let expenses = (eventViewModel.selectedEvent?.expenses ?? [])
+            .sorted { $0.dateOfCreation < $1.dateOfCreation }
+            .map { expense in
             let isEqual = SplitMethod(rawValue: expense.splitMethod) == .equally
             let perPerson: Float? = (isEqual && !expense.participants.isEmpty)
                 ? expense.price / Float(expense.participants.count)
                 : nil
             return OptimizationExpensePDFData(
                 name: expense.name,
+                date: expense.dateOfCreation,
                 payerName: expense.coverer.name,
                 amount: expense.price,
                 isEquallySplit: isEqual,
@@ -174,5 +177,5 @@ private struct ExportedPDF: Identifiable {
 
 #Preview {
     SettlementOptimizationView()
-        .environment(Routes())
+        .environment(Router())
 }

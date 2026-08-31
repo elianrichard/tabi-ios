@@ -7,47 +7,49 @@
 
 import SwiftUI
 import SwiftData
+import GoogleSignIn
 
 struct ContentView: View {
-    @State private var routes = AppRouter()
+    @State private var router = Router()
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
     @State private var eventExpenseViewModel = EventExpenseViewModel()
     @State private var eventSettlementViewModel = EventSettlementViewModel()
     @State private var profileViewModel = ProfileViewModel()
     private var loadingViewModel = LoadingViewModel.shared
-    
-    @State private var isAuthenticated = false
+    @State private var sessionState = SessionState.shared
 
     var body: some View {
         ZStack {
-            NavigationStack (path: $routes.navPath) {
+            NavigationStack (path: $router.path) {
                 ZStack {
                     if !UserDefaultsService.shared.getOnboardingStatus() {
                         OnboardingView()
                             .onAppear {
                                 UserDefaultsService.shared.setOnboardingStatus(true)
                             }
-                    } else if isAuthenticated {
+                    } else if sessionState.isAuthenticated {
                         HomeView()
                     } else {
                         LoginView()
                     }
                 }
-                .navigationDestination(for: AppRoute.self) { route in
-                    AppRouteDestinationView(route: route)
-                }
+                .appNavigationDestinations()
             }
 
             if (loadingViewModel.isLoading) {
                 LoadingView()
             }
 
+            ToastOverlay()
+
+            ErrorDialogOverlay()
+
             SplashView()
                 .ignoresSafeArea()
         }
         .ignoresSafeArea(.keyboard)
-        .environment(routes)
+        .environment(router)
         .environment(eventViewModel)
         .environment(eventInviteViewModel)
         .environment(eventExpenseViewModel)
@@ -62,6 +64,11 @@ struct ContentView: View {
         }
         .onOpenURL { incomingURL in
             print("App was opened via URL: \(incomingURL)")
+            // Let GoogleSignIn claim its OAuth callback URL first; if it handles
+            // it, skip the app's own deep-link routing.
+            if GIDSignIn.sharedInstance.handle(incomingURL) {
+                return
+            }
             handleIncomingURL(incomingURL)
         }
     }
@@ -76,30 +83,30 @@ struct ContentView: View {
         }
 
         let hasLocalUser = SwiftDataService.shared.getCurrentUser() != nil
-        let isGuest = SwiftDataService.shared.getCurrentUser()?.phone == "Guest"
+        let isGuest = SwiftDataService.shared.getCurrentUser()?.email == "Guest"
 
         if isGuest {
-            isAuthenticated = true
+            sessionState.isAuthenticated = true
             return
         }
 
         if !hasToken && !hasLocalUser {
-            isAuthenticated = false
+            sessionState.isAuthenticated = false
             return
         }
 
         if !hasToken && hasLocalUser {
             SessionState.shared.sessionExpiredBanner = true
-            isAuthenticated = false
+            sessionState.isAuthenticated = false
             return
         }
 
         do {
             let _ = try await ProfileService.shared.probeSession()
-            isAuthenticated = true
+            sessionState.isAuthenticated = true
             await runMigrationIfNeeded()
         } catch {
-            isAuthenticated = false
+            sessionState.isAuthenticated = false
             SessionState.shared.sessionExpiredBanner = true
         }
     }
@@ -107,10 +114,10 @@ struct ContentView: View {
     private func runMigrationIfNeeded() async {
         guard MigrationCoordinator.shared.hasUnsynced else { return }
         guard let cur = UserDefaultsService.shared.getCurrentUser(),
-              !cur.userPhone.isEmpty,
-              cur.userPhone != "Guest" else { return }
+              !cur.userEmail.isEmpty,
+              cur.userEmail != "Guest" else { return }
         SessionState.shared.migrationRunning = true
-        let ok = await MigrationCoordinator.shared.runIfNeeded(ownerPhone: cur.userPhone, ownerName: cur.userName)
+        let ok = await MigrationCoordinator.shared.runIfNeeded(ownerEmail: cur.userEmail, ownerName: cur.userName)
         SessionState.shared.migrationRunning = false
         if !ok {
             SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
@@ -119,7 +126,10 @@ struct ContentView: View {
 
     private func handleSessionExpired() {
         SessionState.shared.sessionExpiredBanner = true
-        isAuthenticated = false
+        sessionState.isAuthenticated = false
+        // Root swaps back to LoginView; clear any pushed screens so stale
+        // authed views do not linger on top of the login root.
+        router.popToRoot()
     }
     
     
@@ -155,7 +165,9 @@ struct ContentView: View {
                     print("Join event failed: \(error)")
                 }
             }
-            routes.push(.home)
+            // Home is the stack root; clear the path to land there rather than
+            // pushing a duplicate Home screen.
+            router.popToRoot()
         }
     }
 }

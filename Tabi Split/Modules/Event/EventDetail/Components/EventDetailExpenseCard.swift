@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EventDetailExpenseCard : View {
     var expense: Expense
-    @Environment(Routes.self) private var routes
+    @Environment(Router.self) private var router
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
 
     var body : some View {
@@ -49,14 +49,14 @@ struct EventDetailExpenseCard : View {
         .contentShape(Rectangle())
         .onTapGesture {
             eventExpenseViewModel.selectedExpense = expense
-            routes.navigate(to: .ExpenseResultView)
+            router.push(.expenseResult)
         }
     }
 }
 
 #Preview {
     EventDetailExpenseCard(expense:
-                            Expense(name: "Kain Tenun Jepara", coverer: UserData(name: "Naufal", phone: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
-    .environment(Routes())
+                            Expense(name: "Kain Tenun Jepara", coverer: UserData(name: "Naufal", email: "08123456789"), dateOfCreation: Date(), price: 100000, splitMethod: .equally))
+    .environment(Router())
     .environment(EventExpenseViewModel())
 }

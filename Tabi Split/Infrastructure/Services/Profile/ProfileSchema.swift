@@ -23,7 +23,6 @@ enum ProfileAPIError: LocalizedError {
 
 struct EditProfileRequest: Codable {
     let name: String
-    let phone: String
     let avatar_url: String
 }
 
@@ -32,7 +31,7 @@ struct EditProfileResponse: Codable {
 }
 
 struct GetProfileRequest: Codable {
-    let phones: [String]
+    let emails: [String]
 }
 
 struct GetProfileResponse: Codable {
@@ -41,7 +40,7 @@ struct GetProfileResponse: Codable {
 }
 
 struct CheckUsersRequest: Codable {
-    let phones: [String]
+    let emails: [String]
 }
 
 struct CheckUsersResponse: Codable {
@@ -51,7 +50,7 @@ struct CheckUsersResponse: Codable {
 
 struct UserBase: Codable {
     let user_id: String
-    let phone: String?
+    let email: String?
     let name: String
     let avatar_url: String
 }
@@ -60,6 +59,6 @@ struct UserGetResponse: Codable {
     let message: String?
     let user_id: String?
     let name: String?
-    let phone: String?
+    let email: String?
     let profile_image: String?
 }

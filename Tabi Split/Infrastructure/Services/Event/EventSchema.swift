@@ -48,7 +48,14 @@ struct EditEventRequest: Codable {
     let name: String
     let participants: [String]
     let event_image: String
-    let dummy_names: [String]
+    let dummy_users: [DummyUserInput]
+}
+
+// A new (unregistered) participant being invited by name, with the avatar the
+// client chose for them so the backend stores that image instead of a random one.
+struct DummyUserInput: Codable {
+    let name: String
+    let avatar: String
 }
 
 struct EditEventResponse: Codable {
@@ -59,6 +66,27 @@ struct EditEventResponse: Codable {
 struct DummyInfoBase: Codable {
     let dummy_user_id: String
     let dummy_name: String
+    // Built-in avatar identifier assigned by the backend at first invite, so the
+    // client anchors a stable image instead of re-randomizing it on every edit.
+    // Optional to stay decodable against older backends that omit it.
+    let avatar_url: String?
+}
+
+// Edits one participant: name + avatar, and optionally an email to link the
+// participant to an existing registered account.
+struct EditParticipantRequest: Codable {
+    let name: String
+    let avatar: String
+    let email: String?
+}
+
+struct EditParticipantResponse: Codable {
+    let message: String
+    let participant: UserBase
+}
+
+struct RemoveParticipantResponse: Codable {
+    let message: String
 }
 
 struct CompleteEventRequest: Codable {
