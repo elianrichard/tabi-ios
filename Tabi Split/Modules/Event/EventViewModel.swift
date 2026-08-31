@@ -75,20 +75,35 @@ final class EventViewModel {
                     }
                 }
 
-                var unregisteredUsers: [UserData] = selectedContacts.filter { contact in
+                let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
                     return !registeredUsers.contains(where: { user in user.email == contact.email })
                 }
-                
-                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: registeredUsers, creatorId: selectedEvent.creatorId), dummyNames: unregisteredUsers.map { $0.name })
+
+                // A dummy that already has a userId was created on a previous invite.
+                // Keep its anchor (id + image) and send it as a normal participant so
+                // the backend reuses the existing row instead of minting a new dummy
+                // with a fresh random avatar. Only brand-new dummies (empty userId)
+                // are sent via dummy_users (name + client-chosen avatar).
+                let anchoredDummyUsers: [UserData] = unregisteredUsers.filter { !$0.userId.isEmpty }
+                var newDummyUsers: [UserData] = unregisteredUsers.filter { $0.userId.isEmpty }
+
+                let participantsToSend = registeredUsers + anchoredDummyUsers
+                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: participantsToSend, creatorId: selectedEvent.creatorId), newDummyUsers: newDummyUsers)
+
                 var registeredDummyUsers: [UserData] = []
                 for dummyInfo in response.dummy_user_info {
-                    if let user = unregisteredUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                    if let user = newDummyUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                        // Anchor the new dummy to the backend's id, and adopt the
+                        // avatar it assigned so the image stays fixed from now on.
                         user.userId = dummyInfo.dummy_user_id
+                        if let avatar = dummyInfo.avatar_url, let image = ProfileImageEnum(rawValue: avatar) {
+                            user.image = image.id
+                        }
                         registeredDummyUsers.append(user)
-                        unregisteredUsers.remove(user)
+                        newDummyUsers.remove(user)
                     }
                 }
-                participants = registeredUsers + registeredDummyUsers
+                participants = registeredUsers + anchoredDummyUsers + registeredDummyUsers
             }
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id

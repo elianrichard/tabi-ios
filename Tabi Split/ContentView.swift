@@ -43,6 +43,8 @@ struct ContentView: View {
 
             ToastOverlay()
 
+            ErrorDialogOverlay()
+
             SplashView()
                 .ignoresSafeArea()
         }

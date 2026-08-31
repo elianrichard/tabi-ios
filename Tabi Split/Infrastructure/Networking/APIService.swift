@@ -158,10 +158,12 @@ final class APIService: APIClient {
 
     private func notifyError(_ error: APIError) {
         // .unauthorized is handled by the session-expired flow (banner + logout);
-        // surfacing it as a toast would be redundant/noisy.
+        // surfacing it here would be redundant/noisy.
         if case .unauthorized = error { return }
         let message = error.errorDescription ?? "Something went wrong. Please try again."
-        Task { @MainActor in ToastViewModel.shared.showError(message) }
+        // Errors are shown in a blocking dialog (demands acknowledgment); the toast
+        // is reserved for success/info messages.
+        Task { @MainActor in ErrorDialogViewModel.shared.show(message) }
     }
 }
 

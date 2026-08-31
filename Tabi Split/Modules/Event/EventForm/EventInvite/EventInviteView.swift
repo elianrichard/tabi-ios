@@ -203,11 +203,11 @@ struct EventInviteView: View {
                             .font(.tabiBody)
                             .foregroundStyle(.textGrey)
                     } else {
-                        InputWithLabel(label: "Full Name",
-                                       placeholder: "Full Name",
-                                       text: $inviteNameText,
-                                       focusedField: $focusedField,
-                                       focusCase: .field1)
+                        Input(
+                            placeholder: "Participant's Name",
+                            text: $inviteNameText,
+                            focusedField: $focusedField,
+                            focusCase: .field1)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
