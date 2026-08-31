@@ -20,6 +20,7 @@ enum AppRoute: Hashable {
     case register
     case eventDetail
     case eventInvite
+    case editParticipant
     case eventSummaryDetail
     case eventSettlement
     case settlementPaymentMethod

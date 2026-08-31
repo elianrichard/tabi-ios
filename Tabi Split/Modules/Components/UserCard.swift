@@ -13,7 +13,10 @@ struct UserCard : View {
     var isShowYouText: Bool = false
     var isShowOwnerText: Bool = false
     var isShowEmailText: Bool = true
-    
+    // When set, a trailing pencil button is shown that invokes this action. Callers
+    // pass nil for cards that shouldn't be editable (e.g. the current user).
+    var onEdit: (() -> Void)? = nil
+
     var body: some View {
         HStack (spacing: .spacingTight) {
             UserAvatar(userData: user)
@@ -41,6 +44,16 @@ struct UserCard : View {
                 }
             }
             Spacer()
+            if let onEdit {
+                Button {
+                    onEdit()
+                } label: {
+                    // Nugget-style chip (bordered, light fill) but a rounded
+                    // rectangle instead of the full pill, holding a pencil icon.
+                    Icon(systemName: "square.and.pencil", color: .buttonBlue, size: 16)
+                        .padding(.spacingSmall)
+                }
+            }
         }
     }
 }

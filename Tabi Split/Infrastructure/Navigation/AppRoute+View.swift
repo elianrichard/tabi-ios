@@ -23,6 +23,8 @@ struct AppDestinationView: View {
             EventDetailView()
         case .eventInvite:
             EventInviteView()
+        case .editParticipant:
+            EditParticipantView()
         case .swiftDataTesting:
             SwiftDataTestingView()
         case .login:

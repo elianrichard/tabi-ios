@@ -16,14 +16,12 @@ struct ZoomableScrollView<Content: View>: UIViewRepresentable {
   }
 
   func makeUIView(context: Context) -> UIScrollView {
-    // set up the UIScrollView
     let scrollView = UIScrollView()
     scrollView.delegate = context.coordinator  // for viewForZooming(in:)
     scrollView.maximumZoomScale = 20
     scrollView.minimumZoomScale = 1
     scrollView.bouncesZoom = true
 
-    // create a UIHostingController to hold our SwiftUI content
     let hostedView = context.coordinator.hostingController.view!
     hostedView.translatesAutoresizingMaskIntoConstraints = true
     hostedView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -38,7 +36,6 @@ struct ZoomableScrollView<Content: View>: UIViewRepresentable {
   }
 
   func updateUIView(_ uiView: UIScrollView, context: Context) {
-    // update the hosting controller's SwiftUI content
     context.coordinator.hostingController.rootView = self.content
     assert(context.coordinator.hostingController.view.superview == uiView)
   }

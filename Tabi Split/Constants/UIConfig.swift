@@ -51,5 +51,6 @@ struct UIConfig {
         static let Large: CGFloat = 24
         static let Medium: CGFloat = 16
         static let Small: CGFloat = 12
+        static let XSmall: CGFloat = 10
     }
 }

@@ -34,6 +34,7 @@ struct Input: View {
     @Binding var text: String
     var isError: Bool = false
     var isDisabled: Bool = false
+    var showClearButton: Bool = false
     var backgroundColor: Color = .bgWhite
     var cornerRadius: CGFloat = .radiusMedium
     
@@ -76,6 +77,13 @@ struct Input: View {
                 .keyboardType(type.keyboard)
                 .focused($focusedField, equals: focusCase)
                 .disabled(isDisabled)
+                if showClearButton && !text.isEmpty && !isDisabled {
+                    Button {
+                        text = ""
+                    } label: {
+                        Icon(systemName: "xmark.circle.fill", color: .textGrey, size: 18)
+                    }
+                }
             }
         }
         .padding(.vertical, 16)

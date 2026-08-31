@@ -73,7 +73,7 @@ struct EventInviteView: View {
                         })
                     }
                 }
-                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search or Add New Participants")
+                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search / Add New Participants by Name / Email")
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
                         LazyVStack (spacing: 0) {

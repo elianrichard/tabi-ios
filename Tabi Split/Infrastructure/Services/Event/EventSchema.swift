@@ -72,6 +72,23 @@ struct DummyInfoBase: Codable {
     let avatar_url: String?
 }
 
+// Edits one participant: name + avatar, and optionally an email to link the
+// participant to an existing registered account.
+struct EditParticipantRequest: Codable {
+    let name: String
+    let avatar: String
+    let email: String?
+}
+
+struct EditParticipantResponse: Codable {
+    let message: String
+    let participant: UserBase
+}
+
+struct RemoveParticipantResponse: Codable {
+    let message: String
+}
+
 struct CompleteEventRequest: Codable {
     let is_completed: Bool
 }

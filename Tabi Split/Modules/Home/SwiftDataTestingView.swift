@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 
-// MODEL
 struct PostListModel: Encodable ,Decodable, Identifiable {
     let id: Int
     let userId: Int
@@ -58,7 +57,6 @@ class SubNote {
     }
 }
 
-// VIEW
 struct SwiftDataTestingView: View {
     @Environment(Router.self) private var router
     @State var swiftDataTestingViewModel = SwiftDataTestingViewModel()
@@ -221,7 +219,6 @@ struct SwiftDataTestingSubNoteDetailView: View {
         .environment(Router())
 }
 
-// VIEW MODEL
 @Observable
 final class SwiftDataTestingViewModel {
     var notes: [NoteData] = []

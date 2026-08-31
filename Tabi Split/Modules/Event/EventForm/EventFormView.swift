@@ -74,7 +74,12 @@ struct EventFormView: View {
                                         }
                                         
                                         ForEach (participantsList.prefix(4)) { user in
-                                            UserCard(user: user, isShowYouText: true)
+                                            UserCard(user: user,
+                                                     isShowYouText: true,
+                                                     onEdit: (eventViewModel.isUserCreator && !profileViewModel.isCurrentUser(user)) ? {
+                                                         eventInviteViewModel.editingParticipant = user
+                                                         router.push(.editParticipant)
+                                                     } : nil)
                                         }
                                         
                                         if participantsList.count > 4 {

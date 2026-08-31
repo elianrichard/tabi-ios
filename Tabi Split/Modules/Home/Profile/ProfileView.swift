@@ -26,7 +26,7 @@ struct ProfileView: View {
                         UserCard(user: profileViewModel.user)
                         Spacer()
                         if !profileViewModel.isGuest {
-                            Icon(systemName: "pencil", color: .textBlack, size: 16) {
+                            Icon(systemName: "square.and.pencil", color: .textBlack, size: 16) {
                                 router.push(.editProfile)
                             }
                         }

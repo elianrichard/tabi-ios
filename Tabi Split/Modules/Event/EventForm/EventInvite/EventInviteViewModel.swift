@@ -11,7 +11,12 @@ import Contacts
 @Observable
 final class EventInviteViewModel {
     var isLoadContactLoading: Bool = true
-    
+
+    // The participant currently being edited on the EditParticipant screen. Set
+    // when the user taps a card's edit button, then read by EditParticipantView.
+    var editingParticipant: UserData?
+
+
     var searchUserText: String = ""
     var searchFilteredContacts: [UserData] {
         if (searchUserText != "") {
