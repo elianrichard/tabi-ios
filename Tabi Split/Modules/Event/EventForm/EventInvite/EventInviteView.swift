@@ -19,6 +19,12 @@ struct EventInviteView: View {
     @State private var isLinkCopied = false
     @State private var isShowQrSheet = false
 
+    // Per-share signed invite token (1h TTL). Fetched once when the view appears
+    // and reused by Copy / Share / QR; refetched only if the window lapses while
+    // the view is open. nil until the first fetch resolves.
+    @State private var inviteToken: String?
+    @State private var inviteTokenExpiresAt: Date?
+
     // Email-invite flow: when the typed text is an email, present this payload.
     // Driving the sheet with `.sheet(item:)` (rather than a bool + separate
     // @State) avoids a stale-state race where the sheet body would snapshot the
@@ -41,7 +47,14 @@ struct EventInviteView: View {
         var id: String { email }
     }
 
-    private var deeplinkHost = "tabi-web.vercel.app"
+    private let deeplinkHost = "tabisplit.my.id"
+
+    // The full Universal Link for the current token, or nil until a token is
+    // fetched. All three share actions (Copy / Share / QR) use this one shape.
+    private var inviteURLString: String? {
+        guard let token = inviteToken else { return nil }
+        return "https://\(deeplinkHost)/join?token=\(token)"
+    }
     
     var body: some View {
         VStack (spacing: 0) {
@@ -53,22 +66,23 @@ struct EventInviteView: View {
                     EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
                                                icon: isLinkCopied ? .checkIcon : .linkIcon,
                                                action: {
-                        if !isLinkCopied {
-                            withAnimation (nil) {
-                                isLinkCopied = true
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                withAnimation(nil)  {
-                                    isLinkCopied = false
-                                }
-                            }
-                            UIPasteboard.general.setValue("https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")", forPasteboardType: UTType.plainText.identifier)
+                        guard let urlString = inviteURLString, !isLinkCopied else { return }
+                        withAnimation (nil) {
+                            isLinkCopied = true
                         }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation(nil)  {
+                                isLinkCopied = false
+                            }
+                        }
+                        UIPasteboard.general.setValue(urlString, forPasteboardType: UTType.plainText.identifier)
                     })
-                    if let url = URL(string: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")") {
+                    if let urlString = inviteURLString, let url = URL(string: urlString) {
                         ShareLink(item: url) {
                             EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                         }
+                    } else {
+                        EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                     }
                     EventInviteShareButtonView(text: "QR Code",
                                                icon: .qrIcon,
@@ -167,6 +181,7 @@ struct EventInviteView: View {
             if let selectedEvent = eventViewModel.selectedEvent {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
+            Task { await fetchInviteTokenIfNeeded() }
         }
         .sheet(isPresented: $isShowQrSheet) {
             CustomSheet (xToggleBinding: $isShowQrSheet) {
@@ -175,7 +190,7 @@ struct EventInviteView: View {
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     VStack (alignment: .center, spacing: .spacingMedium) {
-                        Image(uiImage: generateQRCode(from: "tabisplit://join-event?event-id=\(eventViewModel.selectedEvent?.eventId ?? "")"))
+                        Image(uiImage: generateQRCode(from: inviteURLString ?? ""))
                                 .resizable()
                                 .interpolation(.none)
                                 .scaledToFit()
@@ -319,6 +334,25 @@ struct EventInviteView: View {
         eventInviteViewModel.searchUserText = ""
         focusedField = nil
         isShowCustomParticipantSheet = false
+    }
+
+    // Fetch a fresh invite token unless a still-valid one is already cached. A
+    // 60s guard band avoids handing out a token that expires mid-share. Errors
+    // surface via the global dialog (APIService.notifyError); the buttons stay
+    // disabled while inviteToken is nil.
+    private func fetchInviteTokenIfNeeded() async {
+        if let expiresAt = inviteTokenExpiresAt, inviteToken != nil,
+           expiresAt.timeIntervalSinceNow > 60 {
+            return
+        }
+        guard let eventId = eventViewModel.selectedEvent?.eventId else { return }
+        do {
+            let response = try await EventService.shared.createInviteToken(eventId: eventId)
+            inviteToken = response.token
+            inviteTokenExpiresAt = Date(timeIntervalSince1970: TimeInterval(response.expires_at))
+        } catch {
+            print("Fetch invite token failed: \(error)")
+        }
     }
 
     private func generateQRCode(from string: String) -> UIImage {

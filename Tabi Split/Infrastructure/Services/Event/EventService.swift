@@ -65,4 +65,13 @@ final class EventService {
     func joinEvent(eventId: String) async throws {
         let _ : JoinEventResponse = try await apiClient.post(endpoint: "/event/join/\(eventId)", body: Empty())
     }
+
+    func joinEventByToken(token: String) async throws {
+        let _ : JoinEventResponse = try await apiClient.post(endpoint: "/event/join-by-token/\(token)", body: Empty())
+    }
+
+    func createInviteToken(eventId: String) async throws -> InviteTokenResponse {
+        let response: InviteTokenResponse = try await apiClient.post(endpoint: "/event/\(eventId)/invite-token", body: Empty())
+        return response
+    }
 }

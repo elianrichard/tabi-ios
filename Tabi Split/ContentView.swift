@@ -116,37 +116,80 @@ struct ContentView: View {
     
     
     private func handleIncomingURL(_ url: URL) {
-        guard url.scheme == "tabisplit" else {
-            return
-        }
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             print("Invalid URL")
             return
         }
-        
-        guard let action = components.host, action == "join-event" else {
+
+        // Universal Link: https://tabisplit.my.id/join?token=<signed invite token>.
+        if url.scheme == "https", components.host == "tabisplit.my.id", components.path == "/join" {
+            guard let token = components.queryItems?.first(where: { $0.name == "token" })?.value else {
+                print("invite token not found")
+                return
+            }
+            joinEventByToken(token)
+            return
+        }
+
+        // Custom-scheme links (tabisplit://...). Web pages can trigger these to
+        // launch the installed app directly from Safari, which a Universal Link
+        // can't do from the page it's already showing.
+        guard url.scheme == "tabisplit" else {
+            return
+        }
+        switch components.host {
+        // tabisplit://join?token=<signed invite token> — the "Open in Tabi"
+        // button on the web /join page.
+        case "join":
+            guard let token = components.queryItems?.first(where: { $0.name == "token" })?.value else {
+                print("invite token not found")
+                return
+            }
+            joinEventByToken(token)
+        // Legacy: tabisplit://join-event?event-id=<raw eventId> (QR codes, old links).
+        case "join-event":
+            guard let eventId = components.queryItems?.first(where: { $0.name == "event-id" })?.value else {
+                print("eventId not found")
+                return
+            }
+            joinEventByEventId(eventId)
+        default:
             print("Unknown URL action!")
+        }
+    }
+
+    private func joinEventByToken(_ token: String) {
+        Task {
+            do {
+                try await EventService.shared.joinEventByToken(token: token)
+            } catch {
+                // Swallow here: APIService.notifyError already surfaced the backend
+                // message ("User already joined event" / "Invite link expired or
+                // invalid") in the global error dialog for any non-401 error.
+                print("Join by token failed: \(error)")
+            }
+            // Home is the stack root; clear the path to land there rather than
+            // pushing a duplicate Home screen.
+            router.popToRoot()
+        }
+    }
+
+    private func joinEventByEventId(_ eventId: String) {
+        // Fast local-dedupe path: if the event is already joined, surface the same
+        // dialog the backend would (409) rather than silently returning.
+        if let events = SwiftDataService.shared.fetchAllEvents(),
+           events.contains(where: { $0.eventId == eventId }) {
+            ErrorDialogViewModel.shared.show("User already joined event")
             return
         }
-        
-        guard let eventId = components.queryItems?.first(where: { $0.name == "event-id" })?.value else {
-            print("eventId not found")
-            return
-        }
-        
-        if let events = SwiftDataService.shared.fetchAllEvents(), events.contains(where: { $0.eventId == eventId }) {
-            print("Event already joined")
-            return
-        }
-        
+
         Task {
             do {
                 try await EventService.shared.joinEvent(eventId: eventId)
             } catch {
+                // notifyError already showed the dialog for non-401 errors.
                 print("Join event failed: \(error)")
             }
-            // Home is the stack root; clear the path to land there rather than
-            // pushing a duplicate Home screen.
             router.popToRoot()
         }
     }

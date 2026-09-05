@@ -105,3 +105,8 @@ struct DeleteEventResponse: Codable {
 struct JoinEventResponse: Codable {
     let message: String
 }
+
+struct InviteTokenResponse: Codable {
+    let token: String
+    let expires_at: Int
+}
