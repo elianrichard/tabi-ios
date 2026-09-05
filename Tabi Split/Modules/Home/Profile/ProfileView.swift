@@ -25,10 +25,8 @@ struct ProfileView: View {
                     HStack(alignment: .center, spacing: .spacingTight) {
                         UserCard(user: profileViewModel.user)
                         Spacer()
-                        if !profileViewModel.isGuest {
-                            Icon(systemName: "square.and.pencil", color: .textBlack, size: 16) {
-                                router.push(.editProfile)
-                            }
+                        Icon(systemName: "square.and.pencil", color: .textBlack, size: 16) {
+                            router.push(.editProfile)
                         }
                     }
                 }
@@ -69,24 +67,25 @@ struct ProfileView: View {
                 }
 
                 
+                // Guests get the full profile like a signed-in user, plus an
+                // upgrade prompt: signing in with Google/Apple links a real account
+                // and (Phase 5) merges the guest's data into it.
                 if profileViewModel.isGuest {
-                    VStack (spacing: .spacingLarge) {
+                    VStack (spacing: .spacingMedium) {
                         Image(.initialOnboarding)
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 300)
-                        Text("Let’s register to keep all your events and expenses saved!")
+                            .frame(width: 220)
+                        Text("Sign in to keep your events and expenses safe across devices.")
                             .font(.tabiSubtitle)
                             .multilineTextAlignment(.center)
                         CustomButton(text: "Sign In", type: .tertiary, iconResource: .logout) {
                             router.push(.login)
                         }
                     }
-                    .frame(maxHeight: .infinity)
                 }
-                                
-                if !profileViewModel.isGuest {
-                    VStack(alignment: .leading, spacing: .spacingTight) {
+
+                VStack(alignment: .leading, spacing: .spacingTight) {
                         //                    TEMPORARILY DISABLED: PAYMENT METHOD
                         if (false) {
                             Text("Settings")
@@ -107,31 +106,35 @@ struct ProfileView: View {
                             }
                             Divider()
                         }
-                        Button {
-                            Task {
-                                let isSuccess = await profileViewModel.logout()
+                        // Guests have no way back into their account, so Log Out
+                        // would silently destroy their data. They upgrade via the
+                        // "Sign In" prompt above instead; only real accounts log out.
+                        if !profileViewModel.isGuest {
+                            Button {
+                                Task {
+                                    let isSuccess = await profileViewModel.logout()
 
-                                if isSuccess {
-                                    // Swap the stack root back to LoginView and
-                                    // clear the path so Home is gone and Back
-                                    // cannot return into the authed area.
-                                    SessionState.shared.isAuthenticated = false
-                                    router.popToRoot()
+                                    if isSuccess {
+                                        // Swap the stack root back to LoginView and
+                                        // clear the path so Home is gone and Back
+                                        // cannot return into the authed area.
+                                        SessionState.shared.isAuthenticated = false
+                                        router.popToRoot()
+                                    }
                                 }
+                            } label: {
+                                HStack(spacing: .spacingTight){
+                                    Icon(.logout, color: .buttonRed, size: 20)
+                                    Text("Log Out")
+                                        .font(.tabiHeadline)
+                                        .foregroundStyle(.buttonRed)
+                                    Spacer()
+                                }
+                                .padding(.vertical, .spacingSmall)
+                                .contentShape(Rectangle())
                             }
-                        } label: {
-                            HStack(spacing: .spacingTight){
-                                Icon(.logout, color: .buttonRed, size: 20)
-                                Text("Log Out")
-                                    .font(.tabiHeadline)
-                                    .foregroundStyle(.buttonRed)
-                                Spacer()
-                            }
-                            .padding(.vertical, .spacingSmall)
-                            .contentShape(Rectangle())
                         }
                     }
-                }
             }
         }
         .navigationBarBackButtonHidden(true)

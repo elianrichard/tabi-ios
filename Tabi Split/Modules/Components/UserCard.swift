@@ -25,7 +25,7 @@ struct UserCard : View {
                     Text("\(user.name)")
                         .font(.tabiHeadline)
                         .foregroundStyle(.textBlack)
-                    if isShowOwnerText && !profileViewModel.isGuest {
+                    if isShowOwnerText {
                         Text("(Owner)")
                             .font(.tabiHeadline)
                             .foregroundStyle(.textGrey)
@@ -35,12 +35,12 @@ struct UserCard : View {
                             .foregroundStyle(.textGrey)
                     }
                 }
+                // Empty emails are already skipped, so a guest current user (who has
+                // no email) shows no email row without a special case.
                 if (isShowEmailText && user.email != "") {
-                    if !(profileViewModel.isGuest && profileViewModel.isCurrentUser(user)) {
-                        Text(user.email)
-                            .font(.tabiBody)
-                            .foregroundColor(.textGrey)
-                    }
+                    Text(user.email)
+                        .font(.tabiBody)
+                        .foregroundColor(.textGrey)
                 }
             }
             Spacer()

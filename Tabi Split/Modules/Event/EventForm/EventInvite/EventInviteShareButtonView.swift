@@ -44,7 +44,7 @@ struct EventInviteShareButtonViewComponent : View {
             .overlay {
                 RoundedRectangle(cornerRadius: .radiusMedium)
                     .fill(.clear)
-                    .stroke(.buttonBlue, lineWidth: 0.5)
+                    .stroke(.buttonBlue, lineWidth: 1.5)
                     .padding(0.5)
             }
     }

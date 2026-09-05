@@ -311,14 +311,14 @@ final class EventExpenseViewModel {
         return numbersCount >= alphabetsCount
     }
     @MainActor
-    func finalizeExpense(_ event: EventData, isGuest: Bool) async -> Bool {
+    func finalizeExpense(_ event: EventData) async -> Bool {
         guard let selectedCoverer, let selectedMethod else {
             print("Error")
             return false
         }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-        
+
         do {
             let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
             if (selectedMethod == .equally) {
@@ -330,11 +330,9 @@ final class EventExpenseViewModel {
                 expense.items = items
                 expense.additionalCharges = additionalCharges
             }
-            if !isGuest {
-                let response = try await ExpenseService.shared.createExpense(event: event, expense: expense)
-                expense.expenseId = response.expense_id
-                expense.isSynced = true
-            }
+            let response = try await ExpenseService.shared.createExpense(event: event, expense: expense)
+            expense.expenseId = response.expense_id
+            expense.isSynced = true
             event.expenses.append(expense)
             SwiftDataService.shared.saveModelContext()
         } catch {
@@ -343,17 +341,15 @@ final class EventExpenseViewModel {
         }
         return true
     }
-    
+
     @MainActor
-    func handleDeleteExpense(event: EventData?, isGuest: Bool) async -> Bool {
+    func handleDeleteExpense(event: EventData?) async -> Bool {
         guard let expense = selectedExpense, let event else { return false }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-        
+
         do {
-            if !isGuest {
-                try await ExpenseService.shared.deleteExpense(expense: expense)
-            }
+            try await ExpenseService.shared.deleteExpense(expense: expense)
             event.expenses.removeAll(where: { $0 == expense })
             SwiftDataService.shared.saveModelContext()
         } catch {
@@ -362,9 +358,9 @@ final class EventExpenseViewModel {
         }
         return true
     }
-    
+
     @MainActor
-    func handleUpdateExpense (event: EventData, isGuest: Bool) async -> Bool {
+    func handleUpdateExpense (event: EventData) async -> Bool {
         guard let expense = selectedExpense, let selectedCoverer = selectedCoverer, let selectedMethod = selectedMethod else { return false }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
@@ -383,10 +379,8 @@ final class EventExpenseViewModel {
             expense.items = items
             expense.additionalCharges = additionalCharges
             expense.participants = selectedParticipants
-            
-            if !isGuest {
-                try await ExpenseService.shared.updateExpense(expense: expense)
-            }
+
+            try await ExpenseService.shared.updateExpense(expense: expense)
             SwiftDataService.shared.saveModelContext()
         } catch {
             expense.coverer = originalCoverer

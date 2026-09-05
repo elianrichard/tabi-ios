@@ -57,7 +57,8 @@ class UserData {
     /// Whether this participant is the given signed-in user. Matches on userId
     /// first (the authoritative identity), then falls back to email. Empty
     /// values never match, so unresolved/dummy rows (userId "" and email "")
-    /// and multiple guests (email "Guest") are not collapsed into "you".
+    /// and guest accounts (which have a real userId but no email) are not
+    /// collapsed into "you".
     func isSameUser(as current: CurrentUserDefaults) -> Bool {
         if !userId.isEmpty && !current.userId.isEmpty {
             return userId == current.userId

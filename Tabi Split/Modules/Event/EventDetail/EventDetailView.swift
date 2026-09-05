@@ -29,13 +29,7 @@ struct EventDetailView: View {
                         } label: {
                             Label("Edit Event", systemImage: "pencil")
                         }
-                        if !eventViewModel.isEventCompleted {
-                            Button {
-                                router.present(.eventComplete)
-                            } label: {
-                                Label("Mark as Completed", systemImage: "flag")
-                            }
-                        } else {
+                        if eventViewModel.isEventCompleted {
                             Button {
                                 router.present(.eventIncomplete)
                             } label: {
@@ -82,19 +76,17 @@ struct EventDetailView: View {
                     Spacer(minLength: 60)
                 } else if eventViewModel.selectedSection == .expenses {
                     Spacer(minLength: 80)
+                } else if eventViewModel.selectedSection == .summary && eventViewModel.isUserCreator {
+                    // Clearance for the floating "Complete and See Recap" CTA.
+                    Spacer(minLength: 80)
                 }
             }
             .ignoresSafeArea()
             
             VStack {
-                if eventViewModel.isEventCompleted, let event = eventViewModel.selectedEvent, let date = event.completionDate {
-                    VStack (spacing: .spacingXSmall) {
-                        Text("This event has been completed on")
-                            .font(.tabiHeadline)
-                            .foregroundStyle(.textGrey)
-                        Text("\(Date().customDateFormat("dd MMM YYYY").string(from: date))")
-                            .font(.tabiBody2)
-                            .foregroundStyle(.textGrey)
+                if eventViewModel.isEventCompleted {
+                    CustomButton(text: "See Optimization") {
+                        router.push(.settlementOptimization)
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .expenses) {
@@ -109,6 +101,13 @@ struct EventDetailView: View {
                             eventExpenseViewModel.isQuickScanned = true
                             router.present(.eventQuickScan)
                         }
+                    }
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                } else if (!eventViewModel.isNoParticipants && eventViewModel.selectedSection == .summary && eventViewModel.isUserCreator) {
+                    // Owner-only CTA to complete the event; opens the .eventComplete
+                    // confirmation sheet, which on Complete routes to the recap.
+                    CustomButton(text: "Complete and See Optimization") {
+                        router.present(.eventComplete)
                     }
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 }
@@ -139,7 +138,7 @@ struct EventDetailView: View {
                         Text("Mark this event as completed?")
                             .font(.tabiSubtitle)
                             .multilineTextAlignment(.center)
-                        Text("You can’t add or edit the expenses on this event anymore.")
+                        Text("You'll need to mark the event as 'Incomplete' to add or edit the expenses on this event later on.")
                             .font(.tabiBody)
                             .multilineTextAlignment(.center)
                     }
@@ -151,8 +150,9 @@ struct EventDetailView: View {
                     }
                     CustomButton(text: "Complete") {
                         Task {
-                            if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
+                            if await eventViewModel.completeEvent() {
                                 router.dismissSheet()
+                                router.push(.settlementOptimization)
                             }
                         }
                     }
@@ -189,7 +189,7 @@ struct EventDetailView: View {
                     }
                     CustomButton(text: "Yes") {
                         Task {
-                            if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
+                            if await eventViewModel.incompleteEvent() {
                                 router.dismissSheet()
                             }
                         }
@@ -226,7 +226,7 @@ struct EventDetailView: View {
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
                         Task {
                             router.dismissSheet()
-                            if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
+                            if await eventViewModel.handleDeleteEvent() {
                                 router.pop()
                             }
                         }
@@ -244,7 +244,7 @@ struct EventDetailView: View {
                 .presentationDetents([.height(quickScanSheetHeight)])
         }
         .sheet(isPresented: router.sheetBinding(for: .eventAllParticipants)){
-            SeeAllParticipantSheet(isPresented: router.sheetBinding(for: .eventAllParticipants), participantsList: eventViewModel.selectedEvent?.participants ?? [])
+            SeeAllParticipantSheet(isPresented: router.sheetBinding(for: .eventAllParticipants), participantsList: eventViewModel.selectedEvent?.participants ?? [], showAddParticipantButton: true)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }

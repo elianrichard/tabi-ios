@@ -42,18 +42,24 @@ struct LoginView: View {
                 HStack {
                     if SwiftDataService.shared.getCurrentUser() == nil {
                         Button {
-                            if loginViewModel.guestLogin() {
-                                profileViewModel.user = UserData(name: "Guest", email: "Guest")
-                                sessionState.isAuthenticated = true
-                                router.popToRoot()
+                            Task {
+                                // Guest is now a server-backed account: create the
+                                // session, then adopt the returned identity (real
+                                // userId, kind == guest). Requires connectivity.
+                                if let guestUser = await loginViewModel.guestLogin() {
+                                    profileViewModel.user = guestUser
+                                    sessionState.isAuthenticated = true
+                                    router.popToRoot()
+                                }
                             }
                         } label: {
-                            Text("Enter as Guest")
+                            Text(loginViewModel.isLoading ? "Loading..." : "Enter as Guest")
                                 .font(.tabiBody)
                                 .foregroundStyle(.textGrey)
                                 .padding(14)
                         }
                         .padding(-14)
+                        .disabled(loginViewModel.isLoading)
                     } else {
                         Icon(systemName: "arrow.left", size: 16) {
                             router.pop()
@@ -104,17 +110,25 @@ struct LoginView: View {
         }
     }
 
-    /// Runs a provider sign-in, then the shared post-login flow: wipe local data
-    /// if a different account previously owned this device, run the pending
-    /// migration, and make Home the root.
+    /// Runs a provider sign-in, then the shared post-login flow. The guest→account
+    /// merge happens server-side inside the sign-in request (the guest token is sent
+    /// as merge_from_guest_token), so here we only clear stale local data owned by a
+    /// *different* prior account, refresh from the server, and make Home the root.
     @MainActor
     private func handleSignIn(_ signIn: () async -> Bool) async {
+        // Was this a guest upgrade? Captured before sign-in overwrites the stored
+        // user; a guest merges its data, so its local rows must NOT be wiped.
+        let wasGuest = UserDefaultsService.shared.getCurrentUser()?.kind == "guest"
+        let prevEmail = UserDefaultsService.shared.getCurrentUser()?.userEmail
+
         let ok = await signIn()
         guard ok else { return }
 
         let incomingEmail = loginViewModel.lastSignedInEmail
-        let prev = UserDefaultsService.shared.getCurrentUser()
-        if let prev, prev.userEmail != "Guest", prev.userEmail != incomingEmail {
+        // A different real account previously owned this device: drop its local
+        // cache so it isn't mixed with the incoming account. Guests are exempt —
+        // their data was merged server-side and will rehydrate on refresh.
+        if !wasGuest, let prevEmail, !prevEmail.isEmpty, prevEmail != incomingEmail {
             SwiftDataService.shared.deleteAllEvents()
             SwiftDataService.shared.deleteAllExpenses()
             SwiftDataService.shared.deleteAllUser()
@@ -123,15 +137,9 @@ struct LoginView: View {
 
         sessionState.sessionExpiredBanner = false
         profileViewModel.refreshUserData()
-        let name = profileViewModel.user.name
-        sessionState.migrationRunning = true
-        let migrated = await MigrationCoordinator.shared.runIfNeeded(ownerEmail: incomingEmail, ownerName: name)
-        sessionState.migrationRunning = false
-        if !migrated {
-            sessionState.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
-        }
         // Make Home the root: swap the stack root to HomeView and clear the path
-        // so the auth screens are gone and Back cannot return.
+        // so the auth screens are gone and Back cannot return. HomeView's refresh
+        // pulls the (merged) events from the server.
         sessionState.isAuthenticated = true
         router.popToRoot()
     }

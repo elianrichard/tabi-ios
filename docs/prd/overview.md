@@ -15,16 +15,16 @@ Tabi Split is an iOS bill-splitting app for groups (travel, dinners, shared trip
 The app is **offline-first**: every event/expense is written to local SwiftData immediately with `localId` + `isSynced` flags, then reconciled with the backend. Unauthenticated **Guest mode** lets users build events offline and bulk-uploads them via `/migrate` after sign-in.
 
 - **Bundle id:** `com.sora.Tabi` · **Display name:** Tabi · **Category:** Finance
-- **Target:** iOS 18.0, iPhone-only, portrait, full-screen, status bar hidden
+- **Target:** iOS 18.6, iPhone-only, portrait, full-screen, status bar hidden
 - **Build:** XcodeGen (`project.yml`) — no `.xcodeproj` checked in
 - **SPM:** Lottie (≥4.5.0), JWTDecode (≥3.2.0)
 
 ## 2. Personas & Modes
 
-| Mode | Description | Identifier |
-|------|-------------|------------|
-| Authenticated | Phone + password account, JWT in Keychain, syncs with backend | `UserData.phone != "Guest"` |
-| Guest | No account, fully offline; events stored locally; converts on login via `/migrate` | `UserData.phone == "Guest"` |
+| Mode          | Description                                                                        | Identifier                  |
+| ------------- | ---------------------------------------------------------------------------------- | --------------------------- |
+| Authenticated | Phone + password account, JWT in Keychain, syncs with backend                      | `UserData.phone != "Guest"` |
+| Guest         | No account, fully offline; events stored locally; converts on login via `/migrate` | `UserData.phone == "Guest"` |
 
 Auth probe runs at launch in [`ContentView.checkAuthentication()`](Tabi%20Split/ContentView.swift). Session-expired events broadcast via `Notification.Name.sessionExpired` and the global [`SessionState`](Tabi%20Split/Infrastructure/Session/SessionState.swift).
 
@@ -44,20 +44,20 @@ Auth probe runs at launch in [`ContentView.checkAuthentication()`](Tabi%20Split/
 
 ## 4. Feature Map
 
-| Module | Purpose | Path |
-|--------|---------|------|
-| Onboarding | 4-slide intro carousel; routes to Login or Home | [`Modules/Onboarding`](Tabi%20Split/Modules/Onboarding) |
-| Login | Phone/password auth; guest entry; session-expired banner | [`Modules/Login`](Tabi%20Split/Modules/Login) |
-| Register | Name/phone/password sign-up | [`Modules/Register`](Tabi%20Split/Modules/Register) |
-| Home | Event list, filters (All / You Owe / Owes You / Settled), profile + inbox entry | [`Modules/Home`](Tabi%20Split/Modules/Home) |
-| Event Form | Create/edit event: name, icon, participants | [`Modules/Event/EventForm`](Tabi%20Split/Modules/Event/EventForm) |
-| Event Detail | Event hub: summary, expenses, settlements | [`Modules/Event/EventDetail`](Tabi%20Split/Modules/Event/EventDetail) |
-| Event Expense | Add/edit expense, item-level splits, receipt OCR (Vision) | [`Modules/Event/EventExpense`](Tabi%20Split/Modules/Event/EventExpense) |
-| Event Summary | Per-user balance, history, optimized settlement view | [`Modules/Event/EventDetail/EventSummary`](Tabi%20Split/Modules/Event/EventDetail) |
-| Settlement | Optimized payment paths, payment method, receipt upload | (under Event Detail) |
-| Profile | User profile, edit, payment methods, logout | [`Modules/Home/Profile`](Tabi%20Split/Modules/Home/Profile) |
-| Inbox | Notifications/invitations — UI scaffold, data mocked | [`Modules/Home/Inbox`](Tabi%20Split/Modules/Home/Inbox) |
-| Migration | Bulk-upload guest/offline events on first authenticated launch | [`Modules/Migration/MigrationCoordinator.swift`](Tabi%20Split/Modules/Migration/MigrationCoordinator.swift) |
+| Module        | Purpose                                                                         | Path                                                                                                        |
+| ------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Onboarding    | 4-slide intro carousel; routes to Login or Home                                 | [`Modules/Onboarding`](Tabi%20Split/Modules/Onboarding)                                                     |
+| Login         | Phone/password auth; guest entry; session-expired banner                        | [`Modules/Login`](Tabi%20Split/Modules/Login)                                                               |
+| Register      | Name/phone/password sign-up                                                     | [`Modules/Register`](Tabi%20Split/Modules/Register)                                                         |
+| Home          | Event list, filters (All / You Owe / Owes You / Settled), profile + inbox entry | [`Modules/Home`](Tabi%20Split/Modules/Home)                                                                 |
+| Event Form    | Create/edit event: name, icon, participants                                     | [`Modules/Event/EventForm`](Tabi%20Split/Modules/Event/EventForm)                                           |
+| Event Detail  | Event hub: summary, expenses, settlements                                       | [`Modules/Event/EventDetail`](Tabi%20Split/Modules/Event/EventDetail)                                       |
+| Event Expense | Add/edit expense, item-level splits, receipt OCR (Vision)                       | [`Modules/Event/EventExpense`](Tabi%20Split/Modules/Event/EventExpense)                                     |
+| Event Summary | Per-user balance, history, optimized settlement view                            | [`Modules/Event/EventDetail/EventSummary`](Tabi%20Split/Modules/Event/EventDetail)                          |
+| Settlement    | Optimized payment paths, payment method, receipt upload                         | (under Event Detail)                                                                                        |
+| Profile       | User profile, edit, payment methods, logout                                     | [`Modules/Home/Profile`](Tabi%20Split/Modules/Home/Profile)                                                 |
+| Inbox         | Notifications/invitations — UI scaffold, data mocked                            | [`Modules/Home/Inbox`](Tabi%20Split/Modules/Home/Inbox)                                                     |
+| Migration     | Bulk-upload guest/offline events on first authenticated launch                  | [`Modules/Migration/MigrationCoordinator.swift`](Tabi%20Split/Modules/Migration/MigrationCoordinator.swift) |
 
 Top-level Home view model: [`HomeViewModel`](Tabi%20Split/Modules/Home/HomeViewModel.swift). Shared event view model used across event flows: [`EventViewModel`](Tabi%20Split/Modules/Event/EventViewModel.swift).
 
@@ -96,17 +96,17 @@ Top-level Home view model: [`HomeViewModel`](Tabi%20Split/Modules/Home/HomeViewM
 
 SwiftData `@Model` classes under [`Tabi Split/Infrastructure/Model/`](Tabi%20Split/Infrastructure/Model). Naming caveat: the expense model is **`Expense`** (file [`ExpenseData.swift`](Tabi%20Split/Infrastructure/Model/ExpenseData.swift)).
 
-| Model | Key fields | Relationships |
-|-------|------------|---------------|
-| `EventData` | `eventId?`, `eventName`, `eventIcon`, `completionDate?`, `userEventBalance`, `createdAt`, `creatorId`, `localId`, `isSynced` | `participants: [UserData]`, `expenses: [Expense]` (.nullify) |
-| `UserData` | `userId`, `name`, `phone`, `image`, `imageUrl?` | `events`, `expenses`, `coveredExpenses`, `expenseShare` |
-| `Expense` | `expenseId?`, `name`, `dateOfCreation`, `price`, `splitMethod` (`equally`/`custom`), `localId`, `isSynced` | `event?`, `coverer: UserData`, `participants`, `items: [ExpenseItem]` (.cascade), `additionalCharges: [AdditionalCharge]` (.cascade) |
-| `ExpenseItem` | item name, price, quantity, assignees | (relationship to `Expense`) |
-| `ExpensePerson` | per-person share | (relationship to `Expense` + `UserData`) |
-| `AdditionalCharge` | tax / tip / fee | (relationship to `Expense`) |
-| `SettlementData` | settlement transfer record | see [`SettlementData.swift`](Tabi%20Split/Infrastructure/Model/SettlementData.swift) |
-| `InboxData` | inbox row (mock today) | see [`InboxData.swift`](Tabi%20Split/Infrastructure/Model/InboxData.swift) |
-| `NoteData` | scratch notes | (in container schema) |
+| Model              | Key fields                                                                                                                   | Relationships                                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `EventData`        | `eventId?`, `eventName`, `eventIcon`, `completionDate?`, `userEventBalance`, `createdAt`, `creatorId`, `localId`, `isSynced` | `participants: [UserData]`, `expenses: [Expense]` (.nullify)                                                                         |
+| `UserData`         | `userId`, `name`, `phone`, `image`, `imageUrl?`                                                                              | `events`, `expenses`, `coveredExpenses`, `expenseShare`                                                                              |
+| `Expense`          | `expenseId?`, `name`, `dateOfCreation`, `price`, `splitMethod` (`equally`/`custom`), `localId`, `isSynced`                   | `event?`, `coverer: UserData`, `participants`, `items: [ExpenseItem]` (.cascade), `additionalCharges: [AdditionalCharge]` (.cascade) |
+| `ExpenseItem`      | item name, price, quantity, assignees                                                                                        | (relationship to `Expense`)                                                                                                          |
+| `ExpensePerson`    | per-person share                                                                                                             | (relationship to `Expense` + `UserData`)                                                                                             |
+| `AdditionalCharge` | tax / tip / fee                                                                                                              | (relationship to `Expense`)                                                                                                          |
+| `SettlementData`   | settlement transfer record                                                                                                   | see [`SettlementData.swift`](Tabi%20Split/Infrastructure/Model/SettlementData.swift)                                                 |
+| `InboxData`        | inbox row (mock today)                                                                                                       | see [`InboxData.swift`](Tabi%20Split/Infrastructure/Model/InboxData.swift)                                                           |
+| `NoteData`         | scratch notes                                                                                                                | (in container schema)                                                                                                                |
 
 **Sync invariant:** every event/expense has `localId` (UUID) and `isSynced: Bool`. Server `eventId`/`expenseId` is optional and populated post-sync. The PATH of truth is local DB; backend is reconciled.
 
@@ -116,25 +116,25 @@ SwiftData `@Model` classes under [`Tabi Split/Infrastructure/Model/`](Tabi%20Spl
 **Headers:** `X-Api-Secret: <ENV.API_SECRET_KEY>`, `Authorization: Bearer <token>` (when present), `Content-Type: application/json`.
 **Auth retry:** `401` → `POST /auth/refresh` → retry once → on failure, post `.sessionExpired`.
 
-| Method | Path | Purpose | Service |
-|--------|------|---------|---------|
-| POST | `/auth/register` | Create account | [`AuthService`](Tabi%20Split/Infrastructure/Services/Auth/AuthService.swift) |
-| POST | `/auth/login` | Login, returns access + refresh | [`AuthService`](Tabi%20Split/Infrastructure/Services/Auth/AuthService.swift) |
-| POST | `/auth/refresh` | Refresh access token | [`AuthService`](Tabi%20Split/Infrastructure/Services/Auth/AuthService.swift) |
-| POST | `/event` | Create event | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift) |
-| GET  | `/event` | List user's events (with expenses) | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift) |
-| PATCH | `/event/{id}` | Edit event (name, icon, participants, dummies) | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift) |
-| POST | `/event/complete/{id}` | Mark complete / lock | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift) |
-| DELETE | `/event/{id}` | Delete event | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift) |
-| POST | `/event/join/{id}` | Join event via deep link | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift) |
-| POST | `/expense/{eventId}` | Add expense | [`ExpenseService`](Tabi%20Split/Infrastructure/Services/Expense/ExpenseService.swift) |
-| PATCH | `/expense/{id}` | Update expense | [`ExpenseService`](Tabi%20Split/Infrastructure/Services/Expense/ExpenseService.swift) |
-| DELETE | `/expense/{id}` | Delete expense | [`ExpenseService`](Tabi%20Split/Infrastructure/Services/Expense/ExpenseService.swift) |
-| GET | `/user` | Get current user | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
-| PATCH | `/user` | Update profile | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
-| DELETE | `/user` | Delete account | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
-| POST | `/user/check` | Validate phone numbers (for invites) | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
-| POST | `/migrate` | Bulk-upload guest events | [`MigrateService`](Tabi%20Split/Infrastructure/Services/Migrate/MigrateService.swift) |
+| Method | Path                   | Purpose                                        | Service                                                                               |
+| ------ | ---------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| POST   | `/auth/register`       | Create account                                 | [`AuthService`](Tabi%20Split/Infrastructure/Services/Auth/AuthService.swift)          |
+| POST   | `/auth/login`          | Login, returns access + refresh                | [`AuthService`](Tabi%20Split/Infrastructure/Services/Auth/AuthService.swift)          |
+| POST   | `/auth/refresh`        | Refresh access token                           | [`AuthService`](Tabi%20Split/Infrastructure/Services/Auth/AuthService.swift)          |
+| POST   | `/event`               | Create event                                   | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift)       |
+| GET    | `/event`               | List user's events (with expenses)             | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift)       |
+| PATCH  | `/event/{id}`          | Edit event (name, icon, participants, dummies) | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift)       |
+| POST   | `/event/complete/{id}` | Mark complete / lock                           | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift)       |
+| DELETE | `/event/{id}`          | Delete event                                   | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift)       |
+| POST   | `/event/join/{id}`     | Join event via deep link                       | [`EventService`](Tabi%20Split/Infrastructure/Services/Event/EventService.swift)       |
+| POST   | `/expense/{eventId}`   | Add expense                                    | [`ExpenseService`](Tabi%20Split/Infrastructure/Services/Expense/ExpenseService.swift) |
+| PATCH  | `/expense/{id}`        | Update expense                                 | [`ExpenseService`](Tabi%20Split/Infrastructure/Services/Expense/ExpenseService.swift) |
+| DELETE | `/expense/{id}`        | Delete expense                                 | [`ExpenseService`](Tabi%20Split/Infrastructure/Services/Expense/ExpenseService.swift) |
+| GET    | `/user`                | Get current user                               | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
+| PATCH  | `/user`                | Update profile                                 | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
+| DELETE | `/user`                | Delete account                                 | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
+| POST   | `/user/check`          | Validate phone numbers (for invites)           | [`ProfileService`](Tabi%20Split/Infrastructure/Services/Profile/ProfileService.swift) |
+| POST   | `/migrate`             | Bulk-upload guest events                       | [`MigrateService`](Tabi%20Split/Infrastructure/Services/Migrate/MigrateService.swift) |
 
 Wire format uses `snake_case`. Response decoding lands directly into domain types via custom initializers (e.g. `UserData(userBase:)`); there is **no separate DTO/mapper layer** — keep snake/camel conversions in the schema files next to each service.
 

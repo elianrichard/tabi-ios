@@ -118,11 +118,11 @@ struct EventFormView: View {
                          isEnabled: !eventViewModel.isApiCallLoading && eventViewModel.eventName != "") {
                 Task {
                     if isEdit {
-                        if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
+                        if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts, currentUser: profileViewModel.user) {
                             router.pop()
                         }
                     } else {
-                        if await eventViewModel.handleCreateEvent(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest) {
+                        if await eventViewModel.handleCreateEvent(currentUser: profileViewModel.user) {
                             router.pop()
                         }
                     }

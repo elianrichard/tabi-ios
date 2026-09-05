@@ -58,53 +58,51 @@ final class EventViewModel {
     var isApiCallLoading = false
     
     @MainActor
-    func handleEditEvent (selectedContacts: [UserData], currentUser: UserData, isGuest: Bool) async -> Bool {
+    func handleEditEvent (selectedContacts: [UserData], currentUser: UserData) async -> Bool {
         guard let selectedEvent else { return false }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-        
+
         do {
             var participants: [UserData] = selectedContacts
-            if !isGuest {
-                let checkUsersResponse = try await ProfileService.shared.checkUsers(emails: selectedContacts.map{ $0.email }.filter { !$0.isEmpty })
-                let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
-                    if let image = ProfileImageEnum(rawValue: user.avatar_url) {
-                        UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: image, imageUrl: "" )
-                    } else {
-                        UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: .owl, imageUrl: user.avatar_url )
-                    }
+            let checkUsersResponse = try await ProfileService.shared.checkUsers(emails: selectedContacts.map{ $0.email }.filter { !$0.isEmpty })
+            let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
+                if let image = ProfileImageEnum(rawValue: user.avatar_url) {
+                    UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: image, imageUrl: "" )
+                } else {
+                    UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: .owl, imageUrl: user.avatar_url )
                 }
-
-                let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
-                    return !registeredUsers.contains(where: { user in user.email == contact.email })
-                }
-
-                // A dummy that already has a userId was created on a previous invite.
-                // Keep its anchor (id + image) and send it as a normal participant so
-                // the backend reuses the existing row instead of minting a new dummy
-                // with a fresh random avatar. Only brand-new dummies (empty userId)
-                // are sent via dummy_users (name + client-chosen avatar).
-                let anchoredDummyUsers: [UserData] = unregisteredUsers.filter { !$0.userId.isEmpty }
-                var newDummyUsers: [UserData] = unregisteredUsers.filter { $0.userId.isEmpty }
-
-                let participantsToSend = registeredUsers + anchoredDummyUsers
-                let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: participantsToSend, creatorId: selectedEvent.creatorId), newDummyUsers: newDummyUsers)
-
-                var registeredDummyUsers: [UserData] = []
-                for dummyInfo in response.dummy_user_info {
-                    if let user = newDummyUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
-                        // Anchor the new dummy to the backend's id, and adopt the
-                        // avatar it assigned so the image stays fixed from now on.
-                        user.userId = dummyInfo.dummy_user_id
-                        if let avatar = dummyInfo.avatar_url, let image = ProfileImageEnum(rawValue: avatar) {
-                            user.image = image.id
-                        }
-                        registeredDummyUsers.append(user)
-                        newDummyUsers.remove(user)
-                    }
-                }
-                participants = registeredUsers + anchoredDummyUsers + registeredDummyUsers
             }
+
+            let unregisteredUsers: [UserData] = selectedContacts.filter { contact in
+                return !registeredUsers.contains(where: { user in user.email == contact.email })
+            }
+
+            // A dummy that already has a userId was created on a previous invite.
+            // Keep its anchor (id + image) and send it as a normal participant so
+            // the backend reuses the existing row instead of minting a new dummy
+            // with a fresh random avatar. Only brand-new dummies (empty userId)
+            // are sent via dummy_users (name + client-chosen avatar).
+            let anchoredDummyUsers: [UserData] = unregisteredUsers.filter { !$0.userId.isEmpty }
+            var newDummyUsers: [UserData] = unregisteredUsers.filter { $0.userId.isEmpty }
+
+            let participantsToSend = registeredUsers + anchoredDummyUsers
+            let response = try await EventService.shared.updateEvent(event: EventData(eventId: selectedEvent.eventId, eventName: eventName, eventIcon: eventIcon, participants: participantsToSend, creatorId: selectedEvent.creatorId), newDummyUsers: newDummyUsers)
+
+            var registeredDummyUsers: [UserData] = []
+            for dummyInfo in response.dummy_user_info {
+                if let user = newDummyUsers.first(where: { $0.name == dummyInfo.dummy_name }) {
+                    // Anchor the new dummy to the backend's id, and adopt the
+                    // avatar it assigned so the image stays fixed from now on.
+                    user.userId = dummyInfo.dummy_user_id
+                    if let avatar = dummyInfo.avatar_url, let image = ProfileImageEnum(rawValue: avatar) {
+                        user.image = image.id
+                    }
+                    registeredDummyUsers.append(user)
+                    newDummyUsers.remove(user)
+                }
+            }
+            participants = registeredUsers + anchoredDummyUsers + registeredDummyUsers
             selectedEvent.eventName = eventName
             selectedEvent.eventIcon = eventIcon.id
             selectedEvent.participants = participants
@@ -114,30 +112,23 @@ final class EventViewModel {
             return false
         }
         return true
-        
+
     }
-    
+
     @MainActor
-    func handleCreateEvent (currentUser: UserData, isGuest: Bool) async -> Bool {
+    func handleCreateEvent (currentUser: UserData) async -> Bool {
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-        
+
         do {
-            var eventId: String?
-            if !isGuest {
-                let response = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
-                eventId = response.event_id
-            }
-            // Logged-in path already POSTed to BE; mark synced so /migrate doesn't re-create it.
-            // Guest path stays unsynced and rides the next migration.
-            //
+            let response = try await EventService.shared.createEvent(name: eventName, image: eventIcon.id)
+            let eventId = response.event_id
             // Source creatorId from the same authoritative identity the edit gate
             // reads (UserDefaults JWT userId) rather than currentUser.userId, which
             // can be "" when the SwiftData user row hasn't resolved yet — an empty
             // creatorId would make isUserCreator false and hide the Edit menu.
-            // Guests have no userId; they keep "" and get patched by promoteGuestUserData on login.
-            let creatorId = isGuest ? currentUser.userId : (UserDefaultsService.shared.getCurrentUser()?.userId ?? currentUser.userId)
-            let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: creatorId, isSynced: !isGuest)
+            let creatorId = UserDefaultsService.shared.getCurrentUser()?.userId ?? currentUser.userId
+            let newEvent = EventData(eventId: eventId, eventName: eventName, eventIcon: eventIcon, participants: [currentUser], creatorId: creatorId, isSynced: true)
             SwiftDataService.shared.addEvent(newEvent)
         } catch {
             print("Create event failed: \(error)")
@@ -145,17 +136,15 @@ final class EventViewModel {
         }
         return true
     }
-    
+
     @MainActor
-    func handleDeleteEvent (isGuest: Bool) async -> Bool {
+    func handleDeleteEvent () async -> Bool {
         guard let selectedEvent else { return false }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-        
+
         do {
-            if !isGuest {
-                try await EventService.shared.deleteEvent(event: selectedEvent)
-            }
+            try await EventService.shared.deleteEvent(event: selectedEvent)
             SwiftDataService.shared.deleteEvent(selectedEvent)
         } catch {
             print("Delete event failed: \(error)")
@@ -163,17 +152,15 @@ final class EventViewModel {
         }
         return true
     }
-    
+
     @MainActor
-    func completeEvent(isGuest: Bool) async -> Bool {
+    func completeEvent() async -> Bool {
         guard let selectedEvent else { return false }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-        
+
         do {
-            if !isGuest {
-                try await EventService.shared.completeEvent(event: selectedEvent)
-            }
+            try await EventService.shared.completeEvent(event: selectedEvent)
             SwiftDataService.shared.completeEvent(selectedEvent)
         } catch {
             print("Event completion fail: \(error)")
@@ -181,17 +168,15 @@ final class EventViewModel {
         }
         return true
     }
-    
+
     @MainActor
-    func incompleteEvent(isGuest: Bool) async -> Bool {
+    func incompleteEvent() async -> Bool {
         guard let selectedEvent else { return false }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-        
+
         do {
-            if !isGuest {
-                try await EventService.shared.incompleteEvent(event: selectedEvent)
-            }
+            try await EventService.shared.incompleteEvent(event: selectedEvent)
             SwiftDataService.shared.incompleteEvent(selectedEvent)
         } catch {
             print("Event incomplete fail: \(error)")

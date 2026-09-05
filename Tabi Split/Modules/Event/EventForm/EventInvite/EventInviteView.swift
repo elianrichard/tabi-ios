@@ -19,6 +19,12 @@ struct EventInviteView: View {
     @State private var isLinkCopied = false
     @State private var isShowQrSheet = false
 
+    // Per-share signed invite token (1h TTL). Fetched once when the view appears
+    // and reused by Copy / Share / QR; refetched only if the window lapses while
+    // the view is open. nil until the first fetch resolves.
+    @State private var inviteToken: String?
+    @State private var inviteTokenExpiresAt: Date?
+
     // Email-invite flow: when the typed text is an email, present this payload.
     // Driving the sheet with `.sheet(item:)` (rather than a bool + separate
     // @State) avoids a stale-state race where the sheet body would snapshot the
@@ -26,6 +32,11 @@ struct EventInviteView: View {
     @State private var inviteByEmailPayload: InviteByEmailPayload?
     @State private var inviteNameText = ""
     @FocusState private var focusedField: FocusField?
+
+    // Custom-participant sheet: Name (required) + Email (optional).
+    @State private var isShowCustomParticipantSheet = false
+    @State private var customNameText = ""
+    @State private var customEmailText = ""
 
     // Payload for the invite-by-email sheet. `existingName` is non-nil when the
     // email is already a selected participant, switching the sheet to an info
@@ -36,44 +47,72 @@ struct EventInviteView: View {
         var id: String { email }
     }
 
-    private var deeplinkHost = "tabi-web.vercel.app"
-    
+    private let deeplinkHost = "tabisplit.my.id"
+
+    // The full Universal Link for the current token, or nil until a token is
+    // fetched. All three share actions (Copy / Share / QR) use this one shape.
+    private var inviteURLString: String? {
+        guard let token = inviteToken else { return nil }
+        return "https://\(deeplinkHost)/join?token=\(token)"
+    }
+
+    // Friendly invite blurb, without the URL. Falls back gracefully when the
+    // event has no name yet. Used as the Share sheet's accompanying message —
+    // the URL is supplied separately via ShareLink's `item:`, so the intro must
+    // NOT also contain it or the link shows up twice.
+    private var inviteIntro: String {
+        let eventName = eventViewModel.selectedEvent?.eventName ?? ""
+        return eventName.isEmpty
+            ? "Join my event on Tabi so we can split the bills easily 💸"
+            : "Join “\(eventName)” on Tabi so we can split the bills easily 💸"
+    }
+
+    // Full blurb + link on one line, for Copy Link (which pastes plain text, so
+    // it needs the URL inline).
+    private var inviteMessage: String? {
+        guard let urlString = inviteURLString else { return nil }
+        return "\(inviteIntro)\n\nTap to join: \(urlString)"
+    }
+
     var body: some View {
         VStack (spacing: 0) {
             TopNavigation(title: "Add Participants", additionalBackFunction: {
                 eventInviteViewModel.searchUserText = ""
             })
             VStack(spacing: .spacingMedium){
-                if !profileViewModel.isGuest {
-                    HStack (spacing: .spacingMedium) {
-                        EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
-                                                   icon: isLinkCopied ? .checkIcon : .linkIcon,
-                                                   action: {
-                            if !isLinkCopied {
-                                withAnimation (nil) {
-                                    isLinkCopied = true
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                    withAnimation(nil)  {
-                                        isLinkCopied = false
-                                    }
-                                }
-                                UIPasteboard.general.setValue("https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")", forPasteboardType: UTType.plainText.identifier)
-                            }
-                        })
-                        if let url = URL(string: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")") {
-                            ShareLink(item: url) {
-                                EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                HStack (spacing: .spacingMedium) {
+                    EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
+                                               icon: isLinkCopied ? .checkIcon : .linkIcon,
+                                               action: {
+                        guard let message = inviteMessage, !isLinkCopied else { return }
+                        withAnimation (nil) {
+                            isLinkCopied = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation(nil)  {
+                                isLinkCopied = false
                             }
                         }
-                        EventInviteShareButtonView(text: "QR Code",
-                                                   icon: .qrIcon,
-                                                   action: {
-                            isShowQrSheet = true
-                        })
+                        UIPasteboard.general.setValue(message, forPasteboardType: UTType.plainText.identifier)
+                    })
+                    if let urlString = inviteURLString, let url = URL(string: urlString) {
+                        // Share the URL (so apps render a rich preview) with the
+                        // friendly blurb as the accompanying message. The intro
+                        // must NOT include the URL — ShareLink adds it via `item:`,
+                        // so putting it in the message too shows the link twice.
+                        ShareLink(item: url, message: Text(inviteIntro)) {
+                            EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                        }
+                    } else {
+                        EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                     }
+                    EventInviteShareButtonView(text: "QR Code",
+                                               icon: .qrIcon,
+                                               action: {
+                        isShowQrSheet = true
+                    })
                 }
-                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search / Add New Participants by Name / Email")
+                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search / Add Participant")
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
                         LazyVStack (spacing: 0) {
@@ -130,14 +169,18 @@ struct EventInviteView: View {
                         }
                     }
                     
+                    CustomButton(text: "Add Custom Participant", type: .secondary, icon: "plus") {
+                        customNameText = ""
+                        customEmailText = ""
+                        isShowCustomParticipantSheet = true
+                    }
                     CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Save",
                                  isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContacts.count > 1) {
                         eventInviteViewModel.searchUserText = ""
                         if (eventViewModel.isDirectInvite) {
                             Task {
                                 if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts,
-                                                                        currentUser: profileViewModel.user,
-                                                                        isGuest: profileViewModel.isGuest) {
+                                                                        currentUser: profileViewModel.user) {
                                     router.pop()
                                 }
                             }
@@ -160,6 +203,7 @@ struct EventInviteView: View {
             if let selectedEvent = eventViewModel.selectedEvent {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
+            Task { await fetchInviteTokenIfNeeded() }
         }
         .sheet(isPresented: $isShowQrSheet) {
             CustomSheet (xToggleBinding: $isShowQrSheet) {
@@ -168,7 +212,7 @@ struct EventInviteView: View {
                         .font(.tabiTitle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     VStack (alignment: .center, spacing: .spacingMedium) {
-                        Image(uiImage: generateQRCode(from: "tabisplit://join-event?event-id=\(eventViewModel.selectedEvent?.eventId ?? "")"))
+                        Image(uiImage: generateQRCode(from: inviteURLString ?? ""))
                                 .resizable()
                                 .interpolation(.none)
                                 .scaledToFit()
@@ -229,6 +273,107 @@ struct EventInviteView: View {
             }
             .presentationDetents([.height(payload.existingName == nil ? 280 : 240)])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowCustomParticipantSheet) {
+            CustomSheet(xToggleBinding: $isShowCustomParticipantSheet) {
+                VStack(alignment: .leading, spacing: .spacingMedium) {
+                    Text("Add Custom Participant")
+                        .font(.tabiTitle)
+                    VStack(alignment: .leading, spacing: .spacingRegular) {
+                        InputWithLabel(
+                            label: "Name",
+                            placeholder: "Participant's Name",
+                            text: $customNameText,
+                            focusedField: $focusedField,
+                            focusCase: .field1)
+                        InputWithLabel(
+                            label: "Email",
+                            isOptional: true,
+                            placeholder: "Participant's Email",
+                            text: $customEmailText,
+                            errorMessage: customEmailErrorMessage,
+                            focusedField: $focusedField,
+                            focusCase: .field2)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                CustomButton(text: "Add Participant",
+                             isEnabled: isCustomParticipantValid) {
+                    addCustomParticipant()
+                }
+            }
+            .presentationDetents([.height(customEmailErrorMessage == nil ? 360 : 390)])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    // When the typed email is a valid address already held by a selected
+    // participant (or the current user), returns that participant's name so the
+    // sheet can show an "already added" message and block the add — mirroring the
+    // inline invite-by-email flow.
+    private var customEmailExistingName: String? {
+        let email = customEmailText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !email.isEmpty, email.isValidEmail else { return nil }
+        if profileViewModel.user.email.lowercased() == email {
+            return profileViewModel.user.name
+        }
+        return eventInviteViewModel.selectedUser(withEmail: email)?.name
+    }
+
+    // Inline error under the Email field: bad format, or already-added.
+    private var customEmailErrorMessage: String? {
+        let email = customEmailText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !email.isEmpty && !email.isValidEmail {
+            return "Please enter a valid email."
+        }
+        if let existingName = customEmailExistingName {
+            return "This email is already added as \(existingName) in the list."
+        }
+        return nil
+    }
+
+    // Name is required; email is optional but, when provided, must be valid and
+    // not already added.
+    private var isCustomParticipantValid: Bool {
+        let name = customNameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return false }
+        return customEmailErrorMessage == nil
+    }
+
+    private func addCustomParticipant() {
+        let name = customNameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let email = customEmailText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if email.isEmpty {
+            // Name-only: add as a dummy participant, mirroring the inline
+            // "Add ... as a participant" button.
+            let newUser = UserData(name: name, email: "")
+            eventInviteViewModel.allContacts.append(newUser)
+            eventInviteViewModel.selectedContacts.append(newUser)
+        } else {
+            // Name + email: reuse the invite-by-email path (dedups by email).
+            eventInviteViewModel.addInvitedUser(name: name, email: email)
+        }
+        eventInviteViewModel.searchUserText = ""
+        focusedField = nil
+        isShowCustomParticipantSheet = false
+    }
+
+    // Fetch a fresh invite token unless a still-valid one is already cached. A
+    // 60s guard band avoids handing out a token that expires mid-share. Errors
+    // surface via the global dialog (APIService.notifyError); the buttons stay
+    // disabled while inviteToken is nil.
+    private func fetchInviteTokenIfNeeded() async {
+        if let expiresAt = inviteTokenExpiresAt, inviteToken != nil,
+           expiresAt.timeIntervalSinceNow > 60 {
+            return
+        }
+        guard let eventId = eventViewModel.selectedEvent?.eventId else { return }
+        do {
+            let response = try await EventService.shared.createInviteToken(eventId: eventId)
+            inviteToken = response.token
+            inviteTokenExpiresAt = Date(timeIntervalSince1970: TimeInterval(response.expires_at))
+        } catch {
+            print("Fetch invite token failed: \(error)")
         }
     }
 

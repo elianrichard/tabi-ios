@@ -17,7 +17,11 @@ struct SeeAllParticipantSheet: View {
     @Binding var isPresented: Bool
     @State var nameToBeSearched: String = ""
     var participantsList: [UserData] = []
-    
+    // Controls whether the pinned "Add / Edit Participant" button is shown.
+    // Off by default so callers that only display the list (e.g. EventFormView)
+    // are unaffected; EventDetailView opts in.
+    var showAddParticipantButton: Bool = false
+
     var body: some View {
         CustomSheet (xToggleBinding: $isPresented) {
             VStack(spacing: .spacingMedium) {
@@ -44,6 +48,17 @@ struct SeeAllParticipantSheet: View {
                                              } : nil)
                                 }
                         }
+                    }
+                }
+                // Pinned outside the ScrollView so it stays at the bottom of the sheet.
+                // Only the event creator can add/edit participants.
+                if showAddParticipantButton && eventViewModel.isUserCreator {
+                    CustomButton(text: "Add / Edit Participant") {
+                        isPresented = false
+                        // Direct invite so EventInviteView persists changes on Save,
+                        // and its back button returns to the presenting EventDetailView.
+                        eventViewModel.isDirectInvite = true
+                        router.push(.eventInvite)
                     }
                 }
             }

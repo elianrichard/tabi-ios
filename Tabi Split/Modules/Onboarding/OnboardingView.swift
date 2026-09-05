@@ -129,7 +129,7 @@ struct OnboardingView: View {
                         if let pos = scrollPosition {
                             if pos == 3 {
                                 router.push(.login)
-                            }else{
+                            } else {
                                 scrollPosition = pos + 1
                             }
                         } else {
@@ -145,11 +145,11 @@ struct OnboardingView: View {
                     }
                 }
                 .zIndex(10)
-                if scrollPosition == 3 {
-                    CustomButton(text: "Sign Up", type: .secondary) {
-                        router.push(.register)
-                    }
-                }
+//                if scrollPosition == 3 {
+//                    CustomButton(text: "Sign Up", type: .secondary) {
+//                        router.push(.register)
+//                    }
+//                }
             }
             .frame(height: 123, alignment: .bottom)
             .padding(.horizontal)

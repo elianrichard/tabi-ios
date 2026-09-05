@@ -74,23 +74,15 @@ struct RegisterView: View {
         }
     }
 
-    /// Shared post-sign-in flow, mirroring LoginView: run any pending migration
-    /// and make Home the root.
+    /// Shared post-sign-in flow, mirroring LoginView. Guest→account merge happens
+    /// server-side inside the sign-in request, so this just refreshes and roots Home.
     @MainActor
     private func handleSignIn(_ signIn: () async -> Bool) async {
         let ok = await signIn()
         guard ok else { return }
 
-        let incomingEmail = registerViewModel.lastSignedInEmail
         sessionState.sessionExpiredBanner = false
         profileViewModel.refreshUserData()
-        let name = profileViewModel.user.name
-        sessionState.migrationRunning = true
-        let migrated = await MigrationCoordinator.shared.runIfNeeded(ownerEmail: incomingEmail, ownerName: name)
-        sessionState.migrationRunning = false
-        if !migrated {
-            sessionState.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
-        }
         sessionState.isAuthenticated = true
         router.popToRoot()
     }

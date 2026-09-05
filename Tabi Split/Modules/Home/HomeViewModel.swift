@@ -90,8 +90,8 @@ final class HomeViewModel {
     }
     
     @MainActor
-    func refreshEventData (currentUser: UserData, isGuest: Bool, isShowLoading: Binding<Bool>) async -> Bool {
-        if (!isGuest && !isLoading) {
+    func refreshEventData (currentUser: UserData, isShowLoading: Binding<Bool>) async -> Bool {
+        if (!isLoading) {
             do {
                 isLoading = true
                 isShowLoading.wrappedValue = true

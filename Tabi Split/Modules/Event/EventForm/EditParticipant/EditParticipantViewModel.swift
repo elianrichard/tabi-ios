@@ -31,23 +31,21 @@ final class EditParticipantViewModel {
         chosenImage = ProfileImageEnum(rawValue: participant.image) ?? .owl
     }
 
-    // Removes the participant from the event. Guests are local-only; signed-in users
-    // call the backend, which rejects removal if the participant is tied to any
-    // expense item (surfaced as an error dialog). On success the participant is
-    // detached from the event's local participant list. Returns false on failure.
+    // Removes the participant from the event via the backend, which rejects
+    // removal if the participant is tied to any expense item (surfaced as an
+    // error dialog). On success the participant is detached from the event's
+    // local participant list. Returns false on failure.
     @MainActor
-    func remove(participant: UserData, event: EventData?, isGuest: Bool) async -> Bool {
+    func remove(participant: UserData, event: EventData?) async -> Bool {
         isApiCallLoading = true
         defer { isApiCallLoading = false }
 
-        if !isGuest {
-            guard let eventId = event?.eventId else { return false }
-            do {
-                _ = try await EventService.shared.removeParticipant(eventId: eventId, participantId: participant.userId)
-            } catch {
-                print("Remove participant failed: \(error)")
-                return false
-            }
+        guard let eventId = event?.eventId else { return false }
+        do {
+            _ = try await EventService.shared.removeParticipant(eventId: eventId, participantId: participant.userId)
+        } catch {
+            print("Remove participant failed: \(error)")
+            return false
         }
 
         event?.participants.removeAll { $0 === participant }
@@ -55,30 +53,18 @@ final class EditParticipantViewModel {
         return true
     }
 
-    // Saves the edit. For guests the event is local-only, so it just updates the
-    // SwiftData row. For signed-in users it calls the backend, which validates the
-    // email (must be an existing registered account not already in the event) and
-    // may swap the dummy for that account; the returned participant is then applied
-    // locally. Returns false on failure (the error dialog is shown by APIService).
+    // Saves the edit via the backend, which validates the email (must be an
+    // existing registered account not already in the event) and may swap the
+    // dummy for that account; the returned participant is then applied locally.
+    // Returns false on failure (the error dialog is shown by APIService).
     @MainActor
-    func save(participant: UserData, event: EventData?, isGuest: Bool) async -> Bool {
+    func save(participant: UserData, event: EventData?) async -> Bool {
         let trimmedName = nameText.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedEmail = emailText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !trimmedName.isEmpty else { return false }
 
         isApiCallLoading = true
         defer { isApiCallLoading = false }
-
-        // Guest events live only on-device; update the participant row directly.
-        if isGuest {
-            participant.name = trimmedName
-            participant.image = chosenImage.id
-            if !trimmedEmail.isEmpty {
-                participant.email = trimmedEmail
-            }
-            SwiftDataService.shared.saveModelContext()
-            return true
-        }
 
         guard let eventId = event?.eventId else { return false }
 

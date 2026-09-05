@@ -31,7 +31,7 @@ struct ExpenseResultView: View {
                         }
                         Button (role: .destructive) {
                             Task {
-                                if await eventExpenseViewModel.handleDeleteExpense(event: eventViewModel.selectedEvent, isGuest: profileViewModel.isGuest){
+                                if await eventExpenseViewModel.handleDeleteExpense(event: eventViewModel.selectedEvent){
                                     router.pop()
                                 }
                             }
@@ -117,13 +117,13 @@ struct ExpenseResultView: View {
                 CustomButton(text: "Save Expense") {
                     Task {
                         if eventExpenseViewModel.isEdit {
-                            if await eventExpenseViewModel.handleUpdateExpense(event: event, isGuest: profileViewModel.isGuest) {
+                            if await eventExpenseViewModel.handleUpdateExpense(event: event) {
                                 eventExpenseViewModel.isEdit = false
                                 router.popToRoot()
                                 router.push(.eventDetail)
                             }
                         } else {
-                            if await eventExpenseViewModel.finalizeExpense(event, isGuest: profileViewModel.isGuest) {
+                            if await eventExpenseViewModel.finalizeExpense(event) {
                                 router.popToRoot()
                                 router.push(.eventDetail)
                                 return

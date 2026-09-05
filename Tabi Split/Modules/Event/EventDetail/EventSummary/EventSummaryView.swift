@@ -14,11 +14,6 @@ struct EventSummaryView: View {
     var body: some View {
         ScrollView (showsIndicators: false) {
             VStack (spacing: .spacingRegular) {
-                if (!eventViewModel.isEventCompleted) {
-                    DialogBox(image: .dialogIcon, iconSize: 36,
-                              text: "You can only settle after you set the event to complete",
-                              backgroundColor: .bgBlueElevated)
-                }
                 VStack {
                     if (eventViewModel.userBalance.status != .settled) {
                         if (eventViewModel.isEventCompleted) {
