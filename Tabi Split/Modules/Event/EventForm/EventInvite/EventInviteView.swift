@@ -27,6 +27,11 @@ struct EventInviteView: View {
     @State private var inviteNameText = ""
     @FocusState private var focusedField: FocusField?
 
+    // Custom-participant sheet: Name (required) + Email (optional).
+    @State private var isShowCustomParticipantSheet = false
+    @State private var customNameText = ""
+    @State private var customEmailText = ""
+
     // Payload for the invite-by-email sheet. `existingName` is non-nil when the
     // email is already a selected participant, switching the sheet to an info
     // message instead of the add form.
@@ -71,7 +76,7 @@ struct EventInviteView: View {
                         isShowQrSheet = true
                     })
                 }
-                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search / Add New Participants by Name / Email")
+                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search")
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
                         LazyVStack (spacing: 0) {
@@ -128,6 +133,11 @@ struct EventInviteView: View {
                         }
                     }
                     
+                    CustomButton(text: "Add Custom Participant", type: .secondary, icon: "plus") {
+                        customNameText = ""
+                        customEmailText = ""
+                        isShowCustomParticipantSheet = true
+                    }
                     CustomButton(text: eventInviteViewModel.isLoadContactLoading ? "Loading Contacts..." : "Save",
                                  isEnabled: !eventInviteViewModel.isLoadContactLoading && eventInviteViewModel.selectedContacts.count > 1) {
                         eventInviteViewModel.searchUserText = ""
@@ -227,6 +237,88 @@ struct EventInviteView: View {
             .presentationDetents([.height(payload.existingName == nil ? 280 : 240)])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $isShowCustomParticipantSheet) {
+            CustomSheet(xToggleBinding: $isShowCustomParticipantSheet) {
+                VStack(alignment: .leading, spacing: .spacingMedium) {
+                    Text("Add Custom Participant")
+                        .font(.tabiTitle)
+                    VStack(alignment: .leading, spacing: .spacingRegular) {
+                        InputWithLabel(
+                            label: "Name",
+                            placeholder: "Participant's Name",
+                            text: $customNameText,
+                            focusedField: $focusedField,
+                            focusCase: .field1)
+                        InputWithLabel(
+                            label: "Email",
+                            isOptional: true,
+                            placeholder: "Participant's Email",
+                            text: $customEmailText,
+                            errorMessage: customEmailErrorMessage,
+                            focusedField: $focusedField,
+                            focusCase: .field2)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                CustomButton(text: "Add Participant",
+                             isEnabled: isCustomParticipantValid) {
+                    addCustomParticipant()
+                }
+            }
+            .presentationDetents([.height(customEmailErrorMessage == nil ? 360 : 390)])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    // When the typed email is a valid address already held by a selected
+    // participant (or the current user), returns that participant's name so the
+    // sheet can show an "already added" message and block the add — mirroring the
+    // inline invite-by-email flow.
+    private var customEmailExistingName: String? {
+        let email = customEmailText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !email.isEmpty, email.isValidEmail else { return nil }
+        if profileViewModel.user.email.lowercased() == email {
+            return profileViewModel.user.name
+        }
+        return eventInviteViewModel.selectedUser(withEmail: email)?.name
+    }
+
+    // Inline error under the Email field: bad format, or already-added.
+    private var customEmailErrorMessage: String? {
+        let email = customEmailText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !email.isEmpty && !email.isValidEmail {
+            return "Please enter a valid email."
+        }
+        if let existingName = customEmailExistingName {
+            return "This email is already added as \(existingName) in the list."
+        }
+        return nil
+    }
+
+    // Name is required; email is optional but, when provided, must be valid and
+    // not already added.
+    private var isCustomParticipantValid: Bool {
+        let name = customNameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return false }
+        return customEmailErrorMessage == nil
+    }
+
+    private func addCustomParticipant() {
+        let name = customNameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let email = customEmailText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if email.isEmpty {
+            // Name-only: add as a dummy participant, mirroring the inline
+            // "Add ... as a participant" button.
+            let newUser = UserData(name: name, email: "")
+            eventInviteViewModel.allContacts.append(newUser)
+            eventInviteViewModel.selectedContacts.append(newUser)
+        } else {
+            // Name + email: reuse the invite-by-email path (dedups by email).
+            eventInviteViewModel.addInvitedUser(name: name, email: email)
+        }
+        eventInviteViewModel.searchUserText = ""
+        focusedField = nil
+        isShowCustomParticipantSheet = false
     }
 
     private func generateQRCode(from string: String) -> UIImage {
