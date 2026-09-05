@@ -73,7 +73,7 @@ struct EventInviteView: View {
         guard let urlString = inviteURLString else { return nil }
         return "\(inviteIntro)\n\nTap to join: \(urlString)"
     }
-    
+
     var body: some View {
         VStack (spacing: 0) {
             TopNavigation(title: "Add Participants", additionalBackFunction: {
@@ -112,7 +112,7 @@ struct EventInviteView: View {
                         isShowQrSheet = true
                     })
                 }
-                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search")
+                SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search / Add Participant")
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
                         LazyVStack (spacing: 0) {
