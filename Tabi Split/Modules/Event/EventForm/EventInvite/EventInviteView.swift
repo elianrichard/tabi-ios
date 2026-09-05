@@ -89,11 +89,16 @@ struct EventInviteView: View {
                         }
                         UIPasteboard.general.setValue(message, forPasteboardType: UTType.plainText.identifier)
                     })
-                    if let urlString = inviteURLString, let url = URL(string: urlString),
-                       let message = inviteMessage {
-                        // Share the URL (so apps render a rich preview) with the
-                        // friendly blurb as the accompanying message.
-                        ShareLink(item: url, message: Text(message)) {
+                    if let message = inviteMessage {
+                        // Share a single plain-text String (the blurb already
+                        // contains the link). A plain String is the most widely
+                        // accepted activity item, so the share sheet offers every
+                        // messaging/social app (Messages, WhatsApp, Telegram,
+                        // Discord, …). Passing a URL + a separate `message:` Text
+                        // instead narrows the sheet to a few targets (Reminders/
+                        // Notes) because the mixed payload isn't accepted by most
+                        // apps. Messaging apps auto-unfurl the link from the text.
+                        ShareLink(item: message) {
                             EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                         }
                     } else {
