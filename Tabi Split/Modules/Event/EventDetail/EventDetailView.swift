@@ -151,7 +151,7 @@ struct EventDetailView: View {
                     }
                     CustomButton(text: "Complete") {
                         Task {
-                            if await eventViewModel.completeEvent(isGuest: profileViewModel.isGuest) {
+                            if await eventViewModel.completeEvent() {
                                 router.dismissSheet()
                             }
                         }
@@ -189,7 +189,7 @@ struct EventDetailView: View {
                     }
                     CustomButton(text: "Yes") {
                         Task {
-                            if await eventViewModel.incompleteEvent(isGuest: profileViewModel.isGuest) {
+                            if await eventViewModel.incompleteEvent() {
                                 router.dismissSheet()
                             }
                         }
@@ -226,7 +226,7 @@ struct EventDetailView: View {
                     CustomButton(text: "Delete", customBackgroundColor: .buttonRed) {
                         Task {
                             router.dismissSheet()
-                            if await eventViewModel.handleDeleteEvent(isGuest: profileViewModel.isGuest) {
+                            if await eventViewModel.handleDeleteEvent() {
                                 router.pop()
                             }
                         }

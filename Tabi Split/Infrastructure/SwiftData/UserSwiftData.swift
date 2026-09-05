@@ -42,7 +42,12 @@ extension SwiftDataService {
     
     func saveCurrentUser (user: CurrentUserDefaults) {
         if let users = getAllUsers() {
-            if !users.contains(where: { $0.email == user.userEmail }) {
+            // Match the existing row by userId when present (authoritative — every
+            // server-backed account, guests included, has a real userId), so a
+            // guest with an empty email is not deduped against other empty-email
+            // rows. Fall back to email only for legacy rows lacking a userId.
+            let exists = users.contains(where: { isSameCurrentUser($0, user) })
+            if !exists {
                 if let image = ProfileImageEnum(rawValue: user.userImage) {
                     modelContext.insert(UserData(userId: user.userId, name: user.userName, email: user.userEmail, image: image, imageUrl: nil))
                 } else {
@@ -56,9 +61,19 @@ extension SwiftDataService {
     func getCurrentUser () -> UserData? {
         if let users = getAllUsers(),
            let currentUser = UserDefaultsService.shared.getCurrentUser(),
-           let user = users.first(where: { $0.email == currentUser.userEmail }) {
+           let user = users.first(where: { isSameCurrentUser($0, currentUser) }) {
             return user
         } else { return nil }
+    }
+
+    /// Whether a stored UserData row is the current user: by userId when both are
+    /// non-empty (authoritative), else by email. Prevents empty-email guest rows
+    /// from colliding with other empty-email rows.
+    private func isSameCurrentUser(_ row: UserData, _ current: CurrentUserDefaults) -> Bool {
+        if !row.userId.isEmpty && !current.userId.isEmpty {
+            return row.userId == current.userId
+        }
+        return !current.userEmail.isEmpty && row.email == current.userEmail
     }
     
     func getUserByUserId (_ id: String) -> UserData? {
@@ -85,36 +100,6 @@ extension SwiftDataService {
         deleteModelContext(type: UserData.self)
     }
 
-    /// Convert pre-login Guest rows (UserData email == "Guest", events.creatorId == "") into the
-    /// authed user. Called from LoginViewModel right after a successful login, before
-    /// saveCurrentUser inserts a fresh row.
-    func promoteGuestUserData(to user: CurrentUserDefaults) {
-        guard let users = getAllUsers() else { return }
-
-        // Promote the Guest UserData (if any) so subsequent saveCurrentUser is a no-op.
-        if let guestUser = users.first(where: { $0.email == "Guest" }) {
-            guestUser.userId = user.userId
-            guestUser.name = user.userName
-            guestUser.email = user.userEmail
-            if let image = ProfileImageEnum(rawValue: user.userImage) {
-                guestUser.image = image.id
-                guestUser.imageUrl = nil
-            } else {
-                guestUser.image = ProfileImageEnum.owl.id
-                guestUser.imageUrl = user.userImage
-            }
-        }
-
-        // Patch creatorId on any Guest-era events (creatorId was "") so isUserCreator works.
-        if let events = fetchAllEvents() {
-            for event in events where event.creatorId.isEmpty {
-                event.creatorId = user.userId
-            }
-        }
-
-        saveModelContext()
-    }
-    
     func addContact (name: String, email: String) {
         if let users = getAllUsers(excludeLoggedUser: true) {
             if !users.contains(where: { $0.email == email }) {

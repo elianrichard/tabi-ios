@@ -13,8 +13,6 @@ final class SessionState {
     static let shared = SessionState()
 
     var sessionExpiredBanner: Bool = false
-    var migrationRunning: Bool = false
-    var lastMigrationError: String?
 
     /// Drives ContentView's root view. Setting this true (after login/register)
     /// swaps the NavigationStack root to HomeView, so the auth screens are no

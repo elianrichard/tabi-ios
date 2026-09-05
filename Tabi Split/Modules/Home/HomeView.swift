@@ -93,10 +93,8 @@ struct HomeView: View {
     private func refreshData(isShowLoading: Bool) async {
         profileViewModel.refreshUserData()
         let loadingBinding = isShowLoading ? Bindable(loadingViewModel).isLoading : .constant(false)
-        if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isGuest: profileViewModel.isGuest, isShowLoading: loadingBinding) {
-            if !profileViewModel.isGuest {
-                SwiftDataService.shared.deleteUsersWithNoId()
-            }
+        if await homeViewModel.refreshEventData(currentUser: profileViewModel.user, isShowLoading: loadingBinding) {
+            SwiftDataService.shared.deleteUsersWithNoId()
         }
     }
 }

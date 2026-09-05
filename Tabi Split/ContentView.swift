@@ -83,13 +83,9 @@ struct ContentView: View {
         }
 
         let hasLocalUser = SwiftDataService.shared.getCurrentUser() != nil
-        let isGuest = SwiftDataService.shared.getCurrentUser()?.email == "Guest"
 
-        if isGuest {
-            sessionState.isAuthenticated = true
-            return
-        }
-
+        // Guests are now server-backed accounts with a real token, so they take the
+        // same token + probeSession path as any signed-in user — no guest bypass.
         if !hasToken && !hasLocalUser {
             sessionState.isAuthenticated = false
             return
@@ -104,23 +100,9 @@ struct ContentView: View {
         do {
             let _ = try await ProfileService.shared.probeSession()
             sessionState.isAuthenticated = true
-            await runMigrationIfNeeded()
         } catch {
             sessionState.isAuthenticated = false
             SessionState.shared.sessionExpiredBanner = true
-        }
-    }
-
-    private func runMigrationIfNeeded() async {
-        guard MigrationCoordinator.shared.hasUnsynced else { return }
-        guard let cur = UserDefaultsService.shared.getCurrentUser(),
-              !cur.userEmail.isEmpty,
-              cur.userEmail != "Guest" else { return }
-        SessionState.shared.migrationRunning = true
-        let ok = await MigrationCoordinator.shared.runIfNeeded(ownerEmail: cur.userEmail, ownerName: cur.userName)
-        SessionState.shared.migrationRunning = false
-        if !ok {
-            SessionState.shared.lastMigrationError = MigrationCoordinator.shared.lastError?.localizedDescription
         }
     }
 
@@ -158,12 +140,10 @@ struct ContentView: View {
         }
         
         Task {
-            if !profileViewModel.isGuest {
-                do {
-                    try await EventService.shared.joinEvent(eventId: eventId)
-                } catch {
-                    print("Join event failed: \(error)")
-                }
+            do {
+                try await EventService.shared.joinEvent(eventId: eventId)
+            } catch {
+                print("Join event failed: \(error)")
             }
             // Home is the stack root; clear the path to land there rather than
             // pushing a duplicate Home screen.

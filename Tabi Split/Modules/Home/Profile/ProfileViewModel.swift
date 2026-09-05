@@ -14,24 +14,25 @@ final class ProfileViewModel{
 
     var isApiCallLoading: Bool = false
     
+    // A guest is a server-backed credential-less account (kind == "guest" from the
+    // backend, carried on the stored current user). It runs every authed endpoint
+    // like a real account; the only differences are UI affordances, so most call
+    // sites no longer branch on this.
     var isGuest: Bool {
-        return user.email == "Guest"
+        return UserDefaultsService.shared.getCurrentUser()?.kind == "guest"
     }
-    
+
     @MainActor
     func logout() async -> Bool {
         do {
-            if !isGuest {
-                isApiCallLoading = true
-                try await AuthenticationService.shared.logout()
-            }
+            isApiCallLoading = true
+            try await AuthenticationService.shared.logout()
             SwiftDataService.shared.deleteAllEvents()
             SwiftDataService.shared.deleteAllExpenses()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
             try? KeychainService.shared.clearTokens()
             SessionState.shared.sessionExpiredBanner = false
-            SessionState.shared.lastMigrationError = nil
             user = UserData(name: "unknown", email: "unknown")
         } catch {
             print("Logout failed: \(error)")
@@ -55,10 +56,11 @@ final class ProfileViewModel{
             // Preserve the real userId (JWT subject) — it identifies the account and
             // gates event-edit ownership; a placeholder here would break isUserCreator.
             let existingUserId = UserDefaultsService.shared.getCurrentUser()?.userId ?? user.userId
-            let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userEmail: user.email, userImage: chosenImage.rawValue, userId: existingUserId)
-            if !isGuest {
-                let _ = try await ProfileService.shared.editProfile(user: updatedUser)
-            }
+            // Preserve the account kind (real/guest) so the stored current user
+            // keeps its guest marker across a profile edit.
+            let existingKind = UserDefaultsService.shared.getCurrentUser()?.kind ?? "real"
+            let updatedUser = CurrentUserDefaults(userName: editProfileViewModel.nameText, userEmail: user.email, userImage: chosenImage.rawValue, userId: existingUserId, kind: existingKind)
+            let _ = try await ProfileService.shared.editProfile(user: updatedUser)
             UserDefaultsService.shared.saveCurrentUser(user: updatedUser)
             user.name = editProfileViewModel.nameText
             if let image = editProfileViewModel.chosenImage {
@@ -79,7 +81,6 @@ final class ProfileViewModel{
         if let currentUser = SwiftDataService.shared.getCurrentUser() {
             user = currentUser
         }
-        if isGuest { return }
         Task {
             do {
                 isApiCallLoading = true
@@ -95,18 +96,15 @@ final class ProfileViewModel{
     @MainActor
     func deleteUser () async -> Bool {
         do {
-            if !isGuest {
-                isApiCallLoading = true
-                try await ProfileService.shared.deleteUser()
-                try await AuthenticationService.shared.logout()
-            }
+            isApiCallLoading = true
+            try await ProfileService.shared.deleteUser()
+            try await AuthenticationService.shared.logout()
             SwiftDataService.shared.deleteAllEvents()
             SwiftDataService.shared.deleteAllExpenses()
             SwiftDataService.shared.deleteAllUser()
             UserDefaultsService.shared.deleteCurrentUser()
             try? KeychainService.shared.clearTokens()
             SessionState.shared.sessionExpiredBanner = false
-            SessionState.shared.lastMigrationError = nil
             user = UserData(name: "unknown", email: "unknown")
         } catch {
             print("User delete failed: \(error)")
@@ -121,7 +119,8 @@ final class ProfileViewModel{
         if userData == user { return true }
         // Match on userId first (authoritative); fall back to email. Empty values
         // never match, so an unresolved/placeholder current user ("unknown") or a
-        // guest ("Guest") does not mis-identify empty-identity rows as "you".
+        // guest (real userId, no email) does not mis-identify empty-identity rows
+        // as "you".
         if !userData.userId.isEmpty && !user.userId.isEmpty {
             return userData.userId == user.userId
         }

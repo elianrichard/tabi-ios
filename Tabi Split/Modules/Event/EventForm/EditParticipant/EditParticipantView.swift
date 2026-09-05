@@ -90,8 +90,7 @@ struct EditParticipantView: View {
                 guard let participant = eventInviteViewModel.editingParticipant else { return }
                 Task {
                     if await editParticipantViewModel.save(participant: participant,
-                                                           event: eventViewModel.selectedEvent,
-                                                           isGuest: profileViewModel.isGuest) {
+                                                           event: eventViewModel.selectedEvent) {
                         router.pop()
                     }
                 }
@@ -141,8 +140,7 @@ struct EditParticipantView: View {
                         isShowDeleteSheet = false
                         Task {
                             if await editParticipantViewModel.remove(participant: participant,
-                                                                     event: eventViewModel.selectedEvent,
-                                                                     isGuest: profileViewModel.isGuest) {
+                                                                     event: eventViewModel.selectedEvent) {
                                 eventInviteViewModel.selectedContacts.removeAll { $0 === participant }
                                 router.pop()
                             }

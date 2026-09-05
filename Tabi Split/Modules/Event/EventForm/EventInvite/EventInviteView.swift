@@ -44,34 +44,32 @@ struct EventInviteView: View {
                 eventInviteViewModel.searchUserText = ""
             })
             VStack(spacing: .spacingMedium){
-                if !profileViewModel.isGuest {
-                    HStack (spacing: .spacingMedium) {
-                        EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
-                                                   icon: isLinkCopied ? .checkIcon : .linkIcon,
-                                                   action: {
-                            if !isLinkCopied {
-                                withAnimation (nil) {
-                                    isLinkCopied = true
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                    withAnimation(nil)  {
-                                        isLinkCopied = false
-                                    }
-                                }
-                                UIPasteboard.general.setValue("https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")", forPasteboardType: UTType.plainText.identifier)
+                HStack (spacing: .spacingMedium) {
+                    EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
+                                               icon: isLinkCopied ? .checkIcon : .linkIcon,
+                                               action: {
+                        if !isLinkCopied {
+                            withAnimation (nil) {
+                                isLinkCopied = true
                             }
-                        })
-                        if let url = URL(string: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")") {
-                            ShareLink(item: url) {
-                                EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                withAnimation(nil)  {
+                                    isLinkCopied = false
+                                }
                             }
+                            UIPasteboard.general.setValue("https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")", forPasteboardType: UTType.plainText.identifier)
                         }
-                        EventInviteShareButtonView(text: "QR Code",
-                                                   icon: .qrIcon,
-                                                   action: {
-                            isShowQrSheet = true
-                        })
+                    })
+                    if let url = URL(string: "https://\(deeplinkHost)/join?eventId=\(eventViewModel.selectedEvent?.eventId ?? "")") {
+                        ShareLink(item: url) {
+                            EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
+                        }
                     }
+                    EventInviteShareButtonView(text: "QR Code",
+                                               icon: .qrIcon,
+                                               action: {
+                        isShowQrSheet = true
+                    })
                 }
                 SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search / Add New Participants by Name / Email")
                 VStack (spacing: .spacingTight) {
@@ -136,8 +134,7 @@ struct EventInviteView: View {
                         if (eventViewModel.isDirectInvite) {
                             Task {
                                 if await eventViewModel.handleEditEvent(selectedContacts: eventInviteViewModel.selectedContacts,
-                                                                        currentUser: profileViewModel.user,
-                                                                        isGuest: profileViewModel.isGuest) {
+                                                                        currentUser: profileViewModel.user) {
                                     router.pop()
                                 }
                             }
