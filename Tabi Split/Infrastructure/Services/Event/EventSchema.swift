@@ -106,6 +106,11 @@ struct JoinEventResponse: Codable {
     let message: String
 }
 
+struct JoinEventByTokenResponse: Codable {
+    let message: String
+    let event_id: String
+}
+
 struct InviteTokenResponse: Codable {
     let token: String
     let expires_at: Int

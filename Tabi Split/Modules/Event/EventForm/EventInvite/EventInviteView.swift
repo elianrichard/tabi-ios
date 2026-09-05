@@ -55,6 +55,18 @@ struct EventInviteView: View {
         guard let token = inviteToken else { return nil }
         return "https://\(deeplinkHost)/join?token=\(token)"
     }
+
+    // Friendly invite blurb wrapped around the link, used for Copy and Share so
+    // the recipient gets context ("what is this link?") instead of a bare URL.
+    // Falls back gracefully when the event has no name yet.
+    private var inviteMessage: String? {
+        guard let urlString = inviteURLString else { return nil }
+        let eventName = eventViewModel.selectedEvent?.eventName ?? ""
+        let intro = eventName.isEmpty
+            ? "Join my event on Tabi so we can split the bills easily 💸"
+            : "Join “\(eventName)” on Tabi so we can split the bills easily 💸"
+        return "\(intro)\n\nTap to join: \(urlString)"
+    }
     
     var body: some View {
         VStack (spacing: 0) {
@@ -66,7 +78,7 @@ struct EventInviteView: View {
                     EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
                                                icon: isLinkCopied ? .checkIcon : .linkIcon,
                                                action: {
-                        guard let urlString = inviteURLString, !isLinkCopied else { return }
+                        guard let message = inviteMessage, !isLinkCopied else { return }
                         withAnimation (nil) {
                             isLinkCopied = true
                         }
@@ -75,10 +87,13 @@ struct EventInviteView: View {
                                 isLinkCopied = false
                             }
                         }
-                        UIPasteboard.general.setValue(urlString, forPasteboardType: UTType.plainText.identifier)
+                        UIPasteboard.general.setValue(message, forPasteboardType: UTType.plainText.identifier)
                     })
-                    if let urlString = inviteURLString, let url = URL(string: urlString) {
-                        ShareLink(item: url) {
+                    if let urlString = inviteURLString, let url = URL(string: urlString),
+                       let message = inviteMessage {
+                        // Share the URL (so apps render a rich preview) with the
+                        // friendly blurb as the accompanying message.
+                        ShareLink(item: url, message: Text(message)) {
                             EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                         }
                     } else {

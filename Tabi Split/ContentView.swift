@@ -160,17 +160,38 @@ struct ContentView: View {
 
     private func joinEventByToken(_ token: String) {
         Task {
+            let eventId: String
             do {
-                try await EventService.shared.joinEventByToken(token: token)
+                eventId = try await EventService.shared.joinEventByToken(token: token)
             } catch {
                 // Swallow here: APIService.notifyError already surfaced the backend
                 // message ("User already joined event" / "Invite link expired or
                 // invalid") in the global error dialog for any non-401 error.
                 print("Join by token failed: \(error)")
+                // No event to open — just land on Home.
+                router.popToRoot()
+                return
             }
-            // Home is the stack root; clear the path to land there rather than
-            // pushing a duplicate Home screen.
-            router.popToRoot()
+            await openJoinedEvent(eventId: eventId)
+        }
+    }
+
+    // After a successful join, pull the freshly-joined event into local storage
+    // (same refresh Home does on appear) and navigate straight to its detail
+    // view. Detail is pushed on top of the Home root, so Back returns to Home.
+    @MainActor
+    private func openJoinedEvent(eventId: String) async {
+        profileViewModel.refreshUserData()
+        _ = await HomeViewModel().refreshEventData(
+            currentUser: profileViewModel.user,
+            isShowLoading: Bindable(loadingViewModel).isLoading
+        )
+
+        router.popToRoot()
+        if let event = SwiftDataService.shared.fetchAllEvents()?
+            .first(where: { $0.eventId == eventId }) {
+            eventViewModel.selectedEvent = event
+            router.push(.eventDetail)
         }
     }
 
@@ -189,8 +210,10 @@ struct ContentView: View {
             } catch {
                 // notifyError already showed the dialog for non-401 errors.
                 print("Join event failed: \(error)")
+                router.popToRoot()
+                return
             }
-            router.popToRoot()
+            await openJoinedEvent(eventId: eventId)
         }
     }
 }
