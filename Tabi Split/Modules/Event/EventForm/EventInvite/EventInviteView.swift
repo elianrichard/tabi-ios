@@ -56,16 +56,22 @@ struct EventInviteView: View {
         return "https://\(deeplinkHost)/join?token=\(token)"
     }
 
-    // Friendly invite blurb wrapped around the link, used for Copy and Share so
-    // the recipient gets context ("what is this link?") instead of a bare URL.
-    // Falls back gracefully when the event has no name yet.
-    private var inviteMessage: String? {
-        guard let urlString = inviteURLString else { return nil }
+    // Friendly invite blurb, without the URL. Falls back gracefully when the
+    // event has no name yet. Used as the Share sheet's accompanying message —
+    // the URL is supplied separately via ShareLink's `item:`, so the intro must
+    // NOT also contain it or the link shows up twice.
+    private var inviteIntro: String {
         let eventName = eventViewModel.selectedEvent?.eventName ?? ""
-        let intro = eventName.isEmpty
+        return eventName.isEmpty
             ? "Join my event on Tabi so we can split the bills easily 💸"
             : "Join “\(eventName)” on Tabi so we can split the bills easily 💸"
-        return "\(intro)\n\nTap to join: \(urlString)"
+    }
+
+    // Full blurb + link on one line, for Copy Link (which pastes plain text, so
+    // it needs the URL inline).
+    private var inviteMessage: String? {
+        guard let urlString = inviteURLString else { return nil }
+        return "\(inviteIntro)\n\nTap to join: \(urlString)"
     }
     
     var body: some View {
@@ -89,16 +95,12 @@ struct EventInviteView: View {
                         }
                         UIPasteboard.general.setValue(message, forPasteboardType: UTType.plainText.identifier)
                     })
-                    if let message = inviteMessage {
-                        // Share a single plain-text String (the blurb already
-                        // contains the link). A plain String is the most widely
-                        // accepted activity item, so the share sheet offers every
-                        // messaging/social app (Messages, WhatsApp, Telegram,
-                        // Discord, …). Passing a URL + a separate `message:` Text
-                        // instead narrows the sheet to a few targets (Reminders/
-                        // Notes) because the mixed payload isn't accepted by most
-                        // apps. Messaging apps auto-unfurl the link from the text.
-                        ShareLink(item: message) {
+                    if let urlString = inviteURLString, let url = URL(string: urlString) {
+                        // Share the URL (so apps render a rich preview) with the
+                        // friendly blurb as the accompanying message. The intro
+                        // must NOT include the URL — ShareLink adds it via `item:`,
+                        // so putting it in the message too shows the link twice.
+                        ShareLink(item: url, message: Text(inviteIntro)) {
                             EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
                         }
                     } else {
