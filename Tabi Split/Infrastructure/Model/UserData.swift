@@ -14,6 +14,10 @@ class UserData {
     var userId: String = ""
     var name: String
     var email: String
+    // Account type: "real", "dummy", or "guest". Defaults to "dummy" so existing
+    // SwiftData rows migrate without a value; a linked participant (real/guest)
+    // owns an account and must be unlinked before its details can be edited.
+    var kind: String = "dummy"
     var image: ProfileImageEnum.ID
     var imageUrl: String?
     @Relationship(deleteRule: .nullify, inverse: \EventData.participants) var events: [EventData]? = []
@@ -21,10 +25,11 @@ class UserData {
     @Relationship(deleteRule: .nullify, inverse: \Expense.coverer) var coveredExpenses: [Expense]? = []
     @Relationship(deleteRule: .cascade, inverse: \ExpensePerson.user) var expenseShare: [ExpensePerson]? = []
 
-    init(userId: String = "", name: String, email: String, image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
+    init(userId: String = "", name: String, email: String, kind: String = "dummy", image: ProfileImageEnum? = nil, imageUrl: String? = nil) {
         self.userId = userId
         self.name = name != "" ? name : "Deleted User"
         self.email = email
+        self.kind = kind
         self.image = (image ?? ProfileImageEnum.allCases.randomElement() ?? .owl).id
         self.imageUrl = imageUrl
     }
@@ -33,6 +38,7 @@ class UserData {
         self.userId = userBase.user_id
         self.name = userBase.name != "" ? userBase.name : "Deleted User"
         self.email = userBase.email ?? ""
+        self.kind = userBase.kind ?? "dummy"
         if let image = ProfileImageEnum(rawValue: userBase.avatar_url) {
             self.image = image.id
             self.imageUrl = ""
@@ -46,8 +52,16 @@ class UserData {
         self.userId = user.userId
         self.name = user.name
         self.email = user.email
+        self.kind = user.kind
         self.image = user.image
         self.imageUrl = user.imageUrl
+    }
+
+    /// A linked participant owns a real account (real or guest). Its details are
+    /// controlled by that account, so the creator must unlink it before editing
+    /// or inviting. An unlinked participant is a "dummy" placeholder.
+    var isLinked: Bool {
+        kind == "real" || kind == "guest"
     }
     
     func update(fromUserBase user: UserBase) {

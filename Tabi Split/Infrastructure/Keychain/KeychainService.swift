@@ -27,7 +27,7 @@ final class KeychainService {
     private let service: String
     
     private init() {
-        self.service = Bundle.main.bundleIdentifier ?? "com.your.app"
+        self.service = ENV.APP_BUNDLE_ID
     }
     
     enum KeychainError: Error {

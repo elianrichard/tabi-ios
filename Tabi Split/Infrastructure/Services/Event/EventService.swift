@@ -66,6 +66,14 @@ final class EventService {
         let _ : JoinEventResponse = try await apiClient.post(endpoint: "/event/join/\(eventId)", body: Empty())
     }
 
+    // Non-creator leaves the event; the caller is replaced by a placeholder dummy
+    // carrying their name, keeping their expense history intact.
+    @discardableResult
+    func leaveEvent(eventId: String) async throws -> LeaveEventResponse {
+        let response: LeaveEventResponse = try await apiClient.post(endpoint: "/event/leave/\(eventId)", body: Empty())
+        return response
+    }
+
     @discardableResult
     func joinEventByToken(token: String) async throws -> String {
         let response: JoinEventByTokenResponse = try await apiClient.post(endpoint: "/event/join-by-token/\(token)", body: Empty())
@@ -74,6 +82,20 @@ final class EventService {
 
     func createInviteToken(eventId: String) async throws -> InviteTokenResponse {
         let response: InviteTokenResponse = try await apiClient.post(endpoint: "/event/\(eventId)/invite-token", body: Empty())
+        return response
+    }
+
+    // Single-use token that links the joining user to a specific email-less dummy
+    // participant (claim), rather than adding a brand-new event member.
+    func createParticipantInviteToken(eventId: String, participantId: String) async throws -> InviteTokenResponse {
+        let response: InviteTokenResponse = try await apiClient.post(endpoint: "/event/\(eventId)/participant/\(participantId)/invite-token", body: Empty())
+        return response
+    }
+
+    // Polls whether an email-less dummy participant has been claimed via its
+    // invite link; when claimed, the response carries the account that took over.
+    func participantClaimStatus(eventId: String, participantId: String) async throws -> ParticipantClaimStatusResponse {
+        let response: ParticipantClaimStatusResponse = try await apiClient.get(endpoint: "/event/\(eventId)/participant/\(participantId)/status")
         return response
     }
 }

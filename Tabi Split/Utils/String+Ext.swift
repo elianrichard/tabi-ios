@@ -41,6 +41,12 @@ extension String {
     func getFirstName() -> String {
         return String(self.split(separator: " ").first ?? "")
     }
+
+    /// First up to two words of a name (e.g. "Elian Richard" from
+    /// "Elian Richard Widjaja"), for greetings that read better than one word.
+    func getFirstTwoWords() -> String {
+        return self.split(separator: " ").prefix(2).joined(separator: " ")
+    }
     
     func getLastName() -> String {
         if self.split(separator: " ").count >= 2 {

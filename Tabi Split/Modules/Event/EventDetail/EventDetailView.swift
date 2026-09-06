@@ -42,6 +42,16 @@ struct EventDetailView: View {
                             Label("Delete Event", systemImage: "trash")
                         }
                     }
+                } else {
+                    // Non-creator participants can leave the event; they're replaced
+                    // by a placeholder dummy so their expense history stays intact.
+                    ElipsisMenu (color: .textWhite) {
+                        Button (role: .destructive) {
+                            router.present(.eventLeave)
+                        } label: {
+                            Label("Leave Event", systemImage: "rectangle.portrait.and.arrow.right")
+                        }
+                    }
                 }
             })
             
@@ -231,6 +241,43 @@ struct EventDetailView: View {
                             }
                         }
                 }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: router.sheetBinding(for: .eventLeave)) {
+            VStack (alignment: .center, spacing: 0) {
+                VStack (spacing: 0) {
+                    LottieView(animation: .named("DeleteEvent"))
+                        .looping()
+                        .scaleEffect(1.4)
+                        .frame(width: 300, height: 200)
+                    VStack (spacing: .spacingSmall) {
+                        Text("Do you want to leave this event?")
+                            .font(.tabiSubtitle)
+                            .multilineTextAlignment(.center)
+                        Text("You'll be removed from this event, but the expenses you're part of stay in the record.")
+                            .font(.tabiBody)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                HStack {
+                    CustomButton(text: "Cancel", type: .secondary) {
+                        router.dismissSheet()
+                    }
+                    CustomButton(text: "Leave", customBackgroundColor: .buttonRed) {
+                        Task {
+                            router.dismissSheet()
+                            if await eventViewModel.handleLeaveEvent() {
+                                router.pop()
+                            }
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity)
             }

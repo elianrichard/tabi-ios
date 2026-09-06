@@ -19,15 +19,20 @@ final class ProfileService {
     }
 
     func getCurrentProfile () async throws -> UserBase {
-        guard let user = UserDefaultsService.shared.getCurrentUser() else { throw ProfileAPIError.userNotFound }
-        let request: GetProfileRequest = GetProfileRequest(emails: [user.userEmail])
-        let response: GetProfileResponse = try await apiClient.post(endpoint: "/user/check", body: request)
-
-        guard let apiUser = response.users.first else {
+        // Resolve the current user from the session (GET /user), not by email.
+        // A guest account has no email, so the old email-lookup via /user/check
+        // returned no rows and failed for guests.
+        let response: UserGetResponse = try await apiClient.get(endpoint: "/user")
+        guard let userId = response.user_id, let name = response.name else {
             throw ProfileAPIError.userNotFoundInResponse
         }
-
-        return apiUser
+        return UserBase(
+            user_id: userId,
+            email: response.email,
+            name: name,
+            avatar_url: response.profile_image ?? "",
+            kind: response.kind
+        )
     }
 
     func deleteUser() async throws {

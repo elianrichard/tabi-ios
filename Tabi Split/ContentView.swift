@@ -116,13 +116,14 @@ struct ContentView: View {
     
     
     private func handleIncomingURL(_ url: URL) {
+        print("[Deeplink] received url=\(url.absoluteString)")
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-            print("Invalid URL")
+            print("[Deeplink] Invalid URL")
             return
         }
 
         // Universal Link: https://tabisplit.my.id/join?token=<signed invite token>.
-        if url.scheme == "https", components.host == "tabisplit.my.id", components.path == "/join" {
+        if url.scheme == "https", components.host == ENV.DEEPLINK_HOST, components.path == "/join" {
             guard let token = components.queryItems?.first(where: { $0.name == "token" })?.value else {
                 print("invite token not found")
                 return
@@ -134,7 +135,7 @@ struct ContentView: View {
         // Custom-scheme links (tabisplit://...). Web pages can trigger these to
         // launch the installed app directly from Safari, which a Universal Link
         // can't do from the page it's already showing.
-        guard url.scheme == "tabisplit" else {
+        guard url.scheme == ENV.DEEPLINK_SCHEME else {
             return
         }
         switch components.host {
@@ -159,15 +160,17 @@ struct ContentView: View {
     }
 
     private func joinEventByToken(_ token: String) {
+        print("[Deeplink] joinEventByToken token=\(token)")
         Task {
             let eventId: String
             do {
                 eventId = try await EventService.shared.joinEventByToken(token: token)
+                print("[Deeplink] joinEventByToken success eventId=\(eventId)")
             } catch {
                 // Swallow here: APIService.notifyError already surfaced the backend
                 // message ("User already joined event" / "Invite link expired or
                 // invalid") in the global error dialog for any non-401 error.
-                print("Join by token failed: \(error)")
+                print("[Deeplink] Join by token failed: \(error)")
                 // No event to open — just land on Home.
                 router.popToRoot()
                 return
@@ -181,6 +184,7 @@ struct ContentView: View {
     // view. Detail is pushed on top of the Home root, so Back returns to Home.
     @MainActor
     private func openJoinedEvent(eventId: String) async {
+        print("[Deeplink] openJoinedEvent eventId=\(eventId)")
         profileViewModel.refreshUserData()
         _ = await HomeViewModel().refreshEventData(
             currentUser: profileViewModel.user,
@@ -188,10 +192,14 @@ struct ContentView: View {
         )
 
         router.popToRoot()
-        if let event = SwiftDataService.shared.fetchAllEvents()?
-            .first(where: { $0.eventId == eventId }) {
+        let allEvents = SwiftDataService.shared.fetchAllEvents() ?? []
+        print("[Deeplink] openJoinedEvent after refresh, \(allEvents.count) events locally, ids=\(allEvents.compactMap { $0.eventId })")
+        if let event = allEvents.first(where: { $0.eventId == eventId }) {
+            print("[Deeplink] openJoinedEvent found event, pushing detail")
             eventViewModel.selectedEvent = event
             router.push(.eventDetail)
+        } else {
+            print("[Deeplink] openJoinedEvent event NOT found locally after refresh — nothing to push")
         }
     }
 

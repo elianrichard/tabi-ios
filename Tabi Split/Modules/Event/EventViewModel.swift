@@ -65,12 +65,20 @@ final class EventViewModel {
 
         do {
             var participants: [UserData] = selectedContacts
-            let checkUsersResponse = try await ProfileService.shared.checkUsers(emails: selectedContacts.map{ $0.email }.filter { !$0.isEmpty })
-            let registeredUsers : [UserData] = checkUsersResponse.users.map{ user in
-                if let image = ProfileImageEnum(rawValue: user.avatar_url) {
-                    UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: image, imageUrl: "" )
-                } else {
-                    UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: .owl, imageUrl: user.avatar_url )
+            // Only look up emails that exist; a list of only name-only dummies has
+            // none, so skip the call entirely rather than sending an empty list.
+            let emailsToCheck = selectedContacts.map { $0.email }.filter { !$0.isEmpty }
+            let registeredUsers: [UserData]
+            if emailsToCheck.isEmpty {
+                registeredUsers = []
+            } else {
+                let checkUsersResponse = try await ProfileService.shared.checkUsers(emails: emailsToCheck)
+                registeredUsers = checkUsersResponse.users.map { user in
+                    if let image = ProfileImageEnum(rawValue: user.avatar_url) {
+                        UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: image, imageUrl: "")
+                    } else {
+                        UserData(userId: user.user_id, name: user.name, email: user.email ?? "", image: .owl, imageUrl: user.avatar_url)
+                    }
                 }
             }
 
@@ -148,6 +156,25 @@ final class EventViewModel {
             SwiftDataService.shared.deleteEvent(selectedEvent)
         } catch {
             print("Delete event failed: \(error)")
+            return false
+        }
+        return true
+    }
+
+    // Leaves the event as a non-creator participant: the backend replaces the
+    // caller with a placeholder dummy (keeping their expense history), and the
+    // event is dropped from this user's local list since they no longer belong.
+    @MainActor
+    func handleLeaveEvent () async -> Bool {
+        guard let selectedEvent, let eventId = selectedEvent.eventId else { return false }
+        isApiCallLoading = true
+        defer { isApiCallLoading = false }
+
+        do {
+            _ = try await EventService.shared.leaveEvent(eventId: eventId)
+            SwiftDataService.shared.deleteEvent(selectedEvent)
+        } catch {
+            print("Leave event failed: \(error)")
             return false
         }
         return true

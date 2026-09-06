@@ -38,6 +38,7 @@ enum SheetRoute: Hashable {
     case eventComplete
     case eventIncomplete
     case eventDelete
+    case eventLeave
     case eventQuickScan
     case eventAllParticipants
 }

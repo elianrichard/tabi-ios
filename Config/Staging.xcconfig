@@ -10,6 +10,9 @@ BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
 // X-Api-Secret for the staging backend. Change this to differ from production.
 API_SECRET_KEY = cx40TsowDQFm6kAO9JXCJYZvAFh7U7SEXRvb066aeW7OPBMxzBxGAg3eduO8IITM
 
+// HTTP header field name that carries API_SECRET_KEY. Same across envs.
+API_SECRET_HEADER = X-Api-Secret
+
 CODE_SIGN_ENTITLEMENTS = Tabi Split/Tabi Split.entitlements
 
 // Compile-time flag for staging-only behavior (#if STAGING).

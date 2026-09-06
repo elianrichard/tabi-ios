@@ -19,7 +19,7 @@ struct HomeTopBar: View {
                     .onTapGesture {
                         router.push(.profile)
                     }
-                Text("Hi, " + profileViewModel.user.name.getFirstName() + "!")
+                Text("Hi, " + profileViewModel.user.name.getFirstTwoWords() + "!")
                     .font(.tabiHeadline)
             }
 //            TEMPORARILY DISABLED: NOTIFICATION

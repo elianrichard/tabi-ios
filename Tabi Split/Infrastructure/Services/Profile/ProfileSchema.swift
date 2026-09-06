@@ -53,6 +53,9 @@ struct UserBase: Codable {
     let email: String?
     let name: String
     let avatar_url: String
+    // Account type: "real", "dummy", or "guest". Optional so payloads that omit
+    // it still decode; a nil/absent kind is treated as an unlinked dummy.
+    let kind: String?
 }
 
 struct UserGetResponse: Codable {
@@ -61,4 +64,6 @@ struct UserGetResponse: Codable {
     let name: String?
     let email: String?
     let profile_image: String?
+    // Account type: "real", "dummy", or "guest".
+    let kind: String?
 }

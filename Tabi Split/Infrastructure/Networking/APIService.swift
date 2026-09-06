@@ -42,7 +42,7 @@ final class APIService: APIClient {
         var request = URLRequest(url: URL(string: config.baseURL + endpoint)!)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(ENV.API_SECRET_KEY, forHTTPHeaderField: "X-Api-Secret")
+        request.setValue(ENV.API_SECRET_KEY, forHTTPHeaderField: ENV.API_SECRET_HEADER)
 
         if let body = body {
             let encoder = JSONEncoder()
@@ -149,6 +149,12 @@ final class APIService: APIClient {
             
             return result
         } catch {
+            // A cancelled request is not a user-facing failure: it happens when the
+            // Task is torn down (e.g. navigating away mid-refresh) or superseded.
+            // Rethrow it as-is without the blocking error dialog.
+            if error.isCancellation {
+                throw error
+            }
             os_log(.error, log: .api, "API Error: %{public}@", String(describing: error))
             let apiError = (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
             notifyError(apiError)
@@ -169,6 +175,17 @@ final class APIService: APIClient {
 
 struct Empty: Codable {}
 
+private extension Error {
+    /// True when this error is a task/URL cancellation, in any of its forms:
+    /// Swift's CancellationError, or URLError/NSURLError with the cancelled code.
+    var isCancellation: Bool {
+        if self is CancellationError { return true }
+        if let urlError = self as? URLError { return urlError.code == .cancelled }
+        let nsError = self as NSError
+        return nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled
+    }
+}
+
 struct ErrorResponse: Codable {
     let errors: String
 }
@@ -179,5 +196,5 @@ extension Notification.Name {
 
 
 private extension OSLog {
-    static let api = OSLog(subsystem: "com.tabisplit.TabiSplit", category: "API")
+    static let api = OSLog(subsystem: ENV.APP_BUNDLE_ID, category: "API")
 }

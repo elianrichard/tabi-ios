@@ -7,8 +7,6 @@
 
 import SwiftUI
 import Contacts
-import UniformTypeIdentifiers
-import CoreImage.CIFilterBuiltins
 
 struct EventInviteView: View {
     @Environment(Router.self) private var router
@@ -16,9 +14,6 @@ struct EventInviteView: View {
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
     
-    @State private var isLinkCopied = false
-    @State private var isShowQrSheet = false
-
     // Per-share signed invite token (1h TTL). Fetched once when the view appears
     // and reused by Copy / Share / QR; refetched only if the window lapses while
     // the view is open. nil until the first fetch resolves.
@@ -47,13 +42,12 @@ struct EventInviteView: View {
         var id: String { email }
     }
 
-    private let deeplinkHost = "tabisplit.my.id"
 
     // The full Universal Link for the current token, or nil until a token is
     // fetched. All three share actions (Copy / Share / QR) use this one shape.
     private var inviteURLString: String? {
         guard let token = inviteToken else { return nil }
-        return "https://\(deeplinkHost)/join?token=\(token)"
+        return "https://\(ENV.DEEPLINK_HOST)/join?token=\(token)"
     }
 
     // Friendly invite blurb, without the URL. Falls back gracefully when the
@@ -80,38 +74,9 @@ struct EventInviteView: View {
                 eventInviteViewModel.searchUserText = ""
             })
             VStack(spacing: .spacingMedium){
-                HStack (spacing: .spacingMedium) {
-                    EventInviteShareButtonView(text: isLinkCopied ? "Copied!" : "Copy Link",
-                                               icon: isLinkCopied ? .checkIcon : .linkIcon,
-                                               action: {
-                        guard let message = inviteMessage, !isLinkCopied else { return }
-                        withAnimation (nil) {
-                            isLinkCopied = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                            withAnimation(nil)  {
-                                isLinkCopied = false
-                            }
-                        }
-                        UIPasteboard.general.setValue(message, forPasteboardType: UTType.plainText.identifier)
-                    })
-                    if let urlString = inviteURLString, let url = URL(string: urlString) {
-                        // Share the URL (so apps render a rich preview) with the
-                        // friendly blurb as the accompanying message. The intro
-                        // must NOT include the URL — ShareLink adds it via `item:`,
-                        // so putting it in the message too shows the link twice.
-                        ShareLink(item: url, message: Text(inviteIntro)) {
-                            EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
-                        }
-                    } else {
-                        EventInviteShareButtonView(text: "Share Link", icon: .shareIcon)
-                    }
-                    EventInviteShareButtonView(text: "QR Code",
-                                               icon: .qrIcon,
-                                               action: {
-                        isShowQrSheet = true
-                    })
-                }
+                InviteShareButtons(urlString: inviteURLString,
+                                   copyMessage: inviteMessage,
+                                   shareIntro: inviteIntro)
                 SearchInput(text: Bindable(eventInviteViewModel).searchUserText, placeholder: "Search / Add Participant")
                 VStack (spacing: .spacingTight) {
                     ScrollView (showsIndicators: false) {
@@ -205,29 +170,6 @@ struct EventInviteView: View {
             }
             Task { await fetchInviteTokenIfNeeded() }
         }
-        .sheet(isPresented: $isShowQrSheet) {
-            CustomSheet (xToggleBinding: $isShowQrSheet) {
-                VStack (alignment: .center, spacing: .spacingSmall) {
-                    Text("Show QR Code")
-                        .font(.tabiTitle)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    VStack (alignment: .center, spacing: .spacingMedium) {
-                        Image(uiImage: generateQRCode(from: inviteURLString ?? ""))
-                                .resizable()
-                                .interpolation(.none)
-                                .scaledToFit()
-                                .frame(width: 200, height: 200)
-                        Text("Let your friends scan it to participate in your event")
-                            .font(.tabiHeadline)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .frame(maxHeight: .infinity)
-                }
-            }
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
-        }
         .sheet(item: $inviteByEmailPayload) { payload in
             CustomSheet(xToggleBinding: Binding(
                 get: { inviteByEmailPayload != nil },
@@ -273,6 +215,7 @@ struct EventInviteView: View {
             }
             .presentationDetents([.height(payload.existingName == nil ? 280 : 240)])
             .presentationDragIndicator(.visible)
+            .presentationBackground(.bgWhite)
         }
         .sheet(isPresented: $isShowCustomParticipantSheet) {
             CustomSheet(xToggleBinding: $isShowCustomParticipantSheet) {
@@ -304,6 +247,7 @@ struct EventInviteView: View {
             }
             .presentationDetents([.height(customEmailErrorMessage == nil ? 360 : 390)])
             .presentationDragIndicator(.visible)
+            .presentationBackground(.bgWhite)
         }
     }
 
@@ -377,24 +321,6 @@ struct EventInviteView: View {
         }
     }
 
-    private func generateQRCode(from string: String) -> UIImage {
-        let context = CIContext()
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(string.utf8)
-        
-        
-        if let outputImage = filter.outputImage {
-            let transform = CGAffineTransform(scaleX: 1, y: 1) // Adjust scaling factor as needed
-            let scaledImage = outputImage.transformed(by: transform)
-  
-            if let cgImage = context.createCGImage(outputImage, from: scaledImage.extent) {
-                return UIImage(cgImage: cgImage)
-            }
-        }
-
-        return UIImage(systemName: "xmark.circle") ?? UIImage()
-    }
-    
 }
 
 #Preview {
