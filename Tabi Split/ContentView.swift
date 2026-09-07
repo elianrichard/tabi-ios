@@ -19,6 +19,11 @@ struct ContentView: View {
     private var loadingViewModel = LoadingViewModel.shared
     @State private var sessionState = SessionState.shared
 
+    // A deeplink invite token that arrived before the session was ready (cold
+    // launch via link, or mid-auth). Held here and processed once authenticated,
+    // so the join isn't dropped by the auth/navigation race.
+    @State private var pendingInviteToken: String?
+
     var body: some View {
         ZStack {
             NavigationStack (path: $router.path) {
@@ -62,14 +67,27 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .sessionExpired)) { _ in
             handleSessionExpired()
         }
+        .onChange(of: sessionState.isAuthenticated) { _, _ in
+            // Backup drain: process a queued invite token once the session is ready
+            // (checkAuthentication also drains it directly).
+            drainPendingInviteTokenIfNeeded()
+        }
         .onOpenURL { incomingURL in
-            print("App was opened via URL: \(incomingURL)")
-            // Let GoogleSignIn claim its OAuth callback URL first; if it handles
-            // it, skip the app's own deep-link routing.
+            // Custom-scheme links (tabisplit://…) and, on some launch paths,
+            // Universal Links arrive here. Let GoogleSignIn claim its OAuth
+            // callback URL first, then route the rest ourselves.
             if GIDSignIn.sharedInstance.handle(incomingURL) {
                 return
             }
             handleIncomingURL(incomingURL)
+        }
+        // Universal Links (https://tabisplit.my.id/join?…) are delivered as a
+        // browsing-web user activity, NOT always via onOpenURL — so handle that
+        // path too, otherwise a QR/link that opens the app does nothing.
+        .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+            if let url = activity.webpageURL {
+                handleIncomingURL(url)
+            }
         }
     }
 
@@ -100,10 +118,21 @@ struct ContentView: View {
         do {
             let _ = try await ProfileService.shared.probeSession()
             sessionState.isAuthenticated = true
+            // Deterministically drain a queued deeplink token here, in case the
+            // isAuthenticated onChange observer wasn't registered in time on a cold
+            // launch (the QR/link that launched the app can arrive before body is
+            // fully set up).
+            drainPendingInviteTokenIfNeeded()
         } catch {
             sessionState.isAuthenticated = false
             SessionState.shared.sessionExpiredBanner = true
         }
+    }
+
+    private func drainPendingInviteTokenIfNeeded() {
+        guard sessionState.isAuthenticated, let token = pendingInviteToken else { return }
+        pendingInviteToken = nil
+        joinEventByToken(token)
     }
 
     private func handleSessionExpired() {
@@ -116,19 +145,16 @@ struct ContentView: View {
     
     
     private func handleIncomingURL(_ url: URL) {
-        print("[Deeplink] received url=\(url.absoluteString)")
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-            print("[Deeplink] Invalid URL")
             return
         }
 
         // Universal Link: https://tabisplit.my.id/join?token=<signed invite token>.
         if url.scheme == "https", components.host == ENV.DEEPLINK_HOST, components.path == "/join" {
             guard let token = components.queryItems?.first(where: { $0.name == "token" })?.value else {
-                print("invite token not found")
                 return
             }
-            joinEventByToken(token)
+            handleInviteToken(token)
             return
         }
 
@@ -143,34 +169,42 @@ struct ContentView: View {
         // button on the web /join page.
         case "join":
             guard let token = components.queryItems?.first(where: { $0.name == "token" })?.value else {
-                print("invite token not found")
                 return
             }
-            joinEventByToken(token)
+            handleInviteToken(token)
         // Legacy: tabisplit://join-event?event-id=<raw eventId> (QR codes, old links).
         case "join-event":
             guard let eventId = components.queryItems?.first(where: { $0.name == "event-id" })?.value else {
-                print("eventId not found")
                 return
             }
             joinEventByEventId(eventId)
         default:
-            print("Unknown URL action!")
+            break
         }
     }
 
+    // Entry point for an invite token from a deeplink. If the session isn't ready
+    // yet (cold launch via link, or auth still in flight), stash the token and let
+    // the isAuthenticated onChange process it once ready — otherwise the join
+    // races auth/navigation and intermittently does nothing.
+    private func handleInviteToken(_ token: String) {
+        guard sessionState.isAuthenticated else {
+            pendingInviteToken = token
+            return
+        }
+        joinEventByToken(token)
+    }
+
     private func joinEventByToken(_ token: String) {
-        print("[Deeplink] joinEventByToken token=\(token)")
         Task {
             let eventId: String
             do {
                 eventId = try await EventService.shared.joinEventByToken(token: token)
-                print("[Deeplink] joinEventByToken success eventId=\(eventId)")
             } catch {
                 // Swallow here: APIService.notifyError already surfaced the backend
                 // message ("User already joined event" / "Invite link expired or
                 // invalid") in the global error dialog for any non-401 error.
-                print("[Deeplink] Join by token failed: \(error)")
+                print("Join by token failed: \(error)")
                 // No event to open — just land on Home.
                 router.popToRoot()
                 return
@@ -184,7 +218,6 @@ struct ContentView: View {
     // view. Detail is pushed on top of the Home root, so Back returns to Home.
     @MainActor
     private func openJoinedEvent(eventId: String) async {
-        print("[Deeplink] openJoinedEvent eventId=\(eventId)")
         profileViewModel.refreshUserData()
         _ = await HomeViewModel().refreshEventData(
             currentUser: profileViewModel.user,
@@ -192,14 +225,10 @@ struct ContentView: View {
         )
 
         router.popToRoot()
-        let allEvents = SwiftDataService.shared.fetchAllEvents() ?? []
-        print("[Deeplink] openJoinedEvent after refresh, \(allEvents.count) events locally, ids=\(allEvents.compactMap { $0.eventId })")
-        if let event = allEvents.first(where: { $0.eventId == eventId }) {
-            print("[Deeplink] openJoinedEvent found event, pushing detail")
+        if let event = SwiftDataService.shared.fetchAllEvents()?
+            .first(where: { $0.eventId == eventId }) {
             eventViewModel.selectedEvent = event
             router.push(.eventDetail)
-        } else {
-            print("[Deeplink] openJoinedEvent event NOT found locally after refresh — nothing to push")
         }
     }
 
