@@ -190,36 +190,43 @@ struct SettlementOptimizationView: View {
 /// Pill segmented control switching the recap between the netted "Simplified"
 /// view and the raw "Detailed" pairwise view. Styled with the app's blue accent
 /// tokens to match other interactive controls.
+/// Segmented pill mirroring `EventNavigation`'s styling (a white pill sliding
+/// behind the active label over a `buttonBlueSelected` track), sized smaller.
 private struct RecapModeToggle: View {
     @Binding var isSimplified: Bool
 
+    private let segmentWidth: CGFloat = 78
+
     var body: some View {
-        HStack (spacing: 0) {
-            segment(title: "Simplified", isActive: isSimplified) {
-                isSimplified = true
+        ZStack {
+            // Sliding white pill behind the active segment.
+            HStack {
+                RoundedRectangle(cornerRadius: .infinity)
+                    .fill(.bgWhite)
+                    .frame(maxWidth: segmentWidth, maxHeight: .infinity)
             }
-            segment(title: "Detailed", isActive: !isSimplified) {
-                isSimplified = false
+            .frame(maxWidth: .infinity, alignment: isSimplified ? .leading : .trailing)
+
+            HStack (spacing: 0) {
+                segment(title: "Simplified", isActive: isSimplified) { isSimplified = true }
+                segment(title: "Detailed", isActive: !isSimplified) { isSimplified = false }
             }
         }
-        .padding(2)
+        .padding(3)
         .background(.buttonBlueSelected)
-        .clipShape(Capsule())
+        .frame(width: segmentWidth * 2 + 6, height: 32, alignment: .center)
+        .clipShape(RoundedRectangle(cornerRadius: .infinity))
     }
 
     private func segment(title: String, isActive: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: {
-            withAnimation(.easeInOut(duration: 0.15)) { action() }
-        }) {
-            Text(title)
-                .font(isActive ? .tabiBody2 : .tabiBody)
-                .foregroundStyle(isActive ? .textWhite : .textBlue)
-                .padding(.horizontal, .spacingRegular)
-                .padding(.vertical, .spacingXSmall)
-                .background(isActive ? Color.buttonBlue : .clear)
-                .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
+        Text(title)
+            .frame(maxWidth: segmentWidth, maxHeight: .infinity)
+            .foregroundStyle(isActive ? .textBlue : .textBlack)
+            .font(.custom(isActive ? UIConfig.Font.Name.Medium : UIConfig.Font.Name.Regular, size: 13))
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation { action() }
+            }
     }
 }
 

@@ -34,7 +34,7 @@ struct EventNavigation: View {
             }
         }
         .padding(.vertical, 4)
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 4)
         .background(.buttonBlueSelected)
         .frame(width: 210, height: 44, alignment: .center)
         .clipShape(RoundedRectangle(cornerRadius: .infinity))

@@ -17,13 +17,11 @@ struct EventSummaryDetailView: View {
                 .padding(.horizontal)
             ScrollView {
                 LazyVStack {
-                    Divided {
-                        ForEach(eventViewModel.userTransactionHistory) { data in
-                            EventSummaryHistoryCard(data: data)
-                        }
+                    ForEach(eventViewModel.userTransactionHistory) { data in
+                        EventSummaryHistoryCard(data: data)
                     }
                 }
-                .padding(.horizontal, .spacingMedium)
+                .padding(.horizontal, .spacingSmall)
             }
         }
         .padding(.top)

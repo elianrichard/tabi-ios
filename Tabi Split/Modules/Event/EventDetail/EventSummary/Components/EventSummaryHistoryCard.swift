@@ -7,9 +7,11 @@
 
 import SwiftUI
 
-struct EventSummaryHistoryCard : View {    
+struct EventSummaryHistoryCard : View {
     var data: SummaryHistoryData
-    
+    @Environment(Router.self) private var router
+    @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
+
     var body : some View {
         HStack (alignment: .top, spacing: 12)  {
             Image(.sampleExpenseCard)
@@ -29,14 +31,31 @@ struct EventSummaryHistoryCard : View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             Spacer()
-            Text(data.expenseDate.toProperText())
-                .font(.tabiBody)
-                .foregroundStyle(.textGrey)
+            VStack (alignment: .trailing, spacing: 4) {
+                Text(data.expenseDate.toProperText())
+                    .font(.tabiBody)
+                    .foregroundStyle(.textGrey)
+            }
         }
-        .padding(.vertical, .spacingSmall)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(.uiGray, lineWidth: 1)
+        }
+        .padding(1)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard let expense = data.expense else { return }
+            eventExpenseViewModel.selectedExpense = expense
+            router.push(.expenseResult)
+        }
     }
 }
 
 #Preview {
     EventSummaryHistoryCard(data: SummaryHistoryData(expenseName: "KFC", expenseDate: Date(), amount: 50_000))
+        .environment(Router())
+        .environment(EventExpenseViewModel())
 }

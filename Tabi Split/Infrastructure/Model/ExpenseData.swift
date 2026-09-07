@@ -14,6 +14,10 @@ class Expense {
     var event: EventData?
     var name: String
     var coverer: UserData
+    /// The user who created this expense (distinct from `coverer`, who paid).
+    /// Optional so existing SwiftData rows migrate without a value; falls back to
+    /// the coverer where unknown. Drives who may edit/delete the expense.
+    var creator: UserData?
     var dateOfCreation: Date
     var price: Float
     var splitMethod: SplitMethod.ID
@@ -23,10 +27,11 @@ class Expense {
     var localId: String = UUID().uuidString
     var isSynced: Bool = false
 
-    init(expenseId: String? = nil, name: String, coverer: UserData, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = [], localId: String = UUID().uuidString, isSynced: Bool = false) {
+    init(expenseId: String? = nil, name: String, coverer: UserData, creator: UserData? = nil, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = [], localId: String = UUID().uuidString, isSynced: Bool = false) {
         self.expenseId = expenseId
         self.name = name
         self.coverer = coverer
+        self.creator = creator
         self.dateOfCreation = dateOfCreation ?? Date()
         self.price = price
         self.splitMethod = splitMethod.id

@@ -60,6 +60,9 @@ struct SummaryHistoryData: Identifiable {
     var expenseName: String
     var expenseDate: Date
     var amount: Float
+    /// The expense this history row came from, so tapping the row can open its
+    /// full result screen. Optional so existing call sites (e.g. previews) stay valid.
+    var expense: Expense? = nil
 }
 
 struct SummarySettlementData: Identifiable {

@@ -320,7 +320,10 @@ final class EventExpenseViewModel {
         defer { isApiCallLoading = false }
 
         do {
-            let expense = Expense(name: expenseName, coverer: selectedCoverer, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
+            // Creator is the acting user; the backend infers it from auth, we set
+            // it locally so the model is correct before the next fetch.
+            let creator = SwiftDataService.shared.getCurrentUser()
+            let expense = Expense(name: expenseName, coverer: selectedCoverer, creator: creator, price: totalSpending, splitMethod: selectedMethod, participants: selectedParticipants)
             if (selectedMethod == .equally) {
                 let assignees = selectedParticipants.map{ ExpensePerson(user: $0, share: 1) }
                 let expenseItem = ExpenseItem(itemName: expenseName, itemPrice: totalSpending, itemQuantity: 1, assignees: [])

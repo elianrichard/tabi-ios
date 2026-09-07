@@ -106,6 +106,7 @@ struct ExpenseEventBase: Codable {
     let id: String
     let name: String
     let coverer_id: String
+    let creator_id: String?
     let total_expense: Float
     let split_method: String
     let receipt_url: String

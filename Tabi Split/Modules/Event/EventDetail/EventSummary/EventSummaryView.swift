@@ -93,7 +93,7 @@ struct EventSummaryView: View {
                 if !eventViewModel.userTransactionHistory.isEmpty {
                     VStack (spacing: 16) {
                         HStack {
-                            Text("Your Balance History")
+                            Text("Your Transaction History")
                                 .font(.tabiHeadline)
                             Spacer()
                             Button {
@@ -104,18 +104,12 @@ struct EventSummaryView: View {
                                     .foregroundStyle(.textBlue)
                             }
                         }
-                        VStack (spacing: 0) {
+                        LazyVStack {
                             ForEach(Array(eventViewModel.userTransactionHistory.prefix(3))) { data in
                                 EventSummaryHistoryCard(data: data)
                             }
                         }
                     }
-                    .padding(.spacingRegular)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(.uiGray, lineWidth: 1)
-                    }
-                    .padding(1)
                 }
                 
                 

@@ -43,6 +43,8 @@ struct ExpenseDTO: Codable {
     var expenseId: String?
     var name: String
     var covererKey: String
+    /// Optional so backups made before the creator field existed still decode.
+    var creatorKey: String?
     var dateOfCreation: Date
     var price: Float
     var splitMethod: String
@@ -163,6 +165,7 @@ class BackupService {
             for p in e.participants { _ = assignKey(p) }
             for x in e.expenses {
                 _ = assignKey(x.coverer)
+                if let creator = x.creator { _ = assignKey(creator) }
                 for p in x.participants { _ = assignKey(p) }
                 for item in x.items {
                     for a in item.assignees { _ = assignKey(a.user) }
@@ -208,6 +211,7 @@ class BackupService {
             expenseId: x.expenseId,
             name: x.name,
             covererKey: keyByUser[ObjectIdentifier(x.coverer)] ?? "",
+            creatorKey: x.creator.flatMap { keyByUser[ObjectIdentifier($0)] },
             dateOfCreation: x.dateOfCreation,
             price: x.price,
             splitMethod: x.splitMethod,
@@ -389,10 +393,12 @@ class BackupService {
                     )
                 }
 
+                let creator = expDTO.creatorKey.flatMap { keyToUser[$0] }
                 let expense = Expense(
                     expenseId: expDTO.expenseId,
                     name: expDTO.name,
                     coverer: coverer,
+                    creator: creator,
                     dateOfCreation: expDTO.dateOfCreation,
                     price: expDTO.price,
                     splitMethod: splitMethod,

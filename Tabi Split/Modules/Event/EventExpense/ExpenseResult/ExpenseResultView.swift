@@ -20,7 +20,8 @@ struct ExpenseResultView: View {
     var body: some View {
         VStack (alignment: .leading) {
             TopNavigation(title: "Expense Result", RightToolbar: {
-                if !eventExpenseViewModel.isEditView && !eventViewModel.isEventCompleted {
+                // Only the expense's creator or the event owner may edit/delete it.
+                if !eventExpenseViewModel.isEditView && !eventViewModel.isEventCompleted && canManageExpense {
                     ElipsisMenu {
                         Button {
                             eventExpenseViewModel.isEdit = true
@@ -42,32 +43,42 @@ struct ExpenseResultView: View {
                 }
             })
             
-            VStack (alignment: .leading, spacing: .spacingSmall) {
-                if !eventExpenseViewModel.isEditView {
-                    Text("\(Date().customDateFormat("dd MMM yyyy  HH:mm").string(from: eventExpenseViewModel.selectedExpense?.dateOfCreation ?? Date()))")
-                        .font(.tabiBody)
-                        .foregroundStyle(.textGrey)
-                }
-                VStack (alignment: .leading, spacing: .spacingTight) {
+            VStack (alignment: .leading, spacing: .spacingRegular) {
+                // Title + timestamp
+                VStack (alignment: .leading, spacing: .spacingXSmall) {
+                    if !eventExpenseViewModel.isEditView {
+                        Text("\(Date().customDateFormat("dd MMM yyyy  •  HH:mm").string(from: eventExpenseViewModel.selectedExpense?.dateOfCreation ?? Date()))")
+                            .font(.tabiBody)
+                            .foregroundStyle(.textGrey)
+                    }
                     Text(eventExpenseViewModel.expenseName)
                         .font(.tabiTitle)
-                    HStack {
-                        Icon(eventExpenseViewModel.selectedMethod?.icon)
-                        Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "")
+                        .foregroundStyle(.textBlack)
+                }
+
+                // Hero total (result view only) + who paid.
+                if !eventExpenseViewModel.isEditView {
+                    VStack (alignment: .leading, spacing: .spacingXSmall) {
+                        Text("Total spending")
                             .font(.tabiBody)
+                            .foregroundStyle(.textGrey)
+                        Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
+                            .font(.tabiLargeTitle)
+                            .foregroundStyle(.buttonDarkBlue)
                     }
-                    if !eventExpenseViewModel.isEditView {
-                        HStack (spacing: .spacingTight) {
-                            Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
-                                .font(.tabiHeadline)
-                                .foregroundStyle(.buttonDarkBlue)
-                            Rectangle()
-                                .fill(.textGrey)
-                                .frame(width: 1, height: 14)
-                            Text("\(eventExpenseViewModel.selectedCoverer?.name ?? "") paid")
-                                .font(.tabiBody)
-                                .foregroundStyle(.textGrey)
-                        }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.spacingRegular)
+                    .background(.bgBlueElevated)
+                    .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
+                }
+
+                // Metadata chips: split method (yellow) + coverer (green).
+                HStack (spacing: .spacingSmall) {
+                    if let method = eventExpenseViewModel.selectedMethod {
+                        Nugget(text: method.splitDescription, icon: .resource(method.icon), color: .yellow)
+                    }
+                    if !eventExpenseViewModel.isEditView, let coverer = eventExpenseViewModel.selectedCoverer {
+                        Nugget(text: "\(coverer.name.getFirstName()) paid", icon: .system("person.fill"), color: .green)
                     }
                 }
             }
@@ -157,6 +168,16 @@ struct ExpenseResultView: View {
             .presentationDragIndicator(.visible)
         }
         .navigationBarBackButtonHidden(true)
+    }
+
+    /// Whether the current user may edit or delete this expense: they created it
+    /// or they own the event. Falls back to the coverer for legacy expenses that
+    /// have no stored creator (e.g. rows imported before the field existed).
+    private var canManageExpense: Bool {
+        let creator = eventExpenseViewModel.selectedExpense?.creator
+            ?? eventExpenseViewModel.selectedCoverer
+        let isCreator = creator.map { profileViewModel.isCurrentUser($0) } ?? false
+        return isCreator || eventViewModel.isUserCreator
     }
 }
 
