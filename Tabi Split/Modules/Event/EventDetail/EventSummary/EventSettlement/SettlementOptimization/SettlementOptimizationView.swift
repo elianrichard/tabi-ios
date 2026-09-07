@@ -12,8 +12,19 @@ struct SettlementOptimizationView: View {
     @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
 
-    @State private var contentSize: CGSize = .zero
     @State private var exportedPDF: ExportedPDF?
+    /// Simplified: netted settlements (fewest transfers). Non-simplified: every
+    /// direct debt between two people, no netting.
+    @State private var isSimplified = true
+
+    /// Recap rows for the active mode, current user's own row first.
+    private var recapData: [PersonBalanceData] {
+        let source = isSimplified ? eventViewModel.participantsBalance : eventViewModel.directSettlements
+        let rows = source.filter { !$0.settlement.isEmpty }
+        let current = rows.filter { profileViewModel.isCurrentUser($0.user) }
+        let others = rows.filter { !profileViewModel.isCurrentUser($0.user) }
+        return current + others
+    }
 
     var body: some View {
         VStack (spacing: 0) {
@@ -40,27 +51,24 @@ struct SettlementOptimizationView: View {
                         .padding(.horizontal)
                     }
                 }
-                VStack (alignment: .leading) {
-                    Text("Recapitulation")
-                        .font(.tabiHeadline)
-                    ScrollView (showsIndicators: false) {
+                VStack (alignment: .leading, spacing: .spacingRegular) {
+                    HStack {
+                        Text("Recapitulation")
+                            .font(.tabiHeadline)
+                        Spacer()
+                        RecapModeToggle(isSimplified: $isSimplified)
+                    }
+                    ScrollView (showsIndicators: true) {
                         VStack (spacing: .spacingMedium) {
-                            ForEach (eventViewModel.participantsBalance) { data in
+                            ForEach (recapData) { data in
                                 OptimizationRecapCard(recapData: data)
                             }
                         }
                         .padding(.vertical, .spacingTight)
-                        .overlay(
-                            GeometryReader { geo in
-                                Color.clear.onAppear {
-                                    contentSize = geo.size
-                                }
-                            }
-                        )
+                        .frame(maxWidth: .infinity)
                     }
                     .padding(.horizontal, .spacingRegular)
-                    .frame(maxWidth: .infinity, maxHeight: contentSize.height)
-//                    .frame(height: contentSize.height)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .overlay {
                         RoundedRectangle(cornerRadius: .radiusLarge)
                             .strokeBorder(.uiGray, lineWidth: 1)
@@ -68,9 +76,9 @@ struct SettlementOptimizationView: View {
                     .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
                     .padding(1)
                 }
+                .frame(maxHeight: .infinity)
                 .padding([.bottom, .horizontal])
             }
-            Spacer()
         }
         .navigationBarBackButtonHidden(true)
         .sheet(item: $exportedPDF) { pdf in
@@ -83,6 +91,23 @@ struct SettlementOptimizationView: View {
         let current = eventViewModel.participantsBalance.filter { profileViewModel.isCurrentUser($0.user) }
         let others = eventViewModel.participantsBalance.filter { !profileViewModel.isCurrentUser($0.user) }
         return current + others
+    }
+
+    /// Flattens a settlement source into PDF recap rows, current user's rows first
+    /// (matching the on-screen ordering).
+    private func recapPDF(from source: [PersonBalanceData]) -> [OptimizationRecapPDFData] {
+        let rows = source.filter { !$0.settlement.isEmpty }
+        let current = rows.filter { profileViewModel.isCurrentUser($0.user) }
+        let others = rows.filter { !profileViewModel.isCurrentUser($0.user) }
+        return (current + others).flatMap { participant in
+            participant.settlement.map { settlement in
+                OptimizationRecapPDFData(
+                    fromName: participant.user.name,
+                    toName: settlement.userPaid.name,
+                    amount: settlement.amount
+                )
+            }
+        }
     }
 
     private func statusText(for status: EventCardStatusEnum) -> String {
@@ -105,15 +130,10 @@ struct SettlementOptimizationView: View {
             )
         }
 
-        let recap = orderedParticipants.flatMap { participant in
-            participant.settlement.map { settlement in
-                OptimizationRecapPDFData(
-                    fromName: participant.user.name,
-                    toName: settlement.userPaid.name,
-                    amount: settlement.amount
-                )
-            }
-        }
+        // The PDF always carries both recap views regardless of the on-screen
+        // toggle: "Simplified" (netted) and "Detailed" (raw pairwise).
+        let simplifiedRecap = recapPDF(from: eventViewModel.participantsBalance)
+        let detailedRecap = recapPDF(from: eventViewModel.directSettlements)
 
         let expenses = (eventViewModel.selectedEvent?.expenses ?? [])
             .sorted { $0.dateOfCreation < $1.dateOfCreation }
@@ -153,7 +173,8 @@ struct SettlementOptimizationView: View {
             eventName: eventViewModel.eventName,
             generatedByName: eventViewModel.userBalance.user.name,
             persons: persons,
-            recap: recap,
+            simplifiedRecap: simplifiedRecap,
+            detailedRecap: detailedRecap,
             expenses: expenses
         ))
 
@@ -163,6 +184,42 @@ struct SettlementOptimizationView: View {
 
         guard (try? data.write(to: url)) != nil else { return }
         exportedPDF = ExportedPDF(url: url)
+    }
+}
+
+/// Pill segmented control switching the recap between the netted "Simplified"
+/// view and the raw "Detailed" pairwise view. Styled with the app's blue accent
+/// tokens to match other interactive controls.
+private struct RecapModeToggle: View {
+    @Binding var isSimplified: Bool
+
+    var body: some View {
+        HStack (spacing: 0) {
+            segment(title: "Simplified", isActive: isSimplified) {
+                isSimplified = true
+            }
+            segment(title: "Detailed", isActive: !isSimplified) {
+                isSimplified = false
+            }
+        }
+        .padding(2)
+        .background(.buttonBlueSelected)
+        .clipShape(Capsule())
+    }
+
+    private func segment(title: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.15)) { action() }
+        }) {
+            Text(title)
+                .font(isActive ? .tabiBody2 : .tabiBody)
+                .foregroundStyle(isActive ? .textWhite : .textBlue)
+                .padding(.horizontal, .spacingRegular)
+                .padding(.vertical, .spacingXSmall)
+                .background(isActive ? Color.buttonBlue : .clear)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 

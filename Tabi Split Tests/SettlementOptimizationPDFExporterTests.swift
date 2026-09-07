@@ -15,8 +15,12 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             OptimizationPersonPDFData(name: "Elian", isCurrentUser: true, lent: 100_000, debt: 25_000, balance: 75_000, statusText: "Should receive"),
             OptimizationPersonPDFData(name: "Budi", isCurrentUser: false, lent: 0, debt: 75_000, balance: -75_000, statusText: "Should pay"),
         ],
-        recap: [OptimizationRecapPDFData] = [
+        simplifiedRecap: [OptimizationRecapPDFData] = [
             OptimizationRecapPDFData(fromName: "Budi", toName: "Elian", amount: 75_000),
+        ],
+        detailedRecap: [OptimizationRecapPDFData] = [
+            OptimizationRecapPDFData(fromName: "Budi", toName: "Andi", amount: 50_000),
+            OptimizationRecapPDFData(fromName: "Andi", toName: "Elian", amount: 50_000),
         ],
         expenses: [OptimizationExpensePDFData] = [
             OptimizationExpensePDFData(name: "KFC", date: Date(timeIntervalSince1970: 1_700_000_000), payerName: "Elian", amount: 100_000, isEquallySplit: false, equalSplitPerPerson: nil, participantNames: [], items: [
@@ -38,7 +42,8 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             eventName: "Bali Trip",
             generatedByName: "Elian",
             persons: persons,
-            recap: recap,
+            simplifiedRecap: simplifiedRecap,
+            detailedRecap: detailedRecap,
             expenses: expenses
         )
     }
@@ -58,7 +63,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
     }
 
     func testGeneratePDFWithNoParticipantsOrRecap() throws {
-        let data = SettlementOptimizationPDFExporter.generatePDF(from: makeData(persons: [], recap: []))
+        let data = SettlementOptimizationPDFExporter.generatePDF(from: makeData(persons: [], simplifiedRecap: [], detailedRecap: []))
         XCTAssertFalse(data.isEmpty, "PDF should still be generated when there are no participants or settlements.")
     }
 
@@ -80,7 +85,7 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
             ))
             recap.append(OptimizationRecapPDFData(fromName: "Person \(index)", toName: "Person 0", amount: balance))
         }
-        let data = SettlementOptimizationPDFExporter.generatePDF(from: makeData(persons: persons, recap: recap))
+        let data = SettlementOptimizationPDFExporter.generatePDF(from: makeData(persons: persons, simplifiedRecap: recap, detailedRecap: recap))
         XCTAssertFalse(data.isEmpty)
     }
 

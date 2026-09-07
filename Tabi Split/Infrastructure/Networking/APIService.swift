@@ -105,6 +105,15 @@ final class APIService: APIClient {
             }
             
             if httpResponse.statusCode == 401 {
+                // A 401 on the refresh endpoint itself means the refresh token is
+                // dead ("Invalid refresh token"). Do NOT recurse into refresh() —
+                // that spins forever and hangs the loading screen. End the session.
+                if endpoint == "/auth/refresh" {
+                    try? tokenManager.clearTokens()
+                    NotificationCenter.default.post(name: .sessionExpired, object: nil)
+                    throw APIError.unauthorized
+                }
+
                 do {
                     try await authService.refresh()
                 } catch {

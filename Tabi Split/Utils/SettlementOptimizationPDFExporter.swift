@@ -71,7 +71,10 @@ struct SettlementOptimizationPDFData {
     var eventName: String
     var generatedByName: String
     var persons: [OptimizationPersonPDFData]
-    var recap: [OptimizationRecapPDFData]
+    /// Netted "who pays whom" — the fewest-transfers view.
+    var simplifiedRecap: [OptimizationRecapPDFData]
+    /// Raw pairwise debts — every direct debt between two people, no netting.
+    var detailedRecap: [OptimizationRecapPDFData]
     var expenses: [OptimizationExpensePDFData]
 }
 
@@ -136,29 +139,58 @@ enum SettlementOptimizationPDFExporter {
             }
 
             // ---- Recapitulation (who pays whom) — always starts on its own page ----
+            // Two subsections: "Simplified" (netted) and "Detailed" (raw pairwise).
             context.beginPage()
             pageY = 40
             pageY = drawSectionTitle("Recapitulation", maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth)
             pageY += 6
-            pageY = drawRecapHeader(maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
-            pageY += 4
 
-            if data.recap.isEmpty {
-                pageY = drawInfoRow(label: "Everyone is settled — no payments needed.", value: "", maxY: pageY,
-                                    leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
-            }
-
-            for entry in data.recap {
-                if pageY > pageBottom {
+            /// Draws one recap subsection (a subtitle, a column header, then the
+            /// rows) with the same page-break handling as the rest of the doc.
+            func drawRecapSubsection(_ title: String, subtitle: String, rows: [OptimizationRecapPDFData], emptyText: String) {
+                // Keep the subtitle + header together with at least one row.
+                if pageY + 70 > pageBottom {
                     context.beginPage()
                     pageY = drawSectionTitle("Recapitulation (cont.)", maxY: 40.0,
                                              leftMargin: leftMargin, contentWidth: contentWidth)
                     pageY += 6
-                    pageY = drawRecapHeader(maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
-                    pageY += 4
                 }
-                pageY = drawRecapRow(entry, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
+                pageY = drawSubsectionTitle(title, subtitle: subtitle, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth)
+                pageY += 4
+                pageY = drawRecapHeader(maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
+                pageY += 4
+
+                if rows.isEmpty {
+                    pageY = drawInfoRow(label: emptyText, value: "", maxY: pageY,
+                                        leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
+                }
+
+                for entry in rows {
+                    if pageY > pageBottom {
+                        context.beginPage()
+                        pageY = drawSectionTitle("Recapitulation (cont.)", maxY: 40.0,
+                                                 leftMargin: leftMargin, contentWidth: contentWidth)
+                        pageY += 6
+                        pageY = drawSubsectionTitle("\(title) (cont.)", subtitle: nil, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth)
+                        pageY += 4
+                        pageY = drawRecapHeader(maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
+                        pageY += 4
+                    }
+                    pageY = drawRecapRow(entry, maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
+                }
             }
+
+            drawRecapSubsection(
+                "Simplified", subtitle: "Netted to the fewest transfers.",
+                rows: data.simplifiedRecap,
+                emptyText: "Everyone is settled — no payments needed."
+            )
+            pageY += 16
+            drawRecapSubsection(
+                "Detailed", subtitle: "Every direct debt, without netting.",
+                rows: data.detailedRecap,
+                emptyText: "Everyone is settled — no payments needed."
+            )
 
             // ---- Expense list with per-item breakdown (always starts on its own page) ----
             context.beginPage()
@@ -267,6 +299,28 @@ enum SettlementOptimizationPDFExporter {
         UIColor.separator.setFill()
         UIRectFill(CGRect(x: leftMargin, y: maxY + size.height + 2, width: contentWidth, height: 1))
         return maxY + size.height + 14
+    }
+
+    /// A lighter heading for a subsection within a section (e.g. the "Simplified"
+    /// and "Detailed" recap groups), with an optional one-line explanation.
+    private static func drawSubsectionTitle(_ text: String, subtitle: String?, maxY: CGFloat, leftMargin: CGFloat, contentWidth: CGFloat) -> CGFloat {
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 13, weight: .bold),
+            .foregroundColor: UIColor.black,
+        ]
+        let titleSize = (text as NSString).size(withAttributes: titleAttributes)
+        (text as NSString).draw(at: CGPoint(x: leftMargin, y: maxY), withAttributes: titleAttributes)
+        var bottom = maxY + titleSize.height + 2
+
+        if let subtitle {
+            let subtitleAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 10, weight: .regular),
+                .foregroundColor: UIColor.gray,
+            ]
+            (subtitle as NSString).draw(at: CGPoint(x: leftMargin, y: bottom), withAttributes: subtitleAttributes)
+            bottom += (subtitle as NSString).size(withAttributes: subtitleAttributes).height + 2
+        }
+        return bottom + 2
     }
 
     /// Mirrors `OptimizationPersonCard`: name, lent/debt, and the balance status.
