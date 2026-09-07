@@ -48,6 +48,8 @@ struct ExpenseDTO: Codable {
     var dateOfCreation: Date
     var price: Float
     var splitMethod: String
+    /// Optional so backups made before receipts existed still decode.
+    var receiptId: String?
     var participantKeys: [String]
     var items: [ExpenseItemDTO]
     var additionalCharges: [AdditionalChargeDTO]
@@ -215,6 +217,7 @@ class BackupService {
             dateOfCreation: x.dateOfCreation,
             price: x.price,
             splitMethod: x.splitMethod,
+            receiptId: x.receiptId,
             participantKeys: x.participants.compactMap { keyByUser[ObjectIdentifier($0)] },
             items: x.items.map { item in
                 ExpenseItemDTO(
@@ -403,6 +406,7 @@ class BackupService {
                     price: expDTO.price,
                     splitMethod: splitMethod,
                     participants: expParticipants,
+                    receiptId: expDTO.receiptId,
                     items: items,
                     additionalCharges: charges
                 )

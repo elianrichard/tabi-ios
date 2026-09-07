@@ -22,12 +22,16 @@ class Expense {
     var price: Float
     var splitMethod: SplitMethod.ID
     var participants: [UserData]
+    /// Backend image id of the attached purchase receipt (stored server-side in
+    /// `receipt_url`). Optional so existing SwiftData rows migrate without a value.
+    /// A fresh signed URL is fetched via GET /image/:id at display time.
+    var receiptId: String?
     @Relationship(deleteRule: .cascade, inverse: \ExpenseItem.expense) var items: [ExpenseItem]
     @Relationship(deleteRule: .cascade, inverse: \AdditionalCharge.expense) var additionalCharges: [AdditionalCharge]
     var localId: String = UUID().uuidString
     var isSynced: Bool = false
 
-    init(expenseId: String? = nil, name: String, coverer: UserData, creator: UserData? = nil, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = [], localId: String = UUID().uuidString, isSynced: Bool = false) {
+    init(expenseId: String? = nil, name: String, coverer: UserData, creator: UserData? = nil, dateOfCreation: Date? = nil, price: Float, splitMethod: SplitMethod, participants: [UserData] = [], receiptId: String? = nil, items: [ExpenseItem] = [], additionalCharges: [AdditionalCharge] = [], localId: String = UUID().uuidString, isSynced: Bool = false) {
         self.expenseId = expenseId
         self.name = name
         self.coverer = coverer
@@ -36,6 +40,7 @@ class Expense {
         self.price = price
         self.splitMethod = splitMethod.id
         self.participants = participants
+        self.receiptId = receiptId
         self.items = items
         self.additionalCharges = additionalCharges
         self.localId = localId

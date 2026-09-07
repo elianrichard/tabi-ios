@@ -54,4 +54,10 @@ enum ENV {
     /// build configurations — must match the app's CFBundleURLSchemes and the parser
     /// in ContentView.
     static let DEEPLINK_SCHEME = "tabisplit"
+
+    /// Feature flag: refine the on-device receipt OCR with the backend AI parser
+    /// (custom split + attached image, on Next). When false, the heuristic OCR
+    /// result is used as-is and no /receipt/parse call is made. Toggle here to
+    /// enable/disable without touching the flow.
+    static let RECEIPT_AI_REFINE_ENABLED = true
 }

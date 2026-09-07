@@ -20,6 +20,14 @@ protocol APIClient {
     func put<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
     func patch<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
     func delete<Response: Codable>(endpoint: String) async throws -> Response
+    func upload<Response: Codable>(
+        endpoint: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String,
+        fieldName: String,
+        fields: [String: String]
+    ) async throws -> Response
 }
 
 final class APIService: APIClient {
@@ -41,6 +49,10 @@ final class APIService: APIClient {
     ) async throws -> Response {
         var request = URLRequest(url: URL(string: config.baseURL + endpoint)!)
         request.httpMethod = method
+        // AI-backed endpoints (e.g. /receipt/parse) can take up to ~90s server-side;
+        // exceed that so the client does not cancel a request the server (and the
+        // paid AI call) is still completing.
+        request.timeoutInterval = 120
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(ENV.API_SECRET_KEY, forHTTPHeaderField: ENV.API_SECRET_HEADER)
 
@@ -81,7 +93,62 @@ final class APIService: APIClient {
     func delete<Response: Codable>(endpoint: String) async throws -> Response {
         return try await request(endpoint: endpoint, method: "DELETE", body: nil as Empty?)
     }
-    
+
+    func upload<Response: Codable>(
+        endpoint: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String,
+        fieldName: String,
+        fields: [String: String] = [:]
+    ) async throws -> Response {
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var request = URLRequest(url: URL(string: config.baseURL + endpoint)!)
+        request.httpMethod = "POST"
+        // Multipart, NOT JSON — do not set application/json here.
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue(ENV.API_SECRET_KEY, forHTTPHeaderField: ENV.API_SECRET_HEADER)
+        request.httpBody = Self.multipartBody(
+            boundary: boundary,
+            fields: fields,
+            fileField: fieldName,
+            fileName: fileName,
+            mimeType: mimeType,
+            fileData: fileData
+        )
+
+        os_log(.debug, log: .api, "API Upload POST %{public}@ (%d bytes)", endpoint, fileData.count)
+        // requestWithRetry injects the bearer token and handles 401/refresh; the
+        // multipart body lives on the URLRequest so it survives a retry.
+        return try await requestWithRetry(endpoint: endpoint, request: request)
+    }
+
+    private static func multipartBody(
+        boundary: String,
+        fields: [String: String],
+        fileField: String,
+        fileName: String,
+        mimeType: String,
+        fileData: Data
+    ) -> Data {
+        var body = Data()
+        let boundaryPrefix = "--\(boundary)\r\n"
+
+        for (key, value) in fields {
+            body.append(boundaryPrefix.data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
+
+        body.append(boundaryPrefix.data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"\(fileField)\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        return body
+    }
+
     private func requestWithRetry<Response: Codable>(
         endpoint: String,
         request: URLRequest

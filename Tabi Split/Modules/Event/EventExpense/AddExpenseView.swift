@@ -155,16 +155,19 @@ struct AddExpenseView: View {
                                     .foregroundColor(.textGrey)
                             }
                             HStack(spacing: 0){
-                                CustomButton(text: eventExpenseViewModel.uploadedReceiptImage == nil ? "Upload Image" : "Uploaded Image", type: .tertiary, icon: eventExpenseViewModel.uploadedReceiptImage == nil ? "square.and.arrow.up" : "photo", iconSize: 20, customTextColor: .buttonBlue){
+                                CustomButton(text: eventExpenseViewModel.hasReceipt ? "Uploaded Image" : "Upload Image", type: .tertiary, icon: eventExpenseViewModel.hasReceipt ? "photo" : "square.and.arrow.up", iconSize: 20, customTextColor: .buttonBlue){
                                     viewModel.toggleReceiptSheet.toggle()
                                 }
                                 .lineLimit(1)
-                                
-                                if eventExpenseViewModel.uploadedReceiptImage != nil{
+
+                                if eventExpenseViewModel.hasReceipt {
                                     Button{
+                                        // Clear both the pending image and the stored
+                                        // id so the receipt is removed on save.
                                         eventExpenseViewModel.uploadedReceiptImage = nil
+                                        eventExpenseViewModel.uploadedReceiptId = nil
                                     }label:{
-                                        Icon(systemName: "xmark", color: .textGrey, size: 10)
+                                        Icon(systemName: "xmark", color: .buttonRed, size: 10)
                                     }
                                     .padding(.trailing, .spacingRegular)
                                 }
@@ -232,7 +235,16 @@ struct AddExpenseView: View {
                 CustomButton(text: "Next") {
                     viewModel.validateInput()
                     if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
-                        router.push(.expenseAddItems)
+                        // Custom split with an attached receipt: refine the on-device
+                        // OCR with the AI before showing the items, then advance.
+                        if eventExpenseViewModel.hasReceipt {
+                            Task {
+                                await eventExpenseViewModel.refineReceiptWithAI()
+                                router.push(.expenseAddItems)
+                            }
+                        } else {
+                            router.push(.expenseAddItems)
+                        }
                     } else if (eventExpenseViewModel.selectedMethod == .equally && viewModel.isValid) {
                         eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
                         router.push(.expenseResult)

@@ -39,7 +39,7 @@ struct CreateExpenseRequest: Codable {
         self.name = expense.name
         self.coverer_id = expense.coverer.userId
         self.split_method = expense.splitMethod
-        self.receipt_url = ""
+        self.receipt_url = expense.receiptId ?? ""
         self.items = expense.items.map { ExpenseItemBase(expenseItem: $0) }
         self.additional_charges = expense.additionalCharges.map { ExpenseAdditionalChargeBase(expenseAdditionalCharge: $0) }
     }
@@ -159,7 +159,7 @@ struct UpdateExpenseRequest: Codable {
         self.name = expense.name
         self.coverer_id = expense.coverer.userId
         self.split_method = expense.splitMethod
-        self.receipt_url = ""
+        self.receipt_url = expense.receiptId ?? ""
         self.items = expense.items.map { ExpenseItemBase(expenseItem: $0) }
         self.additional_charges = expense.additionalCharges.map { ExpenseAdditionalChargeBase(expenseAdditionalCharge: $0) }
         self.deleted_item_ids = expense.items.compactMap { $0.itemId }

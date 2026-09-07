@@ -44,10 +44,11 @@ struct ReceiptUploadSheet: View {
                         Task{
                             if receiptUploadViewModel.receiptImageFromGallery != nil {
                                 await receiptUploadViewModel.getImage()
-                                receiptUploadViewModel.straightenDocument(in: receiptUploadViewModel.receiptImage ?? UIImage()) { image in
-                                    receiptUploadViewModel.receiptImageProcessed = image
-                                    receiptUploadViewModel.isLoading = false
-                                }
+                                // Gallery photos are used as-is (orientation baked
+                                // to .up so they don't upload rotated). The camera
+                                // path uses the VisionKit scanner for cropping.
+                                receiptUploadViewModel.receiptImageProcessed = receiptUploadViewModel.receiptImage?.normalizedUp()
+                                receiptUploadViewModel.isLoading = false
                             }
                         }
                     }
@@ -77,15 +78,17 @@ struct ReceiptUploadSheet: View {
         .padding()
         .padding([.top], 10)
         .fullScreenCover(isPresented: Bindable(receiptUploadViewModel).toggleScannerSheet) {
-            CameraView(capturedImage: $receiptUploadViewModel.receiptImage, toggleClose: Bindable(receiptUploadViewModel).toggleScannerSheet)
-                .onChange(of: receiptUploadViewModel.receiptImage) {
-                    receiptUploadViewModel.straightenDocument(in: receiptUploadViewModel.receiptImage ?? UIImage()) { image in
-                        receiptUploadViewModel.receiptImageProcessed = image
-                        receiptUploadViewModel.isLoading = false
-                    }
-                }
-                .background(.black)
-                .background(ignoresSafeAreaEdges: .all)
+            // VisionKit scanner: live edge detection + draggable corner dots +
+            // perspective crop. Its output is already cropped, so it feeds
+            // receiptImageProcessed directly (no straightenDocument step).
+            DocumentScannerView(
+                scannedImage: $receiptUploadViewModel.receiptImage,
+                isPresented: Bindable(receiptUploadViewModel).toggleScannerSheet
+            )
+            .onChange(of: receiptUploadViewModel.receiptImage) {
+                receiptUploadViewModel.receiptImageProcessed = receiptUploadViewModel.receiptImage
+            }
+            .ignoresSafeArea()
         }
         .background(
             GeometryReader { geometry in
@@ -97,7 +100,7 @@ struct ReceiptUploadSheet: View {
         )
         .background(.bgWhite)
         .onChange(of: receiptUploadViewModel.receiptImageProcessed){
-            eventExpenseViewModel.uploadedReceiptImage = receiptUploadViewModel.receiptImageProcessed ?? UIImage()
+            eventExpenseViewModel.attachReceiptImage(receiptUploadViewModel.receiptImageProcessed)
             isPresented.toggle()
         }
     }

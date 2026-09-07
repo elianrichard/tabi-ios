@@ -40,4 +40,19 @@ extension UIImage {
         return data1 == data2
     }
 
+    /// Returns a copy whose pixel buffer is baked to `.up` orientation. Camera and
+    /// gallery photos often carry an EXIF orientation (e.g. `.right`), which makes
+    /// the raw `cgImage` pixels differ from what's displayed. Redrawing to `.up`
+    /// keeps Vision detection, on-screen corner dots, and CIPerspectiveCorrection
+    /// in one consistent coordinate space.
+    func normalizedUp() -> UIImage {
+        if imageOrientation == .up { return self }
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = scale
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { _ in
+            draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+
 }

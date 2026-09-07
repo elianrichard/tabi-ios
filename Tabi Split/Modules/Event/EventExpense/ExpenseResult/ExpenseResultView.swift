@@ -16,6 +16,15 @@ struct ExpenseResultView: View {
     
     @State private var contentSize: CGSize = .zero
     @State private var isShowReceiptSheet = false
+
+    /// The stored receipt image id for this expense, if any. Prefers the saved
+    /// expense's value; falls back to the just-uploaded id during the add flow.
+    private var receiptId: String? {
+        let id = eventExpenseViewModel.selectedExpense?.receiptId
+            ?? eventExpenseViewModel.uploadedReceiptId
+        guard let id, !id.isEmpty else { return nil }
+        return id
+    }
     
     var body: some View {
         VStack (alignment: .leading) {
@@ -112,14 +121,12 @@ struct ExpenseResultView: View {
             }
             //            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
-            //            TEMPORARILY DISABLED: UPLOAD IMAGE RECEIPT
-            if (false) {
-                if !eventExpenseViewModel.isEditView {
-                    CustomButton(text: "Check Purchase Receipt", type: .tertiary) {
-                        isShowReceiptSheet = true
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
+            // Show the receipt only when this expense actually has one attached.
+            if receiptId != nil && !eventExpenseViewModel.isEditView {
+                CustomButton(text: "Check Purchase Receipt", type: .secondary) {
+                    isShowReceiptSheet = true
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
             }
             
             Spacer()
@@ -146,26 +153,10 @@ struct ExpenseResultView: View {
         }
         .padding()
         .addBackgroundColor(.bgWhite)
-        .sheet(isPresented: $isShowReceiptSheet) {
-            VStack (spacing: 0) {
-                SheetXButton(toggle: $isShowReceiptSheet)
-                VStack (alignment: .leading, spacing: .spacingMedium) {
-                    Text("Purchase Receipt")
-                        .font(.tabiTitle)
-                    RoundedRectangle(cornerRadius: .radiusLarge)
-                        .fill(.bgWhite)
-                        .overlay {
-                            Image(.samplePaymentReceipt)
-                                .resizable()
-                                .scaledToFit()
-                                .padding(.spacingRegular)
-                        }
-                }
+        .fullScreenCover(isPresented: $isShowReceiptSheet) {
+            if let receiptId {
+                ReceiptViewerView(receiptId: receiptId, isPresented: $isShowReceiptSheet)
             }
-            .padding()
-            .addBackgroundColor(.bgWhite)
-            .presentationDetents([.height(700)])
-            .presentationDragIndicator(.visible)
         }
         .navigationBarBackButtonHidden(true)
     }

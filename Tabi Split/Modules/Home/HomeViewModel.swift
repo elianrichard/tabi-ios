@@ -68,7 +68,7 @@ final class HomeViewModel {
                     }
                 }
                 let creator = expense.creator_id.flatMap { SwiftDataService.shared.getUserByUserId($0) }
-                let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, creator: creator, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants, isSynced: true)
+                let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, creator: creator, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants, receiptId: expense.receipt_url.isEmpty ? nil : expense.receipt_url, isSynced: true)
                 newEvent.expenses.append(newExpense)
                 for additionalCharge in expense.additional_charges {
                     newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
@@ -142,7 +142,7 @@ final class HomeViewModel {
                         }
                         
                         let creator = expense.creator_id.flatMap { SwiftDataService.shared.getUserByUserId($0) }
-                        newEvent.expenses.append( Expense(expenseId: expense.id, name: expense.name, coverer: coverer, creator: creator, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants, isSynced: true) )
+                        newEvent.expenses.append( Expense(expenseId: expense.id, name: expense.name, coverer: coverer, creator: creator, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants, receiptId: expense.receipt_url.isEmpty ? nil : expense.receipt_url, isSynced: true) )
                         SwiftDataService.shared.saveModelContext()
                         
                         if let newExpense = newEvent.expenses.first(where: { $0.expenseId == expense.id }) {
