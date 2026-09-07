@@ -25,7 +25,7 @@ struct SeeAllParticipantSheet: View {
     var body: some View {
         CustomSheet (xToggleBinding: $isPresented) {
             VStack(spacing: .spacingMedium) {
-                Text("All Participants")
+                Text("All Participants (" + String(participantsList.count) + ")")
                     .font(.tabiTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 SearchInput(text: $nameToBeSearched, placeholder: "Search")
