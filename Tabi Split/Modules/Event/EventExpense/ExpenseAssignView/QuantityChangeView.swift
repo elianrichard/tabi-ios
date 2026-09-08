@@ -15,48 +15,55 @@ struct QuantityChangeView: View {
     @Binding var close: Bool
     
     var body: some View {
-        VStack(alignment: .leading){
-            Text(item.itemName)
-                .font(.tabiTitle)
-                .fontWeight(.bold)
-            Text("Quantity: " + String(item.itemQuantity.formatted(.number)))
-                .font(.tabiBody)
-                .padding(.bottom, 24)
-            ScrollView {
-                LazyVStack {
-                    ForEach(Array(item.assignees.enumerated()), id: \.offset) { (index, assignee) in
-                        HStack(alignment: .center){
-                            UserAvatar(userData: assignee.user, size: 40)
-                                .padding([.trailing], 12)
-                            HStack(spacing: 0){
-                                Text(assignee.user.name)
-                                    .font(.tabiHeadline)
-                                if profileViewModel.user == assignee.user {
-                                    Text(" (You)")
-                                        .font(.tabiBody)
-                                        .foregroundColor(.textGrey)
+        VStack(spacing: 0) {
+            SheetXButton(toggle: $close)
+            VStack(alignment: .leading, spacing: .spacingMedium) {
+                VStack(alignment: .leading, spacing: .spacingXSmall) {
+                    Text(item.itemName)
+                        .font(.tabiTitle)
+                    Text("Quantity: " + String(item.itemQuantity.formatted(.number)))
+                        .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: .spacingTight) {
+                        ForEach(Array(item.assignees.enumerated()), id: \.offset) { (index, assignee) in
+                            HStack(alignment: .center){
+                                UserAvatar(userData: assignee.user, size: 40)
+                                    .padding([.trailing], 12)
+                                HStack(spacing: 0){
+                                    Text(assignee.user.name.getFirstTwoWords())
+                                        .font(.tabiHeadline)
+                                        .lineLimit(1)
+                                    if profileViewModel.user == assignee.user {
+                                        Text(" (You)")
+                                            .font(.tabiBody)
+                                            .foregroundColor(.textGrey)
+                                    }
                                 }
-                            }
-                            Spacer()
-                            HStack{
+                                Spacer()
                                 QuantityCounter(quantity: Bindable(assignee).share, letZero: true)
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 16)
+                            .background(.bgWhite)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(.clear)
+                                    .stroke(.bgGreyOverlay, lineWidth: 0.5)
+                                    .padding(0.5)
+                            }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
-                        .background(.bgWhite)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color(.lightGray), lineWidth: 0.5)
-                                .padding(0.5)
-                        )
                     }
                 }
-            }
-            CustomButton(text: "Save") {
-                close.toggle()
+
+                CustomButton(text: "Save") {
+                    close.toggle()
+                }
             }
         }
         .onDisappear{
@@ -65,6 +72,7 @@ struct QuantityChangeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding()
         .padding([.top], 10)
+        .addBackgroundColor(.bgWhite)
     }
 }
 

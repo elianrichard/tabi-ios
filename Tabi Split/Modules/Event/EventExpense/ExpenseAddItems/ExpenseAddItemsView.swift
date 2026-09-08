@@ -12,20 +12,11 @@ import SwiftData
 struct ExpenseAddItemsView: View {
     @Environment(Router.self) private var router
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
-    
+
     var body: some View {
         VStack (alignment: .leading){
             TopNavigation(title: "Add Items")
-            VStack (alignment: .leading, spacing: .spacingTight) {
-                Text(eventExpenseViewModel.expenseName)
-                    .font(.tabiTitle)
-                HStack {
-                    Icon(eventExpenseViewModel.selectedMethod?.icon)
-                    Text(eventExpenseViewModel.selectedMethod?.splitDescription ?? "")
-                        .font(.tabiBody)
-                }
-            }
-            .padding([.bottom], 24)
+            ExpenseHeaderView()
             ScrollView (showsIndicators: false) {
                 VStack (alignment: .leading, spacing: 16) {
                     Text("Items")

@@ -16,7 +16,8 @@ struct AddExpenseView: View {
     @Environment(Router.self) private var router
     @State var viewModel: AddExpenseViewModel = AddExpenseViewModel()
     @State var hasPreviewed: Bool = false
-    
+    @State private var isShowReceiptPreview: Bool = false
+
     @FocusState private var focusedField: FocusField?
     
     var body: some View {
@@ -145,34 +146,29 @@ struct AddExpenseView: View {
                             )
                         }
                     } // Input nominal kalau equally
-                    if !eventExpenseViewModel.isQuickScanned {
-                        VStack(alignment: .leading, spacing: 8){
-                            HStack(spacing: 0){
-                                Text("Purchase Receipt ")
-                                    .font(.tabiBody)
-                                Text("(optional)")
-                                    .font(.tabiBody)
-                                    .foregroundColor(.textGrey)
-                            }
-                            HStack(spacing: 0){
-                                CustomButton(text: eventExpenseViewModel.hasReceipt ? "Uploaded Image" : "Upload Image", type: .tertiary, icon: eventExpenseViewModel.hasReceipt ? "photo" : "square.and.arrow.up", iconSize: 20, customTextColor: .buttonBlue){
+                    // Receipt field shown in both flows. In quick scan the scanned
+                    // image is already attached (hasReceipt == true) and appears here
+                    // so it's persisted with the expense and can be viewed/changed.
+                    VStack(alignment: .leading, spacing: 8){
+                        HStack(spacing: 0){
+                            Text("Purchase Receipt ")
+                                .font(.tabiBody)
+                            Text("(optional)")
+                                .font(.tabiBody)
+                                .foregroundColor(.textGrey)
+                        }
+                        HStack(spacing: .spacingRegular){
+                            CustomButton(text: eventExpenseViewModel.hasReceipt ? "Uploaded Image" : "Upload Image", type: .tertiary, icon: eventExpenseViewModel.hasReceipt ? "photo" : "square.and.arrow.up", iconSize: 20, customTextColor: .buttonBlue){
+                                // With a receipt attached, the button previews it;
+                                // removing (Clear) is the way to replace it. Without
+                                // one, it opens the upload sheet.
+                                if eventExpenseViewModel.hasReceipt {
+                                    isShowReceiptPreview = true
+                                } else {
                                     viewModel.toggleReceiptSheet.toggle()
                                 }
-                                .lineLimit(1)
-
-                                if eventExpenseViewModel.hasReceipt {
-                                    Button{
-                                        // Clear both the pending image and the stored
-                                        // id so the receipt is removed on save.
-                                        eventExpenseViewModel.uploadedReceiptImage = nil
-                                        eventExpenseViewModel.uploadedReceiptId = nil
-                                    }label:{
-                                        Icon(systemName: "xmark", color: .buttonRed, size: 10)
-                                    }
-                                    .padding(.trailing, .spacingRegular)
-                                }
                             }
-                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
+                            .lineLimit(1)
                             .font(.tabiHeadline)
                             .overlay {
                                 RoundedRectangle(cornerRadius: .infinity)
@@ -180,106 +176,50 @@ struct AddExpenseView: View {
                                     .stroke(.buttonBlue, lineWidth: 1.5)
                                     .padding(1.5)
                             }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    } else if eventExpenseViewModel.selectedMethod == .custom {
-                        VStack (alignment: .leading, spacing: 16) {
-                            Text("Items")
-                                .font(.tabiHeadline)
-                            VStack(alignment: .leading) {
-                                ForEach(Array(eventExpenseViewModel.items.enumerated()), id: \.offset) { index, item in
-                                    if index < eventExpenseViewModel.items.count {
-                                        AddItemContainer(item: Bindable(eventExpenseViewModel).items[index], index: index)
+                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
+
+                            // Clear button — beside the upload button. Removes the
+                            // receipt so a different one can be attached.
+                            if eventExpenseViewModel.hasReceipt {
+                                Button{
+                                    eventExpenseViewModel.uploadedReceiptImage = nil
+                                    eventExpenseViewModel.uploadedReceiptId = nil
+                                }label:{
+                                    HStack(spacing: 4){
+                                        Icon(systemName: "xmark", color: .buttonRed, size: 10)
+                                        Text("Clear")
+                                            .font(.tabiBody2)
+                                            .foregroundStyle(.buttonRed)
                                     }
                                 }
                             }
-                            
-                            HStack{
-                                CustomButton(text: "+ Add Item", type: .secondary) {
-                                    eventExpenseViewModel.createNewExpenseItem()
-                                }
-                                .frame(width: 120)
-                            }
-                            .frame(maxWidth: .infinity)
-                            
-                            Divider()
-                                .padding(.horizontal, 16)
-                            
-                            VStack (alignment: .leading, spacing: 16) {
-                                HStack(spacing: 0){
-                                    Text("Additional Charge ")
-                                        .font(.tabiBody)
-                                    Text("(optional)")
-                                        .font(.tabiBody)
-                                        .foregroundColor(.textGrey)
-                                }
-                                LazyVStack(alignment: .leading){
-                                    ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
-                                        if index < eventExpenseViewModel.additionalCharges.count {
-                                            AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
-                                        }
-                                    }
-                                }
-                                CustomButton(text: "+ Add More", type: .tertiary, vPadding: 0){
-                                    eventExpenseViewModel.additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
-                                }
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             
-            if !eventExpenseViewModel.isQuickScanned || eventExpenseViewModel.selectedMethod == .equally {
-                CustomButton(text: "Next") {
-                    viewModel.validateInput()
-                    if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
-                        // Custom split with an attached receipt: refine the on-device
-                        // OCR with the AI before showing the items, then advance.
-                        if eventExpenseViewModel.hasReceipt {
-                            Task {
-                                await eventExpenseViewModel.refineReceiptWithAI()
-                                router.push(.expenseAddItems)
-                            }
-                        } else {
+            // One flow for both manual and quick scan: custom → items page (items
+            // pre-filled by OCR for quick scan), equally → result.
+            CustomButton(text: "Next") {
+                viewModel.validateInput()
+                if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
+                    // Only re-run OCR/AI when a NEW image was just attached
+                    // (uploadedReceiptImage set). On edit without a re-upload the
+                    // image is absent (only the stored id remains), so keep the
+                    // existing items instead of re-parsing.
+                    if eventExpenseViewModel.uploadedReceiptImage != nil {
+                        Task {
+                            await eventExpenseViewModel.refineReceiptWithAI()
                             router.push(.expenseAddItems)
                         }
-                    } else if (eventExpenseViewModel.selectedMethod == .equally && viewModel.isValid) {
-                        eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
-                        router.push(.expenseResult)
+                    } else {
+                        router.push(.expenseAddItems)
                     }
+                } else if (eventExpenseViewModel.selectedMethod == .equally && viewModel.isValid) {
+                    eventExpenseViewModel.totalSpending = eventExpenseViewModel.expenseTotalInput
+                    router.push(.expenseResult)
                 }
-            }else{
-                ZStack{
-                    HStack(alignment: .top){
-                        Text("Total")
-                            .font(.tabiBody)
-                        Spacer()
-                        Text("Rp\(eventExpenseViewModel.totalSpending.formatPrice())")
-                            .font(.tabiHeadline)
-                    }
-                    .padding(16)
-                    .background{
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(.bgBlueElevated)
-                            .stroke(.buttonBlueSelected, lineWidth: 1)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 90)
-                            .offset(CGSize(width: 0, height: 15))
-                            .zIndex(1)
-                    }
-                    .offset(CGSize(width: 0, height: -50))
-                        .zIndex(1)
-                    CustomButton(text: "Next", isEnabled: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0, customBackgroundColor: eventExpenseViewModel.items.map({$0.itemPrice}).reduce(0, +) != 0 ? .buttonBlue : .buttonGrey) {
-                        viewModel.validateInput()
-                        if viewModel.isValid{
-                            router.push(.expenseAssign)
-                        }
-                    }
-                    .zIndex(2)
-                }
-                .padding([.top], 60)
             }
         }
         .onAppear{
@@ -298,10 +238,20 @@ struct AddExpenseView: View {
                     [.medium, .large],
                     selection: Bindable(viewModel).settingsDetent
                 )
+                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: Bindable(viewModel).toggleReceiptSheet){
             ReceiptUploadSheet(height: $viewModel.receiptSheetHeight, isPresented: Bindable(viewModel).toggleReceiptSheet)
                 .presentationDetents([.height(viewModel.receiptSheetHeight)])
+                .presentationDragIndicator(.visible)
+        }
+        .fullScreenCover(isPresented: $isShowReceiptPreview) {
+            // Preview the attached receipt: local image (create) or stored id (edit).
+            if let image = eventExpenseViewModel.uploadedReceiptImage {
+                ReceiptViewerView(image: image, isPresented: $isShowReceiptPreview)
+            } else if let id = eventExpenseViewModel.uploadedReceiptId, !id.isEmpty {
+                ReceiptViewerView(receiptId: id, isPresented: $isShowReceiptPreview)
+            }
         }
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
             if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil{

@@ -37,19 +37,26 @@ struct DocumentScannerView: UIViewControllerRepresentable {
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
-            // Single-receipt flow: take the first page. The scan is already
-            // cropped to the corners the user confirmed.
+            // Single-receipt flow: VisionKit allows multiple pages, but we only ever
+            // use the FIRST — a receipt is one image. Extra pages are ignored.
+            print("[DocumentScanner] didFinish — \(scan.pageCount) page(s); using page 0")
             if scan.pageCount > 0 {
-                parent.scannedImage = scan.imageOfPage(at: 0)
+                let image = scan.imageOfPage(at: 0)
+                print("[DocumentScanner] page 0 = \(Int(image.size.width))x\(Int(image.size.height))")
+                parent.scannedImage = image
+            } else {
+                print("[DocumentScanner] no pages in scan")
             }
             parent.isPresented = false
         }
 
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+            print("[DocumentScanner] cancelled")
             parent.isPresented = false
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
+            print("[DocumentScanner] failed: \(error)")
             parent.isPresented = false
         }
     }

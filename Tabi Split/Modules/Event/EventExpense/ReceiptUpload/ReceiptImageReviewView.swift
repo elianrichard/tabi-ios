@@ -59,6 +59,7 @@ struct ReceiptImageReviewView: View {
         .sheet(isPresented: $toggleReceiptSheet){
             ReceiptUploadSheet(height: $receiptSheetHeight, isPresented: $toggleReceiptSheet)
                 .presentationDetents([.height(receiptSheetHeight)])
+                .presentationDragIndicator(.visible)
         }
     }
 }

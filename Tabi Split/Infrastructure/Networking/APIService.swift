@@ -233,10 +233,20 @@ final class APIService: APIClient {
             }
             os_log(.error, log: .api, "API Error: %{public}@", String(describing: error))
             let apiError = (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
-            notifyError(apiError)
+            // Some endpoints (best-effort AI features) degrade gracefully; their
+            // failures are logged, not surfaced as a blocking dialog to the user.
+            if !Self.silentErrorEndpoints.contains(where: { endpoint.hasPrefix($0) }) {
+                notifyError(apiError)
+            }
             throw apiError
         }
     }
+
+    /// Endpoints whose failures are suppressed from the blocking error dialog —
+    /// the caller handles them (logs + falls back) rather than interrupting the user.
+    private static let silentErrorEndpoints: [String] = [
+        "/receipt/parse",
+    ]
 
     private func notifyError(_ error: APIError) {
         // .unauthorized is handled by the session-expired flow (banner + logout);

@@ -30,8 +30,17 @@ final class EventExpenseViewModel {
         return selectedExpense == nil || isEdit
     }
     var isQuickScanned = false
-    
-    var expenseName: String = ""
+
+    /// Max characters for an expense name. Enforced in `expenseName`'s didSet so the
+    /// cap applies to every source — manual typing, OCR, and AI refinement alike.
+    static let maxExpenseNameLength = 40
+    var expenseName: String = "" {
+        didSet {
+            if expenseName.count > Self.maxExpenseNameLength {
+                expenseName = String(expenseName.prefix(Self.maxExpenseNameLength))
+            }
+        }
+    }
     var expenseTotalInput: Float = 0
     var selectedParticipants: [UserData] = []
     var selectedMethod: SplitMethod?
@@ -52,6 +61,10 @@ final class EventExpenseViewModel {
     /// The raw OCR rows (grouped, top→bottom) from the last scan, kept so the AI
     /// refinement can re-read the receipt text alongside the on-device draft.
     var lastOCRLines: [String] = []
+    /// Whether the last OCR run extracted at least one real item/price. Used to
+    /// skip the AI call for non-receipt images (a selfie, a random photo) — no
+    /// point paying for an AI parse when the receipt has no detectable content.
+    var ocrFoundItems: Bool = false
     var uploadedReceiptImage: UIImage?
     /// The backend image id for the uploaded receipt. Set after the image is
     /// uploaded (just-in-time, at finalize/update time) and persisted as the
@@ -96,6 +109,18 @@ final class EventExpenseViewModel {
     }
     func createNewExpenseItem () {
         items.append(ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 1))
+    }
+
+    /// Guarantees the add-items UI is never empty: at least one item row (blank
+    /// name, price 0, qty 1) and one additional-charge row (tax, empty amount).
+    /// Called after any path that rebuilds items/charges (OCR, AI, populate).
+    func ensureMinimumRows() {
+        if items.isEmpty {
+            items.append(ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 1))
+        }
+        if additionalCharges.isEmpty {
+            additionalCharges.append(AdditionalCharge(additionalChargeType: .tax, amount: 0))
+        }
     }
     func calculatePersonSpending(person: PersonItem) -> Float {
         let totalSpent = person.items.reduce(0) { $0 + ($1.itemPrice) * Float($1.itemQuantity) }
@@ -148,6 +173,8 @@ final class EventExpenseViewModel {
         ]
         uploadedReceiptImage = nil
         uploadedReceiptId = nil
+        lastOCRLines = []
+        ocrFoundItems = false
     }
 
     /// Clears the transient receipt state after a successful create/update so the
@@ -220,6 +247,9 @@ final class EventExpenseViewModel {
             } else if (expense.splitMethod == SplitMethod.custom.id) {
                 calculatePeopleItems()
             }
+            // A saved expense may have no additional charges — keep the edit UI
+            // non-empty with the default tax row.
+            ensureMinimumRows()
         }
     }
     func normalizeString(_ input: String) -> String {
@@ -472,6 +502,10 @@ final class EventExpenseViewModel {
             items.append(ExpenseItem(itemName: item[0], itemPrice: unitPrice, itemQuantity: Float(quantity)))
         }
 
+        // Record whether OCR found any real content BEFORE ensureMinimumRows() pads
+        // the list — a non-receipt image (selfie, random photo) yields nothing here.
+        ocrFoundItems = !items.isEmpty || !additionalCharges.isEmpty
+
         // ── Single verification dump ──────────────────────────────────────────
         // The raw OCR rows (grouped by line, top→bottom) plus the parsed result as
         // JSON. Copy from the console (filter "ReceiptOCR") into an AI to re-parse
@@ -526,6 +560,9 @@ final class EventExpenseViewModel {
         ═════════════════════════════════════════════════════
         """
         os_log(.info, log: .ocr, "%{public}@", dump)
+
+        // OCR may yield zero items/charges — keep the add-items UI non-empty.
+        ensureMinimumRows()
     }
 
     /// Builds an on-device draft from the current OCR result, in the schema the
@@ -559,15 +596,33 @@ final class EventExpenseViewModel {
     @MainActor
     @discardableResult
     func refineReceiptWithAI() async -> Bool {
-        guard ENV.RECEIPT_AI_REFINE_ENABLED, !lastOCRLines.isEmpty else { return false }
+        guard ENV.RECEIPT_AI_REFINE_ENABLED, !lastOCRLines.isEmpty, ocrFoundItems else {
+            os_log(.info, log: .ocr, "AI refine skipped (enabled=%{public}@, lines=%d, ocrFoundItems=%{public}@) — likely not a receipt",
+                   ENV.RECEIPT_AI_REFINE_ENABLED ? "true" : "false", lastOCRLines.count, ocrFoundItems ? "true" : "false")
+            return false
+        }
         isApiCallLoading = true
         defer { isApiCallLoading = false }
+
+        let draft = buildReceiptDraft()
+        os_log(.info, log: .ocr, "AI refine → sending %d OCR lines + draft (%d items, %d charges) to /receipt/parse",
+               lastOCRLines.count, draft.items.count, draft.additional_charges.count)
         do {
-            let refined = try await ReceiptParseService.shared.parse(lines: lastOCRLines, draft: buildReceiptDraft())
+            let refined = try await ReceiptParseService.shared.parse(lines: lastOCRLines, draft: draft)
+            os_log(.info, log: .ocr, "AI refine ← received %d items, %d charges, total %{public}.0f",
+                   refined.items.count, refined.additional_charges.count, refined.total)
+            for item in refined.items {
+                os_log(.info, log: .ocr, "  AI item: %{public}@ x%d = %{public}.0f (unit %{public}.0f)",
+                       item.name, item.quantity, item.line_total, item.unit_price)
+            }
+            for charge in refined.additional_charges {
+                os_log(.info, log: .ocr, "  AI charge: %{public}@ (%{public}@) = %{public}.0f",
+                       charge.name, charge.type, charge.amount)
+            }
             applyRefinedReceipt(refined)
             return true
         } catch {
-            print("Receipt AI refinement failed: \(error)")
+            os_log(.error, log: .ocr, "AI refine FAILED (kept on-device parse): %{public}@", String(describing: error))
             return false
         }
     }
@@ -586,6 +641,8 @@ final class EventExpenseViewModel {
         if receipt.total > 0 {
             totalSpending = Float(receipt.total)
         }
+        // Keep the add-items UI non-empty even if the AI returned nothing.
+        ensureMinimumRows()
         calculateTotal()
     }
 

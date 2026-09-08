@@ -17,9 +17,14 @@ final class ReceiptUploadViewModel{
     var receiptImageProcessed: UIImage?
     var isLoading: Bool = false
 
-    func getImage() async{
+    /// Loads the picked gallery image and RETURNS it. It intentionally does not
+    /// write `receiptImage` — that property is watched by the camera-scanner
+    /// observer, and writing it from the gallery path would fire that observer too,
+    /// setting `receiptImageProcessed` twice and re-presenting the sheet.
+    func getImage() async -> UIImage? {
         if let data = try? await receiptImageFromGallery?.loadTransferable(type: Data.self) {
-            receiptImage = UIImage(data: data)
+            return UIImage(data: data)
         }
+        return nil
     }
 }

@@ -10,11 +10,29 @@
 import SwiftUI
 
 struct ReceiptViewerView: View {
-    /// Backend image id of the receipt to display.
-    let receiptId: String
+    /// Where the receipt image comes from: a stored image id (fetched via
+    /// GET /image/:id) for a saved expense, or a local UIImage for the create flow
+    /// where the image is attached but not yet uploaded.
+    enum Source {
+        case remote(id: String)
+        case local(UIImage)
+    }
+
+    let source: Source
     @Binding var isPresented: Bool
 
+    // Convenience inits so call sites read naturally.
+    init(receiptId: String, isPresented: Binding<Bool>) {
+        self.source = .remote(id: receiptId)
+        self._isPresented = isPresented
+    }
+    init(image: UIImage, isPresented: Binding<Bool>) {
+        self.source = .local(image)
+        self._isPresented = isPresented
+    }
+
     @State private var receiptURL: URL?
+    @State private var localImage: UIImage?
     @State private var isLoading = false
     @State private var loadError = false
 
@@ -31,7 +49,17 @@ struct ReceiptViewerView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            if isLoading {
+            if let localImage {
+                // Create flow: the attached-but-not-yet-uploaded image.
+                Image(uiImage: localImage)
+                    .resizable()
+                    .scaledToFit()
+                    .scaleEffect(scale)
+                    .offset(offset)
+                    .gesture(magnification)
+                    .simultaneousGesture(dragToPan)
+                    .onTapGesture(count: 2) { resetZoom() }
+            } else if isLoading {
                 ProgressView()
                     .tint(.white)
             } else if let receiptURL {
@@ -125,19 +153,20 @@ struct ReceiptViewerView: View {
 
     @MainActor
     private func loadReceipt() async {
-        if receiptURL != nil { return }
-        isLoading = true
-        loadError = false
-        defer { isLoading = false }
-        do {
-            let detail = try await ImageService.shared.imageDetail(id: receiptId)
-            receiptURL = URL(string: detail.full_path)
-        } catch {
-            loadError = true
+        switch source {
+        case .local(let image):
+            localImage = image
+        case .remote(let id):
+            if receiptURL != nil { return }
+            isLoading = true
+            loadError = false
+            defer { isLoading = false }
+            do {
+                let detail = try await ImageService.shared.imageDetail(id: id)
+                receiptURL = URL(string: detail.full_path)
+            } catch {
+                loadError = true
+            }
         }
     }
-}
-
-#Preview {
-    ReceiptViewerView(receiptId: "preview", isPresented: .constant(true))
 }

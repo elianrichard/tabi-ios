@@ -81,7 +81,7 @@ enum NuggetColor {
         case .green: return .buttonGreen
         case .yellow: return .buttonYellow
         case .red: return .buttonRed
-        case .blue: return .buttonBlue
+        case .blue: return .textBlue
         }
     }
 }

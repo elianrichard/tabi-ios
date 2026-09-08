@@ -40,16 +40,16 @@ struct ReceiptUploadSheet: View {
                             .stroke(.buttonBlue, lineWidth: 1.5)
                     }
                     .onChange(of: receiptUploadViewModel.receiptImageFromGallery) {
+                        guard receiptUploadViewModel.receiptImageFromGallery != nil else { return }
                         receiptUploadViewModel.isLoading = true
                         Task{
-                            if receiptUploadViewModel.receiptImageFromGallery != nil {
-                                await receiptUploadViewModel.getImage()
-                                // Gallery photos are used as-is (orientation baked
-                                // to .up so they don't upload rotated). The camera
-                                // path uses the VisionKit scanner for cropping.
-                                receiptUploadViewModel.receiptImageProcessed = receiptUploadViewModel.receiptImage?.normalizedUp()
-                                receiptUploadViewModel.isLoading = false
-                            }
+                            // Load the picked image and set the PROCESSED image
+                            // directly. Do not touch `receiptImage` (camera-only) —
+                            // that would double-fire and re-present the sheet.
+                            // Orientation baked to .up so it doesn't upload rotated.
+                            let image = await receiptUploadViewModel.getImage()
+                            receiptUploadViewModel.receiptImageProcessed = image?.normalizedUp()
+                            receiptUploadViewModel.isLoading = false
                         }
                     }
                     Button{
@@ -79,15 +79,11 @@ struct ReceiptUploadSheet: View {
         .padding([.top], 10)
         .fullScreenCover(isPresented: Bindable(receiptUploadViewModel).toggleScannerSheet) {
             // VisionKit scanner: live edge detection + draggable corner dots +
-            // perspective crop. Its output is already cropped, so it feeds
-            // receiptImageProcessed directly (no straightenDocument step).
+            // perspective crop. Its output is already cropped/straightened.
             DocumentScannerView(
                 scannedImage: $receiptUploadViewModel.receiptImage,
                 isPresented: Bindable(receiptUploadViewModel).toggleScannerSheet
             )
-            .onChange(of: receiptUploadViewModel.receiptImage) {
-                receiptUploadViewModel.receiptImageProcessed = receiptUploadViewModel.receiptImage
-            }
             .ignoresSafeArea()
         }
         .background(
@@ -99,7 +95,16 @@ struct ReceiptUploadSheet: View {
             }
         )
         .background(.bgWhite)
+        // Observe the scanned image on the PARENT (not inside the cover) so it fires
+        // after the scanner dismisses. The gallery path already sets
+        // receiptImageProcessed directly; the camera path lands here.
+        .onChange(of: receiptUploadViewModel.receiptImage) {
+            guard let image = receiptUploadViewModel.receiptImage else { return }
+            print("[ReceiptUpload] scanner returned image \(Int(image.size.width))x\(Int(image.size.height))")
+            receiptUploadViewModel.receiptImageProcessed = image
+        }
         .onChange(of: receiptUploadViewModel.receiptImageProcessed){
+            print("[ReceiptUpload] processed image set — attaching + dismissing sheet")
             eventExpenseViewModel.attachReceiptImage(receiptUploadViewModel.receiptImageProcessed)
             isPresented.toggle()
         }

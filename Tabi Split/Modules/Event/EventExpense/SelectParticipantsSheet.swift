@@ -23,14 +23,40 @@ struct SelectParticipantsSheet: View {
         value.insert(profileViewModel.user, at: 0)
         return value
     }
-    
+
+    /// Everyone is selected only when every participant is in the selection.
+    private var isAllSelected: Bool {
+        !participants.isEmpty && participants.allSatisfy { eventExpenseViewModel.selectedParticipants.contains($0) }
+    }
+
+    /// Select all when none/partially selected; unselect all only when all are on.
+    private func toggleSelectAll() {
+        if isAllSelected {
+            eventExpenseViewModel.selectedParticipants.removeAll()
+        } else {
+            for person in participants where !eventExpenseViewModel.selectedParticipants.contains(person) {
+                eventExpenseViewModel.selectedParticipants.append(person)
+            }
+        }
+    }
+
     var body: some View {
         VStack{
             SheetXButton(toggle: $isPresented)
             VStack(spacing: .spacingMedium){
-                Text("Select Participants")
-                    .font(.tabiTitle)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack {
+                    Text("Select Participants")
+                        .font(.tabiTitle)
+                    Spacer()
+                    Button {
+                        toggleSelectAll()
+                    } label: {
+                        Text(isAllSelected ? "Unselect All" : "Select All")
+                            .font(.tabiBody)
+                            .foregroundStyle(.buttonBlue)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 ScrollView{
                     VStack{
                         LazyVStack (spacing: .spacingTight){
@@ -74,6 +100,7 @@ struct SelectParticipantsSheet: View {
         .navigationBarBackButtonHidden(true)
         .padding()
         .padding([.top], 10)
+        .addBackgroundColor(.bgWhite)
     }
 }
 
