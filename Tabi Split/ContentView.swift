@@ -33,6 +33,10 @@ struct ContentView: View {
     // arrived before the session was ready. Held and processed once authenticated.
     @State private var pendingSharedReceipt: Bool = false
 
+    // A tapped push notification that arrived before the session was ready
+    // (cold launch from the banner). Held and processed once authenticated.
+    @State private var pendingPushTarget: PushTarget?
+
     var body: some View {
         ZStack {
             NavigationStack (path: $router.path) {
@@ -89,6 +93,12 @@ struct ContentView: View {
             // (checkAuthentication also drains it directly).
             drainPendingInviteTokenIfNeeded()
             drainPendingSharedReceiptIfNeeded()
+            drainPendingPushTargetIfNeeded()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .pushTapped)) { notification in
+            if let target = notification.object as? PushTarget {
+                handlePushTarget(target)
+            }
         }
         .onOpenURL { incomingURL in
             // Custom-scheme links (tabisplit://…) and, on some launch paths,
@@ -141,6 +151,7 @@ struct ContentView: View {
             // launch (the QR/link that launched the app can arrive before body is
             // fully set up).
             drainPendingInviteTokenIfNeeded()
+            drainPendingPushTargetIfNeeded()
         } catch {
             sessionState.isAuthenticated = false
             SessionState.shared.sessionExpiredBanner = true
@@ -224,6 +235,43 @@ struct ContentView: View {
         handleQuickScan()
     }
 
+    // A push was tapped. Same gate-and-drain as invite tokens: cold launch from
+    // a banner delivers the tap before auth settles.
+    private func handlePushTarget(_ target: PushTarget) {
+        guard sessionState.isAuthenticated else {
+            pendingPushTarget = target
+            return
+        }
+        Task { await navigate(to: target) }
+    }
+
+    private func drainPendingPushTargetIfNeeded() {
+        guard sessionState.isAuthenticated, let target = pendingPushTarget else { return }
+        pendingPushTarget = nil
+        Task { await navigate(to: target) }
+    }
+
+    // Back-stack is Home → Event Detail → target, same as in-app navigation.
+    // Unknown event/expense id lands on Home silently (same as the join fallback).
+    @MainActor
+    private func navigate(to target: PushTarget) async {
+        switch target {
+        case .eventDetail(let eventId):
+            _ = await openEvent(eventId: eventId)
+        case .expenseResult(let eventId, let expenseId):
+            guard await openEvent(eventId: eventId),
+                  let expense = eventViewModel.selectedEvent?.expenses
+                    .first(where: { $0.expenseId == expenseId }) else { return }
+            eventExpenseViewModel.selectedExpense = expense
+            router.push(.expenseResult)
+        case .settlementOptimization(let eventId):
+            guard await openEvent(eventId: eventId) else { return }
+            // EventDetailView.onAppear normally computes this; we push past it.
+            eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
+            router.push(.settlementOptimization)
+        }
+    }
+
     // Entry point for an invite token from a deeplink. If the session isn't ready
     // yet (cold launch via link, or auth still in flight), stash the token and let
     // the isAuthenticated onChange process it once ready — otherwise the join
@@ -250,15 +298,16 @@ struct ContentView: View {
                 router.popToRoot()
                 return
             }
-            await openJoinedEvent(eventId: eventId)
+            _ = await openEvent(eventId: eventId)
         }
     }
 
-    // After a successful join, pull the freshly-joined event into local storage
-    // (same refresh Home does on appear) and navigate straight to its detail
-    // view. Detail is pushed on top of the Home root, so Back returns to Home.
+    // Pull the latest events into local storage (same refresh Home does on
+    // appear) and navigate straight to the event's detail view. Detail is pushed
+    // on top of the Home root, so Back returns to Home. Returns false if the
+    // event isn't found (caller is left on Home).
     @MainActor
-    private func openJoinedEvent(eventId: String) async {
+    private func openEvent(eventId: String) async -> Bool {
         profileViewModel.refreshUserData()
         _ = await HomeViewModel().refreshEventData(
             currentUser: profileViewModel.user,
@@ -266,11 +315,11 @@ struct ContentView: View {
         )
 
         router.popToRoot()
-        if let event = SwiftDataService.shared.fetchAllEvents()?
-            .first(where: { $0.eventId == eventId }) {
-            eventViewModel.selectedEvent = event
-            router.push(.eventDetail)
-        }
+        guard let event = SwiftDataService.shared.fetchAllEvents()?
+            .first(where: { $0.eventId == eventId }) else { return false }
+        eventViewModel.selectedEvent = event
+        router.push(.eventDetail)
+        return true
     }
 
     private func joinEventByEventId(_ eventId: String) {
@@ -291,7 +340,7 @@ struct ContentView: View {
                 router.popToRoot()
                 return
             }
-            await openJoinedEvent(eventId: eventId)
+            _ = await openEvent(eventId: eventId)
         }
     }
 }

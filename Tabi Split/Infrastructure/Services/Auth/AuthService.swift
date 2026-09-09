@@ -58,6 +58,8 @@ final class AuthenticationService {
     }
 
     func logout() async throws {
+        // Needs the still-valid access token, so it runs before clearing.
+        await PushService.shared.unregister()
         try tokenManager.clearTokens()
     }
 

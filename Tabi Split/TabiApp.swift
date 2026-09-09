@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct TabiApp: App {
+    @UIApplicationDelegateAdaptor(PushAppDelegate.self) private var pushDelegate
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             NoteData.self,

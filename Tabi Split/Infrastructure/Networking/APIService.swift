@@ -249,6 +249,7 @@ final class APIService: APIClient {
     /// the caller handles them (logs + falls back) rather than interrupting the user.
     private static let silentErrorEndpoints: [String] = [
         "/receipt/parse",
+        "/device-token",
     ]
 
     private func notifyError(_ error: APIError) {
