@@ -30,7 +30,7 @@ struct SettlementOptimizationView: View {
         VStack (spacing: 0) {
             TopNavigation(title: "Optimization Details", RightToolbar: {
                 Button {
-                    exportPDF()
+                    Task { await exportPDF() }
                 } label: {
                     Icon(systemName: "square.and.arrow.up", color: .textBlue, size: 18)
                 }
@@ -122,7 +122,17 @@ struct SettlementOptimizationView: View {
         }
     }
 
-    private func exportPDF() {
+    /// Builds the PDF off the main thread, first downloading every attached expense
+    /// receipt for the final "Receipts" section. The global loading overlay stays up
+    /// for the whole run (the nested `imageDetail` calls push onto the same stack).
+    @MainActor
+    private func exportPDF() async {
+        LoadingViewModel.shared.beginRequest(message: "Fetching receipts…")
+        defer { LoadingViewModel.shared.endRequest() }
+
+        let sortedExpenses = (eventViewModel.selectedEvent?.expenses ?? [])
+            .sorted { $0.dateOfCreation < $1.dateOfCreation }
+
         let persons = orderedParticipants.map { participant in
             OptimizationPersonPDFData(
                 name: participant.user.name,
@@ -139,9 +149,7 @@ struct SettlementOptimizationView: View {
         let simplifiedRecap = recapPDF(from: eventViewModel.participantsBalance)
         let detailedRecap = recapPDF(from: eventViewModel.directSettlements)
 
-        let expenses = (eventViewModel.selectedEvent?.expenses ?? [])
-            .sorted { $0.dateOfCreation < $1.dateOfCreation }
-            .map { expense in
+        let expenses = sortedExpenses.map { expense in
             let isEqual = SplitMethod(rawValue: expense.splitMethod) == .equally
             let perPerson: Float? = (isEqual && !expense.participants.isEmpty)
                 ? expense.price / Float(expense.participants.count)
@@ -173,14 +181,42 @@ struct SettlementOptimizationView: View {
             )
         }
 
-        let data = SettlementOptimizationPDFExporter.generatePDF(from: SettlementOptimizationPDFData(
+        // Download every attached receipt in parallel; a failed download just drops
+        // that receipt rather than aborting the export. Order follows the expense list.
+        // Plain values only — SwiftData models must not cross into the child tasks.
+        let receiptSources = sortedExpenses.enumerated().compactMap { index, expense -> (Int, String, String, Date, Float)? in
+            guard let id = expense.receiptId, !id.isEmpty else { return nil }
+            return (index, id, expense.name, expense.dateOfCreation, expense.price)
+        }
+        let receipts: [OptimizationReceiptPDFData] = await withTaskGroup(of: (Int, OptimizationReceiptPDFData?).self) { group in
+            for (index, id, name, date, price) in receiptSources {
+                group.addTask {
+                    guard let image = await ImageService.shared.downloadImage(id: id) else { return (index, nil) }
+                    // Downscale so a receipt-heavy event doesn't produce a multi-MB PDF.
+                    let thumbnail = await image.byPreparingThumbnail(ofSize: CGSize(width: 1200, height: 1200)) ?? image
+                    return (index, OptimizationReceiptPDFData(expenseName: name, date: date, amount: price, image: thumbnail))
+                }
+            }
+            var collected: [(Int, OptimizationReceiptPDFData)] = []
+            for await (index, receipt) in group {
+                if let receipt { collected.append((index, receipt)) }
+            }
+            return collected.sorted { $0.0 < $1.0 }.map { $0.1 }
+        }
+
+        let pdfData = SettlementOptimizationPDFData(
             eventName: eventViewModel.eventName,
             generatedByName: eventViewModel.userBalance.user.name,
             persons: persons,
             simplifiedRecap: simplifiedRecap,
             detailedRecap: detailedRecap,
-            expenses: expenses
-        ))
+            expenses: expenses,
+            receipts: receipts
+        )
+        // Rendering is CPU-bound; keep it off the main thread so the overlay animates.
+        let data = await Task.detached(priority: .userInitiated) {
+            SettlementOptimizationPDFExporter.generatePDF(from: pdfData)
+        }.value
 
         let sanitizedEventName = eventViewModel.eventName.replacingOccurrences(of: "/", with: "-")
         let url = FileManager.default.temporaryDirectory

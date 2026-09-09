@@ -62,4 +62,14 @@ final class ImageService {
         let response: ImageUploadResponse = try await apiClient.get(endpoint: "/image/\(id)")
         return response
     }
+
+    /// Resolves a stored image id all the way to pixels: signed URL via `imageDetail`,
+    /// then the bytes. Returns nil on any failure so callers (e.g. the PDF export)
+    /// can skip a missing receipt instead of aborting.
+    func downloadImage(id: String) async -> UIImage? {
+        guard let detail = try? await imageDetail(id: id),
+              let url = URL(string: detail.full_path),
+              let (bytes, _) = try? await URLSession.shared.data(from: url) else { return nil }
+        return UIImage(data: bytes)
+    }
 }

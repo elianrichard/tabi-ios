@@ -87,6 +87,9 @@ struct HomeView: View {
             Task {
                 await refreshData(isShowLoading: true)
             }
+            // Home = first authed screen, so the push prompt lands after sign-in.
+            // Re-running on every appear also re-binds the token after account switch.
+            Task { await PushService.shared.requestAuthorizationAndRegister() }
         }
     }
 
