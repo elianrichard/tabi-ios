@@ -51,4 +51,4 @@ Podfile.lock
 # CocoIndex Code (ccc)
 /.cocoindex_code/
 
-*.xcconfig
+Config/*.xcconfig
