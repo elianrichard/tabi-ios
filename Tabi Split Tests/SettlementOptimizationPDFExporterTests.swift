@@ -153,19 +153,31 @@ final class SettlementOptimizationPDFExporterTests: XCTestCase {
     }
 
     func testReceiptsSectionIsFinalPageWithCaptions() throws {
-        let receipts = [
-            OptimizationReceiptPDFData(expenseName: "KFC", date: Date(timeIntervalSince1970: 1_700_000_000), amount: 100_000, image: makeReceiptImage()),
-            OptimizationReceiptPDFData(expenseName: "Taxi", date: Date(timeIntervalSince1970: 1_700_100_000), amount: 50_000, image: makeReceiptImage()),
-        ]
+        func receipt(_ name: String, amount: Float) -> OptimizationReceiptPDFData {
+            OptimizationReceiptPDFData(expenseName: name, date: Date(timeIntervalSince1970: 1_700_000_000), amount: amount, image: makeReceiptImage())
+        }
+        let four = [receipt("KFC", amount: 100_000), receipt("Taxi", amount: 50_000),
+                    receipt("Hotel", amount: 1_000_000), receipt("Snacks", amount: 20_000)]
+        let five = four + [receipt("Souvenir", amount: 75_000)]
+
         let withoutReceipts = try pages(of: SettlementOptimizationPDFExporter.generatePDF(from: makeData()))
-        let withReceipts = try pages(of: SettlementOptimizationPDFExporter.generatePDF(from: makeData(receipts: receipts)))
+        let fourReceipts = try pages(of: SettlementOptimizationPDFExporter.generatePDF(from: makeData(receipts: four)))
+        let fiveReceipts = try pages(of: SettlementOptimizationPDFExporter.generatePDF(from: makeData(receipts: five)))
 
-        // Two portrait receipts each fill a page, so the receipts section must grow the document.
-        XCTAssertGreaterThan(withReceipts.count, withoutReceipts.count)
+        // Receipts render in a 2×2 grid: four share the section page, a fifth spills onto a new one.
+        XCTAssertEqual(fourReceipts.count, withoutReceipts.count)
+        XCTAssertEqual(fiveReceipts.count, withoutReceipts.count + 1)
 
-        let lastPageText = withReceipts.last?.string ?? ""
-        XCTAssertTrue(lastPageText.contains("Receipts"), "Receipts section header missing on the last page.")
-        XCTAssertTrue(lastPageText.contains("Taxi"), "Last receipt's caption missing on the last page.")
+        let gridPageText = fourReceipts.last?.string ?? ""
+        XCTAssertTrue(gridPageText.contains("Receipts"), "Receipts section header missing on the last page.")
+        for name in ["KFC", "Taxi", "Hotel", "Snacks"] {
+            XCTAssertTrue(gridPageText.contains(name), "Caption for \(name) missing from the grid page.")
+        }
+
+        let spillPageText = fiveReceipts.last?.string ?? ""
+        XCTAssertTrue(spillPageText.contains("Receipts (cont.)"), "Overflow page should repeat the section title.")
+        XCTAssertTrue(spillPageText.contains("Souvenir"), "Fifth receipt's caption missing on the overflow page.")
+        XCTAssertFalse(spillPageText.contains("KFC"), "First-page receipts must not repeat on the overflow page.")
 
         // Empty receipts still get the section with its placeholder line.
         let emptyText = withoutReceipts.last?.string ?? ""

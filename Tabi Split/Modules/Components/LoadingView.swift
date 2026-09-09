@@ -14,16 +14,10 @@ struct LoadingView: View {
     var body: some View {
         ZStack {
             Color(.white).opacity(0.8)
-            VStack(spacing: .spacingRegular) {
-                LottieView(animation: .named(loadingViewModel.animationName))
-                    .looping()
-                    // Rebuild the LottieView when the animation changes mid-loading.
-                    .id(loadingViewModel.animationName)
-                    .frame(width: 180, height: 180)
-                Text(loadingViewModel.message)
-                    .font(.tabiBody)
-                    .foregroundStyle(.textGrey)
-            }
+            LottieView(animation: .named(loadingViewModel.animationName))
+                .looping()
+                // Rebuild the LottieView when the animation changes mid-loading.
+                .id(loadingViewModel.animationName)
         }
         .ignoresSafeArea()
     }

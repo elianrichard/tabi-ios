@@ -15,39 +15,30 @@ final class LoadingViewModel {
     /// Default loading animation. Some requests override it (e.g. receipt parsing
     /// shows the scan animation) by passing an `animation` to `beginRequest`.
     static let defaultAnimation = "LoadingComponent"
-    /// Default label shown under the animation; requests may override it the same way.
-    static let defaultMessage = "Loading…"
 
     var isLoading: Bool = false
     /// The Lottie animation to show while loading — the most recent in-flight
     /// request's choice, falling back to the default when none is set.
-    var animationName: String = defaultAnimation
-    /// The text shown under the animation — same most-recent-request rule.
-    var message: String = defaultMessage
+    var animationName: String = "LoadingComponent"
 
-    // Track each in-flight request's choices so ending one restores the prior.
+    // Track each in-flight request's animation so ending one restores the prior.
     private var animationStack: [String] = []
-    private var messageStack: [String] = []
 
     func toggleIsLoading() {
         isLoading.toggle()
     }
 
-    func beginRequest(animation: String = defaultAnimation, message: String = defaultMessage) {
+    func beginRequest(animation: String = defaultAnimation) {
         animationStack.append(animation)
-        messageStack.append(message)
         animationName = animation
-        self.message = message
         isLoading = !animationStack.isEmpty
     }
 
     func endRequest() {
         if !animationStack.isEmpty {
             animationStack.removeLast()
-            messageStack.removeLast()
         }
-        animationName = animationStack.last ?? Self.defaultAnimation
-        message = messageStack.last ?? Self.defaultMessage
+        animationName = animationStack.last ?? "LoadingComponent"
         isLoading = !animationStack.isEmpty
     }
 }

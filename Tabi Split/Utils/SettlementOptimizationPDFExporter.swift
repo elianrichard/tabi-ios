@@ -313,19 +313,31 @@ enum SettlementOptimizationPDFExporter {
                                     leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
             }
 
-            for receipt in data.receipts {
-                let captionHeight: CGFloat = 20
-                // Tallest image that still fits a fresh page under a "(cont.)" section title.
-                let fullPageImageHeight = pageBottom - contentTop - 40 - captionHeight - 18
-                // Scale to the content width, then cap at one page so nothing is ever cropped.
-                let aspect = receipt.image.size.height / max(receipt.image.size.width, 1)
-                let imageHeight = min(contentWidth * aspect, fullPageImageHeight)
-                let imageWidth = imageHeight / max(aspect, 0.0001)
+            // Receipts sit in a 2×2 grid, four per page. Every cell is caption-over-image;
+            // the image is aspect-fit inside its cell so nothing is ever cropped.
+            let columns = 2
+            let rowsPerPage = 2
+            let gutter: CGFloat = 16
+            let captionHeight: CGFloat = 20
+            let cellWidth = (contentWidth - gutter) / CGFloat(columns)
 
-                ensureSpace(captionHeight + imageHeight + 18, continuing: "Receipts")
-                pageY = drawReceipt(receipt, imageSize: CGSize(width: min(imageWidth, contentWidth), height: imageHeight),
-                                    maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth, pageWidth: pageSize.width)
-                pageY += 18
+            for (index, receipt) in data.receipts.enumerated() {
+                let slot = index % (columns * rowsPerPage)
+                if index > 0 && slot == 0 {
+                    newPage()
+                    pageY = drawSectionTitle("Receipts (cont.)", maxY: pageY, leftMargin: leftMargin, contentWidth: contentWidth)
+                    pageY += 6
+                }
+                // Rows split the space left under the section title evenly, so cells line
+                // up regardless of each image's shape. pageY stays put for the whole page.
+                let rowHeight = (pageBottom - pageY - gutter) / CGFloat(rowsPerPage)
+                let column = slot % columns
+                let row = slot / columns
+                let cell = CGRect(x: leftMargin + CGFloat(column) * (cellWidth + gutter),
+                                  y: pageY + CGFloat(row) * (rowHeight + gutter),
+                                  width: cellWidth,
+                                  height: rowHeight)
+                drawReceipt(receipt, in: cell, captionHeight: captionHeight)
             }
         }
     }
@@ -575,28 +587,33 @@ enum SettlementOptimizationPDFExporter {
         return maxY + max(labelSize.height, valueSize.height) + 6
     }
 
-    /// A receipt image under its caption (expense · date · total), clipped to the
-    /// same rounded-corner + hairline card as the balances.
-    private static func drawReceipt(_ receipt: OptimizationReceiptPDFData, imageSize: CGSize, maxY: CGFloat,
-                                    leftMargin: CGFloat, contentWidth: CGFloat, pageWidth: CGFloat) -> CGFloat {
+    /// One grid cell: the caption (expense · date · total) on top, the receipt image
+    /// aspect-fit in the space below and centred horizontally, clipped to the same
+    /// rounded-corner + hairline card as the balances.
+    private static func drawReceipt(_ receipt: OptimizationReceiptPDFData, in cell: CGRect, captionHeight: CGFloat) {
         let captionAttributes = Theme.attributes(.semibold, 11, Theme.inkSoft)
         let dateText = receipt.date.customDateFormat("dd MMM yyyy").string(from: receipt.date)
         let caption = ("\(receipt.expenseName)  ·  \(dateText)  ·  \(formatMoney(receipt.amount))" as NSString)
-            .truncated(toWidth: contentWidth, using: captionAttributes)
-        caption.draw(at: CGPoint(x: leftMargin, y: maxY), withAttributes: captionAttributes)
-        let imageY = maxY + caption.size(withAttributes: captionAttributes).height + 6
+            .truncated(toWidth: cell.width, using: captionAttributes)
+        caption.draw(at: CGPoint(x: cell.minX, y: cell.minY), withAttributes: captionAttributes)
 
-        let frame = CGRect(x: leftMargin, y: imageY, width: imageSize.width, height: imageSize.height)
+        // Fit the image into the box under the caption without cropping or distorting.
+        let box = CGRect(x: cell.minX, y: cell.minY + captionHeight,
+                         width: cell.width, height: cell.height - captionHeight)
+        let imageSize = receipt.image.size
+        let scale = min(box.width / max(imageSize.width, 1), box.height / max(imageSize.height, 1))
+        let drawSize = CGSize(width: imageSize.width * scale, height: imageSize.height * scale)
+        let frame = CGRect(x: box.midX - drawSize.width / 2, y: box.minY,
+                           width: drawSize.width, height: drawSize.height)
+
         let path = UIBezierPath(roundedRect: frame, cornerRadius: Theme.cardRadius)
-        guard let cg = UIGraphicsGetCurrentContext() else { return frame.maxY }
+        guard let cg = UIGraphicsGetCurrentContext() else { return }
         cg.saveGState()
         path.addClip()
         receipt.image.draw(in: frame)
         cg.restoreGState()
         Theme.line.setStroke()
         path.stroke()
-
-        return frame.maxY
     }
 }
 

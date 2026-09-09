@@ -155,10 +155,8 @@ final class APIService: APIClient {
     ) async throws -> Response {
         // Receipt parsing runs the AI and can take a few seconds — show the scan
         // animation instead of the generic spinner.
-        let isReceiptParse = endpoint.hasPrefix("/receipt/parse")
-        let loadingAnimation = isReceiptParse ? "OnboardingScan" : LoadingViewModel.defaultAnimation
-        let loadingMessage = isReceiptParse ? "Reading your receipt…" : LoadingViewModel.defaultMessage
-        await MainActor.run { LoadingViewModel.shared.beginRequest(animation: loadingAnimation, message: loadingMessage) }
+        let loadingAnimation = endpoint.hasPrefix("/receipt/parse") ? "OnboardingScan" : "LoadingComponent"
+        await MainActor.run { LoadingViewModel.shared.beginRequest(animation: loadingAnimation) }
         defer { Task { @MainActor in LoadingViewModel.shared.endRequest() } }
         do {
             let authService = AuthenticationService()

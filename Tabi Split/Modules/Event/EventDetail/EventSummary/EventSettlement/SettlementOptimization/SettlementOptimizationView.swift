@@ -127,7 +127,7 @@ struct SettlementOptimizationView: View {
     /// for the whole run (the nested `imageDetail` calls push onto the same stack).
     @MainActor
     private func exportPDF() async {
-        LoadingViewModel.shared.beginRequest(message: "Fetching receipts…")
+        LoadingViewModel.shared.beginRequest()
         defer { LoadingViewModel.shared.endRequest() }
 
         let sortedExpenses = (eventViewModel.selectedEvent?.expenses ?? [])
