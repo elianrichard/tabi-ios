@@ -177,7 +177,14 @@ final class EventInviteViewModel {
 
         for user in selectedContacts {
             let email = user.email.lowercased()
-            if !allUsers.contains(where: { $0.email == email }) {
+            // Name-only participants (custom/dummy rows) have no email to dedup
+            // on, so carry them over by identity — matching on an empty email
+            // string would collapse them all into one entry.
+            if email.isEmpty {
+                if !allUsers.contains(where: { isSameContact($0, user) }) {
+                    allUsers.append(user)
+                }
+            } else if !allUsers.contains(where: { $0.email.lowercased() == email }) {
                 allUsers.append(user)
             }
         }
@@ -191,6 +198,9 @@ final class EventInviteViewModel {
             }
         }
 
-        allContacts = allUsers.filter{ $0.email != currentUser.email }
+        // Drop the logged-in user (shown separately as the current-user row), but
+        // keep name-only rows: they have an empty email, which must not be
+        // compared against the current user's address.
+        allContacts = allUsers.filter { $0.email.isEmpty || $0.email != currentUser.email }
     }
 }

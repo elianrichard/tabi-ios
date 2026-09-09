@@ -12,20 +12,33 @@ import SwiftUI
 final class LoadingViewModel {
     static let shared = LoadingViewModel()
 
+    /// Default loading animation. Some requests override it (e.g. receipt parsing
+    /// shows the scan animation) by passing an `animation` to `beginRequest`.
+    static let defaultAnimation = "LoadingComponent"
+
     var isLoading: Bool = false
-    private var activeCount: Int = 0
+    /// The Lottie animation to show while loading — the most recent in-flight
+    /// request's choice, falling back to the default when none is set.
+    var animationName: String = "LoadingComponent"
+
+    // Track each in-flight request's animation so ending one restores the prior.
+    private var animationStack: [String] = []
 
     func toggleIsLoading() {
         isLoading.toggle()
     }
 
-    func beginRequest() {
-        activeCount += 1
-        isLoading = activeCount > 0
+    func beginRequest(animation: String = defaultAnimation) {
+        animationStack.append(animation)
+        animationName = animation
+        isLoading = !animationStack.isEmpty
     }
 
     func endRequest() {
-        activeCount = max(0, activeCount - 1)
-        isLoading = activeCount > 0
+        if !animationStack.isEmpty {
+            animationStack.removeLast()
+        }
+        animationName = animationStack.last ?? "LoadingComponent"
+        isLoading = !animationStack.isEmpty
     }
 }

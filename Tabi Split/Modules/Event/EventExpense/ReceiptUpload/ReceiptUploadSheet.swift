@@ -15,7 +15,13 @@ struct ReceiptUploadSheet: View {
     @Environment(Router.self) private var router
     @Binding var height: CGFloat
     @Binding var isPresented: Bool
-    
+
+    // The scan action the user chose; deferred until the disclaimer is confirmed.
+    private enum ScanAction { case library, camera }
+    @State private var showDisclaimer: Bool = false
+    @State private var pendingAction: ScanAction?
+    @State private var openLibrary: Bool = false
+
     var body: some View {
         VStack(spacing: 0){
             SheetXButton(toggle: $isPresented)
@@ -24,7 +30,9 @@ struct ReceiptUploadSheet: View {
                     .font(.tabiTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 HStack(spacing: .spacingTight){
-                    PhotosPicker(selection: $receiptUploadViewModel.receiptImageFromGallery, matching: .images, photoLibrary: .shared()){
+                    Button {
+                        requestScan(.library)
+                    } label: {
                         VStack(spacing: .spacingTight){
                             Icon(systemName: "photo", color: .buttonBlue, size: 20)
                             Text("Open Library")
@@ -39,6 +47,8 @@ struct ReceiptUploadSheet: View {
                             .fill(.clear)
                             .stroke(.buttonBlue, lineWidth: 1.5)
                     }
+                    // Programmatic picker so the disclaimer can gate it.
+                    .photosPicker(isPresented: $openLibrary, selection: $receiptUploadViewModel.receiptImageFromGallery, matching: .images, photoLibrary: .shared())
                     .onChange(of: receiptUploadViewModel.receiptImageFromGallery) {
                         guard receiptUploadViewModel.receiptImageFromGallery != nil else { return }
                         receiptUploadViewModel.isLoading = true
@@ -53,7 +63,7 @@ struct ReceiptUploadSheet: View {
                         }
                     }
                     Button{
-                        receiptUploadViewModel.toggleScannerSheet.toggle()
+                        requestScan(.camera)
                     }label:{
                         VStack(spacing: .spacingTight){
                             Icon(systemName: "camera.fill", color: .buttonBlue, size: 20)
@@ -77,6 +87,13 @@ struct ReceiptUploadSheet: View {
         .navigationBarBackButtonHidden(true)
         .padding()
         .padding([.top], 10)
+        .sheet(isPresented: $showDisclaimer) {
+            ReceiptScanDisclaimerSheet(isPresented: $showDisclaimer) {
+                proceedWithPendingAction()
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
         .fullScreenCover(isPresented: Bindable(receiptUploadViewModel).toggleScannerSheet) {
             // VisionKit scanner: live edge detection + draggable corner dots +
             // perspective crop. Its output is already cropped/straightened.
@@ -108,6 +125,30 @@ struct ReceiptUploadSheet: View {
             eventExpenseViewModel.attachReceiptImage(receiptUploadViewModel.receiptImageProcessed)
             isPresented.toggle()
         }
+    }
+
+    /// Show the disclaimer first (unless the user opted out); otherwise proceed
+    /// straight to the chosen picker.
+    private func requestScan(_ action: ScanAction) {
+        pendingAction = action
+        if UserDefaultsService.shared.getReceiptScanDisclaimerDismissed() {
+            proceedWithPendingAction()
+        } else {
+            showDisclaimer = true
+        }
+    }
+
+    /// Opens the library or the camera scanner for the deferred action.
+    private func proceedWithPendingAction() {
+        switch pendingAction {
+        case .library:
+            openLibrary = true
+        case .camera:
+            receiptUploadViewModel.toggleScannerSheet = true
+        case .none:
+            break
+        }
+        pendingAction = nil
     }
 }
 

@@ -24,6 +24,9 @@ final class AuthenticationService {
         try tokenManager.saveAccessToken(response.token)
         try tokenManager.saveRefreshToken(response.refresh_token)
 
+        // Fresh session: show the receipt-scan disclaimer again until dismissed.
+        UserDefaultsService.shared.resetReceiptScanDisclaimer()
+
         return response
     }
 
@@ -47,6 +50,9 @@ final class AuthenticationService {
 
         try tokenManager.saveAccessToken(response.token)
         try tokenManager.saveRefreshToken(response.refresh_token)
+
+        // Fresh session: show the receipt-scan disclaimer again until dismissed.
+        UserDefaultsService.shared.resetReceiptScanDisclaimer()
 
         return response
     }

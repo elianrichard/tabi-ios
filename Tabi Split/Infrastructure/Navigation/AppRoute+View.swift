@@ -61,6 +61,8 @@ struct AppDestinationView: View {
             PaymentMethodView()
         case .receiptUploadReview:
             ReceiptImageReviewView()
+        case .quickScanEventPicker:
+            QuickScanEventPickerView()
         }
     }
 }

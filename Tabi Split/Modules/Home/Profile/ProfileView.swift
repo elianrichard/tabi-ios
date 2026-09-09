@@ -148,7 +148,11 @@ struct ProfileView: View {
             handleImport(result: result)
         }
         .sheet(item: $exportURL) { url in
-            ShareSheet(items: [url])
+            ShareSheet(items: [url]) {
+                // Dismiss the hosting sheet too — a cancel inside the activity
+                // controller does not clear `exportURL` on its own.
+                exportURL = nil
+            }
         }
         .alert(item: $backupAlert) { alert in
             Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))

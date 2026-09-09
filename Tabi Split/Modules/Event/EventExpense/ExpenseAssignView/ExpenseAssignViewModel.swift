@@ -11,9 +11,8 @@ import SwiftUI
 /// Which slice of the item list to show. "Assigned" is relative to the currently
 /// selected participant; "Unassigned" means items with no assignees at all.
 enum ItemAssignmentFilter: CaseIterable, Identifiable {
-    // Order here drives the segmented control order: Unassigned first (the default
-    // — the items still needing action), then Assigned, then All.
-    case unassigned, assigned, all
+    // Order here drives the segmented control order: All, Unassigned, Assigned.
+    case all, unassigned, assigned
     var id: Self { self }
     var label: String {
         switch self {

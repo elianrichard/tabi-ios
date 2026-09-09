@@ -82,7 +82,11 @@ struct SettlementOptimizationView: View {
         }
         .navigationBarBackButtonHidden(true)
         .sheet(item: $exportedPDF) { pdf in
-            ShareSheet(items: [pdf.url])
+            ShareSheet(items: [pdf.url]) {
+                // Dismiss the hosting sheet too — a cancel inside the activity
+                // controller does not clear `exportedPDF` on its own.
+                exportedPDF = nil
+            }
         }
     }
 

@@ -12,53 +12,82 @@ struct EventSummaryView: View {
     @Environment(EventViewModel.self) private var eventViewModel
 
     var body: some View {
-        ScrollView (showsIndicators: false) {
-            VStack (spacing: .spacingRegular) {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: .spacingRegular) {
                 VStack {
-                    if (eventViewModel.userBalance.status != .settled) {
-                        if (eventViewModel.isEventCompleted) {
-                            HStack (spacing: 20) {
-                                Spacer()
-                                    .frame(width: 30)
-                                VStack (spacing: .spacingXSmall) {
-                                    Text(eventViewModel.userBalance.status.summaryCardText)
-                                        .font(.tabiBody)
-                                    Text("Rp\((eventViewModel.userBalance.balance).formatPrice(isShowSign: false))")
-                                        .font(.tabiTitle)
-                                }
-                                Icon(systemName: "chevron.right", color: .textWhite, size: 12)
-                                    .offset(x: 1)
-                                    .frame(width: 30, height: 30, alignment: .center)
-                                    .background(eventViewModel.userBalance.status.summaryCardBgShadow.opacity(0.5))
-                                    .clipShape(Circle())
+                    if eventViewModel.userBalance.status != .settled {
+                        //                        if (eventViewModel.isEventCompleted) {
+                        HStack(spacing: 20) {
+                            Spacer()
+                                .frame(width: 30)
+                            VStack(spacing: .spacingXSmall) {
+                                Text(
+                                    eventViewModel.userBalance.status
+                                        .summaryCardText
+                                )
+                                .font(.tabiBody)
+                                Text(
+                                    "Rp\((eventViewModel.userBalance.balance).formatPrice(isShowSign: false))"
+                                )
+                                .font(.tabiTitle)
                             }
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, minHeight: 80)
-                            .background(eventViewModel.userBalance.status.summaryCardBgColor)
-                            .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
-                            .padding(.bottom, 6)
-                            .background(eventViewModel.userBalance.status.summaryCardBgShadow)
-                            .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
-                        } else {
-                            VStack (spacing: .spacingXSmall) {
-                                Text(eventViewModel.userBalance.status.summaryCardText)
-                                    .font(.tabiBody)
-                                Text("Rp\((eventViewModel.userBalance.balance).formatPrice(isShowSign: false))")
-                                    .font(.tabiTitle)
-                            }
-                            .foregroundStyle(eventViewModel.userBalance.status.summaryCardBgColor)
-                            .frame(maxWidth: .infinity, minHeight: 80)
-                            .background(.clear)
-                            .overlay {
-                                RoundedRectangle(cornerRadius: .radiusMedium)
-                                    .strokeBorder(.uiGray, lineWidth: 2)
-                            }
+                            Icon(
+                                systemName: "chevron.right",
+                                color: .textWhite,
+                                size: 12
+                            )
+                            .offset(x: 1)
+                            .frame(width: 30, height: 30, alignment: .center)
+                            .background(
+                                eventViewModel.userBalance.status
+                                    .summaryCardBgShadow.opacity(0.5)
+                            )
+                            .clipShape(Circle())
                         }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 80)
+                        .background(
+                            eventViewModel.userBalance.status.summaryCardBgColor
+                        )
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: .radiusMedium)
+                        )
+                        .padding(.bottom, 6)
+                        .background(
+                            eventViewModel.userBalance.status
+                                .summaryCardBgShadow
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: .radiusLarge))
+                        //                        } else {
+                        //                        VStack(spacing: .spacingXSmall) {
+                        //                            Text(
+                        //                                eventViewModel.userBalance.status
+                        //                                    .summaryCardText
+                        //                            )
+                        //                            .font(.tabiBody)
+                        //                            Text(
+                        //                                "Rp\((eventViewModel.userBalance.balance).formatPrice(isShowSign: false))"
+                        //                            )
+                        //                            .font(.tabiTitle)
+                        //                        }
+                        //                        .foregroundStyle(
+                        //                            eventViewModel.userBalance.status.summaryCardBgColor
+                        //                        )
+                        //                        .frame(maxWidth: .infinity, minHeight: 80)
+                        //                        .background(.clear)
+                        //                        .overlay {
+                        //                            RoundedRectangle(cornerRadius: .radiusMedium)
+                        //                                .strokeBorder(.uiGray, lineWidth: 2)
+                        //                        }
+                        //                        }
                     } else {
                         HStack {
-                            VStack (spacing: .spacingSmall) {
-                                Text(eventViewModel.userBalance.status.summaryCardText)
-                                    .font(.tabiSubtitle)
+                            VStack(spacing: .spacingSmall) {
+                                Text(
+                                    eventViewModel.userBalance.status
+                                        .summaryCardText
+                                )
+                                .font(.tabiSubtitle)
                                 if eventViewModel.isEventCompleted {
                                     Button {
                                         router.push(.settlementOptimization)
@@ -77,21 +106,19 @@ struct EventSummaryView: View {
                             RoundedRectangle(cornerRadius: .radiusMedium)
                                 .strokeBorder(.uiGray, lineWidth: 2)
                         }
-                        .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: .radiusMedium)
+                        )
                     }
                 }
                 .onTapGesture {
-                    if (eventViewModel.isEventCompleted) {
-//                        TEMPORARILY DISABLED: SETTLEMENT
-//                        router.push(.eventSettlement)
-                        router.push(.settlementOptimization)
-                    } else {
-                        print("Cannot do this action yet")
-                    }
+                    //                    TEMPORARILY DISABLED: SETTLEMENT
+                    //                    router.push(.eventSettlement)
+                    router.push(.settlementOptimization)
                 }
-                
+
                 if !eventViewModel.userTransactionHistory.isEmpty {
-                    VStack (spacing: 16) {
+                    VStack(spacing: 16) {
                         HStack {
                             Text("Your Transaction History")
                                 .font(.tabiHeadline)
@@ -105,16 +132,23 @@ struct EventSummaryView: View {
                             }
                         }
                         LazyVStack {
-                            ForEach(Array(eventViewModel.userTransactionHistory.prefix(3))) { data in
+                            ForEach(
+                                Array(
+                                    eventViewModel.userTransactionHistory
+                                        .prefix(3)
+                                )
+                            ) { data in
                                 EventSummaryHistoryCard(data: data)
                             }
                         }
                     }
                 }
-                
-                
-                HStack (alignment: .top) {
-                    EventSummarySpendingCard(text: "Your total spending", amount: eventViewModel.userTotalSpending)
+
+                HStack(alignment: .top) {
+                    EventSummarySpendingCard(
+                        text: "Your total spending",
+                        amount: eventViewModel.userTotalSpending
+                    )
                 }
             }
         }

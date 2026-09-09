@@ -17,6 +17,19 @@ struct ExpenseAddItemsView: View {
         VStack (alignment: .leading){
             TopNavigation(title: "Add Items")
             ExpenseHeaderView()
+            // Items came from a scanned receipt: the scan can misread things, so
+            // prompt a check before moving on. Hidden when nothing was attached.
+            if eventExpenseViewModel.hasReceipt {
+                HStack(alignment: .top, spacing: .spacingXSmall) {
+                    Icon(systemName: "exclamationmark.triangle.fill", color: .buttonYellow, size: 14)
+                    Text("These items were read from your receipt. Please double-check the names, prices, and quantities before continuing.")
+                        .font(.tabiBody2)
+                        .foregroundStyle(.buttonYellow)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 16)
+            }
             ScrollView (showsIndicators: false) {
                 VStack (alignment: .leading, spacing: 16) {
                     Text("Items")

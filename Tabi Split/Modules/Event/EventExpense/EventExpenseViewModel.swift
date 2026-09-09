@@ -65,6 +65,12 @@ final class EventExpenseViewModel {
     /// skip the AI call for non-receipt images (a selfie, a random photo) — no
     /// point paying for an AI parse when the receipt has no detectable content.
     var ocrFoundItems: Bool = false
+
+    /// A receipt image shared into the app (Share Extension → quick scan) that is
+    /// attached once AddExpenseView appears. Held separately from
+    /// `uploadedReceiptImage` so setting it does NOT trigger the receipt-review
+    /// push observers during navigation.
+    var pendingSharedReceiptImage: UIImage?
     var uploadedReceiptImage: UIImage?
     /// The backend image id for the uploaded receipt. Set after the image is
     /// uploaded (just-in-time, at finalize/update time) and persisted as the
@@ -173,6 +179,7 @@ final class EventExpenseViewModel {
         ]
         uploadedReceiptImage = nil
         uploadedReceiptId = nil
+        pendingSharedReceiptImage = nil
         lastOCRLines = []
         ocrFoundItems = false
     }
@@ -563,6 +570,19 @@ final class EventExpenseViewModel {
 
         // OCR may yield zero items/charges — keep the add-items UI non-empty.
         ensureMinimumRows()
+    }
+
+    /// Runs Vision OCR on the attached receipt image when it hasn't been OCR'd yet
+    /// (empty `lastOCRLines`). Covers entry points that skip the review screen — a
+    /// shared receipt or a manual attach that goes straight to Next — so the AI
+    /// refine step has OCR lines + a draft to work from.
+    func runOCRIfNeeded() {
+        guard uploadedReceiptImage != nil, lastOCRLines.isEmpty else { return }
+        do {
+            try performOCROnImage(uploadedReceiptImage ?? UIImage())
+        } catch {
+            os_log(.error, log: .ocr, "OCR (runOCRIfNeeded) failed: %{public}@", String(describing: error))
+        }
     }
 
     /// Builds an on-device draft from the current OCR result, in the schema the

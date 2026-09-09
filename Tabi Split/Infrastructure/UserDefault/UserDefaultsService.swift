@@ -8,7 +8,8 @@
 import Foundation
 
 public enum UserDefaultKeys: String {
-    case currentUserDetails, onboardingStatus
+    case currentUserDetails, onboardingStatus, receiptScanDisclaimerDismissed
+    case ratingSuccessfulExpenseCount, ratingLastRequestedAt, ratingRequestCount
 }
 
 class UserDefaultsService {

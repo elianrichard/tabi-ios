@@ -165,7 +165,12 @@ struct EventInviteView: View {
                     eventInviteViewModel.fillUpContacts(currentUser: currentUser, registeredUsers: allUsers)
                 }
             }
-            if let selectedEvent = eventViewModel.selectedEvent {
+            // Seed the selection from the event only on the first visit. On a
+            // return trip `selectedContacts` already holds the in-progress edits
+            // (participants added but not yet saved on EventFormView), and
+            // reseeding here would discard them.
+            if let selectedEvent = eventViewModel.selectedEvent,
+               eventInviteViewModel.selectedContacts.isEmpty {
                 eventInviteViewModel.selectedContacts = selectedEvent.participants
             }
             Task { await fetchInviteTokenIfNeeded() }

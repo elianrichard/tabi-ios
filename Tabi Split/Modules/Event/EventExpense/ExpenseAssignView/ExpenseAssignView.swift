@@ -15,9 +15,23 @@ struct ExpenseAssignView: View {
     @Environment(Router.self) private var router
     
     @State var searchQuery: String = ""
+    // Shown when the user taps Next while some items are still not fully
+    // assigned. They can go back to finish, or continue anyway.
+    @State private var isShowUnassignedWarning = false
 
     private var filteredItems: [ExpenseItem] {
         expenseAssignViewModel.filteredItems(eventExpenseViewModel.items)
+    }
+
+    // Items whose quantity is not fully covered by assignee shares — the same rule
+    // the "Unassigned" tab uses, so the warning matches what that tab shows.
+    private var unassignedItems: [ExpenseItem] {
+        eventExpenseViewModel.items.filter { !expenseAssignViewModel.isFullyAssigned($0) }
+    }
+
+    private func proceedToResult() {
+        eventExpenseViewModel.calculatePeopleItems()
+        router.push(.expenseResult)
     }
 
     private var filteredParticipants: [UserData] {
@@ -253,8 +267,11 @@ struct ExpenseAssignView: View {
             Spacer()
             
             CustomButton(text: "Next") {
-                eventExpenseViewModel.calculatePeopleItems()
-                router.push(.expenseResult)
+                if unassignedItems.isEmpty {
+                    proceedToResult()
+                } else {
+                    isShowUnassignedWarning = true
+                }
             }
         }
         .padding()
@@ -262,6 +279,39 @@ struct ExpenseAssignView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             expenseAssignViewModel.selectedAsignee = eventExpenseViewModel.selectedParticipants.first
+        }
+        .sheet(isPresented: $isShowUnassignedWarning) {
+            let count = unassignedItems.count
+            CustomSheet(xToggleBinding: $isShowUnassignedWarning) {
+                VStack(alignment: .leading, spacing: .spacingSmall) {
+                    HStack(spacing: .spacingTight) {
+                        Icon(systemName: "exclamationmark.triangle.fill", color: .buttonRed, size: 24)
+                        Text("Some items aren't assigned")
+                            .font(.tabiTitle)
+                    }
+                    Text(count == 1
+                         ? "1 item isn't fully assigned yet. Its cost won't be split to anyone."
+                         : "\(count) items aren't fully assigned yet. Their cost won't be split to anyone.")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textGrey)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                VStack(spacing: .spacingTight) {
+                    CustomButton(text: "Continue Anyway") {
+                        isShowUnassignedWarning = false
+                        proceedToResult()
+                    }
+                    CustomButton(text: "Go Back", type: .secondary) {
+                        isShowUnassignedWarning = false
+                        // Jump to the Unassigned tab so the leftover items are in view.
+                        expenseAssignViewModel.itemFilter = .unassigned
+                    }
+                }
+            }
+            .presentationDetents([.height(300)])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(.bgWhite)
         }
         .sheet(isPresented: Bindable(expenseAssignViewModel).isShowingQuantityChangeSheet) {
             if let item = Bindable(eventExpenseViewModel).items.first(where: { $0.id == expenseAssignViewModel.selectedItem.id }){

@@ -204,12 +204,14 @@ struct AddExpenseView: View {
             CustomButton(text: "Next") {
                 viewModel.validateInput()
                 if (eventExpenseViewModel.selectedMethod == .custom && viewModel.isValid) {
-                    // Only re-run OCR/AI when a NEW image was just attached
-                    // (uploadedReceiptImage set). On edit without a re-upload the
-                    // image is absent (only the stored id remains), so keep the
-                    // existing items instead of re-parsing.
+                    print("[AddExpense] Next (custom) — image=\(eventExpenseViewModel.uploadedReceiptImage != nil), ocrLines=\(eventExpenseViewModel.lastOCRLines.count), isQuickScanned=\(eventExpenseViewModel.isQuickScanned)")
+                    // Custom split with an attached image → OCR (if not done yet)
+                    // then AI-refine, for any entry point (manual attach, quick scan,
+                    // or a shared receipt). Skipped on edit without a re-upload
+                    // (no image present, only the stored id).
                     if eventExpenseViewModel.uploadedReceiptImage != nil {
                         Task {
+                            eventExpenseViewModel.runOCRIfNeeded()
                             await eventExpenseViewModel.refineReceiptWithAI()
                             router.push(.expenseAddItems)
                         }
@@ -227,6 +229,17 @@ struct AddExpenseView: View {
                 eventExpenseViewModel.selectedMethod = .custom
             }
             hasPreviewed = false
+            // A receipt shared into the app: attach it here (not during navigation)
+            // and mark it previewed so the onChange below doesn't push the review
+            // screen — the image just sits in the receipt field.
+            if let shared = eventExpenseViewModel.pendingSharedReceiptImage {
+                // Mark previewed BEFORE attaching so the onChange below cannot push
+                // the review screen for a shared receipt.
+                hasPreviewed = true
+                eventExpenseViewModel.pendingSharedReceiptImage = nil
+                eventExpenseViewModel.attachReceiptImage(shared)
+                print("[AddExpense] attached shared receipt \(Int(shared.size.width))x\(Int(shared.size.height)) — hasReceipt=\(eventExpenseViewModel.hasReceipt)")
+            }
             viewModel = AddExpenseViewModel(eventExpenseViewModel: eventExpenseViewModel)
             if eventExpenseViewModel.selectedParticipants == [] {
                 eventExpenseViewModel.selectedParticipants = eventViewModel.selectedEvent?.participants ?? []

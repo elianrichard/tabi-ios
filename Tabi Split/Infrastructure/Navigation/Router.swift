@@ -32,6 +32,7 @@ enum AppRoute: Hashable {
     case editProfile
     case paymentMethods
     case receiptUploadReview
+    case quickScanEventPicker
 }
 
 enum SheetRoute: Hashable {

@@ -296,6 +296,12 @@ struct EventDetailView: View {
                 .presentationDragIndicator(.visible)
         }
         .onChange(of: eventExpenseViewModel.uploadedReceiptImage){
+            // This observer serves ONLY the Quick Scan button on this screen
+            // (isQuickScanned == true). EventDetailView stays mounted beneath
+            // AddExpenseView in the NavigationStack and keeps observing, so without
+            // this guard it hijacks a manual attach or a shared receipt by pushing
+            // the review screen — whose onDisappear then nils the image.
+            guard eventExpenseViewModel.isQuickScanned else { return }
             if !hasPreviewed && eventExpenseViewModel.uploadedReceiptImage != nil {
                 hasPreviewed.toggle()
                 router.push(.receiptUploadReview)

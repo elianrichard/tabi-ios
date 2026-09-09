@@ -8,8 +8,13 @@
 import SwiftUI
 import SwiftData
 import GoogleSignIn
+import StoreKit
 
 struct ContentView: View {
+    // Fires Apple's native App Store rating prompt. Read here (must be read from
+    // a View) and invoked when RatingPromptManager flips `pendingReview`.
+    @Environment(\.requestReview) private var requestReview
+    @State private var ratingPromptManager = RatingPromptManager.shared
     @State private var router = Router()
     @State private var eventViewModel = EventViewModel()
     @State private var eventInviteViewModel = EventInviteViewModel()
@@ -23,6 +28,10 @@ struct ContentView: View {
     // launch via link, or mid-auth). Held here and processed once authenticated,
     // so the join isn't dropped by the auth/navigation race.
     @State private var pendingInviteToken: String?
+
+    // A shared receipt (tabisplit://quickscan from the Share Extension) that
+    // arrived before the session was ready. Held and processed once authenticated.
+    @State private var pendingSharedReceipt: Bool = false
 
     var body: some View {
         ZStack {
@@ -54,6 +63,14 @@ struct ContentView: View {
                 .ignoresSafeArea()
         }
         .ignoresSafeArea(.keyboard)
+        .onChange(of: ratingPromptManager.pendingReview) { _, pending in
+            // The OS decides whether to actually show anything and silently
+            // throttles it; we just ask at this natural completion moment.
+            if pending {
+                requestReview()
+                ratingPromptManager.pendingReview = false
+            }
+        }
         .environment(router)
         .environment(eventViewModel)
         .environment(eventInviteViewModel)
@@ -71,6 +88,7 @@ struct ContentView: View {
             // Backup drain: process a queued invite token once the session is ready
             // (checkAuthentication also drains it directly).
             drainPendingInviteTokenIfNeeded()
+            drainPendingSharedReceiptIfNeeded()
         }
         .onOpenURL { incomingURL in
             // Custom-scheme links (tabisplit://…) and, on some launch paths,
@@ -178,9 +196,32 @@ struct ContentView: View {
                 return
             }
             joinEventByEventId(eventId)
+        // tabisplit://quickscan — the Share Extension shared a receipt image into
+        // the App Group and opened the app to add it as an expense.
+        case "quickscan":
+            handleQuickScan()
         default:
             break
         }
+    }
+
+    // A shared receipt arrived. Gate on the session; if not ready, stash and drain
+    // once authenticated (mirrors handleInviteToken). Otherwise open the event
+    // picker, which attaches the image and opens the add-expense flow.
+    private func handleQuickScan() {
+        guard AppGroup.hasSharedReceipt else { return }
+        guard sessionState.isAuthenticated else {
+            pendingSharedReceipt = true
+            return
+        }
+        router.popToRoot()
+        router.push(.quickScanEventPicker)
+    }
+
+    private func drainPendingSharedReceiptIfNeeded() {
+        guard pendingSharedReceipt, sessionState.isAuthenticated else { return }
+        pendingSharedReceipt = false
+        handleQuickScan()
     }
 
     // Entry point for an invite token from a deeplink. If the session isn't ready

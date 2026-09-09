@@ -25,6 +25,13 @@ struct ExpenseResultView: View {
         guard let id, !id.isEmpty else { return nil }
         return id
     }
+
+    /// Whether any receipt can be shown: a stored id, or the freshly picked local
+    /// image in the add flow that hasn't been uploaded yet (so has no id).
+    /// Mirrors ExpenseHeaderView on the items/assign screens.
+    private var hasReceipt: Bool {
+        receiptId != nil || eventExpenseViewModel.uploadedReceiptImage != nil
+    }
     
     var body: some View {
         VStack (alignment: .leading) {
@@ -81,13 +88,22 @@ struct ExpenseResultView: View {
                     .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
                 }
 
-                // Metadata chips: split method (yellow) + coverer (green).
+                // Metadata chips: split method (yellow) + coverer (green) + the
+                // attached receipt (blue), matching the items/assign screens.
                 HStack (spacing: .spacingSmall) {
                     if let method = eventExpenseViewModel.selectedMethod {
                         Nugget(text: method.splitDescription, icon: .resource(method.icon), color: .yellow)
                     }
                     if !eventExpenseViewModel.isEditView, let coverer = eventExpenseViewModel.selectedCoverer {
                         Nugget(text: "\(coverer.name.getFirstName()) paid", icon: .system("person.fill"), color: .green)
+                    }
+                    // Shown in both the saved-result and the add/edit review flow.
+                    if hasReceipt {
+                        Button {
+                            isShowReceiptSheet = true
+                        } label: {
+                            Nugget(text: "See Receipt", icon: .system("doc.text.image"), color: .blue)
+                        }
                     }
                 }
             }
@@ -121,14 +137,8 @@ struct ExpenseResultView: View {
             }
             //            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
-            // Show the receipt only when this expense actually has one attached.
-            if receiptId != nil && !eventExpenseViewModel.isEditView {
-                CustomButton(text: "Check Purchase Receipt", type: .secondary) {
-                    isShowReceiptSheet = true
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-            }
-            
+            // The receipt is reachable from the "See Receipt" nugget in the header.
+
             Spacer()
             
             if let event = eventViewModel.selectedEvent, eventExpenseViewModel.isEditView {
@@ -144,6 +154,9 @@ struct ExpenseResultView: View {
                             if await eventExpenseViewModel.finalizeExpense(event) {
                                 router.popToRoot()
                                 router.push(.eventDetail)
+                                // Successful create is a natural "felt value"
+                                // moment — maybe ask for an App Store rating.
+                                RatingPromptManager.shared.registerSuccessfulExpense()
                                 return
                             }
                         }
@@ -154,7 +167,11 @@ struct ExpenseResultView: View {
         .padding()
         .addBackgroundColor(.bgWhite)
         .fullScreenCover(isPresented: $isShowReceiptSheet) {
-            if let receiptId {
+            // Same precedence as ExpenseHeaderView: the just-picked local image
+            // (add flow, not yet uploaded) before the stored id.
+            if let image = eventExpenseViewModel.uploadedReceiptImage {
+                ReceiptViewerView(image: image, isPresented: $isShowReceiptSheet)
+            } else if let receiptId {
                 ReceiptViewerView(receiptId: receiptId, isPresented: $isShowReceiptSheet)
             }
         }

@@ -27,7 +27,9 @@ targets:
   Tabi Split:
     type: application
     platform: iOS
-    sources: ["Tabi Split"]
+    sources:
+      - "Tabi Split"
+      - "Shared"
     resources: [Resources]
     files:
       - path: "Tabi Split.app"
@@ -84,6 +86,34 @@ targets:
       - package: JWTDecode
       - package: GoogleSignIn
         product: GoogleSignIn
+      - target: ShareExtension
+        embed: true
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - "ShareExtension"
+      - "Shared"
+    configFiles:
+      Debug-Dev: Config/Dev.xcconfig
+      Release-Dev: Config/Dev.xcconfig
+      Debug-Staging: Config/Staging.xcconfig
+      Release-Staging: Config/Staging.xcconfig
+      Debug-Production: Config/Production.xcconfig
+      Release-Production: Config/Production.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sora.TabiSplit.ShareExtension
+        INFOPLIST_FILE: ShareExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ShareExtension/ShareExtension.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        IPHONEOS_DEPLOYMENT_TARGET: "18.1"
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: 1
+        TARGETED_DEVICE_FAMILY: 1
+        SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+        # The share extension has its own bundle id; the xcconfig sets the app's
+        # entitlements/bundle id, which the base settings above override.
   Tabi Split Tests:
     type: bundle.unit-test
     platform: iOS
@@ -100,8 +130,10 @@ schemes:
       targets:
         Tabi Split: all
         Tabi Split Tests: all
+        ShareExtension: all
     run:
       config: Debug-Dev
+      executable: Tabi Split
     test:
       config: Debug-Dev
       targets:
@@ -109,6 +141,7 @@ schemes:
       gatherCoverageData: true
     profile:
       config: Release-Dev
+      executable: Tabi Split
     analyze:
       config: Debug-Dev
     archive:
@@ -118,8 +151,10 @@ schemes:
       targets:
         Tabi Split: all
         Tabi Split Tests: all
+        ShareExtension: all
     run:
       config: Debug-Staging
+      executable: Tabi Split
     test:
       config: Debug-Staging
       targets:
@@ -127,6 +162,7 @@ schemes:
       gatherCoverageData: true
     profile:
       config: Release-Staging
+      executable: Tabi Split
     analyze:
       config: Debug-Staging
     archive:
@@ -136,8 +172,10 @@ schemes:
       targets:
         Tabi Split: all
         Tabi Split Tests: all
+        ShareExtension: all
     run:
       config: Debug-Production
+      executable: Tabi Split
     test:
       config: Debug-Production
       targets:
@@ -145,6 +183,7 @@ schemes:
       gatherCoverageData: true
     profile:
       config: Release-Production
+      executable: Tabi Split
     analyze:
       config: Debug-Production
     archive:
