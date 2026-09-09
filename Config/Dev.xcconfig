@@ -12,7 +12,7 @@ BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
 
 // Same secret as the other envs; the local backend is expected to run with
 // APP_ENV=development, which bypasses the X-Api-Secret check entirely.
-API_SECRET_KEY = secret
+API_SECRET_KEY = cx40TsowDQFm6kAO9JXCJYZvAFh7U7SEXRvb066aeW7OPBMxzBxGAg3eduO8IITM
 
 // HTTP header field name that carries API_SECRET_KEY. Same across envs.
 API_SECRET_HEADER = X-Api-Secret
