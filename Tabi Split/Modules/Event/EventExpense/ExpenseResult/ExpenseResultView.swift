@@ -28,7 +28,7 @@ struct ExpenseResultView: View {
 
     /// Whether any receipt can be shown: a stored id, or the freshly picked local
     /// image in the add flow that hasn't been uploaded yet (so has no id).
-    /// Mirrors ExpenseHeaderView on the items/assign screens.
+    /// Drives the "See Receipt" button at the bottom of the page.
     private var hasReceipt: Bool {
         receiptId != nil || eventExpenseViewModel.uploadedReceiptImage != nil
     }
@@ -88,22 +88,14 @@ struct ExpenseResultView: View {
                     .clipShape(RoundedRectangle(cornerRadius: .radiusMedium))
                 }
 
-                // Metadata chips: split method (yellow) + coverer (green) + the
-                // attached receipt (blue), matching the items/assign screens.
+                // Metadata chips: split method (yellow) + coverer (green). The
+                // receipt is opened from the "See Receipt" button at the bottom.
                 HStack (spacing: .spacingSmall) {
                     if let method = eventExpenseViewModel.selectedMethod {
                         Nugget(text: method.splitDescription, icon: .resource(method.icon), color: .yellow)
                     }
                     if !eventExpenseViewModel.isEditView, let coverer = eventExpenseViewModel.selectedCoverer {
                         Nugget(text: "\(coverer.name.getFirstName()) paid", icon: .system("person.fill"), color: .green)
-                    }
-                    // Shown in both the saved-result and the add/edit review flow.
-                    if hasReceipt {
-                        Button {
-                            isShowReceiptSheet = true
-                        } label: {
-                            Nugget(text: "See Receipt", icon: .system("doc.text.image"), color: .blue)
-                        }
                     }
                 }
             }
@@ -137,10 +129,16 @@ struct ExpenseResultView: View {
             }
             //            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             
-            // The receipt is reachable from the "See Receipt" nugget in the header.
-
             Spacer()
-            
+
+            // Bottom actions: See Receipt (when one is attached) sits above the
+            // Save button in the add/edit flow, and alone on the saved result.
+            if hasReceipt {
+                CustomButton(text: "See Receipt", type: .secondary, icon: "doc.text.image") {
+                    isShowReceiptSheet = true
+                }
+            }
+
             if let event = eventViewModel.selectedEvent, eventExpenseViewModel.isEditView {
                 CustomButton(text: "Save Expense") {
                     Task {

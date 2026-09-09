@@ -29,7 +29,7 @@ class ExpenseAssignViewModel {
     var isShowingQuantityChangeSheet: Bool = false
     var selectedItem: ExpenseItem = ExpenseItem(itemName: "", itemPrice: 0, itemQuantity: 0)
     var settingsDetent = PresentationDetent.medium
-    var itemFilter: ItemAssignmentFilter = .unassigned
+    var itemFilter: ItemAssignmentFilter = .all
 
     /// An item is FULLY assigned when the sum of its assignees' shares equals its
     /// quantity — e.g. a qty-3 item needs 3 shares total (one person taking 3, or
