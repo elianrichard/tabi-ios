@@ -99,7 +99,8 @@ Top-level Home view model: [`HomeViewModel`](Tabi%20Split/Modules/Home/HomeViewM
 2. `POST /auth/apple` or `/auth/google` with `id_token` (+ `merge_from_guest_token` if the current session is a guest) → `LoginResponse(token, refresh_token, full_name, email, profile_image)`.
 3. `userId` is read from the JWT (`JWTDecode`); tokens go to Keychain; `CurrentUserDefaults` (UserDefaults) and the SwiftData current user are saved; `SessionState.isAuthenticated = true`.
 4. Guest: `POST /auth/guest` → same persistence with `kind: "guest"`. Cancelling the provider sheet is not surfaced as an error.
-5. Each fresh session resets the receipt-scan disclaimer so it shows again once.
+5. Token lifetimes: access token 24h, renewed by `POST /auth/refresh` on a 401. Provider refresh tokens last 7 days (then the session-expired banner; sign in again). **Guest refresh tokens never expire** — a guest has no credentials to sign back in with — and are revoked only by logout, account deletion, or the guest → provider merge. A guest still holding a legacy 7-day token gets it rotated on its first refresh (`RefreshResponse.refresh_token`), which `AuthService.refresh()` stores in place.
+6. Each fresh session resets the receipt-scan disclaimer so it shows again once.
 
 **5.3 Create event → invite participants**
 

@@ -35,6 +35,10 @@ struct EventBase: Codable {
     let avatar_url: String
     let creator_id: String
     let created_at: String
+    // Event row's own last-modified time. Optional to stay decodable against
+    // older backends; not yet used for change detection (expense edits don't
+    // bump it).
+    let updated_at: String?
     let participants: [UserBase]
     let expenses: [ExpenseEventBase]
 }
@@ -42,6 +46,13 @@ struct EventBase: Codable {
 struct GetEventsResponse: Codable {
     let message: String
     let events: [EventBase]
+}
+
+// Single event, same shape as one GetEventsResponse entry. Backs the in-place
+// refresh of the open event (GET /event/:id).
+struct GetEventResponse: Codable {
+    let message: String
+    let event: EventBase
 }
 
 struct EditEventRequest: Codable {

@@ -17,6 +17,20 @@ struct CurrentUserDefaults: Codable {
 
     var isGuest: Bool { kind == "guest" }
 
+    /// Whether two stored users are the same account. userId is authoritative
+    /// (every server-backed account, guests included, has one); email is only a
+    /// fallback for legacy blobs saved before userId was stored. Two records
+    /// with nothing comparable are treated as different accounts.
+    static func isSameAccount(_ a: CurrentUserDefaults, _ b: CurrentUserDefaults) -> Bool {
+        if !a.userId.isEmpty && !b.userId.isEmpty {
+            return a.userId == b.userId
+        }
+        if !a.userEmail.isEmpty && !b.userEmail.isEmpty {
+            return a.userEmail == b.userEmail
+        }
+        return false
+    }
+
     init(userName: String, userEmail: String, userImage: ProfileImageEnum.ID, userId: String, kind: String = "real") {
         self.userName = userName
         self.userEmail = userEmail

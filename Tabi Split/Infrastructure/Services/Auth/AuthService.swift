@@ -69,5 +69,8 @@ final class AuthenticationService {
         let response: RefreshResponse = try await apiClient.post(endpoint: "/auth/refresh", body: refreshRequest)
 
         try tokenManager.saveAccessToken(response.token)
+        if let rotated = response.refresh_token, !rotated.isEmpty {
+            try tokenManager.saveRefreshToken(rotated)
+        }
     }
 }

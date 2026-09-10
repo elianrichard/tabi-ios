@@ -16,6 +16,10 @@ protocol APIClient {
     ) async throws -> Response
     
     func get<Response: Codable>(endpoint: String) async throws -> Response
+    /// `silent: true` runs the request without the global loading overlay and
+    /// without the blocking error dialog — for background refreshes and polls
+    /// whose failures the caller handles itself.
+    func get<Response: Codable>(endpoint: String, silent: Bool) async throws -> Response
     func post<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
     func put<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
     func patch<Request: Encodable, Response: Codable>(endpoint: String, body: Request) async throws -> Response
@@ -47,6 +51,15 @@ final class APIService: APIClient {
         method: String,
         body: Encodable?
     ) async throws -> Response {
+        return try await request(endpoint: endpoint, method: method, body: body, silent: false)
+    }
+
+    private func request<Response: Codable>(
+        endpoint: String,
+        method: String,
+        body: Encodable?,
+        silent: Bool
+    ) async throws -> Response {
         var request = URLRequest(url: URL(string: config.baseURL + endpoint)!)
         request.httpMethod = method
         // AI-backed endpoints (e.g. /receipt/parse) can take up to ~90s server-side;
@@ -62,11 +75,15 @@ final class APIService: APIClient {
         }
 
         os_log(.debug, log: .api, "API Request %{public}@ %{public}@ body: %{public}@", method, endpoint, String(describing: body))
-        return try await requestWithRetry(endpoint: endpoint, request: request)
+        return try await requestWithRetry(endpoint: endpoint, request: request, silent: silent)
     }
     
     func get<Response: Codable>(endpoint: String) async throws -> Response {
-        return try await request(endpoint: endpoint, method: "GET", body: nil as Empty?)
+        return try await get(endpoint: endpoint, silent: false)
+    }
+
+    func get<Response: Codable>(endpoint: String, silent: Bool) async throws -> Response {
+        return try await request(endpoint: endpoint, method: "GET", body: nil as Empty?, silent: silent)
     }
     
     func post<Request: Encodable, Response: Codable>(
@@ -151,13 +168,19 @@ final class APIService: APIClient {
 
     private func requestWithRetry<Response: Codable>(
         endpoint: String,
-        request: URLRequest
+        request: URLRequest,
+        silent: Bool = false
     ) async throws -> Response {
         // Receipt parsing runs the AI and can take a few seconds — show the scan
-        // animation instead of the generic spinner.
-        let loadingAnimation = endpoint.hasPrefix("/receipt/parse") ? "OnboardingScan" : "LoadingComponent"
-        await MainActor.run { LoadingViewModel.shared.beginRequest(animation: loadingAnimation) }
-        defer { Task { @MainActor in LoadingViewModel.shared.endRequest() } }
+        // animation instead of the generic spinner. Silent requests (background
+        // refreshes, polls) never touch the overlay.
+        if !silent {
+            let loadingAnimation = endpoint.hasPrefix("/receipt/parse") ? "OnboardingScan" : "LoadingComponent"
+            await MainActor.run { LoadingViewModel.shared.beginRequest(animation: loadingAnimation) }
+        }
+        defer {
+            if !silent { Task { @MainActor in LoadingViewModel.shared.endRequest() } }
+        }
         do {
             let authService = AuthenticationService()
             var modifiedRequest = request
@@ -212,7 +235,14 @@ final class APIService: APIClient {
                         try? tokenManager.clearTokens()
                         throw APIError.unauthorized
                     }
-                    throw APIError.requestFailed(message: errorResponse.errors)
+                    // Typed so callers can tell "gone / no longer yours" apart
+                    // from a transient failure (e.g. a refreshed event that was
+                    // deleted, or one the user was removed from).
+                    switch httpResponse.statusCode {
+                    case 404: throw APIError.notFound(message: errorResponse.errors)
+                    case 403: throw APIError.forbidden(message: errorResponse.errors)
+                    default: throw APIError.requestFailed(message: errorResponse.errors)
+                    }
                 }
                 
                 let errorMessage = try? JSONDecoder().decode(String.self, from: data)
@@ -238,7 +268,8 @@ final class APIService: APIClient {
             let apiError = (error as? APIError) ?? .requestFailed(message: error.localizedDescription)
             // Some endpoints (best-effort AI features) degrade gracefully; their
             // failures are logged, not surfaced as a blocking dialog to the user.
-            if !Self.silentErrorEndpoints.contains(where: { endpoint.hasPrefix($0) }) {
+            // Silent requests likewise leave error handling to their caller.
+            if !silent && !Self.silentErrorEndpoints.contains(where: { endpoint.hasPrefix($0) }) {
                 notifyError(apiError)
             }
             throw apiError

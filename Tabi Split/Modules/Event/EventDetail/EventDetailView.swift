@@ -7,6 +7,11 @@
 
 import SwiftUI
 import Lottie
+import os.log
+
+private extension OSLog {
+    static let sync = OSLog(subsystem: ENV.APP_BUNDLE_ID, category: "EventSync")
+}
 
 struct EventDetailView: View {
     @Environment(Router.self) private var router
@@ -14,42 +19,60 @@ struct EventDetailView: View {
     @Environment(EventExpenseViewModel.self) private var eventExpenseViewModel
     @Environment(EventInviteViewModel.self) private var eventInviteViewModel
     @Environment(ProfileViewModel.self) private var profileViewModel
+    @Environment(\.scenePhase) private var scenePhase
     
     @State private var hasPreviewed: Bool = false
     @State private var quickScanSheetHeight: CGFloat = 0
+
+    /// How long refreshed event data counts as fresh. Appear, foreground and the
+    /// visible poll all skip the fetch inside this window; pull-to-refresh
+    /// ignores it.
+    private static let refreshMaxAge: TimeInterval = 60
+    /// Slow poll cadence while this screen is on top and the app is active.
+    private static let visiblePollInterval: Duration = .seconds(60)
     
     var body: some View {
         ZStack {
             TopNavigation (title: eventViewModel.eventName, titleColor: .textWhite, isCircleBackButton: true, isInline: false, RightToolbar: {
-                if eventViewModel.isUserCreator {
-                    ElipsisMenu (color: .textWhite) {
-                        Button {
-                            eventViewModel.isDirectInvite = false
-                            router.push(.eventForm)
-                        } label: {
-                            Label("Edit Event", systemImage: "pencil")
-                        }
-                        if eventViewModel.isEventCompleted {
+                HStack (spacing: .spacingSmall) {
+                    // Background sync indicator. Always laid out (opacity only)
+                    // so the menu button doesn't shift when it toggles.
+                    ProgressView()
+                        .tint(.textWhite)
+                        .controlSize(.small)
+                        .opacity(eventViewModel.isSyncing ? 1 : 0)
+                        .accessibilityLabel("Syncing event")
+                        .accessibilityHidden(!eventViewModel.isSyncing)
+                    if eventViewModel.isUserCreator {
+                        ElipsisMenu (color: .textWhite) {
                             Button {
-                                router.present(.eventIncomplete)
+                                eventViewModel.isDirectInvite = false
+                                router.push(.eventForm)
                             } label: {
-                                Label("Mark as Incomplete", systemImage: "flag.slash")
+                                Label("Edit Event", systemImage: "pencil")
+                            }
+                            if eventViewModel.isEventCompleted {
+                                Button {
+                                    router.present(.eventIncomplete)
+                                } label: {
+                                    Label("Mark as Incomplete", systemImage: "flag.slash")
+                                }
+                            }
+                            Button (role: .destructive) {
+                                router.present(.eventDelete)
+                            } label: {
+                                Label("Delete Event", systemImage: "trash")
                             }
                         }
-                        Button (role: .destructive) {
-                            router.present(.eventDelete)
-                        } label: {
-                            Label("Delete Event", systemImage: "trash")
-                        }
-                    }
-                } else {
-                    // Non-creator participants can leave the event; they're replaced
-                    // by a placeholder dummy so their expense history stays intact.
-                    ElipsisMenu (color: .textWhite) {
-                        Button (role: .destructive) {
-                            router.present(.eventLeave)
-                        } label: {
-                            Label("Leave Event", systemImage: "rectangle.portrait.and.arrow.right")
+                    } else {
+                        // Non-creator participants can leave the event; they're replaced
+                        // by a placeholder dummy so their expense history stays intact.
+                        ElipsisMenu (color: .textWhite) {
+                            Button (role: .destructive) {
+                                router.present(.eventLeave)
+                            } label: {
+                                Label("Leave Event", systemImage: "rectangle.portrait.and.arrow.right")
+                            }
                         }
                     }
                 }
@@ -69,9 +92,9 @@ struct EventDetailView: View {
                                 EventNavigation()
                                 VStack{
                                     if eventViewModel.selectedSection == .expenses {
-                                        EventDetailExpenseView()
+                                        EventDetailExpenseView(onRefresh: { await refreshEvent(ifStale: false) })
                                     } else if eventViewModel.selectedSection == .summary {
-                                        EventSummaryView()
+                                        EventSummaryView(onRefresh: { await refreshEvent(ifStale: false) })
                                     }
                                 }
                                 .transaction { transaction in
@@ -134,6 +157,23 @@ struct EventDetailView: View {
             hasPreviewed = false
             eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
             eventInviteViewModel.selectedContacts = eventViewModel.selectedEvent?.participants ?? []
+            Task { await refreshEvent(ifStale: true) }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Returning from the background after a while: catch up silently.
+            guard phase == .active else { return }
+            Task { await refreshEvent(ifStale: true) }
+        }
+        .task {
+            // Slow poll while this screen is showing, so two people looking at
+            // the same event converge without pulling. `.task` is cancelled when
+            // the view disappears (child pushed, or popped) and restarts on
+            // re-appear.
+            while !Task.isCancelled {
+                try? await Task.sleep(for: Self.visiblePollInterval)
+                guard !Task.isCancelled else { return }
+                await refreshEvent(ifStale: true)
+            }
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: router.sheetBinding(for: .eventComplete)) {
@@ -306,6 +346,29 @@ struct EventDetailView: View {
                 hasPreviewed.toggle()
                 router.push(.receiptUploadReview)
             }
+        }
+    }
+
+    /// Silent refresh of the open event. Only runs while this screen is on top
+    /// with no sheet up and the app active, so it never rewrites an expense the
+    /// user is editing on a child screen. On `.gone` the event no longer exists
+    /// for this user: go Home (whose own refresh drops it from the list) and
+    /// say why.
+    @MainActor
+    private func refreshEvent(ifStale: Bool) async {
+        guard router.path.last == .eventDetail, router.sheet == nil, scenePhase == .active else {
+            os_log(.info, log: .sync, "trigger ignored (ifStale=%{public}@): path.last=%{public}@ sheet=%{public}@ scenePhase=%{public}@",
+                   String(ifStale), String(describing: router.path.last), String(describing: router.sheet), String(describing: scenePhase))
+            return
+        }
+        os_log(.info, log: .sync, "trigger (ifStale=%{public}@)", String(ifStale))
+        let outcome = ifStale
+            ? await eventViewModel.refreshSelectedEventIfStale(currentUser: profileViewModel.user, maxAge: Self.refreshMaxAge)
+            : await eventViewModel.refreshSelectedEvent(currentUser: profileViewModel.user)
+        os_log(.info, log: .sync, "outcome: %{public}@", String(describing: outcome))
+        if outcome == .gone {
+            router.popToRoot()
+            ToastViewModel.shared.show("This event is no longer available", style: .info)
         }
     }
 }

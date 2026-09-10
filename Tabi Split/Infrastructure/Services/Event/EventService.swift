@@ -21,6 +21,15 @@ final class EventService {
         
         return response
     }
+
+    // Fetches one event for an in-place refresh of the open detail screen. Runs
+    // silently (no loading overlay, no error dialog); the caller decides how to
+    // surface failures. Throws APIError.notFound / .forbidden when the event is
+    // gone or the user is no longer a participant.
+    func getEvent(eventId: String) async throws -> EventBase {
+        let response: GetEventResponse = try await apiClient.get(endpoint: "/event/\(eventId)", silent: true)
+        return response.event
+    }
     
     func updateEvent(event: EventData, newDummyUsers: [UserData] = []) async throws -> EditEventResponse {
         guard let eventId = event.eventId else { throw EventAPIError.eventIdNotFound }
@@ -95,7 +104,7 @@ final class EventService {
     // Polls whether an email-less dummy participant has been claimed via its
     // invite link; when claimed, the response carries the account that took over.
     func participantClaimStatus(eventId: String, participantId: String) async throws -> ParticipantClaimStatusResponse {
-        let response: ParticipantClaimStatusResponse = try await apiClient.get(endpoint: "/event/\(eventId)/participant/\(participantId)/status")
+        let response: ParticipantClaimStatusResponse = try await apiClient.get(endpoint: "/event/\(eventId)/participant/\(participantId)/status", silent: true)
         return response
     }
 }

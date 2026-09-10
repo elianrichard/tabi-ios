@@ -10,6 +10,8 @@ import SwiftUI
 struct EventSummaryView: View {
     @Environment(Router.self) private var router
     @Environment(EventViewModel.self) private var eventViewModel
+    /// Pull-to-refresh handler; the parent decides what "refresh" means.
+    var onRefresh: () async -> Void = {}
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -151,6 +153,15 @@ struct EventSummaryView: View {
                     )
                 }
             }
+        }
+        .refreshable {
+            // SwiftUI cancels the refresh action's task when the view owning this
+            // modifier is re-evaluated mid-refresh (the parent flips `isSyncing`
+            // as soon as the fetch starts), which surfaced as URLError -999
+            // "cancelled". Do the work in an unstructured task so cancelling the
+            // gesture task doesn't abort the fetch; the pull spinner still waits
+            // for the result.
+            await Task { await onRefresh() }.value
         }
     }
 }

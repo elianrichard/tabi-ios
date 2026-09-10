@@ -35,62 +35,6 @@ final class HomeViewModel {
     }
     
     @MainActor
-    func populateEventData(data: GetEventsResponse, currentUser: UserData) {
-        for event in data.events {
-            let image = EventIconEnum(rawValue: event.avatar_url) ?? .icon1
-            var participants: [UserData] = []
-            
-            if let users = SwiftDataService.shared.getAllUsers() {
-                for dataUser in event.participants {
-                    if let targetUser = users.first(where: { dataUser.user_id == $0.userId }) {
-                        targetUser.update(fromUserBase: dataUser)
-                        participants.append(targetUser)
-                    } else {
-                        participants.append(UserData(userBase: dataUser))
-                    }
-                }
-            }
-            
-            let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.completion_date ?? "").convertIsoToDate(), eventIcon: image, participants: participants, createdAt: event.created_at.convertIsoToDate(), creatorId: event.creator_id, isSynced: true)
-            SwiftDataService.shared.addEvent(newEvent)
-            
-            let eventExpenses = event.expenses
-            
-            for expense in eventExpenses {
-                guard let coverer = SwiftDataService.shared.getUserByUserId(expense.coverer_id),
-                      let method = SplitMethod(rawValue: expense.split_method) else { continue }
-                var participants: [UserData] = []
-                for item in expense.items {
-                    for assignee in item.assignees {
-                        if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
-                            participants.append(user)
-                        }
-                    }
-                }
-                let creator = expense.creator_id.flatMap { SwiftDataService.shared.getUserByUserId($0) }
-                let newExpense = Expense(expenseId: expense.id, name: expense.name, coverer: coverer, creator: creator, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants, receiptId: expense.receipt_url.isEmpty ? nil : expense.receipt_url, isSynced: true)
-                newEvent.expenses.append(newExpense)
-                for additionalCharge in expense.additional_charges {
-                    newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
-                }
-                
-                for item in expense.items {
-                    var itemAssignees: [ExpensePerson] = []
-                    for assignee in item.assignees {
-                        if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
-                            itemAssignees.append(ExpensePerson(user: user, share: assignee.share))
-                        }
-                    }
-                    let expenseItem = ExpenseItem(itemId: item.id, itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
-                    newExpense.items.append(expenseItem)
-                }
-                newEvent.calculateUserEventBalance(currentUser: currentUser)
-            }
-            SwiftDataService.shared.saveModelContext()
-        }
-    }
-    
-    @MainActor
     func refreshEventData (currentUser: UserData, isShowLoading: Binding<Bool>) async -> Bool {
         if (!isLoading) {
             do {
@@ -106,65 +50,7 @@ final class HomeViewModel {
                 SwiftDataService.shared.saveModelContext()
 
                 for event in data.events {
-                    let image = EventIconEnum(rawValue: event.avatar_url) ?? .icon1
-                    var participants: [UserData] = []
-                    
-                    if let users = SwiftDataService.shared.getAllUsers() {
-                        for dataUser in event.participants {
-                            if let targetUser = users.first(where: { dataUser.user_id == $0.userId }) {
-                                targetUser.update(fromUserBase: dataUser)
-                                participants.append(targetUser)
-                            } else {
-                                participants.append(UserData(userBase: dataUser))
-                            }
-                        }
-                    }
-                    
-                    let newEvent = EventData(eventId: event.id, eventName: event.name, completionDate: (event.completion_date ?? "").convertIsoToDate(), eventIcon: image, participants: [], createdAt: event.created_at.convertIsoToDate(), creatorId: event.creator_id, isSynced: true)
-                    SwiftDataService.shared.addEvent(newEvent)
-                    newEvent.participants.append(contentsOf: participants)
-                    
-                    SwiftDataService.shared.saveModelContext()
-                    let eventExpenses = event.expenses
-                    
-                    for expense in eventExpenses {
-                        guard let coverer = SwiftDataService.shared.getUserByUserId(expense.coverer_id),
-                              let method = SplitMethod(rawValue: expense.split_method) else { continue }
-                        var participants: [UserData] = []
-                        for item in expense.items {
-                            for assignee in item.assignees {
-                                if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
-                                    if !participants.contains(where: { $0 == user }) {
-                                        participants.append(user)
-                                    }
-                                }
-                            }
-                        }
-                        
-                        let creator = expense.creator_id.flatMap { SwiftDataService.shared.getUserByUserId($0) }
-                        newEvent.expenses.append( Expense(expenseId: expense.id, name: expense.name, coverer: coverer, creator: creator, dateOfCreation: expense.created_at.convertIsoToDate(), price: expense.total_expense, splitMethod: method, participants: participants, receiptId: expense.receipt_url.isEmpty ? nil : expense.receipt_url, isSynced: true) )
-                        SwiftDataService.shared.saveModelContext()
-                        
-                        if let newExpense = newEvent.expenses.first(where: { $0.expenseId == expense.id }) {
-                            for additionalCharge in expense.additional_charges {
-                                newExpense.additionalCharges.append(AdditionalCharge(additionalChargeBase: additionalCharge))
-                            }
-                            
-                            for item in expense.items {
-                                var itemAssignees: [ExpensePerson] = []
-                                for assignee in item.assignees {
-                                    if let user = SwiftDataService.shared.getUserByUserId(assignee.user_id) {
-                                        itemAssignees.append(ExpensePerson(user: user, share: assignee.share))
-                                    }
-                                }
-                                let expenseItem = ExpenseItem(itemId: item.id, itemName: item.name, itemPrice: item.price, itemQuantity: item.quantity, assignees: itemAssignees)
-                                newExpense.items.append(expenseItem)
-                                SwiftDataService.shared.saveModelContext()
-                            }
-                        }
-                        newEvent.calculateUserEventBalance(currentUser: currentUser)
-                        SwiftDataService.shared.saveModelContext()
-                    }
+                    EventData.insertSynced(from: event, currentUser: currentUser, in: SwiftDataService.shared.modelContext)
                     SwiftDataService.shared.saveModelContext()
                 }
             } catch {

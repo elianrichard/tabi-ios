@@ -55,12 +55,40 @@ final class PushService {
     private struct MessageResponse: Codable { let message: String }
 
     /// Shows the system prompt once; on later calls iOS just re-issues the token,
-    /// which re-uploads it bound to whoever is signed in now.
-    func requestAuthorizationAndRegister() async {
+    /// which re-uploads it bound to whoever is signed in now. Returns whether
+    /// notifications are authorized.
+    @discardableResult
+    func requestAuthorizationAndRegister() async -> Bool {
         let granted = (try? await UNUserNotificationCenter.current()
             .requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-        guard granted else { return }
+        guard granted else { return false }
         await MainActor.run { UIApplication.shared.registerForRemoteNotifications() }
+        return true
+    }
+
+    /// Current OS-level permission. `.notDetermined` means the prompt has never
+    /// been shown; `.denied` can only be reversed by the user in iOS Settings.
+    func authorizationStatus() async -> UNAuthorizationStatus {
+        await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+    }
+
+    /// Whether pushes can be delivered under this status (provisional/ephemeral
+    /// are quiet or time-boxed grants, still "on" for our purposes).
+    static func isEnabled(_ status: UNAuthorizationStatus) -> Bool {
+        switch status {
+        case .authorized, .provisional, .ephemeral: return true
+        case .denied, .notDetermined: return false
+        @unknown default: return false
+        }
+    }
+
+    /// Opens this app's notification page in iOS Settings. iOS never re-prompts
+    /// after a denial (and can't revoke programmatically), so this is the only
+    /// way for the user to flip the permission once it has been decided.
+    @MainActor
+    func openNotificationSettings() {
+        guard let url = URL(string: UIApplication.openNotificationSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
     func uploadToken(_ hex: String) async {

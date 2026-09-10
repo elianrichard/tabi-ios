@@ -8,14 +8,19 @@
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
+import UserNotifications
 
 struct ProfileView: View {
     @Environment(Router.self) var router
     @Environment(ProfileViewModel.self) private var profileViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var isImporterPresented: Bool = false
     @State private var exportURL: URL?
     @State private var backupAlert: BackupAlert?
+    /// OS notification permission, re-read on appear and whenever the app comes
+    /// back to the foreground (the user may have changed it in Settings).
+    @State private var notificationStatus: UNAuthorizationStatus?
 
     var body: some View {
         VStack{
@@ -106,6 +111,45 @@ struct ProfileView: View {
                             }
                             Divider()
                         }
+                        // Notifications: iOS only ever shows the permission prompt
+                        // once. If the user tapped "Don't Allow" (on the Home prompt
+                        // or later), the only way back is iOS Settings, so this row
+                        // shows the current state and routes there; when never asked
+                        // it prompts directly. Not a Toggle — the app can't flip the
+                        // OS permission itself, so a switch would lie.
+                        Text("Settings")
+                            .font(.tabiBody)
+                        Button {
+                            Task { await handleNotificationsTap() }
+                        } label: {
+                            HStack(spacing: .spacingTight){
+                                Icon(systemName: notificationsEnabled ? "bell" : "bell.slash", size: 20)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Notifications")
+                                        .font(.tabiHeadline)
+                                        .foregroundStyle(.textBlack)
+                                    if notificationStatus == .denied {
+                                        // Button labels center wrapped text by default;
+                                        // keep the subtitle flush with the title.
+                                        Text("Turned off in iOS Settings. Tap to turn on.")
+                                            .font(.tabiBody)
+                                            .foregroundStyle(.textGrey)
+                                            .multilineTextAlignment(.leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                Spacer(minLength: .spacingTight)
+                                Text(notificationsEnabled ? "On" : "Off")
+                                    .font(.tabiBody)
+                                    .foregroundStyle(.textGrey)
+                                Icon(systemName: "chevron.right", size: 16)
+                            }
+                            .padding(.vertical, .spacingSmall)
+                            .contentShape(Rectangle())
+                        }
+                        .disabled(notificationStatus == nil)
+                        Divider()
                         // Guests have no way back into their account, so Log Out
                         // would silently destroy their data. They upgrade via the
                         // "Sign In" prompt above instead; only real accounts log out.
@@ -140,6 +184,14 @@ struct ProfileView: View {
         .navigationBarBackButtonHidden(true)
         .padding(.spacingMedium)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onAppear {
+            Task { await refreshNotificationStatus() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Back from iOS Settings: pick up whatever the user changed there.
+            guard phase == .active else { return }
+            Task { await refreshNotificationStatus() }
+        }
         .fileImporter(
             isPresented: $isImporterPresented,
             allowedContentTypes: [.json],
@@ -156,6 +208,38 @@ struct ProfileView: View {
         }
         .alert(item: $backupAlert) { alert in
             Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))
+        }
+    }
+
+    private var notificationsEnabled: Bool {
+        notificationStatus.map(PushService.isEnabled) ?? false
+    }
+
+    /// Re-reads the OS permission. If it just flipped to enabled (user turned it
+    /// on in Settings, or granted the prompt) the device token is (re)registered
+    /// right away so pushes resume without waiting for the next Home appear.
+    @MainActor
+    private func refreshNotificationStatus() async {
+        let wasEnabled = notificationsEnabled
+        let status = await PushService.shared.authorizationStatus()
+        notificationStatus = status
+        if !wasEnabled && PushService.isEnabled(status) {
+            await PushService.shared.requestAuthorizationAndRegister()
+        }
+    }
+
+    @MainActor
+    private func handleNotificationsTap() async {
+        switch notificationStatus {
+        case .notDetermined:
+            // Never asked: the system prompt is still available.
+            await PushService.shared.requestAuthorizationAndRegister()
+            await refreshNotificationStatus()
+        case .none:
+            return
+        default:
+            // Denied (or already on): only iOS Settings can change it from here.
+            PushService.shared.openNotificationSettings()
         }
     }
 

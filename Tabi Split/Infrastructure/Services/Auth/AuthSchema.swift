@@ -43,6 +43,9 @@ struct RefreshRequest: Codable {
 
 struct RefreshResponse: Codable {
     let token: String
+    // Present only when the server rotated the refresh token (e.g. a guest's
+    // expiring token upgraded to a non-expiring one); replace the stored one.
+    let refresh_token: String?
     let message: String
 }
 

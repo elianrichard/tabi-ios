@@ -6,6 +6,13 @@
 //
 
 import SwiftUI
+import os.log
+
+private extension OSLog {
+    /// In-place event refresh diagnostics — filter Console.app / Xcode console by
+    /// category "EventSync" to trace pull-to-refresh, foreground and poll syncs.
+    static let sync = OSLog(subsystem: ENV.APP_BUNDLE_ID, category: "EventSync")
+}
 
 @Observable
 final class EventViewModel {
@@ -13,6 +20,7 @@ final class EventViewModel {
     
     var selectedEvent: EventData? {
         didSet {
+            lastSyncedAt = nil
             if let event = selectedEvent {
                 eventName = event.eventName
                 eventIcon = EventIconEnum(rawValue: event.eventIcon) ?? .icon1
@@ -60,6 +68,98 @@ final class EventViewModel {
     var userSettlementList: [SummarySettlementData] = []
     
     var isApiCallLoading = false
+
+    // MARK: - In-place refresh of the open event
+
+    /// True while a background refresh of `selectedEvent` is in flight. Drives
+    /// the small sync indicator on the detail screen; never the full overlay.
+    var isSyncing = false
+    /// When `selectedEvent` was last refreshed from the server in this session.
+    /// Reset whenever a different event is selected.
+    private(set) var lastSyncedAt: Date?
+
+    enum RefreshOutcome: Equatable {
+        case updated
+        /// Nothing to do: no synced event selected, a refresh or a local write
+        /// is already in flight, or the data is still fresh.
+        case skipped
+        /// Network/server error; local data left untouched.
+        case failed
+        /// The event was deleted, or the user is no longer a participant.
+        case gone
+    }
+
+    /// Refreshes only when the last successful refresh is older than `maxAge`.
+    @MainActor
+    func refreshSelectedEventIfStale(currentUser: UserData, maxAge: TimeInterval) async -> RefreshOutcome {
+        if let lastSyncedAt, Date().timeIntervalSince(lastSyncedAt) < maxAge {
+            return .skipped
+        }
+        return await refreshSelectedEvent(currentUser: currentUser)
+    }
+
+    /// Fetches `selectedEvent` from the server and merges it in place (same
+    /// object, so observers re-render without a swap), then recomputes the
+    /// summary. Silent: no loading overlay, no error dialog.
+    @MainActor
+    func refreshSelectedEvent(currentUser: UserData) async -> RefreshOutcome {
+        guard let event = selectedEvent else {
+            os_log(.info, log: .sync, "refresh skipped: no selected event")
+            return .skipped
+        }
+        guard event.isSynced, let eventId = event.eventId else {
+            os_log(.info, log: .sync, "refresh skipped: event not synced (isSynced=%{public}@ eventId=%{public}@)",
+                   String(event.isSynced), event.eventId ?? "nil")
+            return .skipped
+        }
+        // Don't race a local mutation (edit/complete/delete) or another refresh.
+        guard !isSyncing, !isApiCallLoading else {
+            os_log(.info, log: .sync, "refresh skipped: busy (isSyncing=%{public}@ isApiCallLoading=%{public}@)",
+                   String(isSyncing), String(isApiCallLoading))
+            return .skipped
+        }
+        isSyncing = true
+        defer { isSyncing = false }
+
+        os_log(.info, log: .sync, "refresh start: event=%{public}@ local expenses=%d participants=%d",
+               eventId, event.expenses.count, event.participants.count)
+        let base: EventBase
+        do {
+            base = try await EventService.shared.getEvent(eventId: eventId)
+        } catch let error as APIError {
+            switch error {
+            case .notFound, .forbidden:
+                os_log(.error, log: .sync, "refresh gone: %{public}@", String(describing: error))
+                return .gone
+            default:
+                os_log(.error, log: .sync, "refresh failed: %{public}@", String(describing: error))
+                return .failed
+            }
+        } catch {
+            os_log(.error, log: .sync, "refresh failed: %{public}@", String(describing: error))
+            return .failed
+        }
+
+        // A deeplink/push may have switched events while the request was out.
+        guard selectedEvent === event, !isApiCallLoading else {
+            os_log(.info, log: .sync, "refresh discarded: selection changed or local write started mid-flight")
+            return .skipped
+        }
+
+        os_log(.info, log: .sync, "refresh fetched: server expenses=%d participants=%d name=%{public}@",
+               base.expenses.count, base.participants.count, base.name)
+        event.apply(from: base, currentUser: currentUser, in: SwiftDataService.shared.modelContext)
+        SwiftDataService.shared.saveModelContext()
+        // `selectedEvent`'s didSet only runs on assignment, so mirror the
+        // header fields it derives (the title reads `eventName`).
+        eventName = event.eventName
+        eventIcon = EventIconEnum(rawValue: event.eventIcon) ?? .icon1
+        calculateOptimization(currentUser: currentUser)
+        lastSyncedAt = Date()
+        os_log(.info, log: .sync, "refresh applied: local expenses=%d participants=%d",
+               event.expenses.count, event.participants.count)
+        return .updated
+    }
     
     @MainActor
     func handleEditEvent (selectedContacts: [UserData], currentUser: UserData) async -> Bool {
