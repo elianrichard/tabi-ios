@@ -88,6 +88,7 @@ struct LoginView: View {
 
                     VStack (spacing: .spacingMedium) {
                         CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Continue with Apple",
+                                     isEnabled: !loginViewModel.isLoading,
                                      icon: "apple.logo",
                                      customBackgroundColor: .black,
                                      customTextColor: .white) {
@@ -95,7 +96,8 @@ struct LoginView: View {
                         }
 
                         CustomButton(text: loginViewModel.isLoading ? "Loading..." : "Continue with Google",
-                                     type: .secondary) {
+                                     type: .secondary,
+                                     isEnabled: !loginViewModel.isLoading) {
                             Task { await handleSignIn { await loginViewModel.signInWithGoogle() } }
                         }
                     }

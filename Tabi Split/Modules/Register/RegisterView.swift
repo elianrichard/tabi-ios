@@ -42,6 +42,7 @@ struct RegisterView: View {
                 VStack (spacing: .spacingTight) {
                     VStack (spacing: .spacingMedium) {
                         CustomButton(text: registerViewModel.isLoading ? "Loading..." : "Continue with Apple",
+                                     isEnabled: !registerViewModel.isLoading,
                                      icon: "apple.logo",
                                      customBackgroundColor: .black,
                                      customTextColor: .white) {
@@ -49,7 +50,8 @@ struct RegisterView: View {
                         }
 
                         CustomButton(text: registerViewModel.isLoading ? "Loading..." : "Continue with Google",
-                                     type: .secondary) {
+                                     type: .secondary,
+                                     isEnabled: !registerViewModel.isLoading) {
                             Task { await handleSignIn { await registerViewModel.signInWithGoogle() } }
                         }
                     }
