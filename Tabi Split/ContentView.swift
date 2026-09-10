@@ -269,6 +269,12 @@ struct ContentView: View {
             // EventDetailView.onAppear normally computes this; we push past it.
             eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
             router.push(.settlementOptimization)
+        case .eventSummaryDetail(let eventId):
+            guard await openEvent(eventId: eventId) else { return }
+            // Same precompute: it also fills userTransactionHistory, which
+            // EventSummaryDetailView reads.
+            eventViewModel.calculateOptimization(currentUser: profileViewModel.user)
+            router.push(.eventSummaryDetail)
         }
     }
 

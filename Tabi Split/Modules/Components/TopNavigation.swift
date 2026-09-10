@@ -63,6 +63,14 @@ struct TopNavigation<Content: View>: View {
             }
         }
         .padding(.bottom, .spacingLarge)
+        // Every screen with this header also gets the native edge-swipe back gesture,
+        // running the same `additionalBackFunction` as the arrow when the swipe lands.
+        .background(
+            SwipeBackGesture(onSwipeBack: additionalBackFunction)
+                .frame(width: 0, height: 0)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        )
         .zIndex(isInline ? 0 :  100)
     }
 }

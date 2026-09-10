@@ -18,6 +18,8 @@ enum PushTarget {
     case eventDetail(eventId: String)
     case expenseResult(eventId: String, expenseId: String)
     case settlementOptimization(eventId: String)
+    /// "Your Transaction History" — the linked user's own expenses in the event.
+    case eventSummaryDetail(eventId: String)
 
     init?(userInfo: [AnyHashable: Any]) {
         guard let eventId = userInfo["event_id"] as? String, !eventId.isEmpty else { return nil }
@@ -25,6 +27,8 @@ enum PushTarget {
         switch type {
         case "event_completed":
             self = .settlementOptimization(eventId: eventId)
+        case "event_linked":
+            self = .eventSummaryDetail(eventId: eventId)
         case "expense_assigned", "expense_payer":
             guard let expenseId = userInfo["expense_id"] as? String, !expenseId.isEmpty else {
                 self = .eventDetail(eventId: eventId)
