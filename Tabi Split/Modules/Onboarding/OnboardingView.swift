@@ -31,7 +31,7 @@ struct OnboardingView: View {
     
     private var data: [OnboardingData] = [
         OnboardingData(title: "Collaborate with your friends", description: "Create an event and invite others to collaborate with them.", animationName: "OnboardingInvite", imageSize: 300),
-        OnboardingData(title: "Quickly add expenses", description: "Add expenses into your event within less than 5 mins, with OCR or manually.", animationName: "OnboardingScan", imageSize: 500),
+        OnboardingData(title: "Scan receipts with AI", description: "Snap a receipt and let AI read the items and prices for you, or add expenses manually in minutes.", animationName: "OnboardingScan", imageSize: 500),
         OnboardingData(title: "Settle with ease...", description: "No more unnecessary settlements with automated & optimized calculation.", animationName: "OnboardingOptimization", imageSize: 300),
         //        TEMPORARILY DISABLED: ONBOARDING REMINDER FEATURE
         //        OnboardingData(title: "...and hassle-free!", description: "Only one tap to remind your friends and check their payment info."),

@@ -8,7 +8,7 @@ SLASH = /
 BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
 
 // X-Api-Secret for the production backend. Change this to differ from staging.
-API_SECRET_KEY = cx40TsowDQFm6kAO9JXCJYZvAFh7U7SEXRvb066aeW7OPBMxzBxGAg3eduO8IITM
+API_SECRET_KEY = 
 
 // HTTP header field name that carries API_SECRET_KEY. Same across envs.
 API_SECRET_HEADER = X-Api-Secret
