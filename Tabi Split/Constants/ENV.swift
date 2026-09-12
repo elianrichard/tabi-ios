@@ -6,39 +6,22 @@
 //
 
 import Foundation
+import os
 
 enum ENV {
     /// Base API URL, injected per build configuration via the xcconfig
     /// BASE_URL -> Info.plist key. The Staging and Production schemes supply
     /// different values; see Config/Staging.xcconfig and Config/Production.xcconfig.
-    static let BASE_API_URL: String = {
-        guard let value = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String,
-              !value.isEmpty else {
-            fatalError("BASE_URL missing from Info.plist — check the active scheme's xcconfig")
-        }
-        return value
-    }()
+    static let BASE_API_URL: String = requiredInfoPlistValue("BASE_URL")
 
     /// X-Api-Secret sent on every request, injected per build configuration via
-    /// the xcconfig API_SECRET_KEY -> Info.plist key. Staging and Production can
-    /// carry different secrets; see Config/Staging.xcconfig / Production.xcconfig.
-    static let API_SECRET_KEY: String = {
-        guard let value = Bundle.main.object(forInfoDictionaryKey: "API_SECRET_KEY") as? String,
-              !value.isEmpty else {
-            fatalError("API_SECRET_KEY missing from Info.plist — check the active scheme's xcconfig")
-        }
-        return value
-    }()
+    /// the xcconfig API_SECRET_KEY -> Info.plist key. Production reads it from the
+    /// gitignored Config/Secrets.xcconfig (see Secrets.xcconfig.example).
+    static let API_SECRET_KEY: String = requiredInfoPlistValue("API_SECRET_KEY")
 
     /// HTTP header field name that carries API_SECRET_KEY, injected per build
     /// configuration via the xcconfig API_SECRET_HEADER -> Info.plist key.
-    static let API_SECRET_HEADER: String = {
-        guard let value = Bundle.main.object(forInfoDictionaryKey: "API_SECRET_HEADER") as? String,
-              !value.isEmpty else {
-            fatalError("API_SECRET_HEADER missing from Info.plist — check the active scheme's xcconfig")
-        }
-        return value
-    }()
+    static let API_SECRET_HEADER: String = requiredInfoPlistValue("API_SECRET_HEADER")
 
     /// App bundle identifier. Fixed per app; used for the OSLog subsystem and as
     /// the Keychain service name. Falls back to the running bundle's id.
@@ -60,4 +43,18 @@ enum ENV {
     /// result is used as-is and no /receipt/parse call is made. Toggle here to
     /// enable/disable without touching the flow.
     static let RECEIPT_AI_REFINE_ENABLED = true
+
+    /// A missing build setting is a packaging mistake, and the "Check required build
+    /// settings" phase in project.yml fails the build for it. If one still slips
+    /// through, degrade to an empty value (requests fail → "session expired") rather
+    /// than crashing every user at launch; Debug builds still stop immediately.
+    private static func requiredInfoPlistValue(_ key: String) -> String {
+        let value = Bundle.main.object(forInfoDictionaryKey: key) as? String ?? ""
+        if value.isEmpty {
+            Logger(subsystem: APP_BUNDLE_ID, category: "config")
+                .fault("\(key, privacy: .public) missing from Info.plist — check the active scheme's xcconfig")
+            assertionFailure("\(key) missing from Info.plist — check the active scheme's xcconfig")
+        }
+        return value
+    }
 }

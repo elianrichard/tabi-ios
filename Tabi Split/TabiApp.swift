@@ -12,25 +12,13 @@ import SwiftData
 struct TabiApp: App {
     @UIApplicationDelegateAdaptor(PushAppDelegate.self) private var pushDelegate
 
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            NoteData.self,
-            EventData.self,
-            UserData.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        // One container for the whole app. SwiftDataService owns it and opens it
+        // through TabiSchema.loadOrRecover(), which never fatalErrors on a store
+        // that failed to migrate (it is moved aside and rebuilt from the server).
+        .modelContainer(SwiftDataService.shared.modelContainer)
     }
 }

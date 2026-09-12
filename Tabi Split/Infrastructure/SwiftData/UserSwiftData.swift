@@ -26,7 +26,8 @@ extension SwiftDataService {
                 return users.filter{ $0.email != currentUser.userEmail }
             } else { return users }
         } catch {
-            fatalError(error.localizedDescription)
+            TabiSchema.log.error("fetch users failed: \(String(describing: error), privacy: .public)")
+            return nil
         }
     }
     

@@ -19,7 +19,8 @@ extension SwiftDataService {
         do {
             return try modelContext.fetch(fetchDescriptor)
         } catch {
-            fatalError(error.localizedDescription)
+            TabiSchema.log.error("fetch events failed: \(String(describing: error), privacy: .public)")
+            return nil
         }
     }
     

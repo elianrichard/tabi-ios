@@ -47,7 +47,10 @@ struct CurrentUserDefaults: Codable {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         userName = try c.decode(String.self, forKey: .userName)
-        userEmail = try c.decode(String.self, forKey: .userEmail)
+        // 1.1.x stored `userPhone` instead of `userEmail`; decode leniently so the
+        // record (and its authoritative userId) survives the upgrade. ContentView
+        // refills the email from the session probe.
+        userEmail = try c.decodeIfPresent(String.self, forKey: .userEmail) ?? ""
         userImage = try c.decode(ProfileImageEnum.ID.self, forKey: .userImage)
         userId = try c.decode(String.self, forKey: .userId)
         kind = try c.decodeIfPresent(String.self, forKey: .kind) ?? "real"

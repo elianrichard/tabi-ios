@@ -53,7 +53,7 @@ Auth probe runs at launch in [`ContentView.checkAuthentication()`](Tabi%20Split/
   - [`RatingPromptManager.shared`](Tabi%20Split/Infrastructure/Review/RatingPromptManager.swift) — decides when to fire the native `requestReview`
   - [`BackupService.shared`](Tabi%20Split/Infrastructure/SwiftData/BackupService.swift), [`ImageService.shared`](Tabi%20Split/Infrastructure/Services/Image/ImageService.swift), [`ReceiptParseService.shared`](Tabi%20Split/Infrastructure/Services/Receipt/ReceiptParseService.swift)
 - **Global overlays** (ContentView `ZStack`): `LoadingView`, `ToastOverlay`, `ErrorDialogOverlay`, `SplashView`.
-- **SwiftData container:** schema `[NoteData, EventData, UserData]` in [`TabiApp`](Tabi%20Split/TabiApp.swift) (persistent, on disk).
+- **SwiftData container:** schema `[NoteData, EventData, UserData]` defined once in [`TabiSchema`](Tabi%20Split/Infrastructure/SwiftData/TabiSchema.swift); `SwiftDataService.shared` opens the single on-disk container via `TabiSchema.loadOrRecover()` (failed open → store moved to `Application Support/Recovery/`, fresh store, toast on Home; never `fatalError`) and [`TabiApp`](Tabi%20Split/TabiApp.swift) injects that same container. Schema rules + fixture tests: [ADR-0001](../adr/0001-swiftdata-schema-migration.md).
 - **Networking:** every request carries `Content-Type: application/json` + `<ENV.API_SECRET_HEADER>: <ENV.API_SECRET_KEY>` + `Authorization: Bearer <token>` when present. On `401` it calls `POST /auth/refresh` once and retries; a `401` **on the refresh endpoint itself** posts `.sessionExpired` without recursing. Concurrent refreshes are de-duplicated (`isRefreshing` + queue). Any non-401 failure is auto-surfaced in the global error dialog by `notifyError`; task/URL cancellations are swallowed. Logging is `os_log` (no `print` in `APIService`).
 - **Errors:** [`APIError`](Tabi%20Split/Infrastructure/Networking/APIError.swift) (`invalidResponse`, `refreshFailed`, `unauthorized`, `requestFailed(message)`, `tokenMissing`, `internalServerError(message)`) plus domain errors `EventAPIError`, `ExpenseAPIError`, `ProfileAPIError`, [`ProviderSignInError`](Tabi%20Split/Infrastructure/Services/Auth/ProviderSignIn.swift).
 
@@ -241,9 +241,19 @@ Wire format uses `snake_case`. Response decoding lands directly into domain type
 - **Domain docs referenced but absent.** [`CLAUDE.md`](CLAUDE.md) → `docs/agents/domain.md` expects `CONTEXT.md` + `docs/adr/`; neither exists yet (created lazily by `/grill-with-docs`).
 - **Developer leftovers.** [`SwiftDataTestingView`](Tabi%20Split/Modules/Home/SwiftDataTestingView.swift) + `AppRoute.swiftDataTesting`, `NoteData` in the container schema, `TabiSplitTests.swift` template.
 - **Profile image upload.** `UserData.imageUrl` remains for legacy remote avatars; `PATCH /user` only accepts one of the four template ids. No upload pipeline for custom avatars.
-- **Version numbers.** `project.yml` sets `CURRENT_PROJECT_VERSION: 1`; the untracked local `.xcodeproj` shows build `22`. Build numbers are managed outside the repo — confirm before archiving.
+- **Version numbers.** `project.yml` sets `CURRENT_PROJECT_VERSION: 1`; build numbers are managed outside the repo (Xcode Cloud / local `.xcodeproj`). Marketing versions **must** be bumped in `project.yml` and tagged (`v<version>`): 1.1.6–1.1.8 were never recorded in git, which made the 1.2.0 migration crash hard to reconstruct.
+- **SwiftData follow-ups (all must pass `StoreMigrationTests`).** `Expense.creator` has no inverse (deleting a `UserData` leaves a dangling to-one); non-optional to-one `Expense.coverer` / `ExpensePerson.user` become nil when a user row is deleted → guard deletes or make optional; remove `NoteData`/`Author`/`SubNote` + `SwiftDataTestingView` from the schema via an explicit stage.
 
-## 10. Glossary
+## 10. Release checklist
+
+1. Bump `MARKETING_VERSION` in `project.yml` (all targets) and commit.
+2. Generate the store fixture for this version and commit it: `Tabi Split Tests/Fixtures/README.md`.
+3. `StoreMigrationTests` green (opens every previous fixture with the current schema).
+4. Production secret present: local `Config/Secrets.xcconfig` (from `Secrets.xcconfig.example`) or the Xcode Cloud secret `PROD_API_SECRET_KEY`; the "Check required build settings" phase fails the archive otherwise.
+5. Install the TestFlight build **over** the current App Store build on a device: app launches, Home balances correct, Profile shows the right email.
+6. Tag the archived commit `v<version>`.
+
+## 11. Glossary
 
 - **Event** — shared context with participants, an icon, and a list of expenses. Persisted as `EventData`. Has a **creator** (owner) who alone can complete / delete it.
 - **Participant** — `UserData` linked to an event. **Kind** is `real` (provider account), `guest` (credential-less account) or `dummy` (placeholder created by the owner). `real` and `guest` are **linked**.

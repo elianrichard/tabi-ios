@@ -144,7 +144,8 @@ struct ContentView: View {
         }
 
         do {
-            let _ = try await ProfileService.shared.probeSession()
+            let profile = try await ProfileService.shared.probeSession()
+            reseedCurrentUserIfMissing(from: profile)
             sessionState.isAuthenticated = true
             // Deterministically drain a queued deeplink token here, in case the
             // isAuthenticated onChange observer wasn't registered in time on a cold
@@ -155,6 +156,36 @@ struct ContentView: View {
         } catch {
             sessionState.isAuthenticated = false
             SessionState.shared.sessionExpiredBanner = true
+        }
+    }
+
+    /// The token is valid but the local current-user records may be missing or
+    /// stale: after an upgrade from 1.1.x (stored user had `userPhone`, no email),
+    /// after a store recovery, or after an interrupted login. Rebuild them from the
+    /// session probe so Home computes balances for the signed-in user instead of
+    /// ProfileViewModel's "unknown" placeholder. Guests legitimately have no email,
+    /// so the rewrite is idempotent for them.
+    private func reseedCurrentUserIfMissing(from profile: UserGetResponse) {
+        let stored = UserDefaultsService.shared.getCurrentUser()
+        let needsDefaults = stored == nil || stored?.userEmail.isEmpty == true
+        let user: CurrentUserDefaults
+        if let stored, !needsDefaults {
+            user = stored
+        } else {
+            user = CurrentUserDefaults(
+                userName: profile.name ?? stored?.userName ?? "",
+                userEmail: profile.email ?? "",
+                userImage: profile.profile_image ?? stored?.userImage ?? ProfileImageEnum.owl.id,
+                userId: profile.user_id ?? stored?.userId ?? "",
+                kind: profile.kind ?? stored?.kind ?? "real"
+            )
+        }
+        guard !user.userId.isEmpty else { return }
+        if needsDefaults {
+            UserDefaultsService.shared.saveCurrentUser(user: user)
+        }
+        if SwiftDataService.shared.getCurrentUser() == nil {
+            SwiftDataService.shared.saveCurrentUser(user: user)
         }
     }
 

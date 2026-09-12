@@ -84,6 +84,9 @@ struct HomeView: View {
         .padding(.top)
         .navigationBarBackButtonHidden(true)
         .onAppear {
+            if SwiftDataService.shared.consumeRecoveryNotice() {
+                ToastViewModel.shared.show("Local data was reset and is reloading from your account.", style: .info, duration: 6)
+            }
             Task {
                 await refreshData(isShowLoading: true)
             }

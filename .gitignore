@@ -52,3 +52,5 @@ Podfile.lock
 /.cocoindex_code/
 
 .env
+# Production API secret (see Config/Secrets.xcconfig.example)
+Config/Secrets.xcconfig

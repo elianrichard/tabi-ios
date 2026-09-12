@@ -13,7 +13,12 @@ import SwiftUI
 class UserData {
     var userId: String = ""
     var name: String
-    var email: String
+    // Default value required: 1.1.x stores have a `phone` column and no `email`.
+    // SwiftData lightweight migration can only add a mandatory attribute when it
+    // has a default; without it every upgrading user crashed at launch (1.2.0).
+    // Old phone values are intentionally NOT carried over (they are not emails);
+    // identity prefers userId and the next server refresh fills email/kind.
+    var email: String = ""
     // Account type: "real", "dummy", or "guest". Defaults to "dummy" so existing
     // SwiftData rows migrate without a value; a linked participant (real/guest)
     // owns an account and must be unlinked before its details can be edited.

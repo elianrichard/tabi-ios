@@ -7,8 +7,12 @@ API_HOST = api.tabisplit.my.id
 SLASH = /
 BASE_URL = $(API_SCHEME):$(SLASH)$(SLASH)$(API_HOST)
 
-// X-Api-Secret for the production backend. Change this to differ from staging.
-API_SECRET_KEY = 
+// X-Api-Secret for the production backend lives OUTSIDE git in Config/Secrets.xcconfig
+// (gitignored; copy Config/Secrets.xcconfig.example). Xcode Cloud writes that file in
+// ci_scripts/ci_pre_xcodebuild.sh from the PROD_API_SECRET_KEY secret. The
+// "Check required build settings" phase (project.yml) fails Production builds when
+// the value is empty — an empty value used to crash the app at its first request.
+#include? "Secrets.xcconfig"
 
 // HTTP header field name that carries API_SECRET_KEY. Same across envs.
 API_SECRET_HEADER = X-Api-Secret
