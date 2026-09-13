@@ -46,6 +46,14 @@ struct ExpenseHeaderView: View {
                 ReceiptViewerView(image: image, isPresented: $isShowReceipt)
             } else if let id = eventExpenseViewModel.uploadedReceiptId, !id.isEmpty {
                 ReceiptViewerView(receiptId: id, isPresented: $isShowReceipt)
+            } else {
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    Text("No receipt found")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textWhite)
+                }
+                .onTapGesture { isShowReceipt = false }
             }
         }
     }

@@ -58,7 +58,7 @@ struct ExpenseAddItemsView: View {
                                 .foregroundColor(.textGrey)
                         }
                         VStack(alignment: .leading){
-                            ForEach(Array(eventExpenseViewModel.additionalCharges.enumerated()), id: \.offset) { index, item in
+                            ForEach(eventExpenseViewModel.additionalCharges.indices, id: \.self) { index in
                                 AdditionalChargeContainer(item: Bindable(eventExpenseViewModel).additionalCharges[index])
                             }
                         }

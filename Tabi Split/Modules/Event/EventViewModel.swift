@@ -58,12 +58,10 @@ final class EventViewModel {
     /// `settlement` is populated. Used by the recap's non-simplified mode.
     var directSettlements: [PersonBalanceData] = []
     var userTransactionHistory: [SummaryHistoryData] = []
-    var userBalance: PersonBalanceData {
-        if let currentUser = UserDefaultsService.shared.getCurrentUser(),
-           let personBalance = participantsBalance.first(where: { $0.user.isSameUser(as: currentUser) }) {
-            return personBalance
-        } else { return PersonBalanceData(user: UserData(name: "Unkown", email: "")) }
-    }
+    /// The current user's row from the last `calculateOptimization` run, or an
+    /// empty (settled) placeholder. Stored rather than re-derived from
+    /// UserDefaults so every screen resolves "me" exactly as the engine did.
+    var userBalance: PersonBalanceData = PersonBalanceData(user: UserData(name: "Unknown", email: ""))
     var userTotalSpending: Float = 0
     var userSettlementList: [SummarySettlementData] = []
     
@@ -316,259 +314,30 @@ final class EventViewModel {
         return true
     }
     
+    /// Runs the settlement engine for `selectedEvent` and publishes its output.
+    /// Every balance-derived value on this view model comes from here.
     func calculateOptimization(currentUser: UserData) {
-        let debug = false // enable this to debug print
-
-        var userSummaryData: [SummaryHistoryData] = []
-        var userTotalSpendingTemp: Float = 0
-
-        // Raw pairwise debts for the recap's non-simplified mode: for every
-        // expense each buyer owes the coverer their share directly, with no
-        // netting across people. Keyed by identity (userId can be empty for
-        // dummy participants) to match the `==` lookups used below.
-        var directDebtMap: [ObjectIdentifier: [ObjectIdentifier: Float]] = [:]
-        var userLookup: [ObjectIdentifier: UserData] = [:]
-        func recordDirectDebt(from buyer: UserData, to coverer: UserData, amount: Float) {
-            guard buyer !== coverer, amount != 0 else { return }
-            let buyerKey = ObjectIdentifier(buyer)
-            let covererKey = ObjectIdentifier(coverer)
-            userLookup[buyerKey] = buyer
-            userLookup[covererKey] = coverer
-            directDebtMap[buyerKey, default: [:]][covererKey, default: 0] += amount
+        guard let event = selectedEvent else { return }
+        guard let result = SettlementCalculator.compute(participants: event.participants, expenses: event.expenses, currentUser: currentUser) else {
+            // An expense references a non-participant: show everyone as settled
+            // rather than a half-computed plan.
+            participantsBalance = event.participants
+                .map { PersonBalanceData(user: $0) }
+                .sorted { $0.user.name.lowercased() < $1.user.name.lowercased() }
+            directSettlements = []
+            userTransactionHistory = []
+            userTotalSpending = 0
+            userSettlementList = []
+            userBalance = PersonBalanceData(user: currentUser)
+            return
         }
-
-        // Robust "is this the signed-in user" check. A bare `== currentUser`
-        // only matches the same object instance, so after a backend sync (which
-        // rebuilds UserData objects) the current user's expense rows silently
-        // failed to register in their own transaction history. Match on userId
-        // first (authoritative), then email, then object identity.
-        func isCurrentUser(_ user: UserData) -> Bool {
-            if user === currentUser { return true }
-            if !user.userId.isEmpty && !currentUser.userId.isEmpty {
-                return user.userId == currentUser.userId
-            }
-            if !user.email.isEmpty && !currentUser.email.isEmpty && currentUser.email != "unknown" {
-                return user.email == currentUser.email
-            }
-            return false
-        }
-        guard let event = selectedEvent else { print("[OPT] no selectedEvent -> bail"); return }
-        if debug {
-            print("[OPT] ===== calculateOptimization START event=\(event.eventName) =====")
-            print("[OPT] currentUser name=\(currentUser.name) id=\(currentUser.userId) email=\(currentUser.email) ptr=\(ObjectIdentifier(currentUser))")
-            print("[OPT] event.participants count=\(event.participants.count)")
-            for p in event.participants {
-                print("[OPT]   participant name=\(p.name) id=\(p.userId) email=\(p.email) ptr=\(ObjectIdentifier(p))")
-            }
-            print("[OPT] event.expenses count=\(event.expenses.count)")
-        }
-        participantsBalance = event.participants
-            .map { PersonBalanceData(user: $0) }
-            .sorted { $0.user.name.lowercased() < $1.user.name.lowercased() }
-
-        // Identity-keyed index so the per-expense lookups below are O(1) instead
-        // of a linear `.first(where:)` scan on every coverer/assignee/participant.
-        // Keyed by object identity to match the `==` semantics used previously.
-        let balanceByUser: [ObjectIdentifier: PersonBalanceData] = Dictionary(
-            participantsBalance.map { (ObjectIdentifier($0.user), $0) },
-            uniquingKeysWith: { first, _ in first }
-        )
-        // Secondary indexes for the robust fallback below: an expense can
-        // reference a *different* UserData instance than the one in
-        // event.participants (same person, rebuilt object after a SwiftData
-        // re-fetch / navigation). ObjectIdentifier then misses, the old code
-        // bailed, and participantsBalance was left all-zero -> the summary card
-        // wrongly showed "all settled". Fall back to userId, then email.
-        var balanceByUserId: [String: PersonBalanceData] = [:]
-        var balanceByEmail: [String: PersonBalanceData] = [:]
-        for balance in participantsBalance {
-            if !balance.user.userId.isEmpty { balanceByUserId[balance.user.userId] = balance }
-            if !balance.user.email.isEmpty { balanceByEmail[balance.user.email] = balance }
-        }
-
-        /// Resolve the balance row for a user referenced by an expense, tolerating
-        /// object-identity mismatches. Returns nil only when the user truly isn't
-        /// a participant.
-        func resolveBalance(for user: UserData) -> PersonBalanceData? {
-            if let hit = balanceByUser[ObjectIdentifier(user)] { return hit }
-            if !user.userId.isEmpty, let hit = balanceByUserId[user.userId] {
-                if debug { print("[OPT]   ~ resolved \(user.name) by userId fallback (identity missed)") }
-                return hit
-            }
-            if !user.email.isEmpty, let hit = balanceByEmail[user.email] {
-                if debug { print("[OPT]   ~ resolved \(user.name) by email fallback (identity missed)") }
-                return hit
-            }
-            return nil
-        }
-
-        //        FILL THE PERSON LENT AND PERSON DEBT EXPENSE
-
-        for expense in event.expenses {
-            var userBalanceTemp: Float = 0
-            if debug { print(expense.name + " - " + "Coverer: " + expense.coverer.name + " \(expense.price.formatPrice()) split=\(expense.splitMethod) participants=\(expense.participants.count) items=\(expense.items.count)") }
-            if debug { print("[OPT]   coverer name=\(expense.coverer.name) id=\(expense.coverer.userId) email=\(expense.coverer.email) ptr=\(ObjectIdentifier(expense.coverer))") }
-            guard let personPaid = resolveBalance(for: expense.coverer) else {
-                print("[OPT] !! BAIL: coverer not a participant. expense=\(expense.name) coverer name=\(expense.coverer.name) id=\(expense.coverer.userId) email=\(expense.coverer.email) participants=\(participantsBalance.map { "\($0.user.name)#\($0.user.userId)" })")
-                return
-            }
-            personPaid.lent += expense.price
-
-            if isCurrentUser(expense.coverer) {
-                userBalanceTemp += expense.price
-            }
-
-            if (expense.splitMethod == SplitMethod.custom.id) {
-                let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
-                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice * $1.itemQuantity}
-                for item in expense.items {
-                    let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
-                    for assignee in item.assignees {
-                        guard let personBuy = resolveBalance(for: assignee.user) else {
-                            print("[OPT] !! BAIL: assignee not a participant (custom split). expense=\(expense.name) item=\(item.itemName) assignee name=\(assignee.user.name) id=\(assignee.user.userId) email=\(assignee.user.email)")
-                            return
-                        }
-                        let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
-                        let amountSpent = personQuantity * item.itemPrice
-                        let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
-                        let amountDebt = Float(amountSpent + amountAdditional).properRound()
-                        if debug { print("Participants: " + assignee.user.name, "\(item.itemName) Spent: ", amountSpent, "Additional: ", amountAdditional, "debt: ", amountDebt) }
-                        if (isCurrentUser(expense.coverer) && isCurrentUser(personBuy.user)) {
-                            personPaid.lent -= amountDebt
-                        } else {
-                            personBuy.debt += amountDebt
-                        }
-                        recordDirectDebt(from: personBuy.user, to: expense.coverer, amount: amountDebt)
-                        if (isCurrentUser(assignee.user)) {
-                            userTotalSpendingTemp += amountDebt
-                            userBalanceTemp -= amountDebt
-                        }
-                    }
-                }
-            } else if (expense.splitMethod == SplitMethod.equally.id) {
-                let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
-                for person in expense.participants {
-                    guard let personBuy = resolveBalance(for: person) else {
-                        print("[OPT] !! BAIL: participant not a participant (equally split). expense=\(expense.name) person name=\(person.name) id=\(person.userId) email=\(person.email)")
-                        return
-                    }
-                    if (isCurrentUser(expense.coverer) && isCurrentUser(personBuy.user)) {
-                        personPaid.lent -= amountDebt
-                    } else {
-                        personBuy.debt += amountDebt
-                    }
-                    recordDirectDebt(from: personBuy.user, to: expense.coverer, amount: amountDebt)
-                    if (isCurrentUser(person)) {
-                        userTotalSpendingTemp += amountDebt
-                        userBalanceTemp -= amountDebt
-                    }
-                }
-            }
-            
-            //            record the specific user balance history data
-            if debug {
-                print("[OPT][HIST] expense=\(expense.name) covererIsMe=\(isCurrentUser(expense.coverer)) userBalanceTemp=\(userBalanceTemp) -> \(userBalanceTemp != 0 ? "APPEND" : "skip")")
-            }
-            if (userBalanceTemp != 0) {
-                userSummaryData.append(SummaryHistoryData(expenseName: expense.name, expenseDate: expense.dateOfCreation, amount: userBalanceTemp, expense: expense))
-            }
-        }
-        
-        if debug { print("[OPT] all expenses processed OK (no early return). participantsBalance count=\(participantsBalance.count)") }
-
-        userTotalSpending = userTotalSpendingTemp
-        userTransactionHistory = userSummaryData.sorted(by: { $0.expenseDate > $1.expenseDate })
-
-        // Build the raw pairwise settlement list from the accumulated debt map.
-        // One PersonBalanceData per debtor, ordered the same as participantsBalance,
-        // each carrying a settlement row per creditor sorted by name.
-        directSettlements = participantsBalance.compactMap { balance in
-            guard let creditors = directDebtMap[ObjectIdentifier(balance.user)], !creditors.isEmpty else { return nil }
-            let entry = PersonBalanceData(user: balance.user)
-            entry.settlement = creditors.compactMap { key, amount -> PersonSettlementData? in
-                let rounded = amount.properRound()
-                guard let coverer = userLookup[key], rounded != 0 else { return nil }
-                return PersonSettlementData(userPaid: coverer, amount: rounded)
-            }
-            .sorted(by: { $0.userPaid.name.lowercased() < $1.userPaid.name.lowercased() })
-            return entry.settlement.isEmpty ? nil : entry
-        }
-        
-        //        CALCULATE EACH PERSON BALANCE BASED ON LENT AND DEBT VALUE
-        if debug {
-            for participant in participantsBalance {
-                print("\(participant.user.name) balance: " + String(participant.balance.formatPrice()))
-            }
-        }
-        
-        let personWithDebt: [PersonBalanceData] = participantsBalance.filter { $0.balance < 0 }.sorted(by: { $0.balance < $1.balance })
-        let personWithLent: [PersonBalanceData] = participantsBalance.filter { $0.balance > 0 }.sorted(by: { $0.balance < $1.balance })
-        
-        for debtUser in personWithDebt {
-            for lentUser in personWithLent {
-                if debug { print("lent: ", lentUser.user.name, lentUser.calculationBalance, "debt: ", debtUser.user.name, debtUser.calculationBalance) }
-                if (lentUser.calculationBalance <= 0) { continue }
-                let sum = debtUser.calculationBalance + lentUser.calculationBalance
-                if debug { print(debtUser.user.name, lentUser.user.name, sum) }
-                if (sum >= 0) {
-                    debtUser.settlement.append(PersonSettlementData(userPaid: lentUser.user, amount: abs(debtUser.calculationBalance)))
-                    debtUser.calculationBalance = 0
-                    lentUser.calculationBalance = sum
-                    break
-                } else if (sum < 0) {
-                    debtUser.settlement.append(PersonSettlementData(userPaid: lentUser.user, amount: lentUser.calculationBalance))
-                    debtUser.calculationBalance = sum
-                    lentUser.calculationBalance = 0
-                }
-            }
-        }
-        
-        //        Fill up user's settlement list
-        // Resolve the current user's balance once; `userBalance` is a computed
-        // property that re-runs getCurrentUser + a linear scan on every access.
-        let currentUserBalance = userBalance
-
-        if debug {
-            print("[OPT] ----- FINAL balances event=\(event.eventName) -----")
-            for p in participantsBalance {
-                print("[OPT]   \(p.user.name) id=\(p.user.userId) lent=\(p.lent) debt=\(p.debt) balance=\(p.balance) status=\(p.status) settlements=\(p.settlement.count)")
-            }
-            print("[OPT]   >>> userBalance: name=\(currentUserBalance.user.name) id=\(currentUserBalance.user.userId) balance=\(currentUserBalance.balance) status=\(currentUserBalance.status)")
-            let matched = participantsBalance.contains { isCurrentUser($0.user) }
-            if !matched {
-                print("[OPT]   !! WARNING: current user (id=\(currentUser.userId) email=\(currentUser.email)) not found among participants -> userBalance is a default 'settled' placeholder")
-            }
-            print("[OPT] ----- END event=\(event.eventName) -----")
-        }
-        userSettlementList = []
-        if currentUserBalance.status == .debt {
-            for settlement in currentUserBalance.settlement {
-                userSettlementList.append(SummarySettlementData(targetUser: settlement.userPaid, amount: settlement.amount, status: .NeedPayment))
-            }
-        } else if currentUserBalance.status == .credit {
-            let relatedPersonBalance = participantsBalance.filter { $0.settlement.contains(where: { isCurrentUser($0.userPaid) }) }
-            for balance in relatedPersonBalance {
-                for settlement in balance.settlement {
-                    userSettlementList.append(SummarySettlementData(targetUser: balance.user, amount: settlement.amount, status: .WaitingPayment))
-                }
-            }
-        }
-        userSettlementList = userSettlementList.sorted(by: { $0.targetUser.name.lowercased() < $1.targetUser.name.lowercased() })
-
-        if let selectedEvent {
-            selectedEvent.userEventBalance = currentUserBalance.balance
-        }
-        
-        if debug {
-            print("=== CALCULATE FINISH ===")
-            for person in participantsBalance {
-                for settlement in person.settlement {
-                    print("\(person.user.name) should pay \(settlement.userPaid.name) for amount of \(settlement.amount.formatPrice())")
-                }
-            }
-            for person in participantsBalance {
-                print("\(person.user.name) balance: \(person.balance) calculation balance: \(person.calculationBalance)")
-            }
-        }
+        participantsBalance = result.participants
+        directSettlements = result.directSettlements
+        userTransactionHistory = result.userTransactionHistory
+        userTotalSpending = result.userTotalSpending
+        userSettlementList = result.userSettlementList
+        userBalance = result.userBalance ?? PersonBalanceData(user: currentUser)
+        // Keep Home's card in step without waiting for the next list refresh.
+        event.userEventBalance = userBalance.balance
     }
 }

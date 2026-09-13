@@ -36,42 +36,13 @@ class EventData {
         self.isSynced = isSynced
     }
     
+    /// The signed-in user's net position in this event, shown on Home's card.
+    /// Same engine as the Summary/Optimization screens so the numbers can't
+    /// drift. Left unchanged when the data can't be settled (see
+    /// `SettlementCalculator.compute`).
     func calculateUserEventBalance (currentUser: UserData) {
-        // Identity match by userId (or email fallback) to survive duplicate UserData rows after a refresh.
-        func sameUser(_ a: UserData) -> Bool {
-            if !a.userId.isEmpty && !currentUser.userId.isEmpty { return a.userId == currentUser.userId }
-            if !a.email.isEmpty && !currentUser.email.isEmpty { return a.email == currentUser.email }
-            return a == currentUser
-        }
-
-        var userBalanceTemp: Float = 0
-
-        for expense in self.expenses {
-            if sameUser(expense.coverer) {
-                userBalanceTemp += expense.price
-            }
-
-            if (expense.splitMethod == SplitMethod.custom.id) {
-                let totalAdditionalCharges: Float = expense.additionalCharges.reduce(0) { $0 + $1.amount }
-                let itemTotalAmount = expense.items.reduce(0) {$0 + $1.itemPrice}
-                for item in expense.items {
-                    let itemTotalShares = item.assignees.reduce(0) { $0 + ($1.share) }
-                    if let assignee = item.assignees.first(where: { sameUser($0.user) }){
-                        let personQuantity = (assignee.share / itemTotalShares) * item.itemQuantity
-                        let amountSpent = personQuantity * item.itemPrice
-                        let amountAdditional = totalAdditionalCharges * (amountSpent / itemTotalAmount)
-                        let amountDebt = Float(amountSpent + amountAdditional).properRound()
-                        userBalanceTemp -= amountDebt
-                    }
-                }
-            } else if (expense.splitMethod == SplitMethod.equally.id) {
-                let amountDebt = Float(expense.price / Float(expense.participants.count)).rounded(toDecimalPlaces: 1).properRound()
-                if (expense.participants.contains(where: { sameUser($0) })) {
-                    userBalanceTemp -= amountDebt
-                }
-            }
-        }
-        self.userEventBalance = userBalanceTemp
+        guard let result = SettlementCalculator.compute(participants: participants, expenses: expenses, currentUser: currentUser) else { return }
+        userEventBalance = result.userBalance?.balance ?? 0
     }
 }
 

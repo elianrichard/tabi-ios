@@ -3,8 +3,8 @@
 //  Tabi Split
 //
 //  Full-screen modal receipt viewer with pinch-to-zoom and pan. Loads a fresh
-//  signed URL for a stored image id (GET /image/:id) and renders it zoomable.
-//  Native gestures only — no third-party dependency.
+//  signed URL for a stored image id (GET /image/:id), downloads the bytes and
+//  renders them zoomable. Native gestures only — no third-party dependency.
 //
 
 import SwiftUI
@@ -31,8 +31,9 @@ struct ReceiptViewerView: View {
         self._isPresented = isPresented
     }
 
-    @State private var receiptURL: URL?
-    @State private var localImage: UIImage?
+    /// The image on screen: the local one in the create flow, or the downloaded
+    /// bytes of the signed URL for a saved expense.
+    @State private var image: UIImage?
     @State private var isLoading = false
     @State private var loadError = false
 
@@ -49,9 +50,8 @@ struct ReceiptViewerView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            if let localImage {
-                // Create flow: the attached-but-not-yet-uploaded image.
-                Image(uiImage: localImage)
+            if let image {
+                Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
                     .scaleEffect(scale)
@@ -62,26 +62,6 @@ struct ReceiptViewerView: View {
             } else if isLoading {
                 ProgressView()
                     .tint(.white)
-            } else if let receiptURL {
-                AsyncImage(url: receiptURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .scaleEffect(scale)
-                            .offset(offset)
-                            .gesture(magnification)
-                            .simultaneousGesture(dragToPan)
-                            .onTapGesture(count: 2) { resetZoom() }
-                    case .failure:
-                        errorLabel
-                    case .empty:
-                        ProgressView().tint(.white)
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
             } else if loadError {
                 errorLabel
             }
@@ -154,16 +134,28 @@ struct ReceiptViewerView: View {
     @MainActor
     private func loadReceipt() async {
         switch source {
-        case .local(let image):
-            localImage = image
+        case .local(let local):
+            image = local
         case .remote(let id):
-            if receiptURL != nil { return }
+            if image != nil { return }
             isLoading = true
             loadError = false
             defer { isLoading = false }
             do {
                 let detail = try await ImageService.shared.imageDetail(id: id)
-                receiptURL = URL(string: detail.full_path)
+                guard let url = URL(string: detail.full_path) else {
+                    loadError = true
+                    return
+                }
+                // Fetch the bytes ourselves rather than via AsyncImage so a rejected
+                // signed URL surfaces as a load error instead of an opaque failure.
+                let (bytes, response) = try await URLSession.shared.data(from: url)
+                let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+                guard (200...299).contains(status), let decoded = UIImage(data: bytes) else {
+                    loadError = true
+                    return
+                }
+                image = decoded
             } catch {
                 loadError = true
             }

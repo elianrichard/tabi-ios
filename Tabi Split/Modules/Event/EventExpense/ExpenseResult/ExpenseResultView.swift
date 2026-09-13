@@ -171,6 +171,16 @@ struct ExpenseResultView: View {
                 ReceiptViewerView(image: image, isPresented: $isShowReceiptSheet)
             } else if let receiptId {
                 ReceiptViewerView(receiptId: receiptId, isPresented: $isShowReceiptSheet)
+            } else {
+                // Should be unreachable (button only shows when hasReceipt). Kept
+                // dismissible so a bad state never traps the user on a blank cover.
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    Text("No receipt found")
+                        .font(.tabiBody)
+                        .foregroundStyle(.textWhite)
+                }
+                .onTapGesture { isShowReceiptSheet = false }
             }
         }
         .navigationBarBackButtonHidden(true)
